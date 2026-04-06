@@ -76,8 +76,8 @@ export const TimeBar = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setLocalTimer((prev) => Math.max(prev - 50, 0));
-    }, 50);
+      setLocalTimer((prev) => Math.max(prev - 100, 0));
+    }, 100);
     return () => clearInterval(interval);
   }, []);
 
