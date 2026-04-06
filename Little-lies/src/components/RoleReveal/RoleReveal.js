@@ -34,7 +34,6 @@ const RoleReveal = ({ onComplete }) => {
 
   return (
     <AnimatePresence>
-      {phase !== 'fade' ? null : null}
       <motion.div
         className="role-reveal-overlay"
         initial={{ opacity: 0 }}
