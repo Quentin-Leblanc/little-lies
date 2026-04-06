@@ -11,7 +11,6 @@ import {
 } from './components';
 import { TimeBar } from './components/time/Time';
 import { useGameEngine } from './hooks/useGameEngine';
-import { useSound } from './hooks/useSound';
 import GameComponent from './components/GameComponent/GameComponent';
 import GameOver from './components/GameOver/GameOver';
 import RoleReveal from './components/RoleReveal/RoleReveal';
@@ -21,57 +20,21 @@ import './styles/global.scss';
 import './styles/App.scss';
 
 function App() {
-    const { game: { isGameStarted, isGameSetup, isDay, status, phase, timer }, CONSTANTS } = useGameEngine();
-    const { play } = useSound();
+    const { game: { isGameStarted, isGameSetup, isDay, status, phase }, CONSTANTS } = useGameEngine();
     const isNight = phase === CONSTANTS.PHASE.NIGHT;
     const [isSelectingRoles, setIsSelectingRoles] = useState(false);
     const [showRoleReveal, setShowRoleReveal] = useState(true);
     const prevPhaseRef = useRef(null);
-    const prevStatusRef = useRef(null);
-
-    // Sound triggers on phase changes
-    useEffect(() => {
-        if (!isGameStarted) return;
-        const prev = prevPhaseRef.current;
-        prevPhaseRef.current = phase;
-        if (!prev || prev === phase) return;
-
-        switch (phase) {
-            case CONSTANTS.PHASE.NIGHT: play('nightFall'); break;
-            case CONSTANTS.PHASE.DEATH_REPORT: play('morning'); break;
-            case CONSTANTS.PHASE.DISCUSSION: play('discussion'); break;
-            case CONSTANTS.PHASE.VOTING: play('voteOpen'); break;
-            case CONSTANTS.PHASE.JUDGMENT: play('judgment'); break;
-            case CONSTANTS.PHASE.EXECUTION: play('execution'); break;
-            case CONSTANTS.PHASE.LAST_WORDS: play('guilty'); break;
-            case CONSTANTS.PHASE.SPARED: play('innocent'); break;
-            default: break;
-        }
-    }, [phase, isGameStarted]);
-
-    // Sound on game over
-    useEffect(() => {
-        const prev = prevStatusRef.current;
-        prevStatusRef.current = status;
-        if (prev === status) return;
-        if (status === CONSTANTS.GAME_ENDED) play('defeat');
-    }, [status]);
-
-    // Tick sound for last 5 seconds
-    useEffect(() => {
-        if (!isGameStarted) return;
-        if (timer <= 5000 && timer > 0 && timer % 1000 === 0) {
-            play('tick');
-        }
-    }, [timer, isGameStarted]);
 
     const isGameOver = status === CONSTANTS.GAME_ENDED;
 
     // Phase banner overlay
     const [phaseBanner, setPhaseBanner] = useState(null);
     useEffect(() => {
-        if (!isGameStarted || !prevPhaseRef.current) return;
-        if (prevPhaseRef.current === phase) return;
+        if (!isGameStarted) return;
+        const prev = prevPhaseRef.current;
+        prevPhaseRef.current = phase;
+        if (!prev || prev === phase) return;
 
         const PHASE_BANNERS = {
             [CONSTANTS.PHASE.NIGHT]: { text: 'La nuit tombe...', icon: 'fa-moon', className: 'banner-night' },
