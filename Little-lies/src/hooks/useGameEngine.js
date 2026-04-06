@@ -267,20 +267,41 @@ export const GameEngineProvider = ({ children }) => {
 
     setPlayers(newPlayers);
 
-    // Game starts at Night 1
+    // Game starts at Day 1 (Discussion) — players have no info yet, can /skip to night
     setGame({
       ...game,
       status: STATUS.STARTED,
-      phase: PHASE.NIGHT,
-      timer: getDuration(game, 'NIGHT'),
+      phase: PHASE.DISCUSSION,
+      timer: getDuration(game, 'DISCUSSION'),
       isGameStarted: true,
       isGameSetup: false,
-      isDay: false,
+      isDay: true,
       dayCount: 1,
       trialsToday: 0,
       accusedId: null,
       winner: null,
+      skipVotes: [],
     });
+
+    // Day 1 opening messages
+    setChatMessages([
+      {
+        player: 'system',
+        color: 'white',
+        content: '--- Jour 1 ---',
+        type: 'system',
+        dayCount: 1,
+        chat: 'default',
+      },
+      {
+        player: 'system',
+        color: '#78ff78',
+        content: 'La discussion est ouverte. Tapez /skip pour passer à la nuit.',
+        type: 'system',
+        dayCount: 1,
+        chat: 'default',
+      },
+    ]);
   };
 
   // --- Disconnect handling ---
@@ -448,6 +469,16 @@ export const GameEngineProvider = ({ children }) => {
     }
   };
 
+  // --- Skip day vote ---
+  const voteSkip = (playerId) => {
+    const currentSkips = game.skipVotes || [];
+    if (currentSkips.includes(playerId)) return { success: false };
+    const newSkips = [...currentSkips, playerId];
+    const aliveCount = players.filter((p) => p.isAlive).length;
+    setGame({ ...game, skipVotes: newSkips });
+    return { success: true, count: newSkips.length, total: aliveCount };
+  };
+
   // --- Helper to get phase timer ---
   const dur = (phase) => getDuration(game, phase);
 
@@ -462,7 +493,7 @@ export const GameEngineProvider = ({ children }) => {
     switch (currentPhase) {
       case PHASE.NIGHT:
         handleDisconnectPlayers();
-        nextGame = { ...nextGame, phase: PHASE.DEATH_REPORT, timer: dur('DEATH_REPORT'), isDay: true, dayCount: game.dayCount + 1, trialsToday: 0, accusedId: null };
+        nextGame = { ...nextGame, phase: PHASE.DEATH_REPORT, timer: dur('DEATH_REPORT'), isDay: true, dayCount: game.dayCount + 1, trialsToday: 0, accusedId: null, skipVotes: [] };
         break;
 
       case PHASE.DEATH_REPORT:
@@ -580,6 +611,31 @@ export const GameEngineProvider = ({ children }) => {
     return () => clearTimeout(tick);
   }, [game.timer, game.phase, game.status, isHost()]);
 
+  // --- Skip day majority check (host only) ---
+  const skipVoteCount = (game.skipVotes || []).length;
+  useEffect(() => {
+    if (!isHost() || !game.isGameStarted || game.status === STATUS.ENDED) return;
+    if (!game.isDay || (game.phase !== PHASE.DISCUSSION && game.phase !== PHASE.VOTING)) return;
+    if (skipVoteCount === 0) return;
+
+    const aliveCount = players.filter((p) => p.isAlive).length;
+    if (aliveCount === 0) return;
+    const majority = Math.floor(aliveCount / 2) + 1;
+
+    if (skipVoteCount >= majority) {
+      addChatSystem('La majorité a voté pour passer. La nuit tombe sur le village...', '#8899cc');
+      resetTrial();
+      setGame({
+        ...game,
+        phase: PHASE.NIGHT,
+        timer: getDuration(game, 'NIGHT'),
+        isDay: false,
+        accusedId: null,
+        skipVotes: [],
+      });
+    }
+  }, [skipVoteCount]);
+
   return (
     <GameEngineContext.Provider
       value={{
@@ -589,6 +645,7 @@ export const GameEngineProvider = ({ children }) => {
         CONSTANTS,
         updatePlayerName,
         checkWinCondition,
+        voteSkip,
       }}
     >
       {children}

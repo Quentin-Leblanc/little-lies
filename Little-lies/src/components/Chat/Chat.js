@@ -9,7 +9,7 @@ const TIME_FRAME = 5000;
 const TIMEOUT_DURATION = 10000;
 
 function Chat(props) {
-  const { game, getMe, getPlayers, updatePlayerName, setPlayers, CONSTANTS } = useGameEngine();
+  const { game, getMe, getPlayers, updatePlayerName, setPlayers, CONSTANTS, voteSkip } = useGameEngine();
   const me = getMe();
   const players = getPlayers();
   const myName = me?.profile?.name;
@@ -48,11 +48,11 @@ function Chat(props) {
     setInputValues(value);
   };
 
-  // --- Command handling ---
+  // --- Command handling (normalized: prefix stripped, lowercase) ---
   const handleCommand = (command, args) => {
     const allMessages = messages || [];
 
-    if (command === '-name' && args.length > 0 && game.isGameSetup) {
+    if (command === 'name' && args.length > 0 && game.isGameSetup) {
       const newName = args.join(' ');
       setMessages([
         ...allMessages,
@@ -70,8 +70,8 @@ function Chat(props) {
       return true;
     }
 
-    // Whisper: -pm <playerName> <message>
-    if (command === '-pm' && args.length >= 2) {
+    // Whisper: /pm <playerName> <message>
+    if (command === 'pm' && args.length >= 2) {
       const targetName = args[0];
       const whisperContent = args.slice(1).join(' ');
       const targetPlayer = players.find(
@@ -117,8 +117,8 @@ function Chat(props) {
       return true;
     }
 
-    // Last will: -lw <message>
-    if (command === '-lw' || command === '-lastwill') {
+    // Last will: /lw <message>
+    if (command === 'lw' || command === 'lastwill') {
       if (!me?.isAlive) {
         setInputError('Les morts ne peuvent pas écrire de testament.');
         setTimeout(() => setInputError(''), 3000);
@@ -151,6 +151,41 @@ function Chat(props) {
       return true;
     }
 
+    // Skip day: /skip
+    if (command === 'skip') {
+      if (!me?.isAlive) {
+        setInputError('Les morts ne peuvent pas voter.');
+        setTimeout(() => setInputError(''), 3000);
+        return true;
+      }
+      if (!game.isDay || (game.phase !== CONSTANTS.PHASE.DISCUSSION && game.phase !== CONSTANTS.PHASE.VOTING)) {
+        setInputError('Skip possible uniquement en discussion ou vote.');
+        setTimeout(() => setInputError(''), 3000);
+        return true;
+      }
+
+      const result = voteSkip(me.id);
+      if (!result.success) {
+        setInputError('Vous avez déjà voté pour skip.');
+        setTimeout(() => setInputError(''), 3000);
+        return true;
+      }
+
+      setMessages([
+        ...allMessages,
+        {
+          id: `skip-${Date.now()}`,
+          player: 'system',
+          color: '#aaa',
+          content: `${myName} veut passer — Skip (${result.count}/${result.total})`,
+          type: 'system',
+          dayCount: game.dayCount,
+          chat: 'default',
+        },
+      ]);
+      return true;
+    }
+
     return false;
   };
 
@@ -158,9 +193,10 @@ function Chat(props) {
   const sendMessage = () => {
     if (inputValues.trim() === '' || inputError !== '') return;
 
-    // Handle commands
-    if (inputValues.startsWith('-')) {
-      const [command, ...args] = inputValues.split(' ');
+    // Handle commands (both / and - prefixes)
+    if (inputValues.startsWith('-') || inputValues.startsWith('/')) {
+      const [rawCommand, ...args] = inputValues.split(' ');
+      const command = rawCommand.slice(1).toLowerCase();
       if (handleCommand(command, args)) {
         setInputValues('');
         return;
@@ -254,9 +290,11 @@ function Chat(props) {
       return isDead;
     }
 
-    // Mafia chat: only visible to mafia members (and during night)
+    // Mafia chat: visible to mafia members + Spy (passive ability)
     if (message.chat === 'mafia') {
-      return myTeam === 'mafia';
+      if (myTeam === 'mafia') return true;
+      if (me?.character?.key === 'spy' && me?.isAlive) return true;
+      return false;
     }
 
     // Default chat: always visible to alive, visible to dead too
@@ -269,8 +307,9 @@ function Chat(props) {
   const filteredMessages = (messages || [])
     .filter(filterMessage);
 
-  // Night: non-mafia alive players see a minimal night view
-  if (props.night && myTeam !== 'mafia' && !isDead) {
+  // Night: non-mafia alive players see a minimal night view (Spy sees chat like mafia)
+  const isSpy = me?.character?.key === 'spy';
+  if (props.night && myTeam !== 'mafia' && !isSpy && !isDead) {
     return (
       <div className="chat-container chat-night">
         <div className="chat-messages">
