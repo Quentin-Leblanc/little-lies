@@ -29,9 +29,9 @@
 
 /* 3D Vote button */
 .vote-3d-btn {
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(120, 120, 120, 0.75);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   padding: 4px 14px;
   font-size: 13px;
@@ -39,12 +39,18 @@
   font-weight: bold;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transition: all 0.15s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 
   &:hover {
-    background: rgba(30, 30, 30, 1);
-    transform: scale(1.1);
+    background: rgba(90, 90, 90, 0.9);
+  }
+
+  &.vote-3d-btn-active {
+    background: rgba(40, 40, 40, 0.95);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+    transform: scale(0.95);
   }
 }
 
@@ -95,29 +101,23 @@
   justify-content: center;
   z-index: 20;
   pointer-events: none;
-  background: rgba(0, 0, 0, 0.4);
 }
 
 .announcement-text {
   font-family: 'Cinzel', serif;
   font-size: 28px;
   font-weight: 700;
-  color: #fff;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+  color: #000;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
   padding: 16px 40px;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   animation: announcement-fade-in 0.5s ease-out;
 
   &.announcement-spared {
-    color: #78ff78;
-    border-color: rgba(120, 255, 120, 0.2);
+    color: #1a6e1a;
   }
 
   &.announcement-execution {
-    color: #ff4444;
-    border-color: rgba(255, 68, 68, 0.2);
+    color: #991111;
   }
 
   &.announcement-report {
