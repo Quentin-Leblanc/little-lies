@@ -78,34 +78,37 @@ const PlayerActions = memo(function () {
     });
   };
 
-  // --- Vote handlers (with vote weight) ---
-  const handleVoteClick = (suspectedPlayerId) => {
-    if (!me.isAlive || !isVotingPhase) return;
-
-    const voteWeight = me.voteWeight || 1;
-    const existingVotes = trial?.suspects[suspectedPlayerId]?.suspectedBy || [];
-
-    // Add vote(s) based on weight
-    const newVotes = [...existingVotes];
-    for (let i = 0; i < voteWeight; i++) {
-      newVotes.push(me.id);
-    }
-
-    setTrial({
-      ...trial,
-      suspects: {
-        ...trial.suspects,
-        [suspectedPlayerId]: {
-          id: suspectedPlayerId,
-          suspectedBy: newVotes,
-        },
-      },
-    });
-  };
-
-  const hasVotedToday = trial.suspects && Object.keys(trial.suspects).some((suspectedId) =>
+  // --- Vote handlers (with vote weight, allows changing vote) ---
+  const myVoteTarget = trial.suspects && Object.keys(trial.suspects).find((suspectedId) =>
     trial.suspects[suspectedId]?.suspectedBy?.some((voteId) => voteId === me.id)
   );
+
+  const handleVoteClick = (suspectedPlayerId) => {
+    if (!me.isAlive || !isVotingPhase) return;
+    // If clicking the same target, do nothing
+    if (myVoteTarget === suspectedPlayerId) return;
+
+    const voteWeight = me.voteWeight || 1;
+
+    // Remove my votes from all targets first
+    const newSuspects = {};
+    Object.keys(trial.suspects || {}).forEach((sid) => {
+      const filtered = (trial.suspects[sid]?.suspectedBy || []).filter((vid) => vid !== me.id);
+      if (filtered.length > 0 || sid === suspectedPlayerId) {
+        newSuspects[sid] = { id: sid, suspectedBy: filtered };
+      }
+    });
+
+    // Add my votes to the new target
+    if (!newSuspects[suspectedPlayerId]) {
+      newSuspects[suspectedPlayerId] = { id: suspectedPlayerId, suspectedBy: [] };
+    }
+    for (let i = 0; i < voteWeight; i++) {
+      newSuspects[suspectedPlayerId].suspectedBy.push(me.id);
+    }
+
+    setTrial({ ...trial, suspects: newSuspects });
+  };
 
   // --- Judgment handlers ---
   const handleJudgmentVote = (vote) => {
@@ -121,23 +124,30 @@ const PlayerActions = memo(function () {
     });
   };
 
-  // --- Night action handler ---
+  // --- Night action handler (allows changing target) ---
   const handleNightAction = (action, targetPlayer) => {
-    // Vest use tracking
+    // Vest use tracking (only increment on first use, not on change)
     if (action.type === 'VEST' && action.maxUses) {
-      const vestUses = me.vestUses || 0;
-      if (vestUses >= action.maxUses) return; // No more vests
-      setPlayers((prev) =>
-        prev.map((p) =>
-          p.id === me.id ? { ...p, vestUses: vestUses + 1 } : p
-        )
-      );
+      const alreadyUsed = Events.hasDoneThisActionTonight(action.type);
+      if (!alreadyUsed) {
+        const vestUses = me.vestUses || 0;
+        if (vestUses >= action.maxUses) return;
+        setPlayers((prev) =>
+          prev.map((p) =>
+            p.id === me.id ? { ...p, vestUses: vestUses + 1 } : p
+          )
+        );
+      }
     }
 
     // Night 1: Vigilante can't shoot
     if (action.type === 'VIGILANTE_KILL' && game.dayCount <= 1) return;
 
-    Events.add({
+    // If same target, do nothing
+    const currentTarget = Events.getMyActionTarget(action.type);
+    if (currentTarget === targetPlayer.id) return;
+
+    Events.replaceAction({
       type: action.type,
       content: {
         target: targetPlayer.id,
@@ -235,6 +245,7 @@ const PlayerActions = memo(function () {
             return (
               <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''}`}>
                 <span className="player-name-cell">
+                  <span className="player-color-dot" style={{ backgroundColor: player.profile.color || '#888' }} />
                   <span style={{ color: player.profile.color }}>
                     {player.profile.name}
                   </span>
@@ -248,9 +259,12 @@ const PlayerActions = memo(function () {
                 <div className="vote-container">
                   {player.isAlive ? (
                     <>
-                      {/* Vote button during VOTING phase */}
-                      {me.isAlive && player.id !== me.id && !hasVotedToday && isVotingPhase && (
-                        <button className="primaryBtn vote-btn" onClick={() => handleVoteClick(player.id)}>
+                      {/* Vote button during VOTING phase — stays visible, pressed when selected */}
+                      {me.isAlive && player.id !== me.id && isVotingPhase && (
+                        <button
+                          className={`vote-btn ${myVoteTarget === player.id ? 'vote-btn-active' : ''}`}
+                          onClick={() => handleVoteClick(player.id)}
+                        >
                           Vote
                         </button>
                       )}
@@ -260,24 +274,24 @@ const PlayerActions = memo(function () {
                         </span>
                       )}
 
-                      {/* Night actions */}
+                      {/* Night actions — stays visible, pressed when selected */}
                       {me.isAlive && isNightPhase && me.character?.actions?.map((action) => {
-                        if (Events.hasDoneThisActionTonight(action.type)) return null;
                         if (action.type === 'VOTE' || action.type === 'REVEAL') return null;
                         if (!action.require.includes('isNight')) return null;
 
                         if (action.type === 'VIGILANTE_KILL' && game.dayCount <= 1) return null;
-                        if (action.type === 'VEST' && action.maxUses && (me.vestUses || 0) >= action.maxUses) return null;
+                        if (action.type === 'VEST' && action.maxUses && !Events.hasDoneThisActionTonight(action.type) && (me.vestUses || 0) >= action.maxUses) return null;
 
                         if (action.targets === 'notMyTeam' && me.character.team === player.character?.team) return null;
                         if (action.targets === 'notMe' && player.id === me.id) return null;
                         if (action.targets === 'self' && player.id !== me.id) return null;
 
+                        const isSelected = Events.getMyActionTarget(action.type) === player.id;
                         const actionStyle = getActionStyle(action.type);
                         return (
                           <button
-                            className="action-btn"
-                            style={{ background: actionStyle.bg, color: actionStyle.color, border: 'none' }}
+                            className={`action-btn ${isSelected ? 'action-btn-active' : ''}`}
+                            style={{ background: isSelected ? actionStyle.hover : actionStyle.bg, color: actionStyle.color, border: 'none' }}
                             onClick={() => handleNightAction(action, player)}
                             key={action.type}
                           >

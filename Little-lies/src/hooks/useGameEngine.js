@@ -82,6 +82,25 @@ const avatars = [
 
 const MAX_TRIALS_PER_DAY = 3;
 
+// 15 distinct player colors — no duplicates possible
+const PLAYER_COLORS = [
+  '#e74c3c', // red
+  '#3498db', // blue
+  '#2ecc71', // green
+  '#f39c12', // orange
+  '#9b59b6', // purple
+  '#1abc9c', // teal
+  '#e91e63', // pink
+  '#00bcd4', // cyan
+  '#ff9800', // amber
+  '#8bc34a', // lime
+  '#ff5722', // deep orange
+  '#607d8b', // blue grey
+  '#cddc39', // yellow-green
+  '#795548', // brown
+  '#03a9f4', // light blue
+];
+
 // Get duration for a phase, using custom config if available
 const getDuration = (game, phase) => {
   const configDurations = game.config?.durations;
@@ -164,22 +183,36 @@ export const GameEngineProvider = ({ children }) => {
   };
 
   // Sync playroom players into game state (only before game starts)
+  // Assigns a unique color from PLAYER_COLORS to each player
   useEffect(() => {
     if (playroom_players.length > 0 && !game.isGameStarted) {
-      setPlayers((prevPlayers) =>
-        playroom_players.map((playroom_player) => {
+      setPlayers((prevPlayers) => {
+        const usedColors = new Set();
+        // First pass: collect colors already assigned to existing players that are still connected
+        const connectedIds = new Set(playroom_players.map((p) => p.id));
+        prevPlayers.forEach((p) => {
+          if (connectedIds.has(p.id) && p.profile?.color) {
+            usedColors.add(p.profile.color);
+          }
+        });
+
+        return playroom_players.map((playroom_player) => {
           const existingPlayer = prevPlayers.find((p) => p.id === playroom_player.id);
-          return existingPlayer
-            ? existingPlayer
-            : {
-                id: playroom_player.id,
-                profile: {
-                  ...playroom_player.getState().profile,
-                  name: playroom_player.getState().profile.name || 'Unnamed Player',
-                },
-              };
-        })
-      );
+          if (existingPlayer) return existingPlayer;
+
+          // Assign next available color
+          const color = PLAYER_COLORS.find((c) => !usedColors.has(c)) || '#888';
+          usedColors.add(color);
+          return {
+            id: playroom_player.id,
+            profile: {
+              ...playroom_player.getState().profile,
+              name: playroom_player.getState().profile.name || 'Unnamed Player',
+              color,
+            },
+          };
+        });
+      });
     }
   }, [playroom_players]);
 
@@ -206,16 +239,21 @@ export const GameEngineProvider = ({ children }) => {
     const shuffledRoles = [...rolesSelected].sort(() => Math.random() - 0.5);
     const newPlayers = playroom_players
       .sort((a, b) => a.myId.localeCompare(b.myId))
-      .map((player, index) => ({
-        id: player.id,
-        profile: {
-          ...player.getState().profile,
-          avatar: avatars[index % avatars.length],
-        },
-        character: shuffledRoles[index],
-        connected: true,
-        isAlive: true,
-      }));
+      .map((player, index) => {
+        // Preserve the unique color assigned in the lobby
+        const existingPlayer = players.find((p) => p.id === player.id);
+        return {
+          id: player.id,
+          profile: {
+            ...player.getState().profile,
+            color: existingPlayer?.profile?.color || PLAYER_COLORS[index] || '#888',
+            avatar: avatars[index % avatars.length],
+          },
+          character: shuffledRoles[index],
+          connected: true,
+          isAlive: true,
+        };
+      });
 
     // Assign Executioner targets (random town member)
     const townPlayers = newPlayers.filter((p) => p.character?.team === 'town');
