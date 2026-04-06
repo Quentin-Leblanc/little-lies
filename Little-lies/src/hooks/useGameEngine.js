@@ -9,7 +9,7 @@ const GameEngineContext = React.createContext();
 const DURATIONS = {
   NIGHT: 30000,
   DEATH_REPORT: 5000,
-  DISCUSSION: 30000,
+  DISCUSSION: 15000,
   VOTING: 30000,
   DEFENSE: 20000,
   JUDGMENT: 15000,
@@ -150,7 +150,8 @@ export const GameEngineProvider = ({ children }) => {
   const rolesAvailable = _rolesAvailable || [];
   const [_rolesSelected, setRolesSelected] = useMultiplayerState('rolesSelected', []);
   const rolesSelected = _rolesSelected || [];
-  const [] = useMultiplayerState('chatMessages', []);
+  const [_chatMessages, setChatMessages] = useMultiplayerState('chatMessages', []);
+  const chatMessages = _chatMessages || [];
   const [_trial, setTrial] = useMultiplayerState('trial', {
     suspects: {},
     votes: {},
@@ -301,6 +302,21 @@ export const GameEngineProvider = ({ children }) => {
     }
   };
 
+  // --- Chat helper ---
+  const addChatSystem = (content, color = 'white', dayOverride = null) => {
+    setChatMessages([
+      ...chatMessages,
+      {
+        player: 'system',
+        color,
+        content,
+        type: 'system',
+        dayCount: dayOverride || game.dayCount,
+        chat: 'default',
+      },
+    ]);
+  };
+
   // --- Trial / Voting ---
   const resetTrial = () => setTrial({ suspects: {}, votes: {} });
 
@@ -397,8 +413,11 @@ export const GameEngineProvider = ({ children }) => {
       );
       let elimMsg = `${accused.profile.name} a été éliminé par le village. Son rôle était : ${accused.character?.label}.`;
       if (accused.lastWill) {
-        elimMsg += `\n📜 Testament : "${accused.lastWill}"`;
+        elimMsg += ` | Testament : "${accused.lastWill}"`;
       }
+
+      // Write to chat immediately (not deferred to morning)
+      addChatSystem(elimMsg, '#ff4444');
 
       Events.add({
         type: 'ELIMINATION',
@@ -406,7 +425,7 @@ export const GameEngineProvider = ({ children }) => {
           target: accusedId,
           chatMessage: elimMsg,
         },
-        displayed: false,
+        displayed: true, // already displayed in chat
       });
 
       // Jester wins if they get lynched
@@ -447,10 +466,12 @@ export const GameEngineProvider = ({ children }) => {
         break;
 
       case PHASE.DEATH_REPORT:
+        addChatSystem('La discussion est ouverte.', '#78ff78');
         nextGame = { ...nextGame, phase: PHASE.DISCUSSION, timer: dur('DISCUSSION') };
         break;
 
       case PHASE.DISCUSSION:
+        addChatSystem('Le vote est ouvert ! Votez pour accuser un suspect.', '#ffa502');
         resetTrial();
         nextGame = { ...nextGame, phase: PHASE.VOTING, timer: dur('VOTING') };
         break;
@@ -461,7 +482,8 @@ export const GameEngineProvider = ({ children }) => {
           nextGame = { ...nextGame, phase: PHASE.DEFENSE, timer: dur('DEFENSE'), accusedId, trialsToday: game.trialsToday + 1 };
         } else {
           // No majority → show NO_LYNCH announcement then go to night
-          Events.add({ type: 'NO_LYNCH', content: { chatMessage: 'Personne ne sera lynché aujourd\'hui.' }, displayed: false });
+          addChatSystem('Personne ne sera lynché aujourd\'hui.', '#ffa502');
+          Events.add({ type: 'NO_LYNCH', content: { chatMessage: 'Personne ne sera lynché aujourd\'hui.' }, displayed: true });
           resetTrial();
           nextGame = { ...nextGame, phase: PHASE.NO_LYNCH, timer: dur('NO_LYNCH'), accusedId: null };
         }
@@ -470,6 +492,7 @@ export const GameEngineProvider = ({ children }) => {
 
       case PHASE.NO_LYNCH:
         // After announcement, go to night
+        addChatSystem('La nuit tombe sur le village...', '#8899cc');
         nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
         break;
 
@@ -486,7 +509,8 @@ export const GameEngineProvider = ({ children }) => {
         const resultMsg = isGuilty
           ? `Coupable ! (${guiltyCount} vs ${innocentCount})`
           : `Acquitté ! (${guiltyCount} vs ${innocentCount})`;
-        Events.add({ type: 'JUDGMENT_RESULT', content: { chatMessage: resultMsg }, displayed: false });
+        addChatSystem(resultMsg, isGuilty ? '#ff4444' : '#78ff78');
+        Events.add({ type: 'JUDGMENT_RESULT', content: { chatMessage: resultMsg }, displayed: true });
 
         if (isGuilty) {
           nextGame = { ...nextGame, phase: PHASE.LAST_WORDS, timer: dur('LAST_WORDS') };
@@ -499,6 +523,7 @@ export const GameEngineProvider = ({ children }) => {
 
       case PHASE.SPARED: {
         // After spared announcement, go to night
+        addChatSystem('La nuit tombe sur le village...', '#8899cc');
         resetTrial();
         nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
         break;
@@ -513,6 +538,7 @@ export const GameEngineProvider = ({ children }) => {
         const winnerAfterExec = checkWinCondition();
         if (winnerAfterExec) { endGame(winnerAfterExec); return; }
         // After execution, go to night
+        addChatSystem('La nuit tombe sur le village...', '#8899cc');
         resetTrial();
         nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
         break;

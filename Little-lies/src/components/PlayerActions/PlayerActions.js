@@ -175,8 +175,8 @@ const PlayerActions = memo(function () {
       <div className="player-list-container">
         {/* Mayor reveal button */}
         {canReveal && (
-          <button className="primaryBtn reveal-btn" onClick={handleReveal}>
-            <i className="fas fa-landmark"></i> Se révéler Maire
+          <button className="reveal-btn" onClick={handleReveal}>
+            <i className="fas fa-landmark"></i> Maire
           </button>
         )}
 

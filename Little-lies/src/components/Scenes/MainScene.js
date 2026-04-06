@@ -486,10 +486,10 @@ const MainScene = () => {
         ) : null;
       })()}
 
-      {/* Discussion start message */}
+      {/* Discussion start — day begins */}
       {phase === CONSTANTS.PHASE.DISCUSSION && (
         <div className="scene-announcement scene-announcement-fade">
-          <div className="announcement-text">La nuit tombe sur le village...</div>
+          <div className="announcement-text">Le village se réveille...</div>
         </div>
       )}
 
@@ -517,26 +517,32 @@ const MainScene = () => {
   );
 };
 
-// Night ambiance — random messages that cycle during night phase
+// Night ambiance — 3 unique messages per night, longer display
 const NightAmbiance = () => {
   const [message, setMessage] = useState('');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     let timeout;
+    // Pick 3 unique random messages
+    const shuffled = [...NIGHT_AMBIANCE].sort(() => Math.random() - 0.5);
+    const picks = shuffled.slice(0, 3);
+    let index = 0;
+
     const showNext = () => {
-      const msg = NIGHT_AMBIANCE[Math.floor(Math.random() * NIGHT_AMBIANCE.length)];
-      setMessage(msg);
+      if (index >= picks.length) return;
+      setMessage(picks[index]);
       setVisible(true);
-      // Stay visible for 4s, then fade out
+      index++;
       timeout = setTimeout(() => {
         setVisible(false);
-        // Wait 2s before next message
-        timeout = setTimeout(showNext, 2000);
-      }, 4000);
+        if (index < picks.length) {
+          timeout = setTimeout(showNext, 2500);
+        }
+      }, 7000);
     };
-    // Start after a short delay
-    timeout = setTimeout(showNext, 1500);
+
+    timeout = setTimeout(showNext, 2000);
     return () => clearTimeout(timeout);
   }, []);
 
