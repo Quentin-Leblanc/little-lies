@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { isHost, useMultiplayerState, me } from 'playroomkit';
 
 const EventsContext = React.createContext();
@@ -31,6 +31,7 @@ export const EventsProvider = ({ children }) => {
   const players = _players || [];
   const [_notifications, setNotifications] = useMultiplayerState('notifications', []);
   const notifications = _notifications || [];
+  const morningProcessedRef = useRef(0);
 
   const add = (event) => {
     const eventProperties = ['type', 'content', 'displayed'];
@@ -485,11 +486,12 @@ export const EventsProvider = ({ children }) => {
 
   useEffect(() => {
     if (isHost()) {
-      if (game?.isGameStarted && game?.phase === 'DEATH_REPORT') {
+      if (game?.isGameStarted && game?.phase === 'DEATH_REPORT' && morningProcessedRef.current !== game?.dayCount) {
+        morningProcessedRef.current = game.dayCount;
         addMorningMessages();
       }
     }
-  }, [game?.isGameStarted, game?.phase, isHost()]);
+  }, [game?.isGameStarted, game?.phase, game?.dayCount, isHost()]);
 
   return (
     <EventsContext.Provider value={{ ...eventsState }}>

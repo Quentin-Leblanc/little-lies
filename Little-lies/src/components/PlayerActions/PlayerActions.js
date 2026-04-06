@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
 import { useGameEngine } from '../../hooks/useGameEngine';
@@ -33,6 +33,7 @@ const PlayerActions = memo(function () {
 
   const [isDead, setIsDead] = useState(false);
   const [actionUsed, setActionUsed] = useState(null);
+  const prevAliveRef = useRef(me?.isAlive ?? true);
 
   const phase = game.phase;
   const isVotingPhase = phase === CONSTANTS.PHASE.VOTING;
@@ -46,13 +47,18 @@ const PlayerActions = memo(function () {
     setActionUsed(null);
   }, [game.phase]);
 
+  // Death flash — fires exactly once when player transitions alive → dead
   useEffect(() => {
-    if (me && !me.isAlive && game.isDay) {
+    const wasAlive = prevAliveRef.current;
+    const isNowDead = me && !me.isAlive;
+    prevAliveRef.current = me?.isAlive ?? true;
+
+    if (wasAlive && isNowDead) {
       setIsDead(true);
       const timer = setTimeout(() => setIsDead(false), 1500);
       return () => clearTimeout(timer);
     }
-  }, [me?.isAlive, game.isDay]);
+  }, [me?.isAlive]);
 
   if (!me) return null;
 
