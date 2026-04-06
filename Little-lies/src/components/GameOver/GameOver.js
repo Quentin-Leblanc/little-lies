@@ -118,9 +118,13 @@ const GameOver = () => {
             </button>
             <button
               className="primaryBtn gameover-btn"
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('r');
+                window.location.href = url.toString();
+              }}
             >
-              Retour au lobby
+              Nouveau salon
             </button>
           </div>
         </div>

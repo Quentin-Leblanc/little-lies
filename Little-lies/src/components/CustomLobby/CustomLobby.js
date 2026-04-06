@@ -61,8 +61,14 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
 
   const newLobby = () => {
     const url = new URL(window.location.href);
+    const hadRoomCode = url.searchParams.has('r');
     url.searchParams.delete('r');
-    window.location.href = url.toString();
+    if (hadRoomCode) {
+      window.location.href = url.toString();
+    } else {
+      // URL already has no room code — force a full reload to create a fresh room
+      window.location.reload();
+    }
   };
 
   return (
@@ -162,7 +168,8 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           </div>
 
           <div className="lobby-actions">
-            {isHost() ? (
+            {/* isHost() re-evaluated on each render triggered by usePlayersList changes */}
+            {playroom_players.length > 0 && isHost() ? (
               <button className="lobby-btn lobby-btn-primary" onClick={() => setIsSelectingRoles(true)}>
                 <i className="fas fa-play"></i> Lancer la partie
               </button>

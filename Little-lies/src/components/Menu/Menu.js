@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMultiplayerState, me, getRoomCode } from 'playroomkit';
+import { useMultiplayerState, getRoomCode } from 'playroomkit';
 import trad from '../../trad/roles.json';
 
 import './Menu.scss';
@@ -21,12 +21,10 @@ const Menu = () => {
     }
   }, []);
 
-  const handleQuitGame = async () => {
-    try {
-      await me().kick();
-    } catch (error) {
-      console.error('Error while trying to quit the game:', error);
-    }
+  const handleQuitGame = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('r');
+    window.location.href = url.toString();
   };
 
   const filteredLogs = messages?.filter((message) => message.chat !== 'mafia' && message.chat !== 'whisper' && message.chat !== 'dead') || [];
