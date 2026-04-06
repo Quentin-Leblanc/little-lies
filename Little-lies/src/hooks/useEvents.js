@@ -92,8 +92,11 @@ export const EventsProvider = ({ children }) => {
     );
 
   const resolveNightActions = () => {
+    // Night events were created with dayCount = N, but dayCount is now N+1
+    // (incremented during NIGHT→DEATH_REPORT transition). Filter by N-1.
+    const nightDayCount = game.dayCount - 1;
     const currentEvents = get().filter(
-      (event) => event.dayCount === game.dayCount && !event.displayed
+      (event) => event.dayCount === nightDayCount && !event.displayed
     );
 
     // Data structures for resolution
