@@ -41,9 +41,9 @@
   flex-direction: column;
 }
 
-// Center - 3D scene stretched behind all panels
+// Center - 3D scene only in the center column, below header
 .layout-center {
-  grid-area: 1 / 1 / -1 / -1;
+  grid-area: center;
   position: relative;
   overflow: hidden;
   z-index: 1;

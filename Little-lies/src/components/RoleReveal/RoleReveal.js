@@ -112,14 +112,13 @@ const RoleReveal = ({ onComplete }) => {
           </motion.div>
         )}
 
-        {/* Countdown hint */}
+        {/* Countdown hint — plain text, no interaction */}
         {phase === 'details' && (
           <motion.p
-            className="reveal-dismiss"
+            className="reveal-hint"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            transition={{ delay: 0.5 }}
-            style={{ cursor: 'default' }}
+            animate={{ opacity: 0.5 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
           >
             La nuit commence bientôt...
           </motion.p>

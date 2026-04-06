@@ -9,6 +9,7 @@ import {
     Roles,
     Time,
 } from './components';
+import { TimeBar } from './components/time/Time';
 import { useGameEngine } from './hooks/useGameEngine';
 import GameComponent from './components/GameComponent/GameComponent';
 import GameOver from './components/GameOver/GameOver';
@@ -68,8 +69,9 @@ function App() {
                         <Graveyard />
                     </div>
 
-                    {/* Center - 3D scene */}
+                    {/* Center - 3D scene + progress bar overlay */}
                     <div className="layout-center">
+                        <TimeBar />
                         <MainScene />
                     </div>
 

@@ -158,7 +158,7 @@
       "actions": [
         {
           "type": "KILL",
-          "label": "Ordonner le meurtre",
+          "label": "Tuer",
           "description": "Ordonne l'élimination d'un joueur cette nuit",
           "require": ["isNight"],
           "targets": "notMyTeam",
@@ -231,7 +231,7 @@
       "actions": [
         {
           "type": "BLACKMAIL",
-          "label": "Faire chanter",
+          "label": "Bâillonner",
           "description": "Empêche un joueur de parler pendant le jour suivant",
           "require": ["isNight"],
           "targets": "notMyTeam",

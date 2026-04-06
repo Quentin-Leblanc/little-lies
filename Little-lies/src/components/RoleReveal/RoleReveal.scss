@@ -131,21 +131,11 @@
   color: #ccc;
 }
 
-.reveal-dismiss {
-  position: absolute;
-  bottom: 60px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ccc;
-  padding: 12px 28px;
-  font-size: 1rem;
+.reveal-hint {
+  margin-top: 24px;
+  color: #556;
+  font-size: 0.9rem;
   font-family: 'Cinzel', serif;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
+  font-style: italic;
+  pointer-events: none;
 }

@@ -3,13 +3,14 @@
 
 .graveyard-box {
   width: 100%;
-  max-height: 250px;
+  flex: 1;
+  min-height: 120px;
   border-radius: 5px;
   color: white;
   padding: 10px;
   overflow-y: auto;
   font-size: 15px;
-  margin-top: auto;
+  margin-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding-top: 10px;
 

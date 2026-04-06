@@ -239,6 +239,7 @@ const PlayerActions = memo(function () {
         )}
 
         {/* Player list — always show all players */}
+        <h4 className="player-list-title"><i className="fas fa-users"></i> Résidents</h4>
         <ul className="player-list">
           {players.map((player) => {
             const hasActions = me.isAlive && player.isAlive;

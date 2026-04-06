@@ -43,34 +43,53 @@ const Time = () => {
   return (
     <div className="time-container">
       <span className="game-title">Little Lies</span>
-      <div className="DayNightTimer">
-        <motion.div
-          className="progress-bar"
-          initial={{ width: '100%' }}
-          animate={{
-            width: `${progressPercentage}%`,
-            backgroundColor: barColor,
-          }}
-          transition={{ ease: 'linear', duration: 0.1 }}
-        />
-        <div className="textOverlayTimer">
-          <div className="progress-content">
-            <i className={`fas ${phaseIcon}`}></i>
-            {headerText}
-          </div>
-          <div className="timer">
-            <motion.div
-              key={localTimer}
-              initial={{ opacity: 0.8 }}
-              animate={{ opacity: 1, color: barColor }}
-              exit={{ opacity: 0.8 }}
-              transition={{ duration: 0.5 }}
-            >
-              {timeRemaining}s
-            </motion.div>
-          </div>
+      <div className="phase-info">
+        <div className="progress-content">
+          <i className={`fas ${phaseIcon}`}></i>
+          {headerText}
+        </div>
+        <div className="timer">
+          <motion.div
+            key={localTimer}
+            initial={{ opacity: 0.8 }}
+            animate={{ opacity: 1, color: barColor }}
+            exit={{ opacity: 0.8 }}
+            transition={{ duration: 0.5 }}
+          >
+            {timeRemaining}s
+          </motion.div>
         </div>
       </div>
+    </div>
+  );
+};
+
+/** Progress bar — rendered inside the 3D scene container */
+export const TimeBar = () => {
+  const {
+    game: { timer, phase },
+    CONSTANTS,
+  } = useGameEngine();
+
+  const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
+  const progressPercentage = (timer / totalDuration) * 100;
+
+  let barColor;
+  if (progressPercentage <= 25) barColor = '#ff4757';
+  else if (progressPercentage <= 55) barColor = '#ffa502';
+  else barColor = '#44cc44';
+
+  return (
+    <div className="progress-bar-scene">
+      <motion.div
+        className="progress-bar-fill"
+        initial={{ width: '100%' }}
+        animate={{
+          width: `${progressPercentage}%`,
+          backgroundColor: barColor,
+        }}
+        transition={{ ease: 'linear', duration: 0.1 }}
+      />
     </div>
   );
 };

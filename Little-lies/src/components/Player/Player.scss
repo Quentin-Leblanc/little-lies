@@ -62,7 +62,8 @@
 }
 
 .role-actions {
-  font-size: 12px;
+  font-size: 10px;
+  color: #888;
 
   ul {
     list-style: none;
@@ -71,8 +72,8 @@
   }
 
   ul li {
-    margin-bottom: 6px;
-    line-height: 1.5;
+    margin-bottom: 3px;
+    line-height: 1.4;
   }
 
   span {
@@ -101,10 +102,11 @@
   color: #555;
 }
 
-.status-alive {
-  color: #78ff78;
+.status-team {
   font-weight: bold;
-  font-size: 13px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .status-dead {

@@ -60,11 +60,10 @@ const Player = () => {
                 <div className="status-line">
                     <span className="status-name">{me.profile?.name || 'Joueur'}</span>
                     <span className="status-separator">—</span>
-                    {me.isAlive ? (
-                        <span className="status-alive">vivant</span>
-                    ) : (
-                        <span className="status-dead">mort</span>
-                    )}
+                    <span className="status-team" style={{ color: me.character?.couleur }}>
+                        {{ town: 'Village', mafia: 'Mafia', neutral: 'Neutre' }[me.character?.team] || me.character?.team}
+                    </span>
+                    {!me.isAlive && <span className="status-dead">mort</span>}
                     {me.isBlackmailed && (
                         <span className="status-blackmailed">
                             <i className="fas fa-comment-slash"></i> Bâillonné

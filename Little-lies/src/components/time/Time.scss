@@ -19,34 +19,12 @@
   letter-spacing: 1px;
 }
 
-.DayNightTimer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  flex: 1;
-  padding: 6px 0;
-}
-
-.progress-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 4px;
-  background-color: #ffffff;
-  z-index: 1;
-  transition: width 0.1s linear, background-color 0.3s ease-in-out;
-}
-
-.textOverlayTimer {
-  text-align: center;
-  color: #ffffff;
-  z-index: 2;
+.phase-info {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 2px 0;
+  flex: 1;
+  padding: 8px 0;
 }
 
 .progress-content {
@@ -66,4 +44,21 @@
   font-size: 18px;
   color: #ffffff;
   font-family: monospace;
+}
+
+/* Progress bar — floats above the 3D scene only */
+.progress-bar-scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #ffffff;
+  transition: width 0.1s linear, background-color 0.3s ease-in-out;
 }
