@@ -42,7 +42,7 @@ const Time = () => {
 
   return (
     <div className="time-container">
-      <span className="game-title">Werewolf</span>
+      <span className="game-title">Little Lies</span>
       <div className="DayNightTimer">
         <motion.div
           className="progress-bar"

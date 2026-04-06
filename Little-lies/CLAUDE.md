@@ -1,4 +1,4 @@
-# Mafia Game - Claude Code Configuration
+# Little Lies - Claude Code Configuration
 
 ## Permissions
 
@@ -20,13 +20,13 @@ Claude Code is allowed to run the following without asking for confirmation:
 
 ## Project Overview
 
-Multiplayer Mafia/Werewolf social deduction game inspired by SC2 Mafia.
+Multiplayer social deduction game — Little Lies.
 
 - **Stack**: React 18, React Three Fiber, PlayroomKit, Framer Motion, SASS
 - **Multiplayer**: PlayroomKit (JoinPlayroom) handles networking/lobby/rooms
 - **3D**: Three.js via R3F for cinematic animations (non-interactive, players don't control characters)
 - **Language**: UI in French
-- **Remote**: https://github.com/Swytsh/mafia.git (branch: test)
+- **Remote**: https://github.com/Quentin-Leblanc/little-lies.git (branch: main)
 
 ## Architecture
 

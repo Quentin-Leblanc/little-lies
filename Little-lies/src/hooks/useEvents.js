@@ -4,7 +4,7 @@ import { isHost, useMultiplayerState, me } from 'playroomkit';
 const EventsContext = React.createContext();
 
 /*
-  Night action resolution order (SC2 Mafia inspired):
+  Night action resolution order:
   Priority 1: Self-defense (Vest)
   Priority 2: Protections (Doctor heal)
   Priority 3: Manipulation (Frame, Blackmail)
