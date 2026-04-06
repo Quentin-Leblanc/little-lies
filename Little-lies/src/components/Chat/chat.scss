@@ -168,8 +168,11 @@
   text-align: left;
   color: #888;
   font-size: 11px;
-  padding: 2px 0;
+  padding: 4px 0 2px;
   font-style: italic;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 6px;
 }
 
 .chat-input-container {

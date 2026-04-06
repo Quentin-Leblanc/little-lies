@@ -144,9 +144,8 @@ function Chat(props) {
           content: `Testament mis à jour.`,
           type: 'system',
           dayCount: game.dayCount,
-          chat: 'whisper',
+          chat: 'self',
           senderId: me.id,
-          receiverId: me.id,
         },
       ]);
       return true;
@@ -198,6 +197,7 @@ function Chat(props) {
     }
 
     const message = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
       player: myName,
       playerId: me?.id,
       color: isDead ? '#666' : myColor,
@@ -244,6 +244,11 @@ function Chat(props) {
       return false;
     }
 
+    // Self messages: only visible to the sender
+    if (message.chat === 'self') {
+      return message.senderId === me?.id;
+    }
+
     // Dead chat: only visible to dead players
     if (message.chat === 'dead') {
       return isDead;
@@ -260,8 +265,8 @@ function Chat(props) {
     return false;
   };
 
+  // Show full game history (no dayCount filter) — day separators provide visual breaks
   const filteredMessages = (messages || [])
-    .filter((m) => m.dayCount === game.dayCount)
     .filter(filterMessage);
 
   // Night: non-mafia alive players see a minimal night view
@@ -325,7 +330,7 @@ function Chat(props) {
           // System messages: render as clean separator
           if (message.type === 'system') {
             return (
-              <div className="chat-message-wrapper msg-system" key={index}>
+              <div className="chat-message-wrapper msg-system" key={message.id || index}>
                 <div className="chat-message chat-day-separator">
                   {message.content}
                 </div>
@@ -334,7 +339,7 @@ function Chat(props) {
           }
 
           return (
-            <div className={`chat-message-wrapper ${getMessageClass(message)}`} key={index}>
+            <div className={`chat-message-wrapper ${getMessageClass(message)}`} key={message.id || index}>
               <div
                 className="chat-message-background"
                 style={{ backgroundColor: message.color }}
