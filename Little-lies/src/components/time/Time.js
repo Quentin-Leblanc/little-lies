@@ -64,7 +64,7 @@ const Time = () => {
   );
 };
 
-/** Progress bar — rendered inside the 3D scene container */
+/** Progress bar — rendered inside the 3D scene container, uses local interpolation for smoothness */
 export const TimeBar = () => {
   const {
     game: { timer, phase },
@@ -72,7 +72,20 @@ export const TimeBar = () => {
   } = useGameEngine();
 
   const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
-  const progressPercentage = (timer / totalDuration) * 100;
+  const [localTimer, setLocalTimer] = useState(timer);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLocalTimer((prev) => Math.max(prev - 50, 0));
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setLocalTimer(timer);
+  }, [timer]);
+
+  const progressPercentage = (localTimer / totalDuration) * 100;
 
   let barColor;
   if (progressPercentage <= 25) barColor = '#ff4757';
@@ -81,14 +94,12 @@ export const TimeBar = () => {
 
   return (
     <div className="progress-bar-scene">
-      <motion.div
+      <div
         className="progress-bar-fill"
-        initial={{ width: '100%' }}
-        animate={{
+        style={{
           width: `${progressPercentage}%`,
           backgroundColor: barColor,
         }}
-        transition={{ ease: 'linear', duration: 0.1 }}
       />
     </div>
   );

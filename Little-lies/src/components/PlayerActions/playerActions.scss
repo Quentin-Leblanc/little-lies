@@ -163,13 +163,16 @@
 // Mayor reveal
 .reveal-btn {
   width: 100%;
-  font-size: 14px;
-  padding: 8px;
+  font-size: 11px;
+  padding: 5px 6px;
   background: rgba(255, 215, 0, 0.15);
-  border-color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 4px;
   color: #ffd700;
+  cursor: pointer;
+  box-sizing: border-box;
 
-  i { margin-right: 6px; }
+  i { margin-right: 4px; }
 
   &:hover {
     background: rgba(255, 215, 0, 0.3);

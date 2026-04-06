@@ -27,31 +27,40 @@
   border-radius: 10px;
 }
 
-/* 3D Vote button */
+/* 3D Vote button — solid, prominent with pulse animation */
 .vote-3d-btn {
-  background: rgba(120, 120, 120, 0.75);
+  background: #555;
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid #888;
   border-radius: 6px;
-  padding: 4px 14px;
+  padding: 5px 16px;
   font-size: 13px;
   font-family: 'Cinzel', serif;
   font-weight: bold;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.15s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.7);
+  animation: vote-pulse 2s ease-in-out infinite;
 
   &:hover {
-    background: rgba(90, 90, 90, 0.9);
+    background: #444;
+    border-color: #aaa;
+    transform: scale(1.05);
   }
 
   &.vote-3d-btn-active {
-    background: rgba(40, 40, 40, 0.95);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+    background: #222;
+    border-color: #fff;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 255, 255, 0.15);
     transform: scale(0.95);
+    animation: none;
   }
+}
+
+@keyframes vote-pulse {
+  0%, 100% { box-shadow: 0 3px 10px rgba(0, 0, 0, 0.7); }
+  50% { box-shadow: 0 3px 10px rgba(0, 0, 0, 0.7), 0 0 14px rgba(255, 255, 255, 0.12); }
 }
 
 /* 3D Judgment buttons */
@@ -89,7 +98,7 @@
   &:hover { background: rgba(255, 68, 68, 1); }
 }
 
-/* Phase announcement overlay */
+/* Phase announcement overlay — with subtle background for readability */
 .scene-announcement {
   position: absolute;
   top: 0;
@@ -101,23 +110,31 @@
   justify-content: center;
   z-index: 20;
   pointer-events: none;
+
+  &.scene-announcement-fade {
+    animation: announcement-auto-fade 4s ease-out forwards;
+  }
 }
 
 .announcement-text {
   font-family: 'Cinzel', serif;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  color: #000;
-  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.5);
-  padding: 16px 40px;
+  color: #111;
+  padding: 14px 36px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
   animation: announcement-fade-in 0.5s ease-out;
 
   &.announcement-spared {
-    color: #1a6e1a;
+    color: #0d5e0d;
+    background: rgba(200, 255, 200, 0.5);
   }
 
   &.announcement-execution {
-    color: #991111;
+    color: #8b0000;
+    background: rgba(255, 200, 200, 0.5);
   }
 
   &.announcement-report {
@@ -130,4 +147,41 @@
 @keyframes announcement-fade-in {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes announcement-auto-fade {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Night ambiance messages */
+.night-ambiance {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1s ease;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
+.night-ambiance-text {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: rgba(200, 210, 240, 0.85);
+  padding: 8px 24px;
+  background: rgba(0, 0, 15, 0.5);
+  border-radius: 6px;
+  backdrop-filter: blur(3px);
+  max-width: 80%;
+  text-align: center;
 }

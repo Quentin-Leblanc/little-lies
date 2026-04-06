@@ -1,10 +1,28 @@
-import React, { useRef, useMemo, Suspense, useCallback } from 'react';
+import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, Stars, Text, Billboard, Html } from '@react-three/drei';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import './MainScene.scss';
+
+// Ambient night messages
+const NIGHT_AMBIANCE = [
+  'Un bruit sourd résonne du côté de l\'église...',
+  'La lune brille d\'un éclat inquiétant ce soir.',
+  'Des pas furtifs se font entendre dans la ruelle...',
+  'Une ombre se glisse entre les maisons.',
+  'Le vent souffle et emporte des murmures lointains...',
+  'Les preuves sont les seules traces qui restent d\'une mort...',
+  'Quelqu\'un frappe à une porte... puis le silence.',
+  'Un cri étouffé perce la nuit.',
+  'Les torches vacillent dans l\'obscurité...',
+  'Le village retient son souffle.',
+  'Une lumière s\'éteint dans une maison au loin...',
+  'Les étoiles semblent observer le village cette nuit.',
+  'Un chat noir traverse la place du village...',
+  'Le bois de la potence grince sous le vent...',
+];
 
 // ============================================================
 // Ground
@@ -449,6 +467,9 @@ const MainScene = () => {
         </Suspense>
       </Canvas>
 
+      {/* Night ambiance messages */}
+      {phase === CONSTANTS.PHASE.NIGHT && <NightAmbiance />}
+
       {/* Death report overlay */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && (() => {
         const dayMessages = (chatMessages || []).filter(
@@ -464,6 +485,13 @@ const MainScene = () => {
           </div>
         ) : null;
       })()}
+
+      {/* Discussion start message */}
+      {phase === CONSTANTS.PHASE.DISCUSSION && (
+        <div className="scene-announcement scene-announcement-fade">
+          <div className="announcement-text">La nuit tombe sur le village...</div>
+        </div>
+      )}
 
       {/* Phase announcements overlay */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
@@ -485,6 +513,36 @@ const MainScene = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// Night ambiance — random messages that cycle during night phase
+const NightAmbiance = () => {
+  const [message, setMessage] = useState('');
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let timeout;
+    const showNext = () => {
+      const msg = NIGHT_AMBIANCE[Math.floor(Math.random() * NIGHT_AMBIANCE.length)];
+      setMessage(msg);
+      setVisible(true);
+      // Stay visible for 4s, then fade out
+      timeout = setTimeout(() => {
+        setVisible(false);
+        // Wait 2s before next message
+        timeout = setTimeout(showNext, 2000);
+      }, 4000);
+    };
+    // Start after a short delay
+    timeout = setTimeout(showNext, 1500);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  return (
+    <div className={`night-ambiance ${visible ? 'visible' : ''}`}>
+      <div className="night-ambiance-text">{message}</div>
     </div>
   );
 };
