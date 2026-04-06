@@ -1,0 +1,239 @@
+@import '../../styles/variables';
+@import '../../styles/global';
+
+.invalid-char {
+  background-color: rgba(255, 0, 0, 0.3) !important;
+  border: 1px solid red !important;
+}
+
+.invalid-char-message {
+  position: absolute;
+  bottom: 45px;
+  right: 20px;
+  font-size: 13px;
+  color: #ff8686;
+}
+
+.chat-container {
+  background-color: rgba(15, 15, 22, 0.95);
+  padding: 6px 8px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.chat-night {
+  background-color: rgba(0, 0, 0, 0.85);
+}
+
+.chat-dead-mode {
+  background-color: rgba(30, 30, 40, 0.8);
+  border-color: #555 !important;
+}
+
+.dead-chat-banner {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  padding: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 5px;
+  i { margin-right: 5px; }
+}
+
+.chat-night-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #667;
+  text-align: center;
+
+  i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #445;
+  }
+
+  p {
+    margin: 4px 0;
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+  }
+
+  .chat-night-sub {
+    font-size: 14px;
+    color: #556;
+    font-family: inherit;
+  }
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; // allows flex child to shrink and scroll
+}
+
+.chat-message-wrapper {
+  position: relative;
+  margin-bottom: 1px;
+  padding: 2px 8px;
+  text-align: left;
+  color: white;
+  border-radius: 3px;
+  overflow: hidden;
+
+  &.msg-system {
+    padding: 4px 0;
+    .chat-message-background { opacity: 0; }
+  }
+
+  &.msg-whisper-notice {
+    .chat-message {
+      color: #888;
+      font-size: 13px;
+      font-style: italic;
+    }
+    .chat-message-background { opacity: 0; }
+  }
+
+  &.msg-whisper {
+    background-color: rgba(218, 112, 214, 0.1);
+    border-left: 2px solid #da70d6;
+  }
+
+  &.msg-dead {
+    opacity: 0.6;
+    border-left: 2px solid #555;
+  }
+
+  &.msg-mafia {
+    background-color: rgba(255, 0, 0, 0.08);
+    border-left: 2px solid #cc0000;
+  }
+}
+
+.chat-message-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.08;
+}
+
+.chat-message {
+  position: relative;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.chat-message strong {
+  color: inherit;
+}
+
+.whisper-prefix {
+  color: #da70d6;
+  font-size: 13px;
+  margin-right: 4px;
+  font-weight: bold;
+}
+
+.dead-prefix {
+  color: #666;
+  font-size: 13px;
+  margin-right: 4px;
+}
+
+.mafia-prefix {
+  color: #ff4444;
+  font-size: 13px;
+  margin-right: 4px;
+  font-weight: bold;
+}
+
+.whisper-notice-text {
+  color: #888;
+  font-style: italic;
+}
+
+.chat-day-separator {
+  text-align: left;
+  color: #888;
+  font-size: 11px;
+  padding: 2px 0;
+  font-style: italic;
+}
+
+.chat-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 5px;
+}
+
+.chat-input {
+  flex-grow: 1;
+  margin-right: 5px;
+  background-color: #222;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+
+  &:disabled {
+    background-color: #1a1a1a;
+    color: #666;
+  }
+}
+
+.chat-send-button {
+  background-color: #000000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+
+  &:hover:not(:disabled) {
+    background-color: #45a049;
+  }
+
+  &:disabled {
+    background-color: #333;
+    color: #666;
+    cursor: not-allowed;
+  }
+}
+
+.chat-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+
+  &:hover {
+    background: #666;
+  }
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}

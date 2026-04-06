@@ -1,0 +1,133 @@
+.main-scene-3d {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+.scene-overlay {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+.scene-alive-count {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px 12px;
+  border-radius: 10px;
+}
+
+/* 3D Vote button */
+.vote-3d-btn {
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-family: 'Cinzel', serif;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+
+  &:hover {
+    background: rgba(30, 30, 30, 1);
+    transform: scale(1.1);
+  }
+}
+
+/* 3D Judgment buttons */
+.judgment-3d-btns {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.judge-btn {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: 'Cinzel', serif;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  color: white;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.judge-save {
+  background: rgba(68, 255, 68, 0.8);
+  color: black;
+  &:hover { background: rgba(68, 255, 68, 1); }
+}
+
+.judge-lynch {
+  background: rgba(255, 68, 68, 0.8);
+  &:hover { background: rgba(255, 68, 68, 1); }
+}
+
+/* Phase announcement overlay */
+.scene-announcement {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.announcement-text {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+  padding: 16px 40px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: announcement-fade-in 0.5s ease-out;
+
+  &.announcement-spared {
+    color: #78ff78;
+    border-color: rgba(120, 255, 120, 0.2);
+  }
+
+  &.announcement-execution {
+    color: #ff4444;
+    border-color: rgba(255, 68, 68, 0.2);
+  }
+
+  &.announcement-report {
+    font-size: 20px;
+    text-align: center;
+    line-height: 1.8;
+  }
+}
+
+@keyframes announcement-fade-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}

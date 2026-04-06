@@ -1,0 +1,187 @@
+@import '../../styles/variables';
+@import '../../styles/global';
+
+.rolesSetup {
+  display: flex;
+  flex-direction: column;
+  margin-top: 80px;
+  padding: 0 20px;
+
+  h2 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    text-align: left;
+  }
+}
+
+.playersNumber {
+  font-size: 18px;
+  text-align: center;
+
+  i {
+    margin-right: 8px;
+    color: $blue;
+  }
+
+  span {
+    color: $blue;
+    font-weight: bold;
+  }
+}
+
+.dualBox {
+  display: flex;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  align-items: flex-start;
+  gap: 0;
+
+  .rolesAvailable, .rolesSelected {
+    border: 1px solid #333;
+    padding: 20px 16px;
+    border-radius: 12px;
+    width: 35%;
+    max-width: 400px;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;
+    color: $blue;
+    padding: 0 16px;
+    align-self: center;
+  }
+}
+
+// Role team groups
+.role-team-group {
+  margin-bottom: 12px;
+
+  h3 {
+    font-size: 13px;
+    margin: 0 0 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+}
+
+._buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+// Role pick button (available)
+.role-pick-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-width: 1px;
+  border-style: solid;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+  }
+
+  i { font-size: 11px; }
+}
+
+// Selected roles
+.rolesSelected {
+  min-height: 200px;
+
+  .selected {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+.role-selected-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-width: 2px;
+  border-style: solid;
+  background: rgba(255, 255, 255, 0.05);
+  width: 100%;
+  text-align: left;
+  position: relative;
+
+  .remove-icon {
+    margin-left: auto;
+    color: #ff4444;
+    font-size: 10px;
+    opacity: 0.5;
+  }
+
+  &:hover:not(:disabled) {
+    .remove-icon { opacity: 1; }
+  }
+
+  i:first-child { font-size: 11px; }
+}
+
+// Presets
+.presets-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.presets-label {
+  font-size: 12px;
+  color: #888;
+}
+
+.preset-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: rgba(47, 130, 255, 0.1);
+  border: 1px solid rgba(47, 130, 255, 0.3);
+  color: #6aa3ff;
+  border-radius: 12px;
+
+  &:hover {
+    background: rgba(47, 130, 255, 0.25);
+    color: white;
+  }
+}
+
+.startGame {
+  text-align: center;
+  margin: 20px auto 0;
+
+  button {
+    border: 1px solid #999;
+    background: $blue;
+    font-weight: bold;
+    padding: 12px 30px;
+    font-size: 16px;
+
+    &:hover {
+      background: $darkBlue;
+      border: 1px solid #333;
+    }
+
+    &:disabled {
+      background: #444;
+      color: #888;
+      cursor: not-allowed;
+      border-color: #555;
+    }
+  }
+}

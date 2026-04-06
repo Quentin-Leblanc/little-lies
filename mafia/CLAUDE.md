@@ -1,0 +1,43 @@
+# Mafia Game - Claude Code Configuration
+
+## Permissions
+
+Claude Code is allowed to run the following without asking for confirmation:
+
+### Shell commands
+- All basic bash commands: `ls`, `cat`, `head`, `tail`, `echo`, `mkdir`, `cp`, `mv`, `rm` (files only)
+- `grep`, `rg`, `find`, `awk`, `sed`
+- `node`, `npm`, `npx` (install, build, start, test)
+
+### Git commands
+- `git status`, `git diff`, `git log`, `git branch`
+- `git add`, `git commit`, `git push`
+- `git checkout`, `git merge`
+
+### File operations
+- Read, write, and edit any file in this project
+- Create new files and directories
+
+## Project Overview
+
+Multiplayer Mafia/Werewolf social deduction game inspired by SC2 Mafia.
+
+- **Stack**: React 18, React Three Fiber, PlayroomKit, Framer Motion, SASS
+- **Multiplayer**: PlayroomKit (JoinPlayroom) handles networking/lobby/rooms
+- **3D**: Three.js via R3F for cinematic animations (non-interactive, players don't control characters)
+- **Language**: UI in French
+- **Remote**: https://github.com/Swytsh/mafia.git (branch: test)
+
+## Architecture
+
+- `src/hooks/useGameEngine.js` - Core game state, phases, win conditions
+- `src/hooks/useEvents.js` - Night action resolution, event system
+- `src/components/` - All UI components
+- `src/trad/roles.json` - Role definitions
+- `public/models/` - 3D assets (Character.gltf, map2.glb)
+
+## Conventions
+
+- Commit in French or English, concise messages
+- Push at the end of each completed phase/chapter of work
+- Component structure: `ComponentName/ComponentName.js` + `ComponentName.scss`

@@ -1,0 +1,313 @@
+.custom-lobby-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Lobby Panel ── */
+.lobby-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 340px;
+  display: flex;
+  align-items: stretch;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.lobby-panel-inner {
+  pointer-events: auto;
+  width: 100%;
+  padding: 28px 22px;
+  background: rgba(12, 12, 18, 0.88);
+  backdrop-filter: blur(12px);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+/* ── Title ── */
+.lobby-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #fff;
+  text-align: center;
+}
+
+.lobby-subtitle {
+  margin: -8px 0 4px;
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── Section / Labels ── */
+.lobby-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lobby-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #aaa;
+}
+
+/* ── Inputs ── */
+.lobby-input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f0f0f0;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: rgba(100, 140, 255, 0.5);
+  }
+
+  &::placeholder {
+    color: #666;
+  }
+}
+
+/* ── Room code ── */
+.room-code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.room-code {
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #e0e0e0;
+  flex: 1;
+  user-select: all;
+}
+
+.lobby-btn-icon {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+
+  &:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ── Buttons ── */
+.lobby-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.1s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.lobby-btn-primary {
+  background: #4a7cff;
+  color: #fff;
+
+  &:hover {
+    background: #3a65d4;
+  }
+
+  &:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+  }
+}
+
+.lobby-btn-secondary {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+}
+
+.lobby-btn-ghost {
+  background: none;
+  color: #888;
+  font-size: 13px;
+  padding: 8px;
+
+  &:hover {
+    color: #ccc;
+  }
+}
+
+/* ── Player list ── */
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+
+  &:not(:hover) {
+    scrollbar-color: transparent transparent;
+
+    &::-webkit-scrollbar-thumb {
+      background: transparent;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.player-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: background 0.15s;
+
+  &.is-me {
+    background: rgba(74, 124, 255, 0.1);
+    border: 1px solid rgba(74, 124, 255, 0.15);
+  }
+}
+
+.player-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.player-list-name {
+  font-size: 14px;
+  color: #ddd;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+
+  &.host {
+    background: rgba(255, 180, 50, 0.2);
+    color: #ffb432;
+  }
+
+  &.me {
+    background: rgba(74, 124, 255, 0.2);
+    color: #7aa2ff;
+  }
+}
+
+/* ── Instructions ── */
+.lobby-instructions {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  padding: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+  i {
+    margin-right: 4px;
+  }
+}
+
+/* ── Actions / Waiting ── */
+.lobby-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.lobby-waiting {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  font-style: italic;
+  margin: 0;
+
+  i {
+    margin-right: 6px;
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .lobby-panel {
+    width: 100%;
+    height: auto;
+    max-height: 50vh;
+    top: auto;
+    bottom: 0;
+    right: 0;
+  }
+
+  .lobby-panel-inner {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px 16px 0 0;
+  }
+}

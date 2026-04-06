@@ -1,0 +1,451 @@
+{
+  "attackLevels": {
+    "none": 0,
+    "basic": 1,
+    "powerful": 2,
+    "unstoppable": 3
+  },
+  "defenseLevels": {
+    "none": 0,
+    "basic": 1,
+    "powerful": 2,
+    "invincible": 3
+  },
+  "roles": [
+    {
+      "label": "Villageois",
+      "key": "villageois",
+      "team": "town",
+      "category": "town_government",
+      "description": "Un simple villageois sans pouvoir spécial.",
+      "couleur": "#78ff78",
+      "icon": "fa-user",
+      "actions": [],
+      "objectif": "Identifie et élimine les membres de la mafia et les menaces neutres.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Sheriff",
+      "key": "sheriff",
+      "team": "town",
+      "category": "town_investigative",
+      "description": "Chaque nuit, investigue un joueur pour savoir s'il est suspect ou non.",
+      "couleur": "#ffff00",
+      "icon": "fa-star",
+      "actions": [
+        {
+          "type": "INVESTIGATE",
+          "label": "Interroger",
+          "description": "Investigue un joueur pour découvrir s'il est suspect",
+          "require": ["isNight"],
+          "targets": "notMe",
+          "priority": 6
+        }
+      ],
+      "objectif": "Découvre les membres de la mafia et aide le village à les éliminer.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Docteur",
+      "key": "docteur",
+      "team": "town",
+      "category": "town_protective",
+      "description": "Chaque nuit, soigne un joueur pour le protéger d'une attaque.",
+      "couleur": "#00bfff",
+      "icon": "fa-medkit",
+      "actions": [
+        {
+          "type": "PROTECT",
+          "label": "Soigner",
+          "description": "Protège un joueur d'une attaque cette nuit",
+          "require": ["isNight"],
+          "targets": "notMe",
+          "priority": 2
+        }
+      ],
+      "objectif": "Protège les villageois en empêchant leur élimination.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Lookout",
+      "key": "lookout",
+      "team": "town",
+      "category": "town_investigative",
+      "description": "Chaque nuit, surveille un joueur pour voir qui lui rend visite.",
+      "couleur": "#7fff00",
+      "icon": "fa-eye",
+      "actions": [
+        {
+          "type": "LOOKOUT",
+          "label": "Surveiller",
+          "description": "Observe un joueur pour voir qui le visite cette nuit",
+          "require": ["isNight"],
+          "targets": "notMe",
+          "priority": 7
+        }
+      ],
+      "objectif": "Identifie les visiteurs nocturnes pour aider le village.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Vigilante",
+      "key": "vigilante",
+      "team": "town",
+      "category": "town_killing",
+      "description": "Peut tirer sur un joueur la nuit. Se suicide de culpabilité s'il tue un membre du village.",
+      "couleur": "#c8e600",
+      "icon": "fa-crosshairs",
+      "actions": [
+        {
+          "type": "VIGILANTE_KILL",
+          "label": "Tirer",
+          "description": "Tire sur un joueur cette nuit (attention aux innocents !)",
+          "require": ["isNight"],
+          "targets": "notMe",
+          "priority": 4
+        }
+      ],
+      "objectif": "Élimine les menaces du village par la force.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 1,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Maire",
+      "key": "maire",
+      "team": "town",
+      "category": "town_government",
+      "description": "Peut se révéler pour obtenir 3 votes, mais ne peut plus être soigné après.",
+      "couleur": "#ffd700",
+      "icon": "fa-landmark",
+      "actions": [
+        {
+          "type": "REVEAL",
+          "label": "Se révéler",
+          "description": "Révèle votre rôle de Maire (3 votes, mais plus de soins possibles)",
+          "require": ["isDay"],
+          "targets": "self",
+          "oneTimeUse": true
+        }
+      ],
+      "objectif": "Utilise son influence politique pour guider le village.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Godfather",
+      "key": "godfather",
+      "team": "mafia",
+      "category": "mafia_killing",
+      "description": "Le chef de la mafia. Ordonne les exécutions et apparaît non-suspect au Sheriff.",
+      "couleur": "#ff0000",
+      "icon": "fa-user-secret",
+      "actions": [
+        {
+          "type": "KILL",
+          "label": "Ordonner le meurtre",
+          "description": "Ordonne l'élimination d'un joueur cette nuit",
+          "require": ["isNight"],
+          "targets": "notMyTeam",
+          "priority": 4
+        }
+      ],
+      "objectif": "Élimine tous ceux qui s'opposent à la mafia.",
+      "unique": true,
+      "nightImmune": true,
+      "detectResult": "non-suspect",
+      "attackLevel": 1,
+      "defenseLevel": 1
+    },
+    {
+      "label": "Mafioso",
+      "key": "mafioso",
+      "team": "mafia",
+      "category": "mafia_killing",
+      "description": "L'exécutant de la mafia. Exécute les ordres du Godfather.",
+      "couleur": "#cc0000",
+      "icon": "fa-gun",
+      "actions": [
+        {
+          "type": "KILL",
+          "label": "Tuer",
+          "description": "Tue un joueur cette nuit sur ordre de la mafia",
+          "require": ["isNight"],
+          "targets": "notMyTeam",
+          "priority": 4
+        }
+      ],
+      "objectif": "Élimine tous ceux qui s'opposent à la mafia.",
+      "nightImmune": false,
+      "detectResult": "suspect",
+      "attackLevel": 1,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Framer",
+      "key": "framer",
+      "team": "mafia",
+      "category": "mafia_deception",
+      "description": "Peut piéger un joueur pour le faire apparaître suspect au Sheriff.",
+      "couleur": "#ff4444",
+      "icon": "fa-mask",
+      "actions": [
+        {
+          "type": "FRAME",
+          "label": "Piéger",
+          "description": "Fait apparaître un joueur comme suspect au Sheriff",
+          "require": ["isNight"],
+          "targets": "notMyTeam",
+          "priority": 3
+        }
+      ],
+      "objectif": "Sème la confusion pour protéger la mafia.",
+      "nightImmune": false,
+      "detectResult": "suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Blackmailer",
+      "key": "blackmailer",
+      "team": "mafia",
+      "category": "mafia_support",
+      "description": "Peut faire chanter un joueur pour l'empêcher de parler le jour suivant.",
+      "couleur": "#ff6666",
+      "icon": "fa-comment-slash",
+      "actions": [
+        {
+          "type": "BLACKMAIL",
+          "label": "Faire chanter",
+          "description": "Empêche un joueur de parler pendant le jour suivant",
+          "require": ["isNight"],
+          "targets": "notMyTeam",
+          "priority": 3
+        }
+      ],
+      "objectif": "Réduit au silence les menaces pour la mafia.",
+      "nightImmune": false,
+      "detectResult": "suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Consigliere",
+      "key": "consigliere",
+      "team": "mafia",
+      "category": "mafia_support",
+      "description": "L'informateur de la mafia. Peut découvrir le rôle exact d'un joueur.",
+      "couleur": "#ff8888",
+      "icon": "fa-binoculars",
+      "actions": [
+        {
+          "type": "INVESTIGATE_ROLE",
+          "label": "Enquêter",
+          "description": "Découvre le rôle exact d'un joueur",
+          "require": ["isNight"],
+          "targets": "notMyTeam",
+          "priority": 6
+        }
+      ],
+      "objectif": "Fournit des informations précieuses à la mafia.",
+      "nightImmune": false,
+      "detectResult": "suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Serial Killer",
+      "key": "serial_killer",
+      "team": "neutral",
+      "category": "neutral_killing",
+      "description": "Un tueur solitaire qui élimine un joueur chaque nuit. Immunité nocturne.",
+      "couleur": "#9370db",
+      "icon": "fa-skull",
+      "actions": [
+        {
+          "type": "KILL",
+          "label": "Poignarder",
+          "description": "Tue un joueur cette nuit",
+          "require": ["isNight"],
+          "targets": "notMe",
+          "priority": 4
+        }
+      ],
+      "objectif": "Être le dernier survivant.",
+      "nightImmune": true,
+      "detectResult": "suspect",
+      "attackLevel": 1,
+      "defenseLevel": 1,
+      "winCondition": "lastStanding"
+    },
+    {
+      "label": "Jester",
+      "key": "jester",
+      "team": "neutral",
+      "category": "neutral_benign",
+      "description": "Un bouffon qui veut se faire lyncher par le village. Aucun pouvoir.",
+      "couleur": "#ff69b4",
+      "icon": "fa-face-grin-tears",
+      "actions": [],
+      "objectif": "Se faire lyncher par le village.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0,
+      "winCondition": "getLynched"
+    },
+    {
+      "label": "Survivor",
+      "key": "survivor",
+      "team": "neutral",
+      "category": "neutral_benign",
+      "description": "Un survivant qui veut juste rester en vie. Possède un gilet pare-balles limité.",
+      "couleur": "#daa520",
+      "icon": "fa-shield-halved",
+      "actions": [
+        {
+          "type": "VEST",
+          "label": "Gilet",
+          "description": "Enfile un gilet pare-balles pour cette nuit (limité)",
+          "require": ["isNight"],
+          "targets": "self",
+          "maxUses": 3,
+          "priority": 1
+        }
+      ],
+      "objectif": "Survivre jusqu'à la fin de la partie.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0,
+      "winCondition": "survive"
+    },
+    {
+      "label": "Executioner",
+      "key": "executioner",
+      "team": "neutral",
+      "category": "neutral_evil",
+      "description": "A une cible secrète du village. Doit la faire lyncher.",
+      "couleur": "#808080",
+      "icon": "fa-bullseye",
+      "actions": [],
+      "objectif": "Faire lyncher votre cible par le village.",
+      "nightImmune": true,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 1,
+      "winCondition": "getTargetLynched"
+    },
+    {
+      "label": "Escort",
+      "key": "escort",
+      "team": "town",
+      "category": "town_support",
+      "description": "Chaque nuit, bloque un joueur pour l'empêcher d'utiliser son pouvoir.",
+      "couleur": "#ff99cc",
+      "icon": "fa-ban",
+      "actions": [
+        {
+          "type": "ROLEBLOCK",
+          "label": "Bloquer",
+          "description": "Empêche un joueur d'agir cette nuit",
+          "require": ["isNight"],
+          "targets": "notMe",
+          "priority": 1
+        }
+      ],
+      "objectif": "Bloque les pouvoirs ennemis pour protéger le village.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Bodyguard",
+      "key": "bodyguard",
+      "team": "town",
+      "category": "town_protective",
+      "description": "Protège un joueur la nuit. Si la cible est attaquée, le Bodyguard tue l'attaquant mais meurt aussi.",
+      "couleur": "#4682b4",
+      "icon": "fa-shield",
+      "actions": [
+        {
+          "type": "BODYGUARD",
+          "label": "Protéger",
+          "description": "Se sacrifie pour protéger un joueur et tuer son attaquant",
+          "require": ["isNight"],
+          "targets": "notMe",
+          "priority": 2
+        }
+      ],
+      "objectif": "Protège le village au prix de sa vie.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 2,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Spy",
+      "key": "spy",
+      "team": "town",
+      "category": "town_investigative",
+      "description": "Peut lire le chat mafia la nuit et voir qui la mafia visite.",
+      "couleur": "#20b2aa",
+      "icon": "fa-user-ninja",
+      "actions": [
+        {
+          "type": "SPY",
+          "label": "Espionner",
+          "description": "Écoute le chat mafia et voit qui ils visitent",
+          "require": ["isNight"],
+          "targets": "self",
+          "priority": 7
+        }
+      ],
+      "objectif": "Infiltre la mafia pour obtenir des informations cruciales.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 0,
+      "defenseLevel": 0
+    },
+    {
+      "label": "Jailor",
+      "key": "jailor",
+      "team": "town",
+      "category": "town_killing",
+      "description": "Choisit un joueur pendant le jour pour l'emprisonner la nuit. Peut l'exécuter (3 utilisations).",
+      "couleur": "#b8860b",
+      "icon": "fa-lock",
+      "actions": [
+        {
+          "type": "JAIL",
+          "label": "Emprisonner",
+          "description": "Emprisonne un joueur cette nuit (choisi pendant le jour)",
+          "require": ["isDay"],
+          "targets": "notMe",
+          "priority": 0
+        }
+      ],
+      "objectif": "Interroge et élimine les suspects de manière contrôlée.",
+      "nightImmune": false,
+      "detectResult": "non-suspect",
+      "attackLevel": 2,
+      "defenseLevel": 0
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+.roles-list-box {
+  margin-bottom: 10px;
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    color: #ddd;
+    i { margin-right: 6px; }
+  }
+}
+
+.roles-empty {
+  color: #666;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.roles-group {
+  margin-bottom: 8px;
+}
+
+.roles-group-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  padding: 2px 0 4px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 2px;
+}
+
+.roles-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .role-count {
+    font-size: 10px;
+    color: #888;
+    margin-left: 2px;
+  }
+}
+
+.role-detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  backdrop-filter: blur(3px);
+}
+
+.role-detail-dialog {
+  background: rgba(15, 15, 25, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 420px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.role-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.role-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  i { font-size: 24px; }
+  h3 {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+  }
+}
+
+.role-detail-team {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.role-detail-desc {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+
+.role-detail-obj {
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+  margin: 8px 0;
+  padding: 8px;
+  border-left: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.role-detail-abilities {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #bbb;
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 0;
+  }
+
+  li {
+    padding: 4px 0;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+}
