@@ -141,7 +141,7 @@ const Village = ({ isDay, isTrialPhase }) => (
 // ============================================================
 // Player Figure (simple capsule with name)
 // ============================================================
-const PlayerFigure = ({ player, position, color, isAccused, showVote, onVote, showJudgment, onJudge }) => {
+const PlayerFigure = ({ player, position, color, isAccused, showVote, isVoteTarget, onVote, showJudgment, onJudge }) => {
   const meshRef = useRef();
 
   useFrame((state) => {
@@ -175,8 +175,7 @@ const PlayerFigure = ({ player, position, color, isAccused, showVote, onVote, sh
       {showVote && (
         <Html position={[0, 0.7, 0]} center>
           <button
-            className="vote-3d-btn"
-            style={{ background: color || 'rgba(47,130,255,0.85)' }}
+            className={`vote-3d-btn ${isVoteTarget ? 'vote-3d-btn-active' : ''}`}
             onClick={() => onVote(player.id)}
           >Vote</button>
         </Html>
@@ -317,19 +316,36 @@ const MainScene = () => {
   const isVotingPhase = phase === CONSTANTS.PHASE.VOTING;
   const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
 
-  const hasVoted = trial.suspects && Object.keys(trial.suspects).some((sid) =>
+  const myVoteTarget = trial.suspects && Object.keys(trial.suspects).find((sid) =>
     trial.suspects[sid]?.suspectedBy?.some((vid) => vid === me?.id)
   );
   const hasJudged = trial.votes?.[me?.id];
 
   const handleVote = useCallback((targetId) => {
-    if (!me?.isAlive || !isVotingPhase || hasVoted) return;
+    if (!me?.isAlive || !isVotingPhase) return;
+    if (myVoteTarget === targetId) return;
+
     const voteWeight = me.voteWeight || 1;
-    const existing = trial?.suspects[targetId]?.suspectedBy || [];
-    const newVotes = [...existing];
-    for (let i = 0; i < voteWeight; i++) newVotes.push(me.id);
-    setTrial({ ...trial, suspects: { ...trial.suspects, [targetId]: { id: targetId, suspectedBy: newVotes } } });
-  }, [me, isVotingPhase, hasVoted, trial, setTrial]);
+
+    // Remove my votes from all targets first
+    const newSuspects = {};
+    Object.keys(trial.suspects || {}).forEach((sid) => {
+      const filtered = (trial.suspects[sid]?.suspectedBy || []).filter((vid) => vid !== me.id);
+      if (filtered.length > 0 || sid === targetId) {
+        newSuspects[sid] = { id: sid, suspectedBy: filtered };
+      }
+    });
+
+    // Add my votes to the new target
+    if (!newSuspects[targetId]) {
+      newSuspects[targetId] = { id: targetId, suspectedBy: [] };
+    }
+    for (let i = 0; i < voteWeight; i++) {
+      newSuspects[targetId].suspectedBy.push(me.id);
+    }
+
+    setTrial({ ...trial, suspects: newSuspects });
+  }, [me, isVotingPhase, myVoteTarget, trial, setTrial]);
 
   const handleJudge = useCallback((vote) => {
     if (!me?.isAlive || !isJudgmentPhase || hasJudged || me.id === game.accusedId) return;
@@ -403,7 +419,8 @@ const MainScene = () => {
           {alivePlayers.map((player) => {
             const isMe = player.id === me?.id;
             const isAccused = player.id === game.accusedId;
-            const showVoteBtn = isVotingPhase && me?.isAlive && !isMe && !hasVoted;
+            const showVoteBtn = isVotingPhase && me?.isAlive && !isMe;
+            const isVoteTarget = myVoteTarget === player.id;
             const showJudgmentBtn = isJudgmentPhase && isAccused && me?.isAlive && me.id !== game.accusedId && !hasJudged;
             return (
               <PlayerFigure
@@ -413,6 +430,7 @@ const MainScene = () => {
                 color={player.character?.couleur || '#ffffff'}
                 isAccused={isAccused}
                 showVote={showVoteBtn}
+                isVoteTarget={isVoteTarget}
                 onVote={handleVote}
                 showJudgment={showJudgmentBtn}
                 onJudge={handleJudge}

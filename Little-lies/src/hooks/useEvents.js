@@ -49,6 +49,26 @@ export const EventsProvider = ({ children }) => {
       .filter((event) => event.dayCount === game.dayCount)
       .some((event) => event.content.by === me().id && event.type === actionType);
 
+  // Replace a night action (remove old event of same type by same player, add new one)
+  const replaceAction = (newEvent) => {
+    const myId = me().id;
+    const filtered = events.filter(
+      (e) => !(e.dayCount === game.dayCount && e.content?.by === myId && e.type === newEvent.type)
+    );
+    setEvents([
+      ...filtered,
+      { dayCount: game.dayCount, createdAt: Date.now(), ...newEvent },
+    ]);
+  };
+
+  // Get my current target for a given action type tonight
+  const getMyActionTarget = (actionType) => {
+    const event = events.find(
+      (e) => e.dayCount === game.dayCount && e.content?.by === me()?.id && e.type === actionType
+    );
+    return event?.content?.target || null;
+  };
+
   const getMyNotifications = () =>
     notifications.filter(
       (n) => n.playerId === me().id && n.dayCount === game.dayCount
@@ -61,7 +81,7 @@ export const EventsProvider = ({ children }) => {
     ]);
   };
 
-  const eventsState = { add, get, hasDoneThisActionTonight, getMyNotifications, addNotification };
+  const eventsState = { add, get, hasDoneThisActionTonight, replaceAction, getMyActionTarget, getMyNotifications, addNotification };
 
   const killPlayer = (playerIdToKill) =>
     setPlayers(
