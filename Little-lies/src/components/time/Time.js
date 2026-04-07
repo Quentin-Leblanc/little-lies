@@ -3,12 +3,16 @@ import { useGameEngine } from '../../hooks/useGameEngine';
 import './Time.scss';
 import { useEffect, useState } from 'react';
 
+// Phases that are purely informational — no countdown needed
+const INFO_PHASES = ['DEATH_REPORT', 'LAST_WORDS', 'EXECUTION', 'NO_LYNCH', 'SPARED'];
+
 const Time = () => {
   const {
     game: { isDay, timer, dayCount, phase },
     CONSTANTS,
   } = useGameEngine();
 
+  const isInfoPhase = INFO_PHASES.includes(phase);
   const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
   const phaseLabel = CONSTANTS.PHASE_LABELS[phase] || phase;
 
@@ -48,23 +52,25 @@ const Time = () => {
           <i className={`fas ${phaseIcon}`}></i>
           {headerText}
         </div>
-        <div className="timer">
-          <motion.div
-            key={localTimer}
-            initial={{ opacity: 0.8 }}
-            animate={{ opacity: 1, color: barColor }}
-            exit={{ opacity: 0.8 }}
-            transition={{ duration: 0.5 }}
-          >
-            {timeRemaining}s
-          </motion.div>
-        </div>
+        {!isInfoPhase && (
+          <div className="timer">
+            <motion.div
+              key={localTimer}
+              initial={{ opacity: 0.8 }}
+              animate={{ opacity: 1, color: barColor }}
+              exit={{ opacity: 0.8 }}
+              transition={{ duration: 0.5 }}
+            >
+              {timeRemaining}s
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-/** Progress bar — rendered inside the 3D scene container, uses local interpolation for smoothness */
+/** Progress bar — rendered inside the 3D scene container, hidden during info phases */
 export const TimeBar = () => {
   const {
     game: { timer, phase },
@@ -84,6 +90,9 @@ export const TimeBar = () => {
   useEffect(() => {
     setLocalTimer(timer);
   }, [timer]);
+
+  // Hide bar during information-only phases (after hooks)
+  if (INFO_PHASES.includes(phase)) return null;
 
   const progressPercentage = (localTimer / totalDuration) * 100;
 
