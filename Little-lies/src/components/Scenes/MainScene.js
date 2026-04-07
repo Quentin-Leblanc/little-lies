@@ -160,6 +160,20 @@ const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 
 // ============================================================
 // Village Center — Cobblestone circle + Gallows (Meshy AI)
 // ============================================================
+// Dedicated gallows component — bypasses auto-grounding with known dimensions
+const GallowsModel = () => {
+  const { scene } = useGLTF('/models/gallows.glb');
+  const clone = useMemo(() => {
+    const c = scene.clone(true);
+    c.traverse((child) => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
+    return c;
+  }, [scene]);
+
+  // Known: minY = -0.616, scale 5 → Y offset = 0.616 * 5 = 3.08
+  const s = 5;
+  return <primitive object={clone} position={[0, 0.616 * s, 0]} scale={[s, s, s]} />;
+};
+
 const VillageCenter = () => (
   <group>
     {/* Cobblestone circle path — embedded flush with ground */}
@@ -169,12 +183,8 @@ const VillageCenter = () => (
       scale={5}
       embedY
     />
-    {/* Gallows — auto-grounded on Y=0, bigger for visibility */}
-    <MeshyModel
-      path="/models/gallows.glb"
-      position={[0, 0, 0]}
-      scale={5}
-    />
+    {/* Gallows — center piece, hardcoded Y */}
+    <GallowsModel />
   </group>
 );
 
