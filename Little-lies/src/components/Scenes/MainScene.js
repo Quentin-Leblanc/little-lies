@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sky, Stars, Text, Billboard, Html } from '@react-three/drei';
+import { Sky, Stars, Text, Billboard, Html, useGLTF } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
@@ -170,153 +170,52 @@ const Torch = ({ position }) => {
 };
 
 // ============================================================
-// Village Well (center piece)
+// Meshy AI GLB Model Loader (generic, clones for multi-instance)
 // ============================================================
-const Well = () => (
-  <group>
-    {/* Stone base */}
-    <mesh position={[0, 0.35, 0]} castShadow>
-      <cylinderGeometry args={[0.75, 0.85, 0.7, 12]} />
-      <meshStandardMaterial color="#888" roughness={0.8} />
-    </mesh>
-    {/* Inner hole */}
-    <mesh position={[0, 0.36, 0]}>
-      <cylinderGeometry args={[0.55, 0.55, 0.72, 12]} />
-      <meshStandardMaterial color="#111" />
-    </mesh>
-    {/* Support posts */}
-    <mesh position={[-0.55, 1.1, 0]} castShadow>
-      <boxGeometry args={[0.08, 1.5, 0.08]} />
-      <meshStandardMaterial color="#5a3a1a" />
-    </mesh>
-    <mesh position={[0.55, 1.1, 0]} castShadow>
-      <boxGeometry args={[0.08, 1.5, 0.08]} />
-      <meshStandardMaterial color="#5a3a1a" />
-    </mesh>
-    {/* Roof beam */}
-    <mesh position={[0, 1.85, 0]} castShadow>
-      <boxGeometry args={[1.3, 0.08, 0.5]} />
-      <meshStandardMaterial color="#5a3a1a" />
-    </mesh>
-    {/* Small roof */}
-    <mesh position={[0, 2.1, 0]} castShadow>
-      <coneGeometry args={[0.8, 0.5, 4]} />
-      <meshStandardMaterial color="#8b4513" />
-    </mesh>
-    {/* Rope */}
-    <mesh position={[0, 1.4, 0]}>
-      <cylinderGeometry args={[0.012, 0.012, 0.9, 4]} />
-      <meshStandardMaterial color="#c8b070" />
-    </mesh>
-    {/* Bucket */}
-    <mesh position={[0, 0.95, 0]} castShadow>
-      <cylinderGeometry args={[0.08, 0.1, 0.15, 6]} />
-      <meshStandardMaterial color="#6b5030" />
-    </mesh>
-  </group>
-);
+const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1 }) => {
+  const { scene } = useGLTF(path);
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone(true);
+    clone.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+    return clone;
+  }, [scene]);
 
-// ============================================================
-// Town Square
-// ============================================================
-const TownSquare = ({ isDay }) => (
-  <group>
-    {/* Stone circle */}
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
-      <circleGeometry args={[6, 32]} />
-      <meshStandardMaterial color={isDay ? '#7a7a7a' : '#444'} />
-    </mesh>
-    {/* Outer decorative ring */}
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-      <ringGeometry args={[5.5, 6, 32]} />
-      <meshStandardMaterial color={isDay ? '#666' : '#333'} />
-    </mesh>
-    {/* Inner ring */}
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-      <ringGeometry args={[1.5, 2, 16]} />
-      <meshStandardMaterial color={isDay ? '#666' : '#333'} />
-    </mesh>
-    {/* Well */}
-    <Well />
-    {/* Benches */}
-    {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle, i) => (
-      <group key={`bench-${i}`} position={[Math.cos(angle) * 4.5, 0, Math.sin(angle) * 4.5]} rotation={[0, -angle, 0]}>
-        <mesh position={[0, 0.25, 0]} castShadow>
-          <boxGeometry args={[1, 0.06, 0.3]} />
-          <meshStandardMaterial color="#5a3a1a" />
-        </mesh>
-        <mesh position={[-0.4, 0.12, 0]} castShadow>
-          <boxGeometry args={[0.06, 0.25, 0.25]} />
-          <meshStandardMaterial color="#4a2a0a" />
-        </mesh>
-        <mesh position={[0.4, 0.12, 0]} castShadow>
-          <boxGeometry args={[0.06, 0.25, 0.25]} />
-          <meshStandardMaterial color="#4a2a0a" />
-        </mesh>
-      </group>
-    ))}
-  </group>
-);
-
-// ============================================================
-// Improved Gallows with rope and noose
-// ============================================================
-const Gallows = ({ visible }) => {
-  if (!visible) return null;
   return (
-    <group position={[0, 0, -2]}>
-      {/* Platform */}
-      <mesh position={[0, 0.15, 0]} castShadow>
-        <boxGeometry args={[3, 0.3, 2.5]} />
-        <meshStandardMaterial color="#5a3a1a" />
-      </mesh>
-      {/* Platform edge */}
-      <mesh position={[0, 0.31, 0]} castShadow>
-        <boxGeometry args={[3.1, 0.02, 2.6]} />
-        <meshStandardMaterial color="#4a2a0a" />
-      </mesh>
-      {/* Steps */}
-      <mesh position={[-1.3, 0.05, 1]} castShadow>
-        <boxGeometry args={[0.7, 0.1, 0.5]} />
-        <meshStandardMaterial color="#4a2a0a" />
-      </mesh>
-      <mesh position={[-1.3, 0.15, 0.6]} castShadow>
-        <boxGeometry args={[0.7, 0.1, 0.5]} />
-        <meshStandardMaterial color="#4a2a0a" />
-      </mesh>
-      {/* Main pillar */}
-      <mesh position={[-1, 1.9, 0]} castShadow>
-        <boxGeometry args={[0.18, 3.5, 0.18]} />
-        <meshStandardMaterial color="#4a2a0a" />
-      </mesh>
-      {/* Cross beam */}
-      <mesh position={[0.1, 3.5, 0]} castShadow>
-        <boxGeometry args={[2.4, 0.14, 0.14]} />
-        <meshStandardMaterial color="#4a2a0a" />
-      </mesh>
-      {/* Diagonal brace */}
-      <mesh position={[-0.45, 2.9, 0]} castShadow rotation={[0, 0, -0.55]}>
-        <boxGeometry args={[0.08, 1.4, 0.08]} />
-        <meshStandardMaterial color="#3d200a" />
-      </mesh>
-      {/* Rope */}
-      <mesh position={[0.6, 2.7, 0]}>
-        <cylinderGeometry args={[0.018, 0.018, 1.6, 4]} />
-        <meshStandardMaterial color="#c8b070" />
-      </mesh>
-      {/* Noose */}
-      <mesh position={[0.6, 1.85, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.1, 0.018, 6, 12]} />
-        <meshStandardMaterial color="#c8b070" />
-      </mesh>
-      {/* Trapdoor marking */}
-      <mesh position={[0.4, 0.31, 0]}>
-        <boxGeometry args={[0.9, 0.01, 0.9]} />
-        <meshStandardMaterial color="#3a200a" />
-      </mesh>
-    </group>
+    <primitive
+      object={clonedScene}
+      position={position}
+      rotation={rotation}
+      scale={typeof scale === 'number' ? [scale, scale, scale] : scale}
+    />
   );
 };
+
+// ============================================================
+// Village Center — Cobblestone circle + Gallows (Meshy AI)
+// ============================================================
+const VillageCenter = () => (
+  <group>
+    {/* Cobblestone circle path */}
+    <MeshyModel
+      path="/models/cobblestone_circle.glb"
+      position={[0, 0, 0]}
+      scale={1}
+    />
+    {/* Gallows — permanent center piece (replaces the old well) */}
+    <MeshyModel
+      path="/models/gallows.glb"
+      position={[0, 0, 0]}
+      scale={1}
+    />
+  </group>
+);
+
+// (Old procedural Gallows removed — now using Meshy AI model in VillageCenter)
 
 // ============================================================
 // Low-poly Tree
@@ -368,15 +267,20 @@ const Barrel = ({ position, rotation = [0, 0, 0] }) => (
 // ============================================================
 // Village Layout
 // ============================================================
+// Remaining procedural buildings (slots not replaced by Meshy models)
 const BUILDINGS = [
-  { pos: [-8, 0, -6], size: [2.5, 3, 2.5], color: '#b8a080', roof: '#8b4513', chimney: true },
   { pos: [-10, 0, 2], size: [2, 2.5, 2], color: '#c8b898', roof: '#a0522d', chimney: false },
   { pos: [-6, 0, 7], size: [2.2, 2.8, 2.2], color: '#d4c4a8', roof: '#6b3a1a', chimney: true },
-  { pos: [8, 0, -5], size: [3, 3.5, 2.5], color: '#a89070', roof: '#7a4422', chimney: true },
   { pos: [9, 0, 3], size: [2, 2.2, 2], color: '#baa888', roof: '#8b5a2b', chimney: false },
   { pos: [6, 0, 8], size: [2.5, 2.5, 2], color: '#c0a080', roof: '#6d3d1d', chimney: false },
-  { pos: [0, 0, -10], size: [3.5, 4, 3], color: '#a08060', roof: '#5c2e0e', chimney: true },
   { pos: [-4, 0, -9], size: [2, 2.2, 2], color: '#bbb098', roof: '#8a4a2a', chimney: false },
+];
+
+// Meshy AI building positions & config
+const MESHY_BUILDINGS = [
+  { path: '/models/forge.glb',   position: [-8, 0, -6],  rotation: [0, Math.PI / 4, 0], scale: 1 },
+  { path: '/models/tavern.glb',  position: [8, 0, -5],   rotation: [0, -Math.PI / 4, 0], scale: 1 },
+  { path: '/models/chapel.glb',  position: [0, 0, -10],  rotation: [0, Math.PI, 0], scale: 1 },
 ];
 
 const TORCH_POS = [
@@ -397,20 +301,33 @@ const BARREL_POSITIONS = [
   [8.5, 0, -2.5], [-9, 0, -3],
 ];
 
-const Village = ({ isDay, isTrialPhase }) => (
+const Village = ({ isDay }) => (
   <group>
-    <TownSquare isDay={isDay} />
-    {BUILDINGS.map((b, i) => (
-      <Building key={i} position={b.pos} size={b.size} color={b.color} roofColor={b.roof} hasChimney={b.chimney} isDay={isDay} />
+    {/* Center piece — cobblestone path + gallows (Meshy AI) */}
+    <VillageCenter />
+
+    {/* Meshy AI buildings — forge, tavern, chapel */}
+    {MESHY_BUILDINGS.map((b, i) => (
+      <MeshyModel key={`meshy-${i}`} path={b.path} position={b.position} rotation={b.rotation} scale={b.scale} />
     ))}
+
+    {/* Remaining procedural buildings */}
+    {BUILDINGS.map((b, i) => (
+      <Building key={`bld-${i}`} position={b.pos} size={b.size} color={b.color} roofColor={b.roof} hasChimney={b.chimney} isDay={isDay} />
+    ))}
+
+    {/* Torches (night only) */}
     {!isDay && TORCH_POS.map((pos, i) => <Torch key={`torch-${i}`} position={pos} />)}
+
+    {/* Trees */}
     {TREE_POSITIONS.map((pos, i) => (
       <LowPolyTree key={`tree-${i}`} position={pos} scale={0.7 + (i % 4) * 0.2} variant={i} />
     ))}
+
+    {/* Barrels */}
     {BARREL_POSITIONS.map((pos, i) => (
       <Barrel key={`barrel-${i}`} position={pos} rotation={[0, i * 1.1, 0]} />
     ))}
-    <Gallows visible={isTrialPhase} />
   </group>
 );
 
@@ -910,7 +827,7 @@ const MainScene = () => {
           )}
 
           <GroundPlane isDay={game.isDay} />
-          <Village isDay={game.isDay} isTrialPhase={isTrialPhase} />
+          <Village isDay={game.isDay} />
 
           {/* Alive Players — hidden after night walk finishes */}
           {!nightPlayersHidden && alivePlayers.map((player) => {
@@ -1056,3 +973,10 @@ const NightAmbiance = () => {
 };
 
 export default MainScene;
+
+// Preload Meshy AI models for faster loading
+useGLTF.preload('/models/cobblestone_circle.glb');
+useGLTF.preload('/models/gallows.glb');
+useGLTF.preload('/models/forge.glb');
+useGLTF.preload('/models/tavern.glb');
+useGLTF.preload('/models/chapel.glb');
