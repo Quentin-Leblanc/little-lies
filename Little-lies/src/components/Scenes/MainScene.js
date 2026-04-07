@@ -232,17 +232,35 @@ const Barrel = ({ position, rotation = [0, 0, 0] }) => (
 // ============================================================
 // Meshy AI building positions & config
 const MESHY_BUILDINGS = [
-  { path: '/models/forge.glb',   position: [-8, 0, -6],  rotation: [0, Math.PI / 4, 0], scale: 3 },
-  { path: '/models/tavern.glb',  position: [8, 0, -5],   rotation: [0, -Math.PI / 4, 0], scale: 3 },
-  { path: '/models/chapel.glb',  position: [0, 0, -10],  rotation: [0, 0, 0], scale: 3.5 },
+  // Unique buildings
+  { path: '/models/forge.glb',   position: [-8, 0, -6],   rotation: [0, Math.PI / 4, 0],  scale: 3 },
+  { path: '/models/tavern.glb',  position: [8, 0, -5],    rotation: [0, -Math.PI / 4, 0], scale: 3 },
+  { path: '/models/chapel.glb',  position: [0, 0, -10],   rotation: [0, 0, 0],            scale: 3.5 },
+  // Cottages spread around the village
+  { path: '/models/cottage.glb', position: [-10, 0, 2],   rotation: [0, Math.PI / 3, 0],  scale: 2.8 },
+  { path: '/models/cottage.glb', position: [9, 0, 3],     rotation: [0, -Math.PI / 3, 0], scale: 2.8 },
+  { path: '/models/cottage.glb', position: [-6, 0, 7],    rotation: [0, Math.PI / 5, 0],  scale: 2.5 },
+  { path: '/models/cottage.glb', position: [6, 0, 8],     rotation: [0, -Math.PI / 6, 0], scale: 2.5 },
+  { path: '/models/cottage.glb', position: [-4, 0, -9],   rotation: [0, Math.PI * 0.7, 0], scale: 2.5 },
 ];
 
-// Streets — reuse cobblestone model as paths connecting buildings to center
-// cobblestone native: 1.912 x 0.449 x 0.440 → stretched along X, thin on Z
+// Auto-generate cobblestone street from center [0,0] toward a building
+// cobblestone native: 1.912 along X → rotate X-axis to point at building
+const makeStreet = (bx, bz, width = 5) => ({
+  position: [bx / 2, 0, bz / 2],
+  rotation: [0, Math.atan2(-bz, bx), 0],
+  scale: [Math.sqrt(bx * bx + bz * bz) / 1.9, 3, width],
+});
+
 const STREETS = [
-  { position: [-4, 0, -3],  rotation: [0, Math.PI / 4, 0],  scale: [4, 3, 6] },   // center → forge
-  { position: [4, 0, -2.5], rotation: [0, -Math.PI / 4, 0], scale: [4, 3, 6] },   // center → tavern
-  { position: [0, 0, -5],   rotation: [0, Math.PI / 2, 0],  scale: [5, 3, 6] },   // center → chapel
+  makeStreet(-8, -6, 6),     // → forge
+  makeStreet(8, -5, 6),      // → tavern
+  makeStreet(0, -10, 6),     // → chapel
+  makeStreet(-10, 2, 5),     // → cottage west
+  makeStreet(9, 3, 5),       // → cottage east
+  makeStreet(-6, 7, 5),      // → cottage SW
+  makeStreet(6, 8, 5),       // → cottage SE
+  makeStreet(-4, -9, 5),     // → cottage near chapel
 ];
 
 const TORCH_POS = [
@@ -942,3 +960,4 @@ useGLTF.preload('/models/gallows.glb');
 useGLTF.preload('/models/forge.glb');
 useGLTF.preload('/models/tavern.glb');
 useGLTF.preload('/models/chapel.glb');
+useGLTF.preload('/models/cottage.glb');
