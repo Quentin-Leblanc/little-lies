@@ -22,20 +22,20 @@ const Plat = ({ position, size = [6, 0.5, 6], color = '#6a7a9a', label }) => (
   </RigidBody>
 );
 
-/* ── Bouncy pad ── */
-const Bouncer = ({ position, size = [5, 0.3, 5] }) => {
+/* ── Bouncy pad — progressive bounce (starts gentle, builds up slowly) ── */
+const Bouncer = ({ position, size = [5, 0.3, 5], color = '#ff3366' }) => {
   const ref = useRef();
   useFrame(({ clock }) => {
     if (ref.current) ref.current.scale.y = 1 + Math.sin(clock.getElapsedTime() * 5) * 0.08;
   });
   return (
-    <RigidBody type="fixed" position={position} collisionGroups={G} restitution={4} friction={1}>
+    <RigidBody type="fixed" position={position} collisionGroups={G} restitution={1.2} friction={1}>
       <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
       <mesh ref={ref} castShadow receiveShadow>
         <boxGeometry args={size} />
-        <meshStandardMaterial color="#ff3366" emissive="#ff1144" emissiveIntensity={0.5} roughness={0.2} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} roughness={0.2} />
       </mesh>
-      <pointLight position={[0, 0.6, 0]} color="#ff3366" intensity={1.5} distance={5} />
+      <pointLight position={[0, 0.6, 0]} color={color} intensity={1.5} distance={5} />
     </RigidBody>
   );
 };
@@ -109,8 +109,8 @@ const Ground = () => (
   </RigidBody>
 );
 
-/* ── Crown at the top ── */
-const Crown = ({ position }) => {
+/* ── Trophy cup at the top ── */
+const Trophy = ({ position }) => {
   const ref = useRef();
   useFrame(({ clock }) => {
     if (ref.current) ref.current.rotation.y = clock.getElapsedTime() * 0.5;
@@ -124,14 +124,34 @@ const Crown = ({ position }) => {
           <meshStandardMaterial color="#ffd700" emissive="#ffaa00" emissiveIntensity={0.6} roughness={0.2} />
         </mesh>
       </RigidBody>
-      <mesh ref={ref} position={[0, 1.5, 0]}>
-        <octahedronGeometry args={[0.8]} />
-        <meshStandardMaterial color="#ffd700" emissive="#ffcc00" emissiveIntensity={0.8} roughness={0.1} />
-      </mesh>
+      {/* Trophy cup shape */}
+      <group ref={ref} position={[0, 1, 0]}>
+        {/* Cup bowl */}
+        <mesh position={[0, 0.6, 0]}>
+          <cylinderGeometry args={[0.5, 0.3, 0.8, 12]} />
+          <meshStandardMaterial color="#ffd700" emissive="#ffcc00" emissiveIntensity={0.8} metalness={0.8} roughness={0.1} />
+        </mesh>
+        {/* Cup stem */}
+        <mesh position={[0, 0.1, 0]}>
+          <cylinderGeometry args={[0.08, 0.08, 0.3, 8]} />
+          <meshStandardMaterial color="#ffd700" metalness={0.9} roughness={0.1} />
+        </mesh>
+        {/* Cup base */}
+        <mesh position={[0, -0.1, 0]}>
+          <cylinderGeometry args={[0.3, 0.35, 0.1, 12]} />
+          <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.1} />
+        </mesh>
+        {/* Handles */}
+        <mesh position={[0.55, 0.55, 0]} rotation={[0, 0, Math.PI / 6]}>
+          <torusGeometry args={[0.15, 0.04, 6, 12]} />
+          <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.1} />
+        </mesh>
+        <mesh position={[-0.55, 0.55, 0]} rotation={[0, 0, -Math.PI / 6]}>
+          <torusGeometry args={[0.15, 0.04, 6, 12]} />
+          <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.1} />
+        </mesh>
+      </group>
       <pointLight position={[0, 2, 0]} color="#ffd700" intensity={4} distance={15} />
-      <Text position={[0, 2.8, 0]} fontSize={0.6} color="#ffd700" anchorX="center">
-        CHAMPION
-      </Text>
     </group>
   );
 };
@@ -148,7 +168,7 @@ const LobbyParkour = () => (
       position={[0, 0.05, -20]}
       rotation={[-Math.PI / 2, 0, 0]}
       fontSize={16}
-      color="#335599"
+      color="#ffffff"
       anchorX="center"
       anchorY="middle"
       letterSpacing={0.3}
@@ -164,7 +184,7 @@ const LobbyParkour = () => (
     <Plat position={[26, 2, 0]} size={[7, 0.5, 7]} color="#ffcc00" />
     <Plat position={[36, 3, 0]} size={[7, 0.5, 7]} color="#33ccff" />
     <Bouncer position={[36, 3.2, 10]} size={[6, 0.3, 6]} />
-    <Plat position={[36, 8, 20]} size={[8, 0.5, 8]} color="#ff44aa" label="NICE!" />
+    <Plat position={[36, 8, 20]} size={[8, 0.5, 8]} color="#ff44aa" />
 
     {/* ══ Path B (left): ramp + slider ══ */}
     <Ramp position={[-14, 1.2, 0]} rotation={[0, 0, -0.12]} size={[10, 0.4, 7]} color="#cc44ff" />
@@ -188,8 +208,18 @@ const LobbyParkour = () => (
     <Plat position={[6, 13.5, 60]} size={[7, 0.5, 7]} color="#ff4488" />
     <Bouncer position={[6, 13.7, 60]} size={[6, 0.3, 6]} />
 
-    {/* ── Crown platform ── */}
-    <Crown position={[6, 20, 72]} />
+    {/* ── Trophy platform ── */}
+    <Trophy position={[6, 20, 72]} />
+
+    {/* ── Random trampolines on the ground ── */}
+    <Bouncer position={[8, 0.15, -8]} size={[3, 0.2, 3]} color="#ff3366" />
+    <Bouncer position={[-12, 0.15, 6]} size={[3, 0.2, 3]} color="#33ff66" />
+    <Bouncer position={[20, 0.15, -14]} size={[3, 0.2, 3]} color="#6633ff" />
+    <Bouncer position={[-18, 0.15, -10]} size={[3, 0.2, 3]} color="#ffcc00" />
+    <Bouncer position={[5, 0.15, 14]} size={[3, 0.2, 3]} color="#ff6600" />
+    <Bouncer position={[-8, 0.15, -18]} size={[3, 0.2, 3]} color="#00ccff" />
+    <Bouncer position={[14, 0.15, 8]} size={[3, 0.2, 3]} color="#ff44cc" />
+    <Bouncer position={[-20, 0.15, 16]} size={[3, 0.2, 3]} color="#44ffaa" />
 
     {/* ── Ambient lights ── */}
     <pointLight position={[36, 6, 10]} color="#ff3366" intensity={2} distance={15} />
