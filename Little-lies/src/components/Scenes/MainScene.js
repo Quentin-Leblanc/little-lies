@@ -179,10 +179,7 @@ const GallowsModel = () => {
 
 const VillageCenter = () => (
   <group>
-    {/* Village square / plaza — rue.glb scaled wide to form a cobblestone plaza */}
-    <MeshyModel path="/models/rue.glb" position={[0, 0, 0]} scale={[7, 1, 16]} />
-    <MeshyModel path="/models/rue.glb" position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]} scale={[7, 1, 16]} />
-    {/* Gallows — center piece */}
+    {/* Gallows only — no roads at center */}
     <GallowsModel />
   </group>
 );
@@ -272,49 +269,32 @@ const makeStreet = (ax, az, bx, bz, width = 8) => {
   };
 };
 
+// Alleys — short street segments placed IN THE GAPS between neighboring houses
 const STREETS = [
-  // Radial streets: center → inner buildings
-  makeStreet(0, 0, -9, -7),        // → forge
-  makeStreet(0, 0, 9, -7),         // → tavern
-  makeStreet(0, 0, 0, -12),        // → chapel
-  makeStreet(0, 0, -10, 1),        // → cottage W
-  makeStreet(0, 0, 10, 2),         // → cottage E
-  makeStreet(0, 0, -7, 8),         // → cottage SW
-  makeStreet(0, 0, 7, 9),          // → cottage SE
-  makeStreet(0, 0, -5, -10),       // → cottage near chapel
-  // Inner ring road
-  makeStreet(-9, -7, -5, -10),     // forge ↔ cottage chapel
-  makeStreet(-5, -10, 0, -12),     // cottage chapel ↔ chapel
-  makeStreet(0, -12, 9, -7),       // chapel ↔ tavern
-  makeStreet(-9, -7, -10, 1),      // forge ↔ cottage W
-  makeStreet(9, -7, 10, 2),        // tavern ↔ cottage E
-  makeStreet(-10, 1, -7, 8),       // cottage W ↔ cottage SW
-  makeStreet(10, 2, 7, 9),         // cottage E ↔ cottage SE
-  makeStreet(-7, 8, 7, 9),         // SW ↔ SE (south road)
-  // Inner → outer connections
-  makeStreet(-9, -7, -15, -10),    // forge → outer NW
-  makeStreet(9, -7, 15, -10),      // tavern → outer NE
-  makeStreet(-10, 1, -16, -3),     // W → outer W
-  makeStreet(10, 2, 16, -2),       // E → outer E
-  makeStreet(-10, 1, -15, 5),      // W → outer SW
-  makeStreet(10, 2, 15, 6),        // E → outer SE
-  makeStreet(-7, 8, -11, 13),      // SW → outer S
-  makeStreet(7, 9, 11, 14),        // SE → outer S
-  makeStreet(0, -12, 6, -16),      // chapel → outer N
-  makeStreet(-5, -10, -8, -15),    // cottage chapel → outer NW
-  // South connections
-  makeStreet(-7, 8, -3, 12),       // SW → south
-  makeStreet(7, 9, 3, 13),         // SE → south
-  makeStreet(-3, 12, 0, 17),       // south → far S
-  makeStreet(3, 13, 0, 17),        // south → far S
-  // Outer ring road
-  makeStreet(-15, -10, -8, -15),   // NW outer
-  makeStreet(-8, -15, 6, -16),     // N outer
-  makeStreet(6, -16, 15, -10),     // NE outer
-  makeStreet(-16, -3, -15, 5),     // W outer
-  makeStreet(16, -2, 15, 6),       // E outer
-  makeStreet(-11, 13, -14, 15),    // SW outer
-  makeStreet(11, 14, 14, 16),      // SE outer
+  // North area — alleys between forge, chapel, tavern
+  makeStreet(-7, -8, -3, -11, 5),     // alley between forge & cottage-chapel
+  makeStreet(3, -9, 7, -8, 5),        // alley between chapel area & tavern
+  makeStreet(-3, -13, 3, -14, 5),     // alley behind chapel
+
+  // West side — alleys between west cottages
+  makeStreet(-10, -3, -9, -3, 5),     // gap between forge & cottage W
+  makeStreet(-12, 3, -11, 3, 5),      // gap between cottage W & outer W
+  makeStreet(-9, 4, -8, 5, 5),        // gap between cottage W & cottage SW
+
+  // East side — alleys between east cottages
+  makeStreet(10, -2, 10, -3, 5),      // gap between tavern & cottage E
+  makeStreet(12, 4, 12, 4, 5),        // gap between cottage E & outer E
+  makeStreet(9, 5, 8, 6, 5),          // gap between cottage E & cottage SE
+
+  // South area — alleys between south cottages
+  makeStreet(-5, 10, -2, 11, 5),      // gap between cottage SW & south cottages
+  makeStreet(5, 10, 2, 12, 5),        // gap between cottage SE & south cottages
+
+  // Outer alleys — between outer ring buildings
+  makeStreet(-13, -8, -12, -7, 5),    // between outer NW cottages
+  makeStreet(13, -7, 14, -6, 5),      // between outer NE cottages
+  makeStreet(-15, 7, -14, 9, 5),      // between outer W & SW cottages
+  makeStreet(15, 8, 15, 10, 5),       // between outer E & SE cottages
 ];
 
 // Background mountains — ring around the village, closer and shorter
