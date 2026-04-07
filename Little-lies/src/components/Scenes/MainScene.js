@@ -266,6 +266,20 @@ const STREETS = [
   makeStreet(-4, -9, 5),     // → cottage near chapel
 ];
 
+// Background mountains — ring around the village at distance ~30-40
+const MOUNTAINS = [
+  { position: [0, 0, -40],   rotation: [0, 0, 0],            scale: 25 },   // north (behind chapel)
+  { position: [-30, 0, -30], rotation: [0, 0.5, 0],          scale: 20 },   // northwest
+  { position: [30, 0, -30],  rotation: [0, -0.4, 0],         scale: 22 },   // northeast
+  { position: [-40, 0, 0],   rotation: [0, 0.8, 0],          scale: 18 },   // west
+  { position: [40, 0, 0],    rotation: [0, -0.7, 0],         scale: 18 },   // east
+  { position: [-35, 0, 25],  rotation: [0, 1.2, 0],          scale: 20 },   // southwest
+  { position: [35, 0, 25],   rotation: [0, -1.1, 0],         scale: 20 },   // southeast
+  { position: [0, 0, 35],    rotation: [0, Math.PI, 0],      scale: 22 },   // south
+  { position: [-18, 0, -38], rotation: [0, 0.3, 0],          scale: 15 },   // north-northwest (fill gap)
+  { position: [18, 0, -38],  rotation: [0, -0.2, 0],         scale: 15 },   // north-northeast (fill gap)
+];
+
 const TORCH_POS = [
   [-4, 0, -4], [4, 0, -4], [-4, 0, 4], [4, 0, 4],
   [0, 0, -5.5], [-5.5, 0, 0], [5.5, 0, 0], [0, 0, 5.5],
@@ -310,6 +324,11 @@ const Village = ({ isDay }) => (
     {/* Barrels */}
     {BARREL_POSITIONS.map((pos, i) => (
       <Barrel key={`barrel-${i}`} position={pos} rotation={[0, i * 1.1, 0]} />
+    ))}
+
+    {/* Background mountains */}
+    {MOUNTAINS.map((m, i) => (
+      <MeshyModel key={`mountain-${i}`} path="/models/mountain.glb" position={m.position} rotation={m.rotation} scale={m.scale} />
     ))}
   </group>
 );
@@ -964,3 +983,4 @@ useGLTF.preload('/models/forge.glb');
 useGLTF.preload('/models/tavern.glb');
 useGLTF.preload('/models/chapel.glb');
 useGLTF.preload('/models/cottage.glb');
+useGLTF.preload('/models/mountain.glb');
