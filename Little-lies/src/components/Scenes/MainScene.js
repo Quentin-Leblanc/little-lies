@@ -215,26 +215,7 @@ const LowPolyTree = ({ position, scale = 1, variant = 0 }) => (
   </group>
 );
 
-// ============================================================
-// Barrel prop
-// ============================================================
-const Barrel = ({ position, rotation = [0, 0, 0] }) => (
-  <group position={position} rotation={rotation}>
-    <mesh position={[0, 0.35, 0]} castShadow>
-      <cylinderGeometry args={[0.22, 0.26, 0.7, 8]} />
-      <meshStandardMaterial color="#6b3a1a" />
-    </mesh>
-    {/* Metal bands */}
-    <mesh position={[0, 0.18, 0]}>
-      <cylinderGeometry args={[0.27, 0.27, 0.04, 8]} />
-      <meshStandardMaterial color="#555" metalness={0.6} roughness={0.4} />
-    </mesh>
-    <mesh position={[0, 0.52, 0]}>
-      <cylinderGeometry args={[0.23, 0.23, 0.04, 8]} />
-      <meshStandardMaterial color="#555" metalness={0.6} roughness={0.4} />
-    </mesh>
-  </group>
-);
+// (Barrels removed)
 
 // ============================================================
 // Village Layout
@@ -338,11 +319,6 @@ const TREE_POSITIONS = [
   [-14, 0, 12], [14, 0, -11],
 ];
 
-const BARREL_POSITIONS = [
-  [-7, 0, -3.5], [7.5, 0, 5.5], [-5.5, 0, 6.5],
-  [8.5, 0, -2.5], [-9, 0, -3],
-];
-
 const Village = ({ isDay }) => (
   <group>
     {/* Center piece — cobblestone path + gallows (Meshy AI) */}
@@ -364,11 +340,6 @@ const Village = ({ isDay }) => (
     {/* Trees */}
     {TREE_POSITIONS.map((pos, i) => (
       <LowPolyTree key={`tree-${i}`} position={pos} scale={0.7 + (i % 4) * 0.2} variant={i} />
-    ))}
-
-    {/* Barrels */}
-    {BARREL_POSITIONS.map((pos, i) => (
-      <Barrel key={`barrel-${i}`} position={pos} rotation={[0, i * 1.1, 0]} />
     ))}
 
     {/* Background mountains */}
@@ -489,15 +460,15 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
       const t = Math.min(elapsed / transitionDuration, 1);
       const eased = t * t * (3 - 2 * t); // smoothstep
 
-      // Interpolate position
+      // Interpolate position in a straight line
       groupRef.current.position.x = startPosition[0] + (position[0] - startPosition[0]) * eased;
       groupRef.current.position.y = position[1];
       groupRef.current.position.z = startPosition[2] + (position[2] - startPosition[2]) * eased;
 
-      // Face outward (away from center) during walk
-      const cx = groupRef.current.position.x;
-      const cz = groupRef.current.position.z;
-      groupRef.current.rotation.y = Math.atan2(cx, cz);
+      // Face walk direction (fixed, computed from start→end, not from current position)
+      const dx = position[0] - startPosition[0];
+      const dz = position[2] - startPosition[2];
+      groupRef.current.rotation.y = Math.atan2(dx, dz);
 
       // End walk animation when done
       if (t >= 1 && currentAnim === 'Walk') {
@@ -574,12 +545,12 @@ const DeadPlayerFigure = ({ player, position }) => (
 // ============================================================
 // Camera Controller (smooth follow based on phase)
 // ============================================================
-// Night cinematic camera waypoints — alley crawl then starry sky reveal
+// Night cinematic camera — slow alley walk then gentle rise to stars
 const NIGHT_CAMERA_WAYPOINTS = [
-  { pos: [0, 10, 8], lookAt: [0, 0, 0], duration: 5 },             // Overview during walk-away
-  { pos: [-2.3, 1.6, -6], lookAt: [-2.3, 1.5, -12], duration: 10 }, // Enter dark alley between buildings [0,-10] & [-4,-9]
-  { pos: [-2.3, 5, -8.5], lookAt: [-2.3, 18, -9], duration: 8 },   // Rise between rooftops, tilt up to reveal stars
-  { pos: [0, 14, 3], lookAt: [0, 30, 0], duration: 7 },            // Wide starry sky view
+  { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 4 },   // Brief overview while players walk away
+  { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 12 },  // Low alley walk, steady forward pace
+  { pos: [-2, 6, -6],     lookAt: [0, 20, -6],       duration: 10 },  // Slow rise, looking up to the sky
+  { pos: [0, 16, -2],     lookAt: [0, 30, -5],       duration: 6 },   // High above, gazing at stars
 ];
 
 const CameraController = ({ phase, CONSTANTS }) => {
