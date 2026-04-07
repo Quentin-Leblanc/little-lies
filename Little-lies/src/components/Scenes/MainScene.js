@@ -118,8 +118,18 @@ const Torch = ({ position }) => {
 };
 
 // ============================================================
-// Meshy AI GLB Model Loader (auto-grounds model on Y=0)
+// Meshy AI GLB Model Loader — known Y bounds (no Box3 needed)
 // ============================================================
+const MODEL_BOUNDS = {
+  '/models/rue.glb':      { min: -0.226, max: 0.224 },
+  '/models/forge.glb':    { min: -0.957, max: 0.954 },
+  '/models/tavern.glb':   { min: -0.957, max: 0.955 },
+  '/models/chapel.glb':   { min: -0.957, max: 0.957 },
+  '/models/cottage.glb':  { min: -0.957, max: 0.954 },
+  '/models/mountain.glb': { min: -0.407, max: 0.405 },
+  '/models/gallows.glb':  { min: -0.616, max: 0.615 },
+};
+
 const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, embedY = false }) => {
   const { scene } = useGLTF(path);
   const clonedScene = useMemo(() => {
@@ -133,23 +143,17 @@ const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 
     return clone;
   }, [scene]);
 
-  // Extract primitives so useMemo deps are stable (not new arrays each render)
-  const px = position[0], py = position[1], pz = position[2];
+  // Use known model bounds for reliable Y positioning
+  const bounds = MODEL_BOUNDS[path] || { min: 0, max: 0 };
   const sy = typeof scale === 'number' ? scale : scale[1];
-
-  // Auto-compute Y offset so the model bottom sits at ground level
-  const groundedPosition = useMemo(() => {
-    const box = new THREE.Box3().setFromObject(clonedScene);
-    if (embedY) {
-      return [px, py - box.max.y * sy + 0.05, pz];
-    }
-    return [px, py - box.min.y * sy, pz];
-  }, [clonedScene, px, py, pz, sy, embedY]);
+  const yOffset = embedY
+    ? -bounds.max * sy + 0.05   // flat surface: top flush with ground
+    : -bounds.min * sy;          // object: bottom sits on ground
 
   return (
     <primitive
       object={clonedScene}
-      position={groundedPosition}
+      position={[position[0], position[1] + yOffset, position[2]]}
       rotation={rotation}
       scale={typeof scale === 'number' ? [scale, scale, scale] : scale}
     />
@@ -175,14 +179,10 @@ const GallowsModel = () => {
 
 const VillageCenter = () => (
   <group>
-    {/* Cobblestone circle path — embedded flush with ground */}
-    <MeshyModel
-      path="/models/rue.glb"
-      position={[0, 0, 0]}
-      scale={5}
-      embedY
-    />
-    {/* Gallows — center piece, hardcoded Y */}
+    {/* Village square / plaza — rue.glb scaled wide to form a cobblestone plaza */}
+    <MeshyModel path="/models/rue.glb" position={[0, 0, 0]} scale={[6, 3, 14]} embedY />
+    <MeshyModel path="/models/rue.glb" position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]} scale={[6, 3, 14]} embedY />
+    {/* Gallows — center piece */}
     <GallowsModel />
   </group>
 );
@@ -235,7 +235,7 @@ const MESHY_BUILDINGS = [
   { path: '/models/cottage.glb', position: [-6, 0, 7],   scale: 2.5, get rotation() { return [0, faceCenter(-6, 7), 0]; } },
   { path: '/models/cottage.glb', position: [6, 0, 8],    scale: 2.5, get rotation() { return [0, faceCenter(6, 8), 0]; } },
   { path: '/models/cottage.glb', position: [-4, 0, -9],  scale: 2.5, get rotation() { return [0, faceCenter(-4, -9), 0]; } },
-  // Outer ring cottages (behind inner buildings, forming a real village)
+  // Outer ring (behind inner buildings)
   { path: '/models/cottage.glb', position: [-13, 0, -9],  scale: 2.5, get rotation() { return [0, faceCenter(-13, -9), 0]; } },
   { path: '/models/cottage.glb', position: [13, 0, -8],   scale: 2.5, get rotation() { return [0, faceCenter(13, -8), 0]; } },
   { path: '/models/cottage.glb', position: [-14, 0, -2],  scale: 2.3, get rotation() { return [0, faceCenter(-14, -2), 0]; } },
@@ -246,6 +246,19 @@ const MESHY_BUILDINGS = [
   { path: '/models/cottage.glb', position: [9, 0, 13],    scale: 2.5, get rotation() { return [0, faceCenter(9, 13), 0]; } },
   { path: '/models/cottage.glb', position: [4, 0, -14],   scale: 2.3, get rotation() { return [0, faceCenter(4, -14), 0]; } },
   { path: '/models/cottage.glb', position: [-8, 0, -13],  scale: 2.3, get rotation() { return [0, faceCenter(-8, -13), 0]; } },
+  // Fill gaps — more cottages for a dense village
+  { path: '/models/cottage.glb', position: [-3, 0, 10],   scale: 2.3, get rotation() { return [0, faceCenter(-3, 10), 0]; } },
+  { path: '/models/cottage.glb', position: [3, 0, 11],    scale: 2.3, get rotation() { return [0, faceCenter(3, 11), 0]; } },
+  { path: '/models/cottage.glb', position: [0, 0, 14],    scale: 2.2, get rotation() { return [0, faceCenter(0, 14), 0]; } },
+  { path: '/models/cottage.glb', position: [-11, 0, -5],  scale: 2.4, get rotation() { return [0, faceCenter(-11, -5), 0]; } },
+  { path: '/models/cottage.glb', position: [11, 0, -3],   scale: 2.4, get rotation() { return [0, faceCenter(11, -3), 0]; } },
+  { path: '/models/cottage.glb', position: [-15, 0, 10],  scale: 2.2, get rotation() { return [0, faceCenter(-15, 10), 0]; } },
+  { path: '/models/cottage.glb', position: [15, 0, 11],   scale: 2.2, get rotation() { return [0, faceCenter(15, 11), 0]; } },
+  { path: '/models/cottage.glb', position: [7, 0, -12],   scale: 2.3, get rotation() { return [0, faceCenter(7, -12), 0]; } },
+  { path: '/models/cottage.glb', position: [-16, 0, -7],  scale: 2.2, get rotation() { return [0, faceCenter(-16, -7), 0]; } },
+  { path: '/models/cottage.glb', position: [16, 0, -6],   scale: 2.2, get rotation() { return [0, faceCenter(16, -6), 0]; } },
+  { path: '/models/cottage.glb', position: [-12, 0, 14],  scale: 2.2, get rotation() { return [0, faceCenter(-12, 14), 0]; } },
+  { path: '/models/cottage.glb', position: [12, 0, 15],   scale: 2.2, get rotation() { return [0, faceCenter(12, 15), 0]; } },
 ];
 
 // Street helper: from point A [ax,az] to point B [bx,bz]
@@ -290,6 +303,28 @@ const STREETS = [
   makeStreet(6, 8, 9, 13, 3),      // cottage SE → outer S
   makeStreet(0, -10, 4, -14, 3),   // chapel → outer N
   makeStreet(-4, -9, -8, -13, 3),  // cottage chapel → outer NW
+  // Streets to fill-gap cottages
+  makeStreet(-6, 7, -3, 10, 3),    // SW → south cottage
+  makeStreet(6, 8, 3, 11, 3),      // SE → south cottage
+  makeStreet(-3, 10, 0, 14, 3),    // south → far south
+  makeStreet(3, 11, 0, 14, 3),     // south → far south
+  makeStreet(-13, -9, -16, -7, 3), // outer NW → far west
+  makeStreet(13, -8, 16, -6, 3),   // outer NE → far east
+  makeStreet(-9, 12, -12, 14, 3),  // S → far SW
+  makeStreet(9, 13, 12, 15, 3),    // S → far SE
+  makeStreet(-13, 6, -15, 10, 3),  // W → far SW
+  makeStreet(13, 7, 15, 11, 3),    // E → far SE
+  makeStreet(8, -5, 7, -12, 3),    // tavern → outer SE-N
+  makeStreet(-8, -6, -11, -5, 3),  // forge → mid-west
+  makeStreet(8, -5, 11, -3, 3),    // tavern → mid-east
+  // Outer ring road segments
+  makeStreet(-13, -9, -8, -13, 3), // NW outer
+  makeStreet(-8, -13, 4, -14, 3),  // N outer
+  makeStreet(4, -14, 13, -8, 3),   // NE outer
+  makeStreet(-16, -7, -14, -2, 3), // W outer
+  makeStreet(16, -6, 14, -1, 3),   // E outer
+  makeStreet(-15, 10, -12, 14, 3), // SW outer
+  makeStreet(15, 11, 12, 15, 3),   // SE outer
 ];
 
 // Background mountains — ring around the village, closer and shorter
