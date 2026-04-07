@@ -60,21 +60,28 @@ const Bouncer = ({ position, size = [5, 0.15, 5], color = '#ff3366' }) => {
   );
 };
 
-/* ── Moving platform (slow, predictable) ── */
+/* ── Moving platform — kinematicVelocity so players ride along ── */
 const Slider = ({ from, to, speed = 0.6, size = [6, 0.5, 6], color = '#3366cc' }) => {
   const ref = useRef();
-  useFrame(({ clock }) => {
+  const prevPos = useRef({ x: from[0], y: from[1], z: from[2] });
+  useFrame(({ clock }, delta) => {
     if (ref.current) {
       const t = (Math.sin(clock.getElapsedTime() * speed) + 1) / 2;
-      ref.current.setNextKinematicTranslation({
-        x: from[0] + (to[0] - from[0]) * t,
-        y: from[1] + (to[1] - from[1]) * t,
-        z: from[2] + (to[2] - from[2]) * t,
-      });
+      const nx = from[0] + (to[0] - from[0]) * t;
+      const ny = from[1] + (to[1] - from[1]) * t;
+      const nz = from[2] + (to[2] - from[2]) * t;
+      const d = Math.max(delta, 0.001);
+      ref.current.setLinvel({
+        x: (nx - prevPos.current.x) / d,
+        y: (ny - prevPos.current.y) / d,
+        z: (nz - prevPos.current.z) / d,
+      }, true);
+      ref.current.setNextKinematicTranslation({ x: nx, y: ny, z: nz });
+      prevPos.current = { x: nx, y: ny, z: nz };
     }
   });
   return (
-    <RigidBody ref={ref} type="kinematicPosition" position={from} collisionGroups={G}>
+    <RigidBody ref={ref} type="kinematicVelocityBased" position={from} collisionGroups={G}>
       <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
       <mesh castShadow receiveShadow>
         <boxGeometry args={size} />
@@ -96,7 +103,7 @@ const Spinner = ({ position, speed = 0.4, length = 12, color = '#ff8800' }) => {
     }
   });
   return (
-    <RigidBody ref={ref} type="kinematicPosition" position={position} collisionGroups={G}>
+    <RigidBody ref={ref} type="kinematicVelocityBased" position={position} collisionGroups={G}>
       <CuboidCollider args={[length / 2, 0.2, 0.6]} />
       <mesh castShadow receiveShadow>
         <boxGeometry args={[length, 0.4, 1.2]} />
@@ -215,8 +222,8 @@ const LobbyParkour = () => (
     <Plat position={[-16, 8, 32]} size={[8, 0.5, 8]} color="#ffdd44" />
 
     {/* ══ Mid zone: converging paths ══ */}
-    <Slider from={[36, 8.5, 24]} to={[16, 8.5, 28]} speed={0.35} size={[6, 0.5, 6]} color="#ff55cc" />
-    <Slider from={[-10, 8.5, 32]} to={[6, 8.5, 30]} speed={0.35} size={[6, 0.5, 6]} color="#55ccff" />
+    <Slider from={[36, 8.5, 22]} to={[14, 8.5, 24]} speed={0.35} size={[6, 0.5, 6]} color="#ff55cc" />
+    <Slider from={[-16, 8.5, 34]} to={[-2, 8.5, 32]} speed={0.35} size={[6, 0.5, 6]} color="#55ccff" />
     <Plat position={[6, 9, 28]} size={[10, 0.5, 10]} color="#ff4444" />
 
     {/* ── Spinner challenge ── */}
