@@ -123,6 +123,7 @@ const Torch = ({ position }) => {
 const MODEL_BOUNDS = {
   '/models/rue.glb':                  { min: -0.226, max: 0.224 },
   '/models/cobblestone_platform.glb': { min: -0.052, max: 0.039 },
+  '/models/terrain.glb':              { min: -0.028, max: 0.028 },
   '/models/forge.glb':                { min: -0.957, max: 0.954 },
   '/models/tavern.glb':               { min: -0.957, max: 0.955 },
   '/models/chapel.glb':               { min: -0.957, max: 0.957 },
@@ -260,17 +261,18 @@ const MESHY_BUILDINGS = [
 
 // Cobblestone ground tiles — cover village area with paved ground
 // cobblestone_platform.glb: 1.90 x 0.09 x 1.90 (flat square)
+// Desert terrain tiles — cover entire village + surroundings
+// terrain.glb: 1.9 x 1.9 flat tile → scale 12 = ~23u per tile
 const GROUND_TILES = [
-  // Center area (3x3 grid, scale 8 each = ~15u per tile)
-  { position: [0, 0, 0],     scale: 8 },
-  { position: [15, 0, 0],    scale: 8 },
-  { position: [-15, 0, 0],   scale: 8 },
-  { position: [0, 0, 14],    scale: 8 },
-  { position: [0, 0, -14],   scale: 8 },
-  { position: [-15, 0, -14], scale: 8 },
-  { position: [15, 0, -14],  scale: 8 },
-  { position: [-15, 0, 14],  scale: 8 },
-  { position: [15, 0, 14],   scale: 8 },
+  { position: [0, 0, 0],     scale: 12 },
+  { position: [22, 0, 0],    scale: 12 },
+  { position: [-22, 0, 0],   scale: 12 },
+  { position: [0, 0, 22],    scale: 12 },
+  { position: [0, 0, -22],   scale: 12 },
+  { position: [-22, 0, -22], scale: 12 },
+  { position: [22, 0, -22],  scale: 12 },
+  { position: [-22, 0, 22],  scale: 12 },
+  { position: [22, 0, 22],   scale: 12 },
 ];
 
 // A few short alleys between close buildings (decorative, using rue.glb)
@@ -324,7 +326,7 @@ const Village = ({ isDay }) => (
   <group>
     {/* Cobblestone ground — paved village floor, slightly raised */}
     {GROUND_TILES.map((t, i) => (
-      <MeshyModel key={`ground-${i}`} path="/models/cobblestone_platform.glb" position={[t.position[0], 0.25, t.position[2]]} scale={t.scale * 0.7} embedY />
+      <MeshyModel key={`ground-${i}`} path="/models/terrain.glb" position={t.position} scale={t.scale} />
     ))}
 
     {/* Gallows at center */}
@@ -1015,3 +1017,4 @@ useGLTF.preload('/models/chapel.glb');
 useGLTF.preload('/models/cottage.glb');
 useGLTF.preload('/models/mountain.glb');
 useGLTF.preload('/models/cobblestone_platform.glb');
+useGLTF.preload('/models/terrain.glb');
