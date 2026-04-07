@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { RigidBody, CuboidCollider, BallCollider, interactionGroups } from '@react-three/rapier';
 import { Text } from '@react-three/drei';
@@ -22,20 +22,37 @@ const Plat = ({ position, size = [6, 0.5, 6], color = '#6a7a9a', label }) => (
   </RigidBody>
 );
 
-/* ── Bouncy pad — progressive bounce (starts gentle, builds up slowly) ── */
-const Bouncer = ({ position, size = [5, 0.3, 5], color = '#ff3366' }) => {
-  const ref = useRef();
+/* ── Trampoline — strong consistent bounce via impulse ── */
+const Bouncer = ({ position, size = [5, 0.15, 5], color = '#ff3366' }) => {
+  const meshRef = useRef();
+
   useFrame(({ clock }) => {
-    if (ref.current) ref.current.scale.y = 1 + Math.sin(clock.getElapsedTime() * 5) * 0.08;
+    if (meshRef.current) {
+      meshRef.current.scale.y = 1 + Math.sin(clock.getElapsedTime() * 4) * 0.15;
+    }
   });
+
+  const handleCollision = useCallback((e) => {
+    const body = e.other.rigidBody;
+    if (!body) return;
+    body.applyImpulse({ x: 0, y: 14, z: 0 }, true);
+  }, []);
+
   return (
-    <RigidBody type="fixed" position={position} collisionGroups={G} restitution={1.2} friction={1}>
+    <RigidBody type="fixed" position={position} collisionGroups={G} restitution={0} friction={1}
+      onCollisionEnter={handleCollision}
+    >
       <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
-      <mesh ref={ref} castShadow receiveShadow>
-        <boxGeometry args={size} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} roughness={0.2} />
+      {/* Flat circular trampoline */}
+      <mesh ref={meshRef} castShadow receiveShadow>
+        <cylinderGeometry args={[size[0] / 2, size[0] / 2, size[1], 24]} />
+        <meshStandardMaterial color={color} roughness={0.4} metalness={0.3} />
       </mesh>
-      <pointLight position={[0, 0.6, 0]} color={color} intensity={1.5} distance={5} />
+      {/* Outer ring */}
+      <mesh position={[0, size[1] / 2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[size[0] / 2, 0.08, 8, 24]} />
+        <meshStandardMaterial color="#ffffff" metalness={0.4} roughness={0.3} />
+      </mesh>
     </RigidBody>
   );
 };
@@ -211,15 +228,15 @@ const LobbyParkour = () => (
     {/* ── Trophy platform ── */}
     <Trophy position={[6, 20, 72]} />
 
-    {/* ── Random trampolines on the ground ── */}
-    <Bouncer position={[8, 0.15, -8]} size={[3, 0.2, 3]} color="#ff3366" />
-    <Bouncer position={[-12, 0.15, 6]} size={[3, 0.2, 3]} color="#33ff66" />
-    <Bouncer position={[20, 0.15, -14]} size={[3, 0.2, 3]} color="#6633ff" />
-    <Bouncer position={[-18, 0.15, -10]} size={[3, 0.2, 3]} color="#ffcc00" />
-    <Bouncer position={[5, 0.15, 14]} size={[3, 0.2, 3]} color="#ff6600" />
-    <Bouncer position={[-8, 0.15, -18]} size={[3, 0.2, 3]} color="#00ccff" />
-    <Bouncer position={[14, 0.15, 8]} size={[3, 0.2, 3]} color="#ff44cc" />
-    <Bouncer position={[-20, 0.15, 16]} size={[3, 0.2, 3]} color="#44ffaa" />
+    {/* ── Trampolines spread across the map (away from spawn 0,0 r=10) ── */}
+    <Bouncer position={[25, 0.1, -20]} size={[5, 0.15, 5]} color="#ff3366" />
+    <Bouncer position={[-25, 0.1, 15]} size={[5, 0.15, 5]} color="#33ff66" />
+    <Bouncer position={[35, 0.1, 15]} size={[5, 0.15, 5]} color="#6633ff" />
+    <Bouncer position={[-30, 0.1, -20]} size={[5, 0.15, 5]} color="#ffcc00" />
+    <Bouncer position={[15, 0.1, 25]} size={[5, 0.15, 5]} color="#ff6600" />
+    <Bouncer position={[-15, 0.1, -30]} size={[5, 0.15, 5]} color="#00ccff" />
+    <Bouncer position={[40, 0.1, -5]} size={[5, 0.15, 5]} color="#ff44cc" />
+    <Bouncer position={[-35, 0.1, 30]} size={[5, 0.15, 5]} color="#44ffaa" />
 
     {/* ── Ambient lights ── */}
     <pointLight position={[36, 6, 10]} color="#ff3366" intensity={2} distance={15} />
