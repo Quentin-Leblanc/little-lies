@@ -56,59 +56,7 @@ const GroundPlane = ({ isDay }) => (
   </group>
 );
 
-// ============================================================
-// Enhanced Village Building
-// ============================================================
-const Building = ({ position, size = [2, 2.5, 2], color, roofColor, hasChimney = false, isDay }) => (
-  <group position={position}>
-    {/* Main body */}
-    <mesh position={[0, size[1] / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={size} />
-      <meshStandardMaterial color={color} />
-    </mesh>
-    {/* Foundation */}
-    <mesh position={[0, 0.08, 0]} castShadow>
-      <boxGeometry args={[size[0] + 0.1, 0.15, size[2] + 0.1]} />
-      <meshStandardMaterial color="#666" />
-    </mesh>
-    {/* Roof */}
-    <mesh position={[0, size[1] + 0.5, 0]} castShadow>
-      <coneGeometry args={[size[0] * 0.9, 1.4, 4]} />
-      <meshStandardMaterial color={roofColor} />
-    </mesh>
-    {/* Door frame */}
-    <mesh position={[0, 0.55, size[2] / 2 + 0.015]}>
-      <planeGeometry args={[0.7, 1.15]} />
-      <meshStandardMaterial color="#2a1a0f" />
-    </mesh>
-    {/* Door */}
-    <mesh position={[0, 0.55, size[2] / 2 + 0.02]}>
-      <planeGeometry args={[0.55, 1]} />
-      <meshStandardMaterial color="#3d2b1f" />
-    </mesh>
-    {/* Windows - front */}
-    <mesh position={[-0.5, size[1] * 0.65, size[2] / 2 + 0.01]}>
-      <planeGeometry args={[0.35, 0.35]} />
-      <meshBasicMaterial color={isDay ? '#ccbb88' : '#ffdd88'} transparent opacity={isDay ? 0.3 : 0.8} />
-    </mesh>
-    <mesh position={[0.5, size[1] * 0.65, size[2] / 2 + 0.01]}>
-      <planeGeometry args={[0.35, 0.35]} />
-      <meshBasicMaterial color={isDay ? '#ccbb88' : '#ffdd88'} transparent opacity={isDay ? 0.3 : 0.8} />
-    </mesh>
-    {/* Window - side */}
-    <mesh position={[size[0] / 2 + 0.01, size[1] * 0.6, 0]} rotation={[0, Math.PI / 2, 0]}>
-      <planeGeometry args={[0.35, 0.35]} />
-      <meshBasicMaterial color={isDay ? '#ccbb88' : '#ffdd88'} transparent opacity={isDay ? 0.2 : 0.6} />
-    </mesh>
-    {/* Chimney */}
-    {hasChimney && (
-      <mesh position={[size[0] * 0.2, size[1] + 1.1, -size[2] * 0.15]} castShadow>
-        <boxGeometry args={[0.3, 0.7, 0.3]} />
-        <meshStandardMaterial color="#777" />
-      </mesh>
-    )}
-  </group>
-);
+// (Old procedural Building component removed — replaced by Meshy AI models)
 
 // ============================================================
 // Improved Torch with multi-layer flame
@@ -282,20 +230,19 @@ const Barrel = ({ position, rotation = [0, 0, 0] }) => (
 // ============================================================
 // Village Layout
 // ============================================================
-// Remaining procedural buildings (slots not replaced by Meshy models)
-const BUILDINGS = [
-  { pos: [-10, 0, 2], size: [2, 2.5, 2], color: '#c8b898', roof: '#a0522d', chimney: false },
-  { pos: [-6, 0, 7], size: [2.2, 2.8, 2.2], color: '#d4c4a8', roof: '#6b3a1a', chimney: true },
-  { pos: [9, 0, 3], size: [2, 2.2, 2], color: '#baa888', roof: '#8b5a2b', chimney: false },
-  { pos: [6, 0, 8], size: [2.5, 2.5, 2], color: '#c0a080', roof: '#6d3d1d', chimney: false },
-  { pos: [-4, 0, -9], size: [2, 2.2, 2], color: '#bbb098', roof: '#8a4a2a', chimney: false },
-];
-
 // Meshy AI building positions & config
 const MESHY_BUILDINGS = [
   { path: '/models/forge.glb',   position: [-8, 0, -6],  rotation: [0, Math.PI / 4, 0], scale: 3 },
   { path: '/models/tavern.glb',  position: [8, 0, -5],   rotation: [0, -Math.PI / 4, 0], scale: 3 },
-  { path: '/models/chapel.glb',  position: [0, 0, -10],  rotation: [0, Math.PI, 0], scale: 3.5 },
+  { path: '/models/chapel.glb',  position: [0, 0, -10],  rotation: [0, 0, 0], scale: 3.5 },
+];
+
+// Streets — reuse cobblestone model as paths connecting buildings to center
+// cobblestone native: 1.912 x 0.449 x 0.440 → stretched along X, thin on Z
+const STREETS = [
+  { position: [-4, 0, -3],  rotation: [0, Math.PI / 4, 0],  scale: [4, 3, 6] },   // center → forge
+  { position: [4, 0, -2.5], rotation: [0, -Math.PI / 4, 0], scale: [4, 3, 6] },   // center → tavern
+  { position: [0, 0, -5],   rotation: [0, Math.PI / 2, 0],  scale: [5, 3, 6] },   // center → chapel
 ];
 
 const TORCH_POS = [
@@ -326,9 +273,9 @@ const Village = ({ isDay }) => (
       <MeshyModel key={`meshy-${i}`} path={b.path} position={b.position} rotation={b.rotation} scale={b.scale} />
     ))}
 
-    {/* Remaining procedural buildings */}
-    {BUILDINGS.map((b, i) => (
-      <Building key={`bld-${i}`} position={b.pos} size={b.size} color={b.color} roofColor={b.roof} hasChimney={b.chimney} isDay={isDay} />
+    {/* Cobblestone streets connecting buildings to center */}
+    {STREETS.map((s, i) => (
+      <MeshyModel key={`street-${i}`} path="/models/cobblestone_circle.glb" position={s.position} rotation={s.rotation} scale={s.scale} embedY />
     ))}
 
     {/* Torches (night only) */}
@@ -472,8 +419,8 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
         setCurrentAnim('Idle');
       }
     } else {
-      // Subtle idle bob
-      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.03;
+      // Stay grounded (no floating)
+      groupRef.current.position.y = position[1];
     }
   });
 
@@ -482,24 +429,24 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
       <Character
         color={color}
         animation={currentAnim}
-        scale={0.55}
+        scale={0.8}
       />
       {/* Accused ring */}
       {isAccused && (
         <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.5, 0.65, 16]} />
+          <ringGeometry args={[0.6, 0.8, 16]} />
           <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
         </mesh>
       )}
       {/* Name label */}
-      <Billboard position={[0, 1.8, 0]}>
-        <Text fontSize={0.18} color="white" anchorX="center" anchorY="bottom" outlineWidth={0.02} outlineColor="black">
+      <Billboard position={[0, 2.6, 0]}>
+        <Text fontSize={0.22} color="white" anchorX="center" anchorY="bottom" outlineWidth={0.025} outlineColor="black">
           {player.profile.name}
         </Text>
       </Billboard>
       {/* Vote button with count */}
       {showVote && (
-        <Html position={[0, 0.9, 0]} center>
+        <Html position={[0, 1.3, 0]} center>
           <button
             className={`vote-3d-btn ${isVoteTarget ? 'vote-3d-btn-active' : ''}`}
             onClick={() => onVote(player.id)}
@@ -508,7 +455,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
       )}
       {/* Judgment buttons */}
       {showJudgment && (
-        <Html position={[0, 0.9, 0]} center>
+        <Html position={[0, 1.3, 0]} center>
           <div className="judgment-3d-btns">
             <button className="judge-btn judge-save" onClick={() => onJudge('innocent')}>Sauver</button>
             <button className="judge-btn judge-lynch" onClick={() => onJudge('guilty')}>Lyncher</button>
@@ -528,11 +475,11 @@ const DeadPlayerFigure = ({ player, position }) => (
       color="#555555"
       animation="Death"
       weapon="Knife_1"
-      scale={0.45}
+      scale={0.65}
     />
-    <GhostOrb position={[0, 1.6, 0]} />
-    <Billboard position={[0, 2.2, 0]}>
-      <Text fontSize={0.14} color="rgba(180,180,200,0.7)" anchorX="center" anchorY="bottom" outlineWidth={0.015} outlineColor="black">
+    <GhostOrb position={[0, 2, 0]} />
+    <Billboard position={[0, 2.6, 0]}>
+      <Text fontSize={0.16} color="rgba(180,180,200,0.7)" anchorX="center" anchorY="bottom" outlineWidth={0.015} outlineColor="black">
         {player.profile.name}
       </Text>
     </Billboard>
