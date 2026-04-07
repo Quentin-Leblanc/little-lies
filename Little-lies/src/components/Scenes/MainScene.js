@@ -500,10 +500,17 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
         animation={currentAnim}
         scale={0.8}
       />
+      {/* Player color glow — colored light under the character */}
+      <pointLight position={[0, 0.5, 0]} color={color} intensity={1.5} distance={4} />
+      {/* Colored ground ring */}
+      <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.4, 0.6, 24]} />
+        <meshBasicMaterial color={color} transparent opacity={0.5} />
+      </mesh>
       {/* Accused ring */}
       {isAccused && (
-        <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.6, 0.8, 16]} />
+        <mesh position={[0, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.7, 0.9, 16]} />
           <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
         </mesh>
       )}

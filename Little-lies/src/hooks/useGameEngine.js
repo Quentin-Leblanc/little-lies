@@ -293,14 +293,6 @@ export const GameEngineProvider = ({ children }) => {
         dayCount: 1,
         chat: 'default',
       },
-      {
-        player: 'system',
-        color: '#78ff78',
-        content: 'La discussion est ouverte. Tapez /skip pour passer à la nuit.',
-        type: 'system',
-        dayCount: 1,
-        chat: 'default',
-      },
     ]);
   };
 
@@ -497,12 +489,10 @@ export const GameEngineProvider = ({ children }) => {
         break;
 
       case PHASE.DEATH_REPORT:
-        addChatSystem('La discussion est ouverte.', '#78ff78');
         nextGame = { ...nextGame, phase: PHASE.DISCUSSION, timer: dur('DISCUSSION') };
         break;
 
       case PHASE.DISCUSSION:
-        addChatSystem('Le vote est ouvert ! Votez pour accuser un suspect.', '#ffa502');
         resetTrial();
         nextGame = { ...nextGame, phase: PHASE.VOTING, timer: dur('VOTING') };
         break;
@@ -513,7 +503,7 @@ export const GameEngineProvider = ({ children }) => {
           nextGame = { ...nextGame, phase: PHASE.DEFENSE, timer: dur('DEFENSE'), accusedId, trialsToday: game.trialsToday + 1 };
         } else {
           // No majority → show NO_LYNCH announcement then go to night
-          addChatSystem('Personne ne sera lynché aujourd\'hui.', '#ffa502');
+          addChatSystem('Personne n\'a été lynché aujourd\'hui.', '#ffa502');
           Events.add({ type: 'NO_LYNCH', content: { chatMessage: 'Personne ne sera lynché aujourd\'hui.' }, displayed: true });
           resetTrial();
           nextGame = { ...nextGame, phase: PHASE.NO_LYNCH, timer: dur('NO_LYNCH'), accusedId: null };

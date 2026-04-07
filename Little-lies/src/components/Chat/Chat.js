@@ -303,9 +303,18 @@ function Chat(props) {
     return false;
   };
 
-  // Show full game history (no dayCount filter) — day separators provide visual breaks
+  // Show full game history — day separators provide visual breaks
   const filteredMessages = (messages || [])
     .filter(filterMessage);
+
+  // Find index of the last day separator ("--- Jour X ---") to gray everything before it
+  let lastDaySeparatorIndex = -1;
+  for (let i = filteredMessages.length - 1; i >= 0; i--) {
+    if (filteredMessages[i].type === 'system' && filteredMessages[i].content?.startsWith('--- Jour')) {
+      lastDaySeparatorIndex = i;
+      break;
+    }
+  }
 
   // Villager night: can see chat (grayed out, read-only) but not write
   const isSpy = me?.character?.key === 'spy';
@@ -355,7 +364,8 @@ function Chat(props) {
       {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> Chat des morts</div>}
       <div className="chat-messages">
         {filteredMessages.map((message, index) => {
-          const isPast = message.dayCount != null && message.dayCount < game.dayCount;
+          // Everything before the last "--- Jour X ---" separator is grayed
+          const isPast = index < lastDaySeparatorIndex;
           const pastClass = isPast ? 'msg-past' : '';
 
           // System messages: render as clean separator
