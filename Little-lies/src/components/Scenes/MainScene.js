@@ -203,14 +203,14 @@ const VillageCenter = () => (
     {/* Cobblestone circle path */}
     <MeshyModel
       path="/models/cobblestone_circle.glb"
-      position={[0, 0, 0]}
-      scale={1}
+      position={[0, 0.05, 0]}
+      scale={2}
     />
     {/* Gallows — permanent center piece (replaces the old well) */}
     <MeshyModel
       path="/models/gallows.glb"
-      position={[0, 0, 0]}
-      scale={1}
+      position={[0, 2, 0]}
+      scale={2}
     />
   </group>
 );
@@ -278,9 +278,9 @@ const BUILDINGS = [
 
 // Meshy AI building positions & config
 const MESHY_BUILDINGS = [
-  { path: '/models/forge.glb',   position: [-8, 0, -6],  rotation: [0, Math.PI / 4, 0], scale: 1 },
-  { path: '/models/tavern.glb',  position: [8, 0, -5],   rotation: [0, -Math.PI / 4, 0], scale: 1 },
-  { path: '/models/chapel.glb',  position: [0, 0, -10],  rotation: [0, Math.PI, 0], scale: 1 },
+  { path: '/models/forge.glb',   position: [-8, 0.5, -6],  rotation: [0, Math.PI / 4, 0], scale: 2 },
+  { path: '/models/tavern.glb',  position: [8, 0.5, -5],   rotation: [0, -Math.PI / 4, 0], scale: 2 },
+  { path: '/models/chapel.glb',  position: [0, 0.5, -10],  rotation: [0, Math.PI, 0], scale: 2.5 },
 ];
 
 const TORCH_POS = [

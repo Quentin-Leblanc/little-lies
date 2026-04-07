@@ -99,6 +99,14 @@ export const EventsProvider = ({ children }) => {
       (event) => event.dayCount === nightDayCount && !event.displayed
     );
 
+    // --- Batch notifications to avoid stale state overwrites ---
+    // Each addNotification() call spreads the same `notifications` ref,
+    // so only the last call would survive. We accumulate locally instead.
+    const pendingNotifs = [...(notifications || [])];
+    const addNotif = (playerId, message) => {
+      pendingNotifs.push({ playerId, message, dayCount: game.dayCount, read: false });
+    };
+
     // Data structures for resolution
     const defenseBonus = {};   // playerId -> extra defense from doctor/vest
     const framedPlayers = {};  // playerId -> true
@@ -116,7 +124,7 @@ export const EventsProvider = ({ children }) => {
       .forEach((e) => {
         jailedPlayers[e.content.target] = e.content.by;
         roleblockedPlayers[e.content.target] = true;
-        addNotification(e.content.target, 'Vous avez été emprisonné par le Jailor !');
+        addNotif(e.content.target, 'Vous avez été emprisonné par le Jailor !');
       });
 
     // === Priority 0.5: Roleblock (Escort) ===
@@ -134,7 +142,7 @@ export const EventsProvider = ({ children }) => {
           });
         } else {
           roleblockedPlayers[e.content.target] = true;
-          addNotification(e.content.target, 'Quelqu\'un vous a empêché d\'agir cette nuit.');
+          addNotif(e.content.target, 'Quelqu\'un vous a empêché d\'agir cette nuit.');
         }
         trackVisitor(visitorsMap, e.content.target, e.content.by);
       });
@@ -166,7 +174,7 @@ export const EventsProvider = ({ children }) => {
         const target = players.find((p) => p.id === e.content.target);
         // Mayor who revealed can't be healed
         if (target?.canBeHealed === false) {
-          addNotification(e.content.by, `Vous n'avez pas pu soigner ${target.profile.name}.`);
+          addNotif(e.content.by, `Vous n'avez pas pu soigner ${target.profile.name}.`);
         } else {
           defenseBonus[e.content.target] = (defenseBonus[e.content.target] || 0) + 1;
         }
@@ -259,8 +267,8 @@ export const EventsProvider = ({ children }) => {
           killed[attackerId] = { attackerId: bgId, type: 'bodyguard_kill' };
           // Target survives
           survived[targetId] = true;
-          addNotification(targetId, 'Un bodyguard s\'est sacrifié pour vous protéger !');
-          addNotification(bgId, 'Vous vous êtes sacrifié pour protéger votre cible.');
+          addNotif(targetId, 'Un bodyguard s\'est sacrifié pour vous protéger !');
+          addNotif(bgId, 'Vous vous êtes sacrifié pour protéger votre cible.');
           return;
         }
       }
@@ -290,10 +298,10 @@ export const EventsProvider = ({ children }) => {
               displayed: false,
             });
           }
-          addNotification(targetId, 'Vous avez été attaqué mais votre protection vous a sauvé !');
+          addNotif(targetId, 'Vous avez été attaqué mais votre protection vous a sauvé !');
         } else {
           // Night immunity
-          addNotification(targetId, 'Quelqu\'un a tenté de vous tuer, mais vous avez survécu !');
+          addNotif(targetId, 'Quelqu\'un a tenté de vous tuer, mais vous avez survécu !');
         }
       }
     });
@@ -329,7 +337,7 @@ export const EventsProvider = ({ children }) => {
       setPlayers(
         players.map((p) => {
           if (p.character?.winCondition === 'getTargetLynched' && killedIds.includes(p.executionerTarget) && p.isAlive) {
-            addNotification(p.id, 'Votre cible est morte... Vous êtes maintenant un Jester. Faites-vous lyncher !');
+            addNotif(p.id, 'Votre cible est morte... Vous êtes maintenant un Jester. Faites-vous lyncher !');
             return { ...p, character: jesterRole, executionerTarget: null };
           }
           return p;
@@ -346,7 +354,7 @@ export const EventsProvider = ({ children }) => {
           content: { target: vigilanteId, chatMessage: '' },
           displayed: true,
         });
-        addNotification(vigilanteId, 'Vous avez tué un innocent... La culpabilité vous ronge.');
+        addNotif(vigilanteId, 'Vous avez tué un innocent... La culpabilité vous ronge.');
       }
     });
 
@@ -358,7 +366,7 @@ export const EventsProvider = ({ children }) => {
         if (target) {
           const isFramed = framedPlayers[target.id];
           const detectResult = isFramed ? 'suspect' : (target.character?.detectResult || 'non-suspect');
-          addNotification(
+          addNotif(
             e.content.by,
             detectResult === 'suspect'
               ? `Votre cible (${target.profile.name}) est suspecte !`
@@ -372,7 +380,7 @@ export const EventsProvider = ({ children }) => {
       .forEach((e) => {
         const target = players.find((p) => p.id === e.content.target);
         if (target) {
-          addNotification(
+          addNotif(
             e.content.by,
             `Votre cible (${target.profile.name}) est : ${target.character?.label}.`
           );
@@ -385,9 +393,9 @@ export const EventsProvider = ({ children }) => {
       .forEach((e) => {
         if (mafiaKillTarget) {
           const mafiaTarget = players.find((p) => p.id === mafiaKillTarget.content.target);
-          addNotification(e.content.by, `La mafia a visité ${mafiaTarget?.profile?.name} cette nuit.`);
+          addNotif(e.content.by, `La mafia a visité ${mafiaTarget?.profile?.name} cette nuit.`);
         } else {
-          addNotification(e.content.by, 'La mafia n\'a visité personne cette nuit.');
+          addNotif(e.content.by, 'La mafia n\'a visité personne cette nuit.');
         }
       });
 
@@ -401,7 +409,7 @@ export const EventsProvider = ({ children }) => {
           .map((vid) => players.find((p) => p.id === vid)?.profile?.name)
           .filter(Boolean);
 
-        addNotification(
+        addNotif(
           e.content.by,
           visitors.length > 0
             ? `Vous avez vu ${visitors.join(', ')} rendre visite à ${target?.profile?.name}.`
@@ -436,6 +444,9 @@ export const EventsProvider = ({ children }) => {
         });
       }
     });
+
+    // --- Flush all accumulated notifications at once ---
+    setNotifications(pendingNotifs);
   };
 
   const addMorningMessages = () => {
