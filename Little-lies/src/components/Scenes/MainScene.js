@@ -173,15 +173,15 @@ const GallowsModel = () => {
   }, [scene]);
 
   // Known: minY = -0.616 → Y offset = 0.616 * scale to sit on ground
-  const s = 3;
+  const s = 2;
   return <primitive object={clone} position={[0, 0.616 * s, 0]} scale={[s, s, s]} />;
 };
 
 const VillageCenter = () => (
   <group>
     {/* Village square / plaza — rue.glb scaled wide to form a cobblestone plaza */}
-    <MeshyModel path="/models/rue.glb" position={[0, 0, 0]} scale={[6, 3, 14]} embedY />
-    <MeshyModel path="/models/rue.glb" position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]} scale={[6, 3, 14]} embedY />
+    <MeshyModel path="/models/rue.glb" position={[0, 0, 0]} scale={[7, 1, 16]} />
+    <MeshyModel path="/models/rue.glb" position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]} scale={[7, 1, 16]} />
     {/* Gallows — center piece */}
     <GallowsModel />
   </group>
@@ -223,108 +223,98 @@ const LowPolyTree = ({ position, scale = 1, variant = 0 }) => (
 // Rotation Y so a building faces center [0,0] from position [bx, bz]
 const faceCenter = (bx, bz) => Math.atan2(-bx, -bz);
 
-// Meshy AI building positions — all rotated to face center
+// Meshy AI building positions — all rotated to face center, spaced to avoid overlap
+// Buildings are ~3-4 units wide at their scale, so min ~5 units between each
 const MESHY_BUILDINGS = [
-  // Unique buildings (inner ring)
-  { path: '/models/forge.glb',   position: [-8, 0, -6],  scale: 3,   get rotation() { return [0, faceCenter(-8, -6), 0]; } },
-  { path: '/models/tavern.glb',  position: [8, 0, -5],   scale: 3,   get rotation() { return [0, faceCenter(8, -5), 0]; } },
-  { path: '/models/chapel.glb',  position: [0, 0, -10],  scale: 3.5, get rotation() { return [0, faceCenter(0, -10), 0]; } },
+  // Unique buildings (inner ring — well spaced)
+  { path: '/models/forge.glb',   position: [-9, 0, -7],   scale: 3,   get rotation() { return [0, faceCenter(-9, -7), 0]; } },
+  { path: '/models/tavern.glb',  position: [9, 0, -7],    scale: 3,   get rotation() { return [0, faceCenter(9, -7), 0]; } },
+  { path: '/models/chapel.glb',  position: [0, 0, -12],   scale: 3.5, get rotation() { return [0, faceCenter(0, -12), 0]; } },
   // Inner ring cottages
-  { path: '/models/cottage.glb', position: [-10, 0, 2],  scale: 2.8, get rotation() { return [0, faceCenter(-10, 2), 0]; } },
-  { path: '/models/cottage.glb', position: [9, 0, 3],    scale: 2.8, get rotation() { return [0, faceCenter(9, 3), 0]; } },
-  { path: '/models/cottage.glb', position: [-6, 0, 7],   scale: 2.5, get rotation() { return [0, faceCenter(-6, 7), 0]; } },
-  { path: '/models/cottage.glb', position: [6, 0, 8],    scale: 2.5, get rotation() { return [0, faceCenter(6, 8), 0]; } },
-  { path: '/models/cottage.glb', position: [-4, 0, -9],  scale: 2.5, get rotation() { return [0, faceCenter(-4, -9), 0]; } },
-  // Outer ring (behind inner buildings)
-  { path: '/models/cottage.glb', position: [-13, 0, -9],  scale: 2.5, get rotation() { return [0, faceCenter(-13, -9), 0]; } },
-  { path: '/models/cottage.glb', position: [13, 0, -8],   scale: 2.5, get rotation() { return [0, faceCenter(13, -8), 0]; } },
-  { path: '/models/cottage.glb', position: [-14, 0, -2],  scale: 2.3, get rotation() { return [0, faceCenter(-14, -2), 0]; } },
-  { path: '/models/cottage.glb', position: [14, 0, -1],   scale: 2.3, get rotation() { return [0, faceCenter(14, -1), 0]; } },
-  { path: '/models/cottage.glb', position: [-13, 0, 6],   scale: 2.3, get rotation() { return [0, faceCenter(-13, 6), 0]; } },
-  { path: '/models/cottage.glb', position: [13, 0, 7],    scale: 2.3, get rotation() { return [0, faceCenter(13, 7), 0]; } },
-  { path: '/models/cottage.glb', position: [-9, 0, 12],   scale: 2.5, get rotation() { return [0, faceCenter(-9, 12), 0]; } },
-  { path: '/models/cottage.glb', position: [9, 0, 13],    scale: 2.5, get rotation() { return [0, faceCenter(9, 13), 0]; } },
-  { path: '/models/cottage.glb', position: [4, 0, -14],   scale: 2.3, get rotation() { return [0, faceCenter(4, -14), 0]; } },
-  { path: '/models/cottage.glb', position: [-8, 0, -13],  scale: 2.3, get rotation() { return [0, faceCenter(-8, -13), 0]; } },
-  // Fill gaps — more cottages for a dense village
-  { path: '/models/cottage.glb', position: [-3, 0, 10],   scale: 2.3, get rotation() { return [0, faceCenter(-3, 10), 0]; } },
-  { path: '/models/cottage.glb', position: [3, 0, 11],    scale: 2.3, get rotation() { return [0, faceCenter(3, 11), 0]; } },
-  { path: '/models/cottage.glb', position: [0, 0, 14],    scale: 2.2, get rotation() { return [0, faceCenter(0, 14), 0]; } },
-  { path: '/models/cottage.glb', position: [-11, 0, -5],  scale: 2.4, get rotation() { return [0, faceCenter(-11, -5), 0]; } },
-  { path: '/models/cottage.glb', position: [11, 0, -3],   scale: 2.4, get rotation() { return [0, faceCenter(11, -3), 0]; } },
-  { path: '/models/cottage.glb', position: [-15, 0, 10],  scale: 2.2, get rotation() { return [0, faceCenter(-15, 10), 0]; } },
-  { path: '/models/cottage.glb', position: [15, 0, 11],   scale: 2.2, get rotation() { return [0, faceCenter(15, 11), 0]; } },
-  { path: '/models/cottage.glb', position: [7, 0, -12],   scale: 2.3, get rotation() { return [0, faceCenter(7, -12), 0]; } },
-  { path: '/models/cottage.glb', position: [-16, 0, -7],  scale: 2.2, get rotation() { return [0, faceCenter(-16, -7), 0]; } },
-  { path: '/models/cottage.glb', position: [16, 0, -6],   scale: 2.2, get rotation() { return [0, faceCenter(16, -6), 0]; } },
-  { path: '/models/cottage.glb', position: [-12, 0, 14],  scale: 2.2, get rotation() { return [0, faceCenter(-12, 14), 0]; } },
-  { path: '/models/cottage.glb', position: [12, 0, 15],   scale: 2.2, get rotation() { return [0, faceCenter(12, 15), 0]; } },
+  { path: '/models/cottage.glb', position: [-10, 0, 1],   scale: 2.8, get rotation() { return [0, faceCenter(-10, 1), 0]; } },
+  { path: '/models/cottage.glb', position: [10, 0, 2],    scale: 2.8, get rotation() { return [0, faceCenter(10, 2), 0]; } },
+  { path: '/models/cottage.glb', position: [-7, 0, 8],    scale: 2.5, get rotation() { return [0, faceCenter(-7, 8), 0]; } },
+  { path: '/models/cottage.glb', position: [7, 0, 9],     scale: 2.5, get rotation() { return [0, faceCenter(7, 9), 0]; } },
+  { path: '/models/cottage.glb', position: [-5, 0, -10],  scale: 2.5, get rotation() { return [0, faceCenter(-5, -10), 0]; } },
+  // Outer ring — well spaced from inner
+  { path: '/models/cottage.glb', position: [-15, 0, -10], scale: 2.5, get rotation() { return [0, faceCenter(-15, -10), 0]; } },
+  { path: '/models/cottage.glb', position: [15, 0, -10],  scale: 2.5, get rotation() { return [0, faceCenter(15, -10), 0]; } },
+  { path: '/models/cottage.glb', position: [-16, 0, -3],  scale: 2.3, get rotation() { return [0, faceCenter(-16, -3), 0]; } },
+  { path: '/models/cottage.glb', position: [16, 0, -2],   scale: 2.3, get rotation() { return [0, faceCenter(16, -2), 0]; } },
+  { path: '/models/cottage.glb', position: [-15, 0, 5],   scale: 2.3, get rotation() { return [0, faceCenter(-15, 5), 0]; } },
+  { path: '/models/cottage.glb', position: [15, 0, 6],    scale: 2.3, get rotation() { return [0, faceCenter(15, 6), 0]; } },
+  { path: '/models/cottage.glb', position: [-11, 0, 13],  scale: 2.5, get rotation() { return [0, faceCenter(-11, 13), 0]; } },
+  { path: '/models/cottage.glb', position: [11, 0, 14],   scale: 2.5, get rotation() { return [0, faceCenter(11, 14), 0]; } },
+  { path: '/models/cottage.glb', position: [6, 0, -16],   scale: 2.3, get rotation() { return [0, faceCenter(6, -16), 0]; } },
+  { path: '/models/cottage.glb', position: [-8, 0, -15],  scale: 2.3, get rotation() { return [0, faceCenter(-8, -15), 0]; } },
+  // Fill — south and mid-ring
+  { path: '/models/cottage.glb', position: [-3, 0, 12],   scale: 2.3, get rotation() { return [0, faceCenter(-3, 12), 0]; } },
+  { path: '/models/cottage.glb', position: [3, 0, 13],    scale: 2.3, get rotation() { return [0, faceCenter(3, 13), 0]; } },
+  { path: '/models/cottage.glb', position: [0, 0, 17],    scale: 2.2, get rotation() { return [0, faceCenter(0, 17), 0]; } },
+  { path: '/models/cottage.glb', position: [-13, 0, -6],  scale: 2.4, get rotation() { return [0, faceCenter(-13, -6), 0]; } },
+  { path: '/models/cottage.glb', position: [13, 0, -4],   scale: 2.4, get rotation() { return [0, faceCenter(13, -4), 0]; } },
+  { path: '/models/cottage.glb', position: [-17, 0, 10],  scale: 2.2, get rotation() { return [0, faceCenter(-17, 10), 0]; } },
+  { path: '/models/cottage.glb', position: [17, 0, 11],   scale: 2.2, get rotation() { return [0, faceCenter(17, 11), 0]; } },
+  { path: '/models/cottage.glb', position: [9, 0, -13],   scale: 2.3, get rotation() { return [0, faceCenter(9, -13), 0]; } },
+  { path: '/models/cottage.glb', position: [-14, 0, 15],  scale: 2.2, get rotation() { return [0, faceCenter(-14, 15), 0]; } },
+  { path: '/models/cottage.glb', position: [14, 0, 16],   scale: 2.2, get rotation() { return [0, faceCenter(14, 16), 0]; } },
 ];
 
 // Street helper: from point A [ax,az] to point B [bx,bz]
-// rue.glb native: 1.912 along X, 0.44 along Z
-const makeStreet = (ax, az, bx, bz, width = 5) => {
+// rue.glb native: 1.912 along X, 0.44 along Z — placed ON ground (not embedded)
+const makeStreet = (ax, az, bx, bz, width = 8) => {
   const dx = bx - ax, dz = bz - az;
   const dist = Math.sqrt(dx * dx + dz * dz);
   return {
     position: [(ax + bx) / 2, 0, (az + bz) / 2],
     rotation: [0, Math.atan2(-dz, dx), 0],
-    scale: [dist / 1.9, 3, width],
+    scale: [dist / 1.9, 1, width],
   };
 };
 
 const STREETS = [
   // Radial streets: center → inner buildings
-  makeStreet(0, 0, -8, -6, 5),     // → forge
-  makeStreet(0, 0, 8, -5, 5),      // → tavern
-  makeStreet(0, 0, 0, -10, 5),     // → chapel
-  makeStreet(0, 0, -10, 2, 4),     // → cottage W
-  makeStreet(0, 0, 9, 3, 4),       // → cottage E
-  makeStreet(0, 0, -6, 7, 4),      // → cottage SW
-  makeStreet(0, 0, 6, 8, 4),       // → cottage SE
-  makeStreet(0, 0, -4, -9, 4),     // → cottage near chapel
-  // Inner ring road (connecting inner buildings to each other)
-  makeStreet(-8, -6, -4, -9, 4),   // forge ↔ cottage chapel
-  makeStreet(-4, -9, 0, -10, 4),   // cottage chapel ↔ chapel
-  makeStreet(0, -10, 8, -5, 4),    // chapel ↔ tavern
-  makeStreet(-8, -6, -10, 2, 4),   // forge ↔ cottage W
-  makeStreet(8, -5, 9, 3, 4),      // tavern ↔ cottage E
-  makeStreet(-10, 2, -6, 7, 4),    // cottage W ↔ cottage SW
-  makeStreet(9, 3, 6, 8, 4),       // cottage E ↔ cottage SE
-  makeStreet(-6, 7, 6, 8, 3),      // cottage SW ↔ cottage SE (south)
-  // Streets to outer ring
-  makeStreet(-8, -6, -13, -9, 3),  // forge → outer NW
-  makeStreet(8, -5, 13, -8, 3),    // tavern → outer NE
-  makeStreet(-10, 2, -14, -2, 3),  // cottage W → outer W
-  makeStreet(9, 3, 14, -1, 3),     // cottage E → outer E
-  makeStreet(-10, 2, -13, 6, 3),   // cottage W → outer SW
-  makeStreet(9, 3, 13, 7, 3),      // cottage E → outer SE
-  makeStreet(-6, 7, -9, 12, 3),    // cottage SW → outer S
-  makeStreet(6, 8, 9, 13, 3),      // cottage SE → outer S
-  makeStreet(0, -10, 4, -14, 3),   // chapel → outer N
-  makeStreet(-4, -9, -8, -13, 3),  // cottage chapel → outer NW
-  // Streets to fill-gap cottages
-  makeStreet(-6, 7, -3, 10, 3),    // SW → south cottage
-  makeStreet(6, 8, 3, 11, 3),      // SE → south cottage
-  makeStreet(-3, 10, 0, 14, 3),    // south → far south
-  makeStreet(3, 11, 0, 14, 3),     // south → far south
-  makeStreet(-13, -9, -16, -7, 3), // outer NW → far west
-  makeStreet(13, -8, 16, -6, 3),   // outer NE → far east
-  makeStreet(-9, 12, -12, 14, 3),  // S → far SW
-  makeStreet(9, 13, 12, 15, 3),    // S → far SE
-  makeStreet(-13, 6, -15, 10, 3),  // W → far SW
-  makeStreet(13, 7, 15, 11, 3),    // E → far SE
-  makeStreet(8, -5, 7, -12, 3),    // tavern → outer SE-N
-  makeStreet(-8, -6, -11, -5, 3),  // forge → mid-west
-  makeStreet(8, -5, 11, -3, 3),    // tavern → mid-east
-  // Outer ring road segments
-  makeStreet(-13, -9, -8, -13, 3), // NW outer
-  makeStreet(-8, -13, 4, -14, 3),  // N outer
-  makeStreet(4, -14, 13, -8, 3),   // NE outer
-  makeStreet(-16, -7, -14, -2, 3), // W outer
-  makeStreet(16, -6, 14, -1, 3),   // E outer
-  makeStreet(-15, 10, -12, 14, 3), // SW outer
-  makeStreet(15, 11, 12, 15, 3),   // SE outer
+  makeStreet(0, 0, -9, -7),        // → forge
+  makeStreet(0, 0, 9, -7),         // → tavern
+  makeStreet(0, 0, 0, -12),        // → chapel
+  makeStreet(0, 0, -10, 1),        // → cottage W
+  makeStreet(0, 0, 10, 2),         // → cottage E
+  makeStreet(0, 0, -7, 8),         // → cottage SW
+  makeStreet(0, 0, 7, 9),          // → cottage SE
+  makeStreet(0, 0, -5, -10),       // → cottage near chapel
+  // Inner ring road
+  makeStreet(-9, -7, -5, -10),     // forge ↔ cottage chapel
+  makeStreet(-5, -10, 0, -12),     // cottage chapel ↔ chapel
+  makeStreet(0, -12, 9, -7),       // chapel ↔ tavern
+  makeStreet(-9, -7, -10, 1),      // forge ↔ cottage W
+  makeStreet(9, -7, 10, 2),        // tavern ↔ cottage E
+  makeStreet(-10, 1, -7, 8),       // cottage W ↔ cottage SW
+  makeStreet(10, 2, 7, 9),         // cottage E ↔ cottage SE
+  makeStreet(-7, 8, 7, 9),         // SW ↔ SE (south road)
+  // Inner → outer connections
+  makeStreet(-9, -7, -15, -10),    // forge → outer NW
+  makeStreet(9, -7, 15, -10),      // tavern → outer NE
+  makeStreet(-10, 1, -16, -3),     // W → outer W
+  makeStreet(10, 2, 16, -2),       // E → outer E
+  makeStreet(-10, 1, -15, 5),      // W → outer SW
+  makeStreet(10, 2, 15, 6),        // E → outer SE
+  makeStreet(-7, 8, -11, 13),      // SW → outer S
+  makeStreet(7, 9, 11, 14),        // SE → outer S
+  makeStreet(0, -12, 6, -16),      // chapel → outer N
+  makeStreet(-5, -10, -8, -15),    // cottage chapel → outer NW
+  // South connections
+  makeStreet(-7, 8, -3, 12),       // SW → south
+  makeStreet(7, 9, 3, 13),         // SE → south
+  makeStreet(-3, 12, 0, 17),       // south → far S
+  makeStreet(3, 13, 0, 17),        // south → far S
+  // Outer ring road
+  makeStreet(-15, -10, -8, -15),   // NW outer
+  makeStreet(-8, -15, 6, -16),     // N outer
+  makeStreet(6, -16, 15, -10),     // NE outer
+  makeStreet(-16, -3, -15, 5),     // W outer
+  makeStreet(16, -2, 15, 6),       // E outer
+  makeStreet(-11, 13, -14, 15),    // SW outer
+  makeStreet(11, 14, 14, 16),      // SE outer
 ];
 
 // Background mountains — ring around the village, closer and shorter
@@ -366,7 +356,7 @@ const Village = ({ isDay }) => (
 
     {/* Cobblestone streets connecting buildings to center */}
     {STREETS.map((s, i) => (
-      <MeshyModel key={`street-${i}`} path="/models/rue.glb" position={s.position} rotation={s.rotation} scale={s.scale} embedY />
+      <MeshyModel key={`street-${i}`} path="/models/rue.glb" position={s.position} rotation={s.rotation} scale={s.scale} />
     ))}
 
     {/* Torches (night only) */}
@@ -472,16 +462,21 @@ const GhostOrb = ({ position }) => {
 const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3 }) => {
   const groupRef = useRef();
   const transitionStartTime = useRef(null);
+  const walkStarted = useRef(false);
   const [currentAnim, setCurrentAnim] = useState('Idle');
 
   useEffect(() => {
-    if (isTransitioning && startPosition) {
+    if (isTransitioning && startPosition && !walkStarted.current) {
+      // Only start walk ONCE per transition cycle
+      walkStarted.current = true;
       transitionStartTime.current = null;
       setCurrentAnim('Walk');
-    } else {
+    }
+    if (!isTransitioning) {
+      walkStarted.current = false;
       setCurrentAnim('Idle');
     }
-  }, [isTransitioning, startPosition]);
+  }, [isTransitioning]);
 
   useFrame((state) => {
     if (!groupRef.current) return;
