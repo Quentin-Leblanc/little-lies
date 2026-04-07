@@ -266,18 +266,18 @@ const STREETS = [
   makeStreet(-4, -9, 5),     // → cottage near chapel
 ];
 
-// Background mountains — ring around the village at distance ~30-40
+// Background mountains — ring around the village, closer and shorter
 const MOUNTAINS = [
-  { position: [0, 0, -40],   rotation: [0, 0, 0],            scale: 25 },   // north (behind chapel)
-  { position: [-30, 0, -30], rotation: [0, 0.5, 0],          scale: 20 },   // northwest
-  { position: [30, 0, -30],  rotation: [0, -0.4, 0],         scale: 22 },   // northeast
-  { position: [-40, 0, 0],   rotation: [0, 0.8, 0],          scale: 18 },   // west
-  { position: [40, 0, 0],    rotation: [0, -0.7, 0],         scale: 18 },   // east
-  { position: [-35, 0, 25],  rotation: [0, 1.2, 0],          scale: 20 },   // southwest
-  { position: [35, 0, 25],   rotation: [0, -1.1, 0],         scale: 20 },   // southeast
-  { position: [0, 0, 35],    rotation: [0, Math.PI, 0],      scale: 22 },   // south
-  { position: [-18, 0, -38], rotation: [0, 0.3, 0],          scale: 15 },   // north-northwest (fill gap)
-  { position: [18, 0, -38],  rotation: [0, -0.2, 0],         scale: 15 },   // north-northeast (fill gap)
+  { position: [0, 0, -28],   rotation: [0, 0, 0],            scale: 15 },   // north (behind chapel)
+  { position: [-22, 0, -20], rotation: [0, 0.5, 0],          scale: 12 },   // northwest
+  { position: [22, 0, -20],  rotation: [0, -0.4, 0],         scale: 13 },   // northeast
+  { position: [-28, 0, 0],   rotation: [0, 0.8, 0],          scale: 11 },   // west
+  { position: [28, 0, 0],    rotation: [0, -0.7, 0],         scale: 11 },   // east
+  { position: [-24, 0, 18],  rotation: [0, 1.2, 0],          scale: 12 },   // southwest
+  { position: [24, 0, 18],   rotation: [0, -1.1, 0],         scale: 12 },   // southeast
+  { position: [0, 0, 24],    rotation: [0, Math.PI, 0],      scale: 13 },   // south
+  { position: [-12, 0, -26], rotation: [0, 0.3, 0],          scale: 9 },    // NNW (fill gap)
+  { position: [12, 0, -26],  rotation: [0, -0.2, 0],         scale: 9 },    // NNE (fill gap)
 ];
 
 const TORCH_POS = [
