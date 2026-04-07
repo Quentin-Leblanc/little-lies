@@ -169,11 +169,11 @@ const VillageCenter = () => (
       scale={5}
       embedY
     />
-    {/* Gallows — auto-grounded on Y=0 */}
+    {/* Gallows — auto-grounded on Y=0, bigger for visibility */}
     <MeshyModel
       path="/models/gallows.glb"
       position={[0, 0, 0]}
-      scale={3}
+      scale={5}
     />
   </group>
 );
@@ -230,18 +230,21 @@ const Barrel = ({ position, rotation = [0, 0, 0] }) => (
 // ============================================================
 // Village Layout
 // ============================================================
-// Meshy AI building positions & config
+// Rotation Y so a building faces center [0,0] from position [bx, bz]
+const faceCenter = (bx, bz) => Math.atan2(-bx, -bz);
+
+// Meshy AI building positions & config — all rotated to face center
 const MESHY_BUILDINGS = [
   // Unique buildings
-  { path: '/models/forge.glb',   position: [-8, 0, -6],   rotation: [0, Math.PI / 4, 0],  scale: 3 },
-  { path: '/models/tavern.glb',  position: [8, 0, -5],    rotation: [0, -Math.PI / 4, 0], scale: 3 },
-  { path: '/models/chapel.glb',  position: [0, 0, -10],   rotation: [0, 0, 0],            scale: 3.5 },
+  { path: '/models/forge.glb',   position: [-8, 0, -6],  scale: 3,   get rotation() { return [0, faceCenter(-8, -6), 0]; } },
+  { path: '/models/tavern.glb',  position: [8, 0, -5],   scale: 3,   get rotation() { return [0, faceCenter(8, -5), 0]; } },
+  { path: '/models/chapel.glb',  position: [0, 0, -10],  scale: 3.5, get rotation() { return [0, faceCenter(0, -10), 0]; } },
   // Cottages spread around the village
-  { path: '/models/cottage.glb', position: [-10, 0, 2],   rotation: [0, Math.PI / 3, 0],  scale: 2.8 },
-  { path: '/models/cottage.glb', position: [9, 0, 3],     rotation: [0, -Math.PI / 3, 0], scale: 2.8 },
-  { path: '/models/cottage.glb', position: [-6, 0, 7],    rotation: [0, Math.PI / 5, 0],  scale: 2.5 },
-  { path: '/models/cottage.glb', position: [6, 0, 8],     rotation: [0, -Math.PI / 6, 0], scale: 2.5 },
-  { path: '/models/cottage.glb', position: [-4, 0, -9],   rotation: [0, Math.PI * 0.7, 0], scale: 2.5 },
+  { path: '/models/cottage.glb', position: [-10, 0, 2],  scale: 2.8, get rotation() { return [0, faceCenter(-10, 2), 0]; } },
+  { path: '/models/cottage.glb', position: [9, 0, 3],    scale: 2.8, get rotation() { return [0, faceCenter(9, 3), 0]; } },
+  { path: '/models/cottage.glb', position: [-6, 0, 7],   scale: 2.5, get rotation() { return [0, faceCenter(-6, 7), 0]; } },
+  { path: '/models/cottage.glb', position: [6, 0, 8],    scale: 2.5, get rotation() { return [0, faceCenter(6, 8), 0]; } },
+  { path: '/models/cottage.glb', position: [-4, 0, -9],  scale: 2.5, get rotation() { return [0, faceCenter(-4, -9), 0]; } },
 ];
 
 // Auto-generate cobblestone street from center [0,0] toward a building
