@@ -121,12 +121,13 @@ const Torch = ({ position }) => {
 // Meshy AI GLB Model Loader — known Y bounds (no Box3 needed)
 // ============================================================
 const MODEL_BOUNDS = {
-  '/models/rue.glb':      { min: -0.226, max: 0.224 },
-  '/models/forge.glb':    { min: -0.957, max: 0.954 },
-  '/models/tavern.glb':   { min: -0.957, max: 0.955 },
-  '/models/chapel.glb':   { min: -0.957, max: 0.957 },
-  '/models/cottage.glb':  { min: -0.957, max: 0.954 },
-  '/models/mountain.glb': { min: -0.407, max: 0.405 },
+  '/models/rue.glb':                  { min: -0.226, max: 0.224 },
+  '/models/cobblestone_platform.glb': { min: -0.052, max: 0.039 },
+  '/models/forge.glb':                { min: -0.957, max: 0.954 },
+  '/models/tavern.glb':               { min: -0.957, max: 0.955 },
+  '/models/chapel.glb':               { min: -0.957, max: 0.957 },
+  '/models/cottage.glb':              { min: -0.957, max: 0.954 },
+  '/models/mountain.glb':             { min: -0.407, max: 0.405 },
   '/models/gallows.glb':  { min: -0.616, max: 0.615 },
 };
 
@@ -257,44 +258,39 @@ const MESHY_BUILDINGS = [
   { path: '/models/cottage.glb', position: [14, 0, 16],   scale: 2.2, get rotation() { return [0, faceCenter(14, 16), 0]; } },
 ];
 
-// Street helper: from point A [ax,az] to point B [bx,bz]
-// rue.glb native: 1.912 along X, 0.44 along Z — placed ON ground (not embedded)
-const makeStreet = (ax, az, bx, bz, width = 8) => {
+// Cobblestone ground tiles — cover village area with paved ground
+// cobblestone_platform.glb: 1.90 x 0.09 x 1.90 (flat square)
+const GROUND_TILES = [
+  // Center area (3x3 grid, scale 8 each = ~15u per tile)
+  { position: [0, 0, 0],     scale: 8 },
+  { position: [15, 0, 0],    scale: 8 },
+  { position: [-15, 0, 0],   scale: 8 },
+  { position: [0, 0, 14],    scale: 8 },
+  { position: [0, 0, -14],   scale: 8 },
+  { position: [-15, 0, -14], scale: 8 },
+  { position: [15, 0, -14],  scale: 8 },
+  { position: [-15, 0, 14],  scale: 8 },
+  { position: [15, 0, 14],   scale: 8 },
+];
+
+// A few short alleys between close buildings (decorative, using rue.glb)
+const makeAlley = (ax, az, bx, bz) => {
   const dx = bx - ax, dz = bz - az;
   const dist = Math.sqrt(dx * dx + dz * dz);
   return {
     position: [(ax + bx) / 2, 0, (az + bz) / 2],
     rotation: [0, Math.atan2(-dz, dx), 0],
-    scale: [dist / 1.9, 1, width],
+    scale: [dist / 1.9, 1, 5],
   };
 };
 
-// Alleys — short street segments placed IN THE GAPS between neighboring houses
-const STREETS = [
-  // North area — alleys between forge, chapel, tavern
-  makeStreet(-7, -8, -3, -11, 5),     // alley between forge & cottage-chapel
-  makeStreet(3, -9, 7, -8, 5),        // alley between chapel area & tavern
-  makeStreet(-3, -13, 3, -14, 5),     // alley behind chapel
-
-  // West side — alleys between west cottages
-  makeStreet(-10, -3, -9, -3, 5),     // gap between forge & cottage W
-  makeStreet(-12, 3, -11, 3, 5),      // gap between cottage W & outer W
-  makeStreet(-9, 4, -8, 5, 5),        // gap between cottage W & cottage SW
-
-  // East side — alleys between east cottages
-  makeStreet(10, -2, 10, -3, 5),      // gap between tavern & cottage E
-  makeStreet(12, 4, 12, 4, 5),        // gap between cottage E & outer E
-  makeStreet(9, 5, 8, 6, 5),          // gap between cottage E & cottage SE
-
-  // South area — alleys between south cottages
-  makeStreet(-5, 10, -2, 11, 5),      // gap between cottage SW & south cottages
-  makeStreet(5, 10, 2, 12, 5),        // gap between cottage SE & south cottages
-
-  // Outer alleys — between outer ring buildings
-  makeStreet(-13, -8, -12, -7, 5),    // between outer NW cottages
-  makeStreet(13, -7, 14, -6, 5),      // between outer NE cottages
-  makeStreet(-15, 7, -14, 9, 5),      // between outer W & SW cottages
-  makeStreet(15, 8, 15, 10, 5),       // between outer E & SE cottages
+const ALLEYS = [
+  makeAlley(-7, -8.5, -3, -10.5),   // between forge & cottage near chapel
+  makeAlley(3, -10, 6, -9),          // between chapel & tavern area
+  makeAlley(-9.5, -3, -9.5, 0),     // narrow alley W of forge
+  makeAlley(9.5, -2, 9.5, 1),       // narrow alley E of tavern
+  makeAlley(-8.5, 4, -7.5, 7),      // between W cottages
+  makeAlley(8.5, 5, 7.5, 8),        // between E cottages
 ];
 
 // Background mountains — ring around the village, closer and shorter
@@ -326,17 +322,22 @@ const TREE_POSITIONS = [
 
 const Village = ({ isDay }) => (
   <group>
-    {/* Center piece — cobblestone path + gallows (Meshy AI) */}
+    {/* Cobblestone ground — paved village floor */}
+    {GROUND_TILES.map((t, i) => (
+      <MeshyModel key={`ground-${i}`} path="/models/cobblestone_platform.glb" position={t.position} scale={t.scale} />
+    ))}
+
+    {/* Gallows at center */}
     <VillageCenter />
 
-    {/* Meshy AI buildings — forge, tavern, chapel */}
+    {/* Buildings */}
     {MESHY_BUILDINGS.map((b, i) => (
       <MeshyModel key={`meshy-${i}`} path={b.path} position={b.position} rotation={b.rotation} scale={b.scale} />
     ))}
 
-    {/* Cobblestone streets connecting buildings to center */}
-    {STREETS.map((s, i) => (
-      <MeshyModel key={`street-${i}`} path="/models/rue.glb" position={s.position} rotation={s.rotation} scale={s.scale} />
+    {/* A few decorative alleys between buildings */}
+    {ALLEYS.map((a, i) => (
+      <MeshyModel key={`alley-${i}`} path="/models/rue.glb" position={a.position} rotation={a.rotation} scale={a.scale} />
     ))}
 
     {/* Torches (night only) */}
@@ -1013,3 +1014,4 @@ useGLTF.preload('/models/tavern.glb');
 useGLTF.preload('/models/chapel.glb');
 useGLTF.preload('/models/cottage.glb');
 useGLTF.preload('/models/mountain.glb');
+useGLTF.preload('/models/cobblestone_platform.glb');
