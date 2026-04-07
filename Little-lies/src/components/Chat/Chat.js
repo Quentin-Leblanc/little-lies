@@ -355,10 +355,13 @@ function Chat(props) {
       {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> Chat des morts</div>}
       <div className="chat-messages">
         {filteredMessages.map((message, index) => {
+          const isPast = message.dayCount != null && message.dayCount < game.dayCount;
+          const pastClass = isPast ? 'msg-past' : '';
+
           // System messages: render as clean separator
           if (message.type === 'system') {
             return (
-              <div className="chat-message-wrapper msg-system" key={message.id || index}>
+              <div className={`chat-message-wrapper msg-system ${pastClass}`} key={message.id || index}>
                 <div className="chat-message chat-day-separator">
                   {message.content}
                 </div>
@@ -367,7 +370,7 @@ function Chat(props) {
           }
 
           return (
-            <div className={`chat-message-wrapper ${getMessageClass(message)}`} key={message.id || index}>
+            <div className={`chat-message-wrapper ${getMessageClass(message)} ${pastClass}`} key={message.id || index}>
               <div
                 className="chat-message-background"
                 style={{ backgroundColor: message.color }}
@@ -375,7 +378,7 @@ function Chat(props) {
               <div className="chat-message">
                 {formatPrefix(message)}
                 {message.type !== 'whisper_notice' && (
-                  <strong style={{ color: message.color }}>{message.player}</strong>
+                  <strong style={{ color: isPast ? '#555' : message.color }}>{message.player}</strong>
                 )}
                 {message.type === 'whisper_notice' ? (
                   <span className="whisper-notice-text">{message.content}</span>
