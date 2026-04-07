@@ -216,14 +216,14 @@ const LobbyParkour = () => (
     {/* ══ Path B (left): ramp + slider ══ */}
     <Ramp position={[-14, 1.2, 0]} rotation={[0, 0, -0.12]} size={[10, 0.4, 7]} color="#cc44ff" />
     <Plat position={[-24, 2.5, 0]} size={[7, 0.5, 7]} color="#44ddaa" />
-    <Slider from={[-24, 2.8, 8]} to={[-24, 2.8, 22]} speed={0.4} color="#ff8844" />
+    <Slider from={[-24, 2.8, 4]} to={[-24, 2.8, 28]} speed={0.4} color="#ff8844" />
     <Plat position={[-24, 3, 32]} size={[7, 0.5, 7]} color="#66ff66" />
     <Bouncer position={[-24, 3.2, 32]} size={[6, 0.3, 6]} />
     <Plat position={[-16, 8, 32]} size={[8, 0.5, 8]} color="#ffdd44" />
 
-    {/* ══ Mid zone: converging paths ══ */}
-    <Slider from={[36, 8.5, 22]} to={[14, 8.5, 24]} speed={0.35} size={[6, 0.5, 6]} color="#ff55cc" />
-    <Slider from={[-16, 8.5, 34]} to={[-2, 8.5, 32]} speed={0.35} size={[6, 0.5, 6]} color="#55ccff" />
+    {/* ══ Mid zone: sliders connect Path A & B to center platform ══ */}
+    <Slider from={[32, 8.5, 20]} to={[10, 8.5, 27]} speed={0.3} size={[6, 0.5, 6]} color="#ff55cc" />
+    <Slider from={[-12, 8.5, 32]} to={[2, 8.5, 28]} speed={0.3} size={[6, 0.5, 6]} color="#55ccff" />
     <Plat position={[6, 9, 28]} size={[10, 0.5, 10]} color="#ff4444" />
 
     {/* ── Spinner challenge ── */}
