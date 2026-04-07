@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sky, Stars, Text, Billboard, Html, useGLTF } from '@react-three/drei';
+import { Sky, Stars, Html, useGLTF } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
@@ -507,16 +507,22 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
           <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
         </mesh>
       )}
-      {/* Name label — player color with dark outline for readability */}
-      <Billboard position={[0, 2.6, 0]}>
-        <mesh position={[0, 0.1, -0.01]}>
-          <planeGeometry args={[player.profile.name.length * 0.13 + 0.3, 0.32]} />
-          <meshBasicMaterial color="#000000" transparent opacity={0.5} />
-        </mesh>
-        <Text fontSize={0.2} color={color} anchorX="center" anchorY="bottom" outlineWidth={0.03} outlineColor="black">
+      {/* Name label — Html for consistent screen-space size */}
+      <Html position={[0, 2.4, 0]} center distanceFactor={8}>
+        <div style={{
+          color: player.profile?.color || color,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          padding: '2px 8px',
+          borderRadius: '4px',
+          fontSize: '13px',
+          fontWeight: 'bold',
+          whiteSpace: 'nowrap',
+          textShadow: '1px 1px 2px black',
+          border: `1px solid ${player.profile?.color || color}`,
+        }}>
           {player.profile.name}
-        </Text>
-      </Billboard>
+        </div>
+      </Html>
       {/* Vote button with count */}
       {showVote && (
         <Html position={[0, 1.3, 0]} center>
@@ -551,15 +557,21 @@ const DeadPlayerFigure = ({ player, position }) => (
       scale={0.65}
     />
     <GhostOrb position={[0, 2, 0]} />
-    <Billboard position={[0, 2.6, 0]}>
-      <mesh position={[0, 0.1, -0.01]}>
-        <planeGeometry args={[player.profile.name.length * 0.13 + 0.3, 0.32]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.5} />
-      </mesh>
-      <Text fontSize={0.2} color="#888899" anchorX="center" anchorY="bottom" outlineWidth={0.03} outlineColor="black">
+    <Html position={[0, 2.4, 0]} center distanceFactor={8}>
+      <div style={{
+        color: '#888899',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: '2px 8px',
+        borderRadius: '4px',
+        fontSize: '13px',
+        fontWeight: 'bold',
+        whiteSpace: 'nowrap',
+        textShadow: '1px 1px 2px black',
+        opacity: 0.7,
+      }}>
         {player.profile.name}
-      </Text>
-    </Billboard>
+      </div>
+    </Html>
   </group>
 );
 
@@ -888,7 +900,7 @@ const MainScene = () => {
                 startPosition={nightTransition ? dayPositions[player.id] : null}
                 isTransitioning={nightTransition}
                 transitionDuration={3}
-                color={player.character?.couleur || '#ffffff'}
+                color={player.profile?.color || '#ffffff'}
                 isAccused={isAccused}
                 showVote={showVoteBtn}
                 isVoteTarget={isVoteTarget}
