@@ -75,8 +75,8 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     <div className="custom-lobby-container">
       {/* 3D Scene */}
       <Canvas shadows camera={{ position: [0, 10, 18], fov: 55 }} dpr={[1, 1.5]}>
-        <color attach="background" args={['#e8e8f0']} />
-        <fog attach="fog" args={['#e8e8f0', 80, 180]} />
+        <color attach="background" args={['#4a90d9']} />
+        <fog attach="fog" args={['#4a90d9', 80, 180]} />
         <PerformanceMonitor />
         <ambientLight intensity={0.7} />
         <directionalLight
@@ -97,10 +97,15 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           {playroom_players.map((player, idx) => {
             const name = player.getState?.()?.profile?.name || 'Joueur';
             const isLocal = player.id === currentPlayer?.id;
+            // Spread players in a circle on the spawn platform
+            const spawnAngle = (idx / Math.max(playroom_players.length, 1)) * Math.PI * 2;
+            const spawnRadius = 4;
+            const spawnX = Math.cos(spawnAngle) * spawnRadius;
+            const spawnZ = Math.sin(spawnAngle) * spawnRadius;
             return (
               <CharacterController
                 key={player.id}
-                position={[idx * 1.5 - 2, 1.5, 0]}
+                position={[spawnX, 1.5, spawnZ]}
                 state={player}
                 isLocalPlayer={isLocal}
                 playerName={name}
