@@ -523,24 +523,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
           {player.profile.name}
         </div>
       </Html>
-      {/* Vote button with count */}
-      {showVote && (
-        <Html position={[0, 1.3, 0]} center>
-          <button
-            className={`vote-3d-btn ${isVoteTarget ? 'vote-3d-btn-active' : ''}`}
-            onClick={() => onVote(player.id)}
-          >Vote <span className="vote-3d-count">{voteCount}/{totalAlive}</span></button>
-        </Html>
-      )}
-      {/* Judgment buttons */}
-      {showJudgment && (
-        <Html position={[0, 1.3, 0]} center>
-          <div className="judgment-3d-btns">
-            <button className="judge-btn judge-save" onClick={() => onJudge('innocent')}>Sauver</button>
-            <button className="judge-btn judge-lynch" onClick={() => onJudge('guilty')}>Lyncher</button>
-          </div>
-        </Html>
-      )}
+      {/* Vote/Judgment buttons removed — handled in action panel */}
     </group>
   );
 };

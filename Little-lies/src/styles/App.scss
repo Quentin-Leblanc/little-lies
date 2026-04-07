@@ -12,7 +12,7 @@
 .game-layout {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  grid-template-columns: 280px 1fr 300px;
+  grid-template-columns: 280px 1fr 380px;
   grid-template-areas:
     "header  header  header"
     "players center  sidebar"
@@ -36,8 +36,9 @@
   overflow-x: hidden;
   padding: 10px;
   z-index: 5;
-  background: rgba(10, 10, 16, 0.92);
+  background: rgba(10, 10, 16, 0.75);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
   display: grid;
   grid-template-rows: auto auto 1fr;
   grid-template-columns: 1fr;
@@ -58,8 +59,9 @@
   overflow-x: hidden;
   padding: 10px;
   z-index: 5;
-  background: rgba(10, 10, 16, 0.92);
+  background: rgba(10, 10, 16, 0.75);
   border-left: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
 }
