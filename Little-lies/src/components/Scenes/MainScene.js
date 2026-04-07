@@ -1,9 +1,11 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, Stars, Text, Billboard, Html } from '@react-three/drei';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
+import { Character } from '../Character/Character';
 import './MainScene.scss';
 
 // Ambient night messages
@@ -25,182 +27,557 @@ const NIGHT_AMBIANCE = [
 ];
 
 // ============================================================
-// Ground
+// Ground with dirt path
 // ============================================================
 const GroundPlane = ({ isDay }) => (
-  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-    <circleGeometry args={[25, 64]} />
-    <meshStandardMaterial color={isDay ? '#3a6e2c' : '#1a2e1c'} />
-  </mesh>
-);
-
-// ============================================================
-// Village Building
-// ============================================================
-const Building = ({ position, size = [2, 2.5, 2], color, roofColor }) => (
-  <group position={position}>
-    <mesh position={[0, size[1] / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={size} />
-      <meshStandardMaterial color={color} />
+  <group>
+    {/* Main grass */}
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+      <circleGeometry args={[30, 64]} />
+      <meshStandardMaterial color={isDay ? '#3a6e2c' : '#1a2e1c'} />
     </mesh>
-    <mesh position={[0, size[1] + 0.4, 0]} castShadow>
-      <coneGeometry args={[size[0] * 0.85, 1.2, 4]} />
-      <meshStandardMaterial color={roofColor} />
+    {/* Dirt path ring around village */}
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.0, 0]} receiveShadow>
+      <ringGeometry args={[7, 9, 32]} />
+      <meshStandardMaterial color={isDay ? '#8B7355' : '#3d3325'} />
     </mesh>
-    <mesh position={[0, 0.5, size[2] / 2 + 0.01]}>
-      <planeGeometry args={[0.6, 1]} />
-      <meshStandardMaterial color="#3d2b1f" />
+    {/* Inner dirt area */}
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.0, 0]} receiveShadow>
+      <circleGeometry args={[6.5, 32]} />
+      <meshStandardMaterial color={isDay ? '#7a6a50' : '#352d20'} />
     </mesh>
-    <mesh position={[0.5, size[1] * 0.7, size[2] / 2 + 0.01]}>
-      <planeGeometry args={[0.4, 0.4]} />
-      <meshBasicMaterial color="#ffdd88" transparent opacity={0.6} />
-    </mesh>
+    {/* Night ground fog layer */}
+    {!isDay && (
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
+        <circleGeometry args={[25, 32]} />
+        <meshBasicMaterial color="#1a2244" transparent opacity={0.1} depthWrite={false} />
+      </mesh>
+    )}
   </group>
 );
 
 // ============================================================
-// Torch
+// Enhanced Village Building
+// ============================================================
+const Building = ({ position, size = [2, 2.5, 2], color, roofColor, hasChimney = false, isDay }) => (
+  <group position={position}>
+    {/* Main body */}
+    <mesh position={[0, size[1] / 2, 0]} castShadow receiveShadow>
+      <boxGeometry args={size} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+    {/* Foundation */}
+    <mesh position={[0, 0.08, 0]} castShadow>
+      <boxGeometry args={[size[0] + 0.1, 0.15, size[2] + 0.1]} />
+      <meshStandardMaterial color="#666" />
+    </mesh>
+    {/* Roof */}
+    <mesh position={[0, size[1] + 0.5, 0]} castShadow>
+      <coneGeometry args={[size[0] * 0.9, 1.4, 4]} />
+      <meshStandardMaterial color={roofColor} />
+    </mesh>
+    {/* Door frame */}
+    <mesh position={[0, 0.55, size[2] / 2 + 0.015]}>
+      <planeGeometry args={[0.7, 1.15]} />
+      <meshStandardMaterial color="#2a1a0f" />
+    </mesh>
+    {/* Door */}
+    <mesh position={[0, 0.55, size[2] / 2 + 0.02]}>
+      <planeGeometry args={[0.55, 1]} />
+      <meshStandardMaterial color="#3d2b1f" />
+    </mesh>
+    {/* Windows - front */}
+    <mesh position={[-0.5, size[1] * 0.65, size[2] / 2 + 0.01]}>
+      <planeGeometry args={[0.35, 0.35]} />
+      <meshBasicMaterial color={isDay ? '#ccbb88' : '#ffdd88'} transparent opacity={isDay ? 0.3 : 0.8} />
+    </mesh>
+    <mesh position={[0.5, size[1] * 0.65, size[2] / 2 + 0.01]}>
+      <planeGeometry args={[0.35, 0.35]} />
+      <meshBasicMaterial color={isDay ? '#ccbb88' : '#ffdd88'} transparent opacity={isDay ? 0.3 : 0.8} />
+    </mesh>
+    {/* Window - side */}
+    <mesh position={[size[0] / 2 + 0.01, size[1] * 0.6, 0]} rotation={[0, Math.PI / 2, 0]}>
+      <planeGeometry args={[0.35, 0.35]} />
+      <meshBasicMaterial color={isDay ? '#ccbb88' : '#ffdd88'} transparent opacity={isDay ? 0.2 : 0.6} />
+    </mesh>
+    {/* Chimney */}
+    {hasChimney && (
+      <mesh position={[size[0] * 0.2, size[1] + 1.1, -size[2] * 0.15]} castShadow>
+        <boxGeometry args={[0.3, 0.7, 0.3]} />
+        <meshStandardMaterial color="#777" />
+      </mesh>
+    )}
+  </group>
+);
+
+// ============================================================
+// Improved Torch with multi-layer flame
 // ============================================================
 const Torch = ({ position }) => {
   const lightRef = useRef();
+  const flameRef = useRef();
+
   useFrame((state) => {
+    const t = state.clock.elapsedTime;
     if (lightRef.current) {
-      lightRef.current.intensity = 1.5 + Math.sin(state.clock.elapsedTime * 8) * 0.3;
+      lightRef.current.intensity = 2 + Math.sin(t * 8 + position[0]) * 0.5 + Math.sin(t * 13) * 0.2;
+    }
+    if (flameRef.current) {
+      flameRef.current.scale.y = 1 + Math.sin(t * 10 + position[2]) * 0.25;
+      flameRef.current.scale.x = 1 + Math.sin(t * 8 + 1) * 0.15;
     }
   });
+
   return (
     <group position={position}>
-      <mesh position={[0, 0.8, 0]}>
-        <cylinderGeometry args={[0.03, 0.05, 1.6, 6]} />
+      {/* Pole */}
+      <mesh position={[0, 0.8, 0]} castShadow>
+        <cylinderGeometry args={[0.03, 0.06, 1.6, 6]} />
         <meshStandardMaterial color="#5a3a1a" />
       </mesh>
-      <pointLight ref={lightRef} position={[0, 1.7, 0]} intensity={1.5} color="#ff8833" distance={8} />
-      <mesh position={[0, 1.7, 0]}>
-        <sphereGeometry args={[0.08, 6, 6]} />
-        <meshBasicMaterial color="#ff6600" />
+      {/* Bracket */}
+      <mesh position={[0, 1.55, 0]}>
+        <cylinderGeometry args={[0.08, 0.05, 0.12, 6]} />
+        <meshStandardMaterial color="#444" metalness={0.5} roughness={0.5} />
       </mesh>
+      {/* Multi-layer flame */}
+      <group ref={flameRef} position={[0, 1.68, 0]}>
+        {/* Outer flame - red/orange */}
+        <mesh>
+          <coneGeometry args={[0.1, 0.35, 6]} />
+          <meshBasicMaterial color="#ff4400" transparent opacity={0.85} />
+        </mesh>
+        {/* Mid flame - orange */}
+        <mesh position={[0, 0.05, 0]}>
+          <coneGeometry args={[0.07, 0.25, 6]} />
+          <meshBasicMaterial color="#ff8800" transparent opacity={0.8} />
+        </mesh>
+        {/* Inner flame - yellow */}
+        <mesh position={[0, 0.1, 0]}>
+          <coneGeometry args={[0.04, 0.18, 4]} />
+          <meshBasicMaterial color="#ffee44" transparent opacity={0.9} />
+        </mesh>
+        {/* Flame tip - white hot */}
+        <mesh position={[0, 0.14, 0]}>
+          <coneGeometry args={[0.02, 0.1, 4]} />
+          <meshBasicMaterial color="#ffffcc" transparent opacity={0.7} />
+        </mesh>
+      </group>
+      {/* Point light */}
+      <pointLight ref={lightRef} position={[0, 1.85, 0]} intensity={2} color="#ff8833" distance={10} castShadow />
     </group>
   );
 };
 
 // ============================================================
-// Town Square
+// Village Well (center piece)
 // ============================================================
-const TownSquare = () => (
+const Well = () => (
   <group>
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
-      <circleGeometry args={[6, 32]} />
-      <meshStandardMaterial color="#6b6b6b" />
+    {/* Stone base */}
+    <mesh position={[0, 0.35, 0]} castShadow>
+      <cylinderGeometry args={[0.75, 0.85, 0.7, 12]} />
+      <meshStandardMaterial color="#888" roughness={0.8} />
     </mesh>
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-      <ringGeometry args={[4.5, 5, 32]} />
-      <meshStandardMaterial color="#555" />
+    {/* Inner hole */}
+    <mesh position={[0, 0.36, 0]}>
+      <cylinderGeometry args={[0.55, 0.55, 0.72, 12]} />
+      <meshStandardMaterial color="#111" />
     </mesh>
-    <mesh position={[0, 0.3, 0]} castShadow>
-      <cylinderGeometry args={[0.8, 1, 0.6, 16]} />
-      <meshStandardMaterial color="#888" />
+    {/* Support posts */}
+    <mesh position={[-0.55, 1.1, 0]} castShadow>
+      <boxGeometry args={[0.08, 1.5, 0.08]} />
+      <meshStandardMaterial color="#5a3a1a" />
     </mesh>
-    <mesh position={[0, 1.0, 0]} castShadow>
-      <cylinderGeometry args={[0.15, 0.15, 1.0, 8]} />
-      <meshStandardMaterial color="#999" />
+    <mesh position={[0.55, 1.1, 0]} castShadow>
+      <boxGeometry args={[0.08, 1.5, 0.08]} />
+      <meshStandardMaterial color="#5a3a1a" />
+    </mesh>
+    {/* Roof beam */}
+    <mesh position={[0, 1.85, 0]} castShadow>
+      <boxGeometry args={[1.3, 0.08, 0.5]} />
+      <meshStandardMaterial color="#5a3a1a" />
+    </mesh>
+    {/* Small roof */}
+    <mesh position={[0, 2.1, 0]} castShadow>
+      <coneGeometry args={[0.8, 0.5, 4]} />
+      <meshStandardMaterial color="#8b4513" />
+    </mesh>
+    {/* Rope */}
+    <mesh position={[0, 1.4, 0]}>
+      <cylinderGeometry args={[0.012, 0.012, 0.9, 4]} />
+      <meshStandardMaterial color="#c8b070" />
+    </mesh>
+    {/* Bucket */}
+    <mesh position={[0, 0.95, 0]} castShadow>
+      <cylinderGeometry args={[0.08, 0.1, 0.15, 6]} />
+      <meshStandardMaterial color="#6b5030" />
     </mesh>
   </group>
 );
 
 // ============================================================
-// Gallows
+// Town Square
+// ============================================================
+const TownSquare = ({ isDay }) => (
+  <group>
+    {/* Stone circle */}
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+      <circleGeometry args={[6, 32]} />
+      <meshStandardMaterial color={isDay ? '#7a7a7a' : '#444'} />
+    </mesh>
+    {/* Outer decorative ring */}
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+      <ringGeometry args={[5.5, 6, 32]} />
+      <meshStandardMaterial color={isDay ? '#666' : '#333'} />
+    </mesh>
+    {/* Inner ring */}
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+      <ringGeometry args={[1.5, 2, 16]} />
+      <meshStandardMaterial color={isDay ? '#666' : '#333'} />
+    </mesh>
+    {/* Well */}
+    <Well />
+    {/* Benches */}
+    {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle, i) => (
+      <group key={`bench-${i}`} position={[Math.cos(angle) * 4.5, 0, Math.sin(angle) * 4.5]} rotation={[0, -angle, 0]}>
+        <mesh position={[0, 0.25, 0]} castShadow>
+          <boxGeometry args={[1, 0.06, 0.3]} />
+          <meshStandardMaterial color="#5a3a1a" />
+        </mesh>
+        <mesh position={[-0.4, 0.12, 0]} castShadow>
+          <boxGeometry args={[0.06, 0.25, 0.25]} />
+          <meshStandardMaterial color="#4a2a0a" />
+        </mesh>
+        <mesh position={[0.4, 0.12, 0]} castShadow>
+          <boxGeometry args={[0.06, 0.25, 0.25]} />
+          <meshStandardMaterial color="#4a2a0a" />
+        </mesh>
+      </group>
+    ))}
+  </group>
+);
+
+// ============================================================
+// Improved Gallows with rope and noose
 // ============================================================
 const Gallows = ({ visible }) => {
   if (!visible) return null;
   return (
     <group position={[0, 0, -2]}>
+      {/* Platform */}
       <mesh position={[0, 0.15, 0]} castShadow>
-        <boxGeometry args={[2.5, 0.3, 2]} />
+        <boxGeometry args={[3, 0.3, 2.5]} />
         <meshStandardMaterial color="#5a3a1a" />
       </mesh>
-      <mesh position={[-0.8, 1.5, 0]} castShadow>
-        <boxGeometry args={[0.15, 3, 0.15]} />
+      {/* Platform edge */}
+      <mesh position={[0, 0.31, 0]} castShadow>
+        <boxGeometry args={[3.1, 0.02, 2.6]} />
         <meshStandardMaterial color="#4a2a0a" />
       </mesh>
-      <mesh position={[0, 2.9, 0]} castShadow>
-        <boxGeometry args={[1.8, 0.12, 0.12]} />
+      {/* Steps */}
+      <mesh position={[-1.3, 0.05, 1]} castShadow>
+        <boxGeometry args={[0.7, 0.1, 0.5]} />
         <meshStandardMaterial color="#4a2a0a" />
+      </mesh>
+      <mesh position={[-1.3, 0.15, 0.6]} castShadow>
+        <boxGeometry args={[0.7, 0.1, 0.5]} />
+        <meshStandardMaterial color="#4a2a0a" />
+      </mesh>
+      {/* Main pillar */}
+      <mesh position={[-1, 1.9, 0]} castShadow>
+        <boxGeometry args={[0.18, 3.5, 0.18]} />
+        <meshStandardMaterial color="#4a2a0a" />
+      </mesh>
+      {/* Cross beam */}
+      <mesh position={[0.1, 3.5, 0]} castShadow>
+        <boxGeometry args={[2.4, 0.14, 0.14]} />
+        <meshStandardMaterial color="#4a2a0a" />
+      </mesh>
+      {/* Diagonal brace */}
+      <mesh position={[-0.45, 2.9, 0]} castShadow rotation={[0, 0, -0.55]}>
+        <boxGeometry args={[0.08, 1.4, 0.08]} />
+        <meshStandardMaterial color="#3d200a" />
+      </mesh>
+      {/* Rope */}
+      <mesh position={[0.6, 2.7, 0]}>
+        <cylinderGeometry args={[0.018, 0.018, 1.6, 4]} />
+        <meshStandardMaterial color="#c8b070" />
+      </mesh>
+      {/* Noose */}
+      <mesh position={[0.6, 1.85, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.1, 0.018, 6, 12]} />
+        <meshStandardMaterial color="#c8b070" />
+      </mesh>
+      {/* Trapdoor marking */}
+      <mesh position={[0.4, 0.31, 0]}>
+        <boxGeometry args={[0.9, 0.01, 0.9]} />
+        <meshStandardMaterial color="#3a200a" />
       </mesh>
     </group>
   );
 };
 
 // ============================================================
+// Low-poly Tree
+// ============================================================
+const LowPolyTree = ({ position, scale = 1, variant = 0 }) => (
+  <group position={position} scale={scale} rotation={[0, variant * 1.3, 0]}>
+    {/* Trunk */}
+    <mesh position={[0, 0.6, 0]} castShadow>
+      <cylinderGeometry args={[0.06, 0.1, 1.2, 5]} />
+      <meshStandardMaterial color="#4a3520" />
+    </mesh>
+    {/* Foliage layers */}
+    <mesh position={[0, 1.5, 0]} castShadow>
+      <coneGeometry args={[0.9, 1.6, 6]} />
+      <meshStandardMaterial color={variant % 2 === 0 ? '#1a5a1a' : '#1d4a1d'} />
+    </mesh>
+    <mesh position={[0, 2.1, 0]} castShadow>
+      <coneGeometry args={[0.65, 1.2, 6]} />
+      <meshStandardMaterial color={variant % 2 === 0 ? '#1d6a1d' : '#1a5a1a'} />
+    </mesh>
+    <mesh position={[0, 2.5, 0]} castShadow>
+      <coneGeometry args={[0.4, 0.9, 5]} />
+      <meshStandardMaterial color="#206a20" />
+    </mesh>
+  </group>
+);
+
+// ============================================================
+// Barrel prop
+// ============================================================
+const Barrel = ({ position, rotation = [0, 0, 0] }) => (
+  <group position={position} rotation={rotation}>
+    <mesh position={[0, 0.35, 0]} castShadow>
+      <cylinderGeometry args={[0.22, 0.26, 0.7, 8]} />
+      <meshStandardMaterial color="#6b3a1a" />
+    </mesh>
+    {/* Metal bands */}
+    <mesh position={[0, 0.18, 0]}>
+      <cylinderGeometry args={[0.27, 0.27, 0.04, 8]} />
+      <meshStandardMaterial color="#555" metalness={0.6} roughness={0.4} />
+    </mesh>
+    <mesh position={[0, 0.52, 0]}>
+      <cylinderGeometry args={[0.23, 0.23, 0.04, 8]} />
+      <meshStandardMaterial color="#555" metalness={0.6} roughness={0.4} />
+    </mesh>
+  </group>
+);
+
+// ============================================================
 // Village Layout
 // ============================================================
 const BUILDINGS = [
-  { pos: [-8, 0, -6], size: [2.5, 3, 2.5], color: '#b8a080', roof: '#8b4513' },
-  { pos: [-10, 0, 2], size: [2, 2.5, 2], color: '#c8b898', roof: '#a0522d' },
-  { pos: [-6, 0, 7], size: [2.2, 2.8, 2.2], color: '#d4c4a8', roof: '#6b3a1a' },
-  { pos: [8, 0, -5], size: [3, 3.5, 2.5], color: '#a89070', roof: '#7a4422' },
-  { pos: [9, 0, 3], size: [2, 2.2, 2], color: '#baa888', roof: '#8b5a2b' },
-  { pos: [6, 0, 8], size: [2.5, 2.5, 2], color: '#c0a080', roof: '#6d3d1d' },
-  { pos: [0, 0, -10], size: [3.5, 4, 3], color: '#a08060', roof: '#5c2e0e' },
-  { pos: [-4, 0, -9], size: [2, 2.2, 2], color: '#bbb098', roof: '#8a4a2a' },
+  { pos: [-8, 0, -6], size: [2.5, 3, 2.5], color: '#b8a080', roof: '#8b4513', chimney: true },
+  { pos: [-10, 0, 2], size: [2, 2.5, 2], color: '#c8b898', roof: '#a0522d', chimney: false },
+  { pos: [-6, 0, 7], size: [2.2, 2.8, 2.2], color: '#d4c4a8', roof: '#6b3a1a', chimney: true },
+  { pos: [8, 0, -5], size: [3, 3.5, 2.5], color: '#a89070', roof: '#7a4422', chimney: true },
+  { pos: [9, 0, 3], size: [2, 2.2, 2], color: '#baa888', roof: '#8b5a2b', chimney: false },
+  { pos: [6, 0, 8], size: [2.5, 2.5, 2], color: '#c0a080', roof: '#6d3d1d', chimney: false },
+  { pos: [0, 0, -10], size: [3.5, 4, 3], color: '#a08060', roof: '#5c2e0e', chimney: true },
+  { pos: [-4, 0, -9], size: [2, 2.2, 2], color: '#bbb098', roof: '#8a4a2a', chimney: false },
 ];
-const TORCH_POS = [[-4,0,-4],[4,0,-4],[-4,0,4],[4,0,4],[0,0,-5.5],[-5.5,0,0],[5.5,0,0],[0,0,5.5]];
+
+const TORCH_POS = [
+  [-4, 0, -4], [4, 0, -4], [-4, 0, 4], [4, 0, 4],
+  [0, 0, -5.5], [-5.5, 0, 0], [5.5, 0, 0], [0, 0, 5.5],
+];
+
+const TREE_POSITIONS = [
+  [-13, 0, -10], [-15, 0, 0], [-13, 0, 8], [-8, 0, 12],
+  [13, 0, -8], [15, 0, 2], [11, 0, 11], [0, 0, 14],
+  [-16, 0, -5], [16, 0, -3], [-11, 0, -13], [9, 0, -13],
+  [-17, 0, 6], [17, 0, 7], [0, 0, -15], [5, 0, 15],
+  [-14, 0, 12], [14, 0, -11],
+];
+
+const BARREL_POSITIONS = [
+  [-7, 0, -3.5], [7.5, 0, 5.5], [-5.5, 0, 6.5],
+  [8.5, 0, -2.5], [-9, 0, -3],
+];
 
 const Village = ({ isDay, isTrialPhase }) => (
   <group>
-    <TownSquare />
+    <TownSquare isDay={isDay} />
     {BUILDINGS.map((b, i) => (
-      <Building key={i} position={b.pos} size={b.size} color={b.color} roofColor={b.roof} />
+      <Building key={i} position={b.pos} size={b.size} color={b.color} roofColor={b.roof} hasChimney={b.chimney} isDay={isDay} />
     ))}
-    {!isDay && TORCH_POS.map((pos, i) => <Torch key={i} position={pos} />)}
+    {!isDay && TORCH_POS.map((pos, i) => <Torch key={`torch-${i}`} position={pos} />)}
+    {TREE_POSITIONS.map((pos, i) => (
+      <LowPolyTree key={`tree-${i}`} position={pos} scale={0.7 + (i % 4) * 0.2} variant={i} />
+    ))}
+    {BARREL_POSITIONS.map((pos, i) => (
+      <Barrel key={`barrel-${i}`} position={pos} rotation={[0, i * 1.1, 0]} />
+    ))}
     <Gallows visible={isTrialPhase} />
   </group>
 );
 
 // ============================================================
-// Player Figure (simple capsule with name)
+// Moon (night only)
 // ============================================================
-const PlayerFigure = ({ player, position, color, isAccused, showVote, isVoteTarget, onVote, showJudgment, onJudge }) => {
+const Moon = () => (
+  <group position={[-20, 22, -18]}>
+    <mesh>
+      <sphereGeometry args={[2.5, 16, 16]} />
+      <meshBasicMaterial color="#ffffee" />
+    </mesh>
+    {/* Subtle glow halo */}
+    <mesh>
+      <sphereGeometry args={[3.2, 16, 16]} />
+      <meshBasicMaterial color="#aabbdd" transparent opacity={0.08} />
+    </mesh>
+    <pointLight color="#8899cc" intensity={0.4} distance={80} />
+  </group>
+);
+
+// ============================================================
+// Fireflies (night particle effect)
+// ============================================================
+const Fireflies = ({ count = 40 }) => {
   const meshRef = useRef();
+  const particles = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push({
+        x: (Math.random() - 0.5) * 35,
+        y: Math.random() * 3.5 + 0.5,
+        z: (Math.random() - 0.5) * 35,
+        speed: Math.random() * 0.4 + 0.15,
+        offset: Math.random() * Math.PI * 2,
+      });
+    }
+    return arr;
+  }, [count]);
+
+  const dummy = useMemo(() => new THREE.Object3D(), []);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.05;
+    const t = state.clock.elapsedTime;
+    particles.forEach((p, i) => {
+      const px = p.x + Math.sin(t * p.speed + p.offset) * 1.5;
+      const py = p.y + Math.sin(t * p.speed * 1.5 + p.offset) * 0.4;
+      const pz = p.z + Math.cos(t * p.speed + p.offset) * 1.5;
+      dummy.position.set(px, py, pz);
+      const pulse = 0.4 + Math.sin(t * 3 + p.offset) * 0.35;
+      dummy.scale.setScalar(pulse);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <sphereGeometry args={[0.04, 4, 4]} />
+      <meshBasicMaterial color="#bbffaa" transparent opacity={0.75} />
+    </instancedMesh>
+  );
+};
+
+// ============================================================
+// Ghost Orb (floats above dead players)
+// ============================================================
+const GhostOrb = ({ position }) => {
+  const ref = useRef();
+  useFrame((state) => {
+    if (ref.current) {
+      const t = state.clock.elapsedTime;
+      ref.current.position.y = position[1] + Math.sin(t * 1.2) * 0.25;
+      ref.current.material.opacity = 0.25 + Math.sin(t * 2) * 0.15;
+    }
+  });
+  return (
+    <mesh ref={ref} position={position}>
+      <sphereGeometry args={[0.15, 8, 8]} />
+      <meshBasicMaterial color="#aaccff" transparent opacity={0.35} />
+    </mesh>
+  );
+};
+
+// ============================================================
+// Player Figure — uses Character model with rotation + walk
+// ============================================================
+const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3 }) => {
+  const groupRef = useRef();
+  const transitionStartTime = useRef(null);
+  const [currentAnim, setCurrentAnim] = useState('Idle');
+
+  useEffect(() => {
+    if (isTransitioning && startPosition) {
+      transitionStartTime.current = null;
+      setCurrentAnim('Walk');
+    } else {
+      setCurrentAnim('Idle');
+    }
+  }, [isTransitioning, startPosition]);
+
+  useFrame((state) => {
+    if (!groupRef.current) return;
+
+    if (isTransitioning && startPosition) {
+      // Initialize transition start time on first frame
+      if (transitionStartTime.current === null) {
+        transitionStartTime.current = state.clock.elapsedTime;
+      }
+      const elapsed = state.clock.elapsedTime - transitionStartTime.current;
+      const t = Math.min(elapsed / transitionDuration, 1);
+      const eased = t * t * (3 - 2 * t); // smoothstep
+
+      // Interpolate position
+      groupRef.current.position.x = startPosition[0] + (position[0] - startPosition[0]) * eased;
+      groupRef.current.position.y = position[1];
+      groupRef.current.position.z = startPosition[2] + (position[2] - startPosition[2]) * eased;
+
+      // Face outward (away from center) during walk
+      const cx = groupRef.current.position.x;
+      const cz = groupRef.current.position.z;
+      groupRef.current.rotation.y = Math.atan2(cx, cz);
+
+      // End walk animation when done
+      if (t >= 1 && currentAnim === 'Walk') {
+        setCurrentAnim('Idle');
+      }
+    } else {
+      // Subtle idle bob
+      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.03;
     }
   });
 
   return (
-    <group ref={meshRef} position={position}>
-      <mesh position={[0, 0.5, 0]} castShadow>
-        <capsuleGeometry args={[0.2, 0.6, 4, 8]} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-      <mesh position={[0, 1.1, 0]} castShadow>
-        <sphereGeometry args={[0.18, 8, 8]} />
-        <meshStandardMaterial color="#ffe0bd" />
-      </mesh>
+    <group ref={groupRef} position={position} rotation={rotation}>
+      <Character
+        color={color}
+        animation={currentAnim}
+        weapon="Knife_1"
+        scale={0.55}
+      />
+      {/* Accused ring */}
       {isAccused && (
         <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.4, 0.55, 16]} />
+          <ringGeometry args={[0.5, 0.65, 16]} />
           <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
         </mesh>
       )}
-      <Billboard position={[0, 1.6, 0]}>
+      {/* Name label */}
+      <Billboard position={[0, 1.8, 0]}>
         <Text fontSize={0.18} color="white" anchorX="center" anchorY="bottom" outlineWidth={0.02} outlineColor="black">
           {player.profile.name}
         </Text>
       </Billboard>
-      {/* Vote button - on the character body */}
+      {/* Vote button with count */}
       {showVote && (
-        <Html position={[0, 0.7, 0]} center>
+        <Html position={[0, 0.9, 0]} center>
           <button
             className={`vote-3d-btn ${isVoteTarget ? 'vote-3d-btn-active' : ''}`}
             onClick={() => onVote(player.id)}
-          >Vote</button>
+          >Vote <span className="vote-3d-count">{voteCount}/{totalAlive}</span></button>
         </Html>
       )}
-      {/* Judgment buttons (on accused player) */}
+      {/* Judgment buttons */}
       {showJudgment && (
-        <Html position={[0, 0.7, 0]} center>
+        <Html position={[0, 0.9, 0]} center>
           <div className="judgment-3d-btns">
             <button className="judge-btn judge-save" onClick={() => onJudge('innocent')}>Sauver</button>
             <button className="judge-btn judge-lynch" onClick={() => onJudge('guilty')}>Lyncher</button>
@@ -212,59 +589,96 @@ const PlayerFigure = ({ player, position, color, isAccused, showVote, isVoteTarg
 };
 
 // ============================================================
-// Dead Player (lying down)
+// Dead Player — Character with Death animation + ghost orb
 // ============================================================
-const DeadPlayerFigure = ({ player, position }) => {
-  return (
-    <group position={position} rotation={[0, 0, Math.PI / 2]}>
-      <mesh position={[0, 0.15, 0]}>
-        <capsuleGeometry args={[0.15, 0.5, 4, 8]} />
-        <meshStandardMaterial color="#444" />
-      </mesh>
-    </group>
-  );
-};
+const DeadPlayerFigure = ({ player, position }) => (
+  <group position={position}>
+    <Character
+      color="#555555"
+      animation="Death"
+      weapon="Knife_1"
+      scale={0.45}
+    />
+    <GhostOrb position={[0, 1.6, 0]} />
+    <Billboard position={[0, 2.2, 0]}>
+      <Text fontSize={0.14} color="rgba(180,180,200,0.7)" anchorX="center" anchorY="bottom" outlineWidth={0.015} outlineColor="black">
+        {player.profile.name}
+      </Text>
+    </Billboard>
+  </group>
+);
 
 // ============================================================
 // Camera Controller (smooth follow based on phase)
 // ============================================================
+// Night cinematic camera waypoints — alley crawl then starry sky reveal
+const NIGHT_CAMERA_WAYPOINTS = [
+  { pos: [0, 10, 8], lookAt: [0, 0, 0], duration: 5 },             // Overview during walk-away
+  { pos: [-2.3, 1.6, -6], lookAt: [-2.3, 1.5, -12], duration: 10 }, // Enter dark alley between buildings [0,-10] & [-4,-9]
+  { pos: [-2.3, 5, -8.5], lookAt: [-2.3, 18, -9], duration: 8 },   // Rise between rooftops, tilt up to reveal stars
+  { pos: [0, 14, 3], lookAt: [0, 30, 0], duration: 7 },            // Wide starry sky view
+];
+
 const CameraController = ({ phase, CONSTANTS }) => {
   const { camera } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 8, 12));
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
+  const nightTimeRef = useRef(0);
+  const prevPhaseRef = useRef(phase);
 
-  useFrame(() => {
-    // Different camera angles per phase
-    switch (phase) {
-      case CONSTANTS.PHASE.NIGHT:
-        targetPos.current.set(0, 12, 8);
-        targetLookAt.current.set(0, 0, 0);
-        break;
-      case CONSTANTS.PHASE.DEFENSE:
-      case CONSTANTS.PHASE.JUDGMENT:
-      case CONSTANTS.PHASE.LAST_WORDS:
-      case CONSTANTS.PHASE.EXECUTION:
-        // Close-up on gallows area
-        targetPos.current.set(3, 4, 5);
-        targetLookAt.current.set(0, 1, 0);
-        break;
-      case CONSTANTS.PHASE.DISCUSSION:
-      case CONSTANTS.PHASE.VOTING:
-        // Overview of town square
-        targetPos.current.set(0, 10, 10);
-        targetLookAt.current.set(0, 0, 0);
-        break;
-      default:
-        targetPos.current.set(0, 8, 12);
-        targetLookAt.current.set(0, 0, 0);
+  useFrame((_, delta) => {
+    // Track night elapsed time
+    if (phase === CONSTANTS.PHASE.NIGHT) {
+      if (prevPhaseRef.current !== CONSTANTS.PHASE.NIGHT) {
+        nightTimeRef.current = 0; // reset on entering night
+      }
+      nightTimeRef.current += delta;
+
+      // Cinematic night waypoints
+      let elapsed = nightTimeRef.current;
+      let wpIdx = 0;
+      let totalBefore = 0;
+      for (let i = 0; i < NIGHT_CAMERA_WAYPOINTS.length; i++) {
+        if (elapsed < totalBefore + NIGHT_CAMERA_WAYPOINTS[i].duration) {
+          wpIdx = i;
+          break;
+        }
+        totalBefore += NIGHT_CAMERA_WAYPOINTS[i].duration;
+        if (i === NIGHT_CAMERA_WAYPOINTS.length - 1) wpIdx = i;
+      }
+
+      const wp = NIGHT_CAMERA_WAYPOINTS[wpIdx];
+      targetPos.current.set(...wp.pos);
+      targetLookAt.current.set(...wp.lookAt);
+    } else {
+      switch (phase) {
+        case CONSTANTS.PHASE.DEFENSE:
+        case CONSTANTS.PHASE.JUDGMENT:
+        case CONSTANTS.PHASE.LAST_WORDS:
+        case CONSTANTS.PHASE.EXECUTION:
+          targetPos.current.set(3, 4, 5);
+          targetLookAt.current.set(0, 1, 0);
+          break;
+        case CONSTANTS.PHASE.DISCUSSION:
+        case CONSTANTS.PHASE.VOTING:
+          targetPos.current.set(0, 10, 10);
+          targetLookAt.current.set(0, 0, 0);
+          break;
+        default:
+          targetPos.current.set(0, 8, 12);
+          targetLookAt.current.set(0, 0, 0);
+      }
     }
 
-    // Smooth lerp
-    camera.position.lerp(targetPos.current, 0.02);
+    prevPhaseRef.current = phase;
+
+    // Smooth lerp — slightly faster for night transitions
+    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.015 : 0.02;
+    camera.position.lerp(targetPos.current, lerpSpeed);
     const currentLookAt = new THREE.Vector3();
     camera.getWorldDirection(currentLookAt);
     const desiredDir = targetLookAt.current.clone().sub(camera.position).normalize();
-    currentLookAt.lerp(desiredDir, 0.02);
+    currentLookAt.lerp(desiredDir, lerpSpeed);
     camera.lookAt(
       camera.position.x + currentLookAt.x,
       camera.position.y + currentLookAt.y,
@@ -276,7 +690,7 @@ const CameraController = ({ phase, CONSTANTS }) => {
 };
 
 // ============================================================
-// Scene Lighting (day/night)
+// Scene Lighting (day/night with enhanced atmosphere)
 // ============================================================
 const SceneLighting = ({ isDay }) => {
   const lightRef = useRef();
@@ -284,23 +698,23 @@ const SceneLighting = ({ isDay }) => {
 
   useFrame(() => {
     if (lightRef.current) {
-      const t = isDay ? 2.5 : 0.8;
+      const t = isDay ? 2.5 : 0.6;
       lightRef.current.intensity += (t - lightRef.current.intensity) * 0.03;
     }
     if (ambientRef.current) {
-      const t = isDay ? 0.5 : 0.35;
+      const t = isDay ? 0.5 : 0.25;
       ambientRef.current.intensity += (t - ambientRef.current.intensity) * 0.03;
     }
   });
 
   return (
     <>
-      <ambientLight ref={ambientRef} intensity={isDay ? 0.5 : 0.35} />
+      <ambientLight ref={ambientRef} intensity={isDay ? 0.5 : 0.25} />
       <directionalLight
         ref={lightRef}
         position={isDay ? [10, 15, 10] : [-5, 12, 8]}
-        intensity={isDay ? 2.5 : 0.8}
-        color={isDay ? '#ffffff' : '#8899cc'}
+        intensity={isDay ? 2.5 : 0.6}
+        color={isDay ? '#ffffff' : '#6677aa'}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -309,6 +723,12 @@ const SceneLighting = ({ isDay }) => {
         shadow-camera-right={20}
         shadow-camera-top={20}
         shadow-camera-bottom={-20}
+      />
+      {/* Warm hemisphere fill */}
+      <hemisphereLight
+        color={isDay ? '#87CEEB' : '#1a1a3a'}
+        groundColor={isDay ? '#3a6e2c' : '#0a0a15'}
+        intensity={isDay ? 0.3 : 0.15}
       />
     </>
   );
@@ -334,6 +754,39 @@ const MainScene = () => {
   const isVotingPhase = phase === CONSTANTS.PHASE.VOTING;
   const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
 
+  // Night walk-away transition + hide after walk
+  const prevPhaseRef = useRef(phase);
+  const [nightTransition, setNightTransition] = useState(false);
+  const [nightPlayersHidden, setNightPlayersHidden] = useState(false);
+
+  useEffect(() => {
+    if (phase === CONSTANTS.PHASE.NIGHT && prevPhaseRef.current !== CONSTANTS.PHASE.NIGHT) {
+      setNightPlayersHidden(false);
+      setNightTransition(true);
+      const walkTimer = setTimeout(() => {
+        setNightTransition(false);
+        setNightPlayersHidden(true); // hide characters after walk finishes
+      }, 3000);
+      return () => clearTimeout(walkTimer);
+    }
+    // Reset when leaving night
+    if (phase !== CONSTANTS.PHASE.NIGHT) {
+      setNightPlayersHidden(false);
+    }
+    prevPhaseRef.current = phase;
+  }, [phase, CONSTANTS.PHASE.NIGHT]);
+
+  // Day circle positions (for night walk-away start)
+  const dayPositions = useMemo(() => {
+    const positions = {};
+    const circleRadius = 4;
+    alivePlayers.forEach((p, i) => {
+      const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
+      positions[p.id] = [Math.cos(angle) * circleRadius, 0, Math.sin(angle) * circleRadius];
+    });
+    return positions;
+  }, [alivePlayers.length]);
+
   const myVoteTarget = trial.suspects && Object.keys(trial.suspects).find((sid) =>
     trial.suspects[sid]?.suspectedBy?.some((vid) => vid === me?.id)
   );
@@ -345,7 +798,6 @@ const MainScene = () => {
 
     const voteWeight = me.voteWeight || 1;
 
-    // Remove my votes from all targets first
     const newSuspects = {};
     Object.keys(trial.suspects || {}).forEach((sid) => {
       const filtered = (trial.suspects[sid]?.suspectedBy || []).filter((vid) => vid !== me.id);
@@ -354,7 +806,6 @@ const MainScene = () => {
       }
     });
 
-    // Add my votes to the new target
     if (!newSuspects[targetId]) {
       newSuspects[targetId] = { id: targetId, suspectedBy: [] };
     }
@@ -370,7 +821,7 @@ const MainScene = () => {
     setTrial({ ...trial, votes: { ...trial.votes, [me.id]: vote } });
   }, [me, isJudgmentPhase, hasJudged, game.accusedId, trial, setTrial]);
 
-  // Calculate player positions based on phase
+  // Calculate player positions + rotations based on phase
   const playerPositions = useMemo(() => {
     const positions = {};
     const circleRadius = 4;
@@ -378,28 +829,43 @@ const MainScene = () => {
     if (phase === CONSTANTS.PHASE.NIGHT) {
       alivePlayers.forEach((p, i) => {
         const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2;
-        positions[p.id] = [Math.cos(angle) * 8, 0, Math.sin(angle) * 8];
+        const pos = [Math.cos(angle) * 8, 0, Math.sin(angle) * 8];
+        positions[p.id] = {
+          position: pos,
+          rotation: [0, Math.atan2(pos[0], pos[2]), 0], // face outward
+        };
       });
     } else if (isTrialPhase) {
       alivePlayers.forEach((p, i) => {
         if (p.id === game.accusedId) {
-          positions[p.id] = [0, 0.3, -1.5];
+          positions[p.id] = { position: [0, 0.3, -1.5], rotation: [0, Math.PI, 0] }; // face crowd
         } else {
           const idx = i - (players.findIndex(pl => pl.id === game.accusedId) < i ? 1 : 0);
           const count = alivePlayers.length - 1;
           const angle = (idx / Math.max(count, 1)) * Math.PI - Math.PI / 2;
-          positions[p.id] = [Math.cos(angle) * 4, 0, Math.sin(angle) * 4 + 2];
+          const pos = [Math.cos(angle) * 4, 0, Math.sin(angle) * 4 + 2];
+          // Face towards accused (center area)
+          const dx = -pos[0];
+          const dz = -1.5 - pos[2];
+          positions[p.id] = {
+            position: pos,
+            rotation: [0, Math.atan2(dx, dz), 0],
+          };
         }
       });
     } else {
       alivePlayers.forEach((p, i) => {
         const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
-        positions[p.id] = [Math.cos(angle) * circleRadius, 0, Math.sin(angle) * circleRadius];
+        const pos = [Math.cos(angle) * circleRadius, 0, Math.sin(angle) * circleRadius];
+        positions[p.id] = {
+          position: pos,
+          rotation: [0, Math.atan2(pos[0], pos[2]) + Math.PI, 0], // face center
+        };
       });
     }
 
     deadPlayers.forEach((p, i) => {
-      positions[p.id] = [-10 + i * 1.2, 0, -10];
+      positions[p.id] = { position: [-12 + i * 2, 0, -12], rotation: [0, 0, 0] };
     });
 
     return positions;
@@ -419,36 +885,45 @@ const MainScene = () => {
           {/* Lighting */}
           <SceneLighting isDay={game.isDay} />
 
-          {/* Sky */}
+          {/* Sky & atmosphere */}
           {game.isDay ? (
             <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
           ) : (
             <>
-              <color attach="background" args={['#080820']} />
-              <fog attach="fog" args={['#080820', 30, 60]} />
-              <Stars radius={80} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
+              <color attach="background" args={['#060818']} />
+              <fog attach="fog" args={['#060818', 25, 55]} />
+              <Stars radius={80} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
+              <Moon />
+              <Fireflies count={40} />
             </>
           )}
 
           <GroundPlane isDay={game.isDay} />
           <Village isDay={game.isDay} isTrialPhase={isTrialPhase} />
 
-          {/* Alive Players */}
-          {alivePlayers.map((player) => {
+          {/* Alive Players — hidden after night walk finishes */}
+          {!nightPlayersHidden && alivePlayers.map((player) => {
             const isMe = player.id === me?.id;
             const isAccused = player.id === game.accusedId;
             const showVoteBtn = isVotingPhase && me?.isAlive && !isMe;
             const isVoteTarget = myVoteTarget === player.id;
             const showJudgmentBtn = isJudgmentPhase && isAccused && me?.isAlive && me.id !== game.accusedId && !hasJudged;
+            const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
             return (
               <PlayerFigure
                 key={player.id}
                 player={player}
-                position={playerPositions[player.id] || [0, 0, 0]}
+                position={pData.position}
+                rotation={pData.rotation}
+                startPosition={nightTransition ? dayPositions[player.id] : null}
+                isTransitioning={nightTransition}
+                transitionDuration={3}
                 color={player.character?.couleur || '#ffffff'}
                 isAccused={isAccused}
                 showVote={showVoteBtn}
                 isVoteTarget={isVoteTarget}
+                voteCount={trial?.suspects?.[player.id]?.suspectedBy?.length || 0}
+                totalAlive={alivePlayers.length}
                 onVote={handleVote}
                 showJudgment={showJudgmentBtn}
                 onJudge={handleJudge}
@@ -457,13 +932,30 @@ const MainScene = () => {
           })}
 
           {/* Dead Players */}
-          {deadPlayers.map((player) => (
-            <DeadPlayerFigure
-              key={player.id}
-              player={player}
-              position={playerPositions[player.id] || [0, 0, 0]}
+          {deadPlayers.map((player) => {
+            const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
+            return (
+              <DeadPlayerFigure
+                key={player.id}
+                player={player}
+                position={pData.position}
+              />
+            );
+          })}
+
+          {/* Post-processing */}
+          <EffectComposer>
+            <Bloom
+              intensity={game.isDay ? 0.2 : 0.7}
+              luminanceThreshold={game.isDay ? 0.9 : 0.5}
+              luminanceSmoothing={0.4}
+              mipmapBlur
             />
-          ))}
+            <Vignette
+              offset={game.isDay ? 0.3 : 0.15}
+              darkness={game.isDay ? 0.3 : 0.65}
+            />
+          </EffectComposer>
         </Suspense>
       </Canvas>
 
@@ -486,14 +978,14 @@ const MainScene = () => {
         ) : null;
       })()}
 
-      {/* Discussion start — day begins */}
+      {/* Discussion start */}
       {phase === CONSTANTS.PHASE.DISCUSSION && (
         <div className="scene-announcement scene-announcement-fade">
           <div className="announcement-text">Le village se réveille...</div>
         </div>
       )}
 
-      {/* Phase announcements overlay */}
+      {/* Phase announcements */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
         <div className="scene-announcement">
           <div className="announcement-text">Personne ne sera lynché aujourd'hui.</div>
@@ -517,14 +1009,13 @@ const MainScene = () => {
   );
 };
 
-// Night ambiance — 3 unique messages per night, longer display
+// Night ambiance — 3 unique messages per night
 const NightAmbiance = () => {
   const [message, setMessage] = useState('');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     let timeout;
-    // Pick 3 unique random messages
     const shuffled = [...NIGHT_AMBIANCE].sort(() => Math.random() - 0.5);
     const picks = shuffled.slice(0, 3);
     let index = 0;

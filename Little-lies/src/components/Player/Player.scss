@@ -18,23 +18,23 @@
 }
 
 .role-name {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: bold;
   text-transform: capitalize;
   padding: 8px 0;
   text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 
   h2 {
     margin: 0;
-    font-size: inherit;
+    font-size: 28px;
   }
 }
 
 .role-name i {
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .role-description {

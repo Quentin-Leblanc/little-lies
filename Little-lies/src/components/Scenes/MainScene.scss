@@ -56,6 +56,13 @@
     transform: scale(0.95);
     animation: none;
   }
+
+  .vote-3d-count {
+    margin-left: 4px;
+    font-size: 11px;
+    opacity: 0.8;
+    font-weight: normal;
+  }
 }
 
 @keyframes vote-pulse {

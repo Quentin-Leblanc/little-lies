@@ -307,31 +307,20 @@ function Chat(props) {
   const filteredMessages = (messages || [])
     .filter(filterMessage);
 
-  // Night: non-mafia alive players see a minimal night view (Spy sees chat like mafia)
+  // Villager night: can see chat (grayed out, read-only) but not write
   const isSpy = me?.character?.key === 'spy';
-  if (props.night && myTeam !== 'mafia' && !isSpy && !isDead) {
-    return (
-      <div className="chat-container chat-night">
-        <div className="chat-messages">
-          <div className="chat-night-message">
-            <i className="fas fa-moon"></i>
-            <p>La nuit tombe sur le village...</p>
-            <p className="chat-night-sub">Utilisez vos pouvoirs si vous en avez.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isVillagerNight = props.night && myTeam !== 'mafia' && !isSpy && !isDead;
 
   // Placeholder text
   let placeholder = 'Entrez un message...';
-  if (isDead) placeholder = 'Chat des morts...';
+  if (isVillagerNight) placeholder = 'La nuit tombe sur le village...';
+  else if (isDead) placeholder = 'Chat des morts...';
   else if (isBlackmailed) placeholder = 'Vous avez été bâillonné...';
   else if (isMutedByPhase) placeholder = "Seul l'accusé peut parler...";
   else if (isPlayerInTimeout) placeholder = 'Vous êtes en timeout...';
   else if (isNight && myTeam === 'mafia') placeholder = 'Chat mafia...';
 
-  const isDisabled = !canChat || (isMutedByPhase && !isDead);
+  const isDisabled = isVillagerNight || !canChat || (isMutedByPhase && !isDead);
 
   // Message CSS class
   const getMessageClass = (message) => {
@@ -360,7 +349,7 @@ function Chat(props) {
 
   return (
     <div
-      className={`chat-container ${props.night ? 'chat-night' : ''} ${isDead ? 'chat-dead-mode' : ''}`}
+      className={`chat-container ${props.night ? 'chat-night' : ''} ${isDead ? 'chat-dead-mode' : ''} ${isVillagerNight ? 'chat-villager-night' : ''}`}
       ref={chatContainerRef}
     >
       {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> Chat des morts</div>}

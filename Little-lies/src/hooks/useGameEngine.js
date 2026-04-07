@@ -390,7 +390,7 @@ export const GameEngineProvider = ({ children }) => {
     if (!trial.suspects || Object.keys(trial.suspects).length === 0) return null;
 
     const totalPossibleVotes = players.filter((p) => p.isAlive).length;
-    const majority = Math.floor(totalPossibleVotes / 2) + 1;
+    const majority = Math.ceil(totalPossibleVotes / 2);
 
     let topSuspect = null;
     let topVotes = 0;
@@ -620,7 +620,7 @@ export const GameEngineProvider = ({ children }) => {
 
     const aliveCount = players.filter((p) => p.isAlive).length;
     if (aliveCount === 0) return;
-    const majority = Math.floor(aliveCount / 2) + 1;
+    const majority = Math.ceil(aliveCount / 2);
 
     if (skipVoteCount >= majority) {
       addChatSystem('La majorité a voté pour passer. La nuit tombe sur le village...', '#8899cc');
