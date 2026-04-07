@@ -170,9 +170,9 @@ const Torch = ({ position }) => {
 };
 
 // ============================================================
-// Meshy AI GLB Model Loader (generic, clones for multi-instance)
+// Meshy AI GLB Model Loader (auto-grounds model on Y=0)
 // ============================================================
-const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1 }) => {
+const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, embedY = false }) => {
   const { scene } = useGLTF(path);
   const clonedScene = useMemo(() => {
     const clone = scene.clone(true);
@@ -185,10 +185,24 @@ const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 
     return clone;
   }, [scene]);
 
+  // Auto-compute Y offset so the model bottom sits at ground level
+  const groundedPosition = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(clonedScene);
+    const s = typeof scale === 'number' ? scale : scale[1];
+    if (embedY) {
+      // For flat surfaces (cobblestone): embed so top is flush with ground
+      const topOffset = box.max.y * s;
+      return [position[0], position[1] - topOffset + 0.05, position[2]];
+    }
+    // For buildings/objects: lift so bottom sits on ground
+    const bottomOffset = box.min.y * s;
+    return [position[0], position[1] - bottomOffset, position[2]];
+  }, [clonedScene, position, scale, embedY]);
+
   return (
     <primitive
       object={clonedScene}
-      position={position}
+      position={groundedPosition}
       rotation={rotation}
       scale={typeof scale === 'number' ? [scale, scale, scale] : scale}
     />
@@ -200,17 +214,18 @@ const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 
 // ============================================================
 const VillageCenter = () => (
   <group>
-    {/* Cobblestone circle path */}
+    {/* Cobblestone circle path — embedded flush with ground */}
     <MeshyModel
       path="/models/cobblestone_circle.glb"
-      position={[0, 0.05, 0]}
-      scale={2}
+      position={[0, 0, 0]}
+      scale={5}
+      embedY
     />
-    {/* Gallows — permanent center piece (replaces the old well) */}
+    {/* Gallows — auto-grounded on Y=0 */}
     <MeshyModel
       path="/models/gallows.glb"
-      position={[0, 2, 0]}
-      scale={2}
+      position={[0, 0, 0]}
+      scale={3}
     />
   </group>
 );
@@ -278,9 +293,9 @@ const BUILDINGS = [
 
 // Meshy AI building positions & config
 const MESHY_BUILDINGS = [
-  { path: '/models/forge.glb',   position: [-8, 0.5, -6],  rotation: [0, Math.PI / 4, 0], scale: 2 },
-  { path: '/models/tavern.glb',  position: [8, 0.5, -5],   rotation: [0, -Math.PI / 4, 0], scale: 2 },
-  { path: '/models/chapel.glb',  position: [0, 0.5, -10],  rotation: [0, Math.PI, 0], scale: 2.5 },
+  { path: '/models/forge.glb',   position: [-8, 0, -6],  rotation: [0, Math.PI / 4, 0], scale: 3 },
+  { path: '/models/tavern.glb',  position: [8, 0, -5],   rotation: [0, -Math.PI / 4, 0], scale: 3 },
+  { path: '/models/chapel.glb',  position: [0, 0, -10],  rotation: [0, Math.PI, 0], scale: 3.5 },
 ];
 
 const TORCH_POS = [
