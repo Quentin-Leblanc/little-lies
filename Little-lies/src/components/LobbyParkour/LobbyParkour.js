@@ -177,7 +177,7 @@ const LobbyParkour = () => (
     </Text>
 
     {/* ── Spawn area ── */}
-    <Plat position={[0, 0.2, 0]} size={[20, 0.5, 20]} color="#00cc66" label="SPAWN" />
+    <Plat position={[0, 0.2, 0]} size={[20, 0.5, 20]} color="#00cc66" />
 
     {/* ══ Path A (right): easy stairs + bouncer ══ */}
     <Plat position={[16, 1, 0]} size={[7, 0.5, 7]} color="#ff6633" />
@@ -197,7 +197,7 @@ const LobbyParkour = () => (
     {/* ══ Mid zone: converging paths ══ */}
     <Slider from={[36, 8.5, 24]} to={[16, 8.5, 28]} speed={0.35} size={[6, 0.5, 6]} color="#ff55cc" />
     <Slider from={[-10, 8.5, 32]} to={[6, 8.5, 30]} speed={0.35} size={[6, 0.5, 6]} color="#55ccff" />
-    <Plat position={[6, 9, 28]} size={[10, 0.5, 10]} color="#ff4444" label="CENTRE" />
+    <Plat position={[6, 9, 28]} size={[10, 0.5, 10]} color="#ff4444" />
 
     {/* ── Spinner challenge ── */}
     <Spinner position={[6, 9.4, 28]} speed={0.25} length={14} color="#ff8800" />
