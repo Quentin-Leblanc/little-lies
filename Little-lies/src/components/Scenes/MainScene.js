@@ -550,7 +550,6 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
       <Character
         color={color}
         animation={currentAnim}
-        weapon="Knife_1"
         scale={0.55}
       />
       {/* Accused ring */}
@@ -794,7 +793,19 @@ const MainScene = () => {
 
   const handleVote = useCallback((targetId) => {
     if (!me?.isAlive || !isVotingPhase) return;
-    if (myVoteTarget === targetId) return;
+
+    // If clicking the same target, unvote
+    if (myVoteTarget === targetId) {
+      const newSuspects = {};
+      Object.keys(trial.suspects || {}).forEach((sid) => {
+        const filtered = (trial.suspects[sid]?.suspectedBy || []).filter((vid) => vid !== me.id);
+        if (filtered.length > 0) {
+          newSuspects[sid] = { id: sid, suspectedBy: filtered };
+        }
+      });
+      setTrial({ ...trial, suspects: newSuspects });
+      return;
+    }
 
     const voteWeight = me.voteWeight || 1;
 

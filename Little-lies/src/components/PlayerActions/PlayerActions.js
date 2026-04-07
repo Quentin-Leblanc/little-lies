@@ -91,8 +91,19 @@ const PlayerActions = memo(function () {
 
   const handleVoteClick = (suspectedPlayerId) => {
     if (!me.isAlive || !isVotingPhase) return;
-    // If clicking the same target, do nothing
-    if (myVoteTarget === suspectedPlayerId) return;
+
+    // If clicking the same target, unvote
+    if (myVoteTarget === suspectedPlayerId) {
+      const newSuspects = {};
+      Object.keys(trial.suspects || {}).forEach((sid) => {
+        const filtered = (trial.suspects[sid]?.suspectedBy || []).filter((vid) => vid !== me.id);
+        if (filtered.length > 0) {
+          newSuspects[sid] = { id: sid, suspectedBy: filtered };
+        }
+      });
+      setTrial({ ...trial, suspects: newSuspects });
+      return;
+    }
 
     const voteWeight = me.voteWeight || 1;
 

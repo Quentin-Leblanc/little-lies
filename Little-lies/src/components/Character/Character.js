@@ -1,135 +1,92 @@
 import { useAnimations, useGLTF } from '@react-three/drei';
-import { useGraph } from '@react-three/fiber';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Color, LoopOnce, MeshStandardMaterial } from 'three';
+import { Color, LoopOnce } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
-const WEAPONS = [
-  'GrenadeLauncher',
-  'AK',
-  'Knife_1',
-  'Knife_2',
-  'Pistol',
-  'Revolver',
-  'Revolver_Small',
-  'RocketLauncher',
-  'ShortCannon',
-  'SMG',
-  'Shotgun',
-  'Shovel',
-  'Sniper',
-  'Sniper_2',
-];
 
 export function Character({
-                            color = 'black',
-                            animation = 'Idle',
-                            weapon = 'AK',
-                            ...props
-                          }) {
+  color,
+  animation = 'Idle',
+  ...props
+}) {
   const group = useRef();
-  const { scene, materials, animations } = useGLTF('/models/Character.gltf');
-  // Skinned meshes cannot be re-used in threejs without cloning them
-  const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
-  const { nodes } = useGraph(clone);
-  const { actions } = useAnimations(animations, group);
+  const origMaterials = useRef(new Map());
+
+  // Load the 5 GLBs (mesh + 1 animation each)
+  const idle = useGLTF('/models/Villager_Idle.glb');
+  const dead = useGLTF('/models/Villager_Dead.glb');
+  const walk = useGLTF('/models/Villager_Walk.glb');
+  const run = useGLTF('/models/Villager_Run.glb');
+  const jump = useGLTF('/models/Villager_Jump.glb');
+
+  // Clone the base mesh from idle (all files share the same mesh/skeleton)
+  const clone = useMemo(() => SkeletonUtils.clone(idle.scene), [idle.scene]);
+
+  // Combine all animations under clean names
+  const allAnimations = useMemo(() => {
+    const anims = [];
+    const addAnim = (source, name) => {
+      source.animations.forEach((a) => {
+        const clip = a.clone();
+        clip.name = name;
+        anims.push(clip);
+      });
+    };
+    addAnim(idle, 'Idle');
+    addAnim(dead, 'Death');
+    addAnim(walk, 'Walk');
+    addAnim(run, 'Run');
+    addAnim(jump, 'Jump');
+    return anims;
+  }, [idle.animations, dead.animations, walk.animations, run.animations, jump.animations]);
+
+  const { actions } = useAnimations(allAnimations, group);
+
+  // Death plays once and holds
   if (actions['Death']) {
     actions['Death'].loop = LoopOnce;
     actions['Death'].clampWhenFinished = true;
   }
 
   useEffect(() => {
-    actions[animation].reset().fadeIn(0.2).play();
-    return () => actions[animation]?.fadeOut(0.2);
-  }, [animation, scene]);
+    // Fallback: if requested animation doesn't exist, use Idle
+    const anim = actions[animation] ? animation : 'Idle';
+    const action = actions[anim];
+    if (action) {
+      action.reset().fadeIn(0.2).play();
+      return () => action.fadeOut(0.2);
+    }
+  }, [animation, actions]);
 
-
-  const playerColorMaterial = useMemo(
-    () =>
-      new MeshStandardMaterial({
-        color: new Color(color),
-      }),
-    [color]
-  );
+  // Store original materials once, then clone + tint for player color
   useEffect(() => {
-    // HIDING NON-SELECTED WEAPONS
-    WEAPONS.forEach((wp) => {
-      const isCurrentWeapon = wp === weapon;
-      nodes[wp].visible = isCurrentWeapon;
-    });
-
-    // ASSIGNING CHARACTER COLOR
-    nodes.Body.traverse((child) => {
-      if (child.isMesh && child.material.name === 'Character_Main') {
-        child.material = playerColorMaterial;
-      }
+    clone.traverse((child) => {
       if (child.isMesh) {
+        // Save original material on first encounter
+        if (!origMaterials.current.has(child.uuid)) {
+          origMaterials.current.set(child.uuid, child.material);
+        }
+        // Clone from original to preserve textures
+        const mat = origMaterials.current.get(child.uuid).clone();
+        // Tint with player color if provided (multiplied with texture)
+        if (color) {
+          mat.color = new Color(color);
+        }
+        child.material = mat;
         child.castShadow = true;
         child.receiveShadow = true;
       }
     });
-    nodes.Head.traverse((child) => {
-      if (child.isMesh && child.material.name === 'Character_Main') {
-        child.material = playerColorMaterial;
-      }
-    });
-    clone.traverse((child) => {
-      if (child.isMesh && child.material.name === 'Character_Main') {
-        child.material = playerColorMaterial;
-      }
-      if (child.isMesh) {
-        child.castShadow = true;
-      }
-    });
-  }, [nodes, clone]);
+  }, [clone, color]);
 
   return (
     <group {...props} dispose={null} ref={group}>
-      <group name="Scene">
-        <group name="CharacterArmature">
-          <primitive object={nodes.Root} />
-          <group name="Body_1">
-            <skinnedMesh
-              name="Cube004"
-              geometry={nodes.Cube004.geometry}
-              material={materials.Skin}
-              skeleton={nodes.Cube004.skeleton}
-              castShadow
-            />
-            <skinnedMesh
-              name="Cube004_1"
-              geometry={nodes.Cube004_1.geometry}
-              material={materials.DarkGrey}
-              skeleton={nodes.Cube004_1.skeleton}
-              castShadow
-            />
-            <skinnedMesh
-              name="Cube004_2"
-              geometry={nodes.Cube004_2.geometry}
-              material={materials.Pants}
-              skeleton={nodes.Cube004_2.skeleton}
-              castShadow
-            />
-            <skinnedMesh
-              name="Cube004_3"
-              geometry={nodes.Cube004_3.geometry}
-              material={playerColorMaterial}
-              skeleton={nodes.Cube004_3.skeleton}
-              castShadow
-            />
-            <skinnedMesh
-              name="Cube004_4"
-              geometry={nodes.Cube004_4.geometry}
-              material={materials.Black}
-              skeleton={nodes.Cube004_4.skeleton}
-              castShadow
-            />
-          </group>
-        </group>
-      </group>
+      <primitive object={clone} />
     </group>
   );
 }
 
-useGLTF.preload('/models/Character.gltf');
-
-
+useGLTF.preload('/models/Villager_Idle.glb');
+useGLTF.preload('/models/Villager_Dead.glb');
+useGLTF.preload('/models/Villager_Walk.glb');
+useGLTF.preload('/models/Villager_Run.glb');
+useGLTF.preload('/models/Villager_Jump.glb');
