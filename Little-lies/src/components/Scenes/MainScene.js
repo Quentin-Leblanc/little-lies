@@ -322,9 +322,9 @@ const TREE_POSITIONS = [
 
 const Village = ({ isDay }) => (
   <group>
-    {/* Cobblestone ground — paved village floor */}
+    {/* Cobblestone ground — paved village floor, top flush with ground */}
     {GROUND_TILES.map((t, i) => (
-      <MeshyModel key={`ground-${i}`} path="/models/cobblestone_platform.glb" position={t.position} scale={t.scale} />
+      <MeshyModel key={`ground-${i}`} path="/models/cobblestone_platform.glb" position={t.position} scale={t.scale} embedY />
     ))}
 
     {/* Gallows at center */}
