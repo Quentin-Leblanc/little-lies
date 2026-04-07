@@ -507,9 +507,13 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
           <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
         </mesh>
       )}
-      {/* Name label */}
+      {/* Name label — player color with dark outline for readability */}
       <Billboard position={[0, 2.6, 0]}>
-        <Text fontSize={0.22} color="white" anchorX="center" anchorY="bottom" outlineWidth={0.025} outlineColor="black">
+        <mesh position={[0, 0.1, -0.01]}>
+          <planeGeometry args={[player.profile.name.length * 0.13 + 0.3, 0.32]} />
+          <meshBasicMaterial color="#000000" transparent opacity={0.5} />
+        </mesh>
+        <Text fontSize={0.2} color={color} anchorX="center" anchorY="bottom" outlineWidth={0.03} outlineColor="black">
           {player.profile.name}
         </Text>
       </Billboard>
@@ -548,7 +552,11 @@ const DeadPlayerFigure = ({ player, position }) => (
     />
     <GhostOrb position={[0, 2, 0]} />
     <Billboard position={[0, 2.6, 0]}>
-      <Text fontSize={0.16} color="rgba(180,180,200,0.7)" anchorX="center" anchorY="bottom" outlineWidth={0.015} outlineColor="black">
+      <mesh position={[0, 0.1, -0.01]}>
+        <planeGeometry args={[player.profile.name.length * 0.13 + 0.3, 0.32]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.5} />
+      </mesh>
+      <Text fontSize={0.2} color="#888899" anchorX="center" anchorY="bottom" outlineWidth={0.03} outlineColor="black">
         {player.profile.name}
       </Text>
     </Billboard>
