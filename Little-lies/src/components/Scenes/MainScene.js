@@ -133,19 +133,18 @@ const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 
     return clone;
   }, [scene]);
 
+  // Extract primitives so useMemo deps are stable (not new arrays each render)
+  const px = position[0], py = position[1], pz = position[2];
+  const sy = typeof scale === 'number' ? scale : scale[1];
+
   // Auto-compute Y offset so the model bottom sits at ground level
   const groundedPosition = useMemo(() => {
     const box = new THREE.Box3().setFromObject(clonedScene);
-    const s = typeof scale === 'number' ? scale : scale[1];
     if (embedY) {
-      // For flat surfaces (cobblestone): embed so top is flush with ground
-      const topOffset = box.max.y * s;
-      return [position[0], position[1] - topOffset + 0.05, position[2]];
+      return [px, py - box.max.y * sy + 0.05, pz];
     }
-    // For buildings/objects: lift so bottom sits on ground
-    const bottomOffset = box.min.y * s;
-    return [position[0], position[1] - bottomOffset, position[2]];
-  }, [clonedScene, position, scale, embedY]);
+    return [px, py - box.min.y * sy, pz];
+  }, [clonedScene, px, py, pz, sy, embedY]);
 
   return (
     <primitive
@@ -169,8 +168,8 @@ const GallowsModel = () => {
     return c;
   }, [scene]);
 
-  // Known: minY = -0.616, scale 5 → Y offset = 0.616 * 5 = 3.08
-  const s = 5;
+  // Known: minY = -0.616 → Y offset = 0.616 * scale to sit on ground
+  const s = 3;
   return <primitive object={clone} position={[0, 0.616 * s, 0]} scale={[s, s, s]} />;
 };
 
@@ -178,7 +177,7 @@ const VillageCenter = () => (
   <group>
     {/* Cobblestone circle path — embedded flush with ground */}
     <MeshyModel
-      path="/models/cobblestone_circle.glb"
+      path="/models/rue.glb"
       position={[0, 0, 0]}
       scale={5}
       embedY
@@ -243,37 +242,73 @@ const Barrel = ({ position, rotation = [0, 0, 0] }) => (
 // Rotation Y so a building faces center [0,0] from position [bx, bz]
 const faceCenter = (bx, bz) => Math.atan2(-bx, -bz);
 
-// Meshy AI building positions & config — all rotated to face center
+// Meshy AI building positions — all rotated to face center
 const MESHY_BUILDINGS = [
-  // Unique buildings
+  // Unique buildings (inner ring)
   { path: '/models/forge.glb',   position: [-8, 0, -6],  scale: 3,   get rotation() { return [0, faceCenter(-8, -6), 0]; } },
   { path: '/models/tavern.glb',  position: [8, 0, -5],   scale: 3,   get rotation() { return [0, faceCenter(8, -5), 0]; } },
   { path: '/models/chapel.glb',  position: [0, 0, -10],  scale: 3.5, get rotation() { return [0, faceCenter(0, -10), 0]; } },
-  // Cottages spread around the village
+  // Inner ring cottages
   { path: '/models/cottage.glb', position: [-10, 0, 2],  scale: 2.8, get rotation() { return [0, faceCenter(-10, 2), 0]; } },
   { path: '/models/cottage.glb', position: [9, 0, 3],    scale: 2.8, get rotation() { return [0, faceCenter(9, 3), 0]; } },
   { path: '/models/cottage.glb', position: [-6, 0, 7],   scale: 2.5, get rotation() { return [0, faceCenter(-6, 7), 0]; } },
   { path: '/models/cottage.glb', position: [6, 0, 8],    scale: 2.5, get rotation() { return [0, faceCenter(6, 8), 0]; } },
   { path: '/models/cottage.glb', position: [-4, 0, -9],  scale: 2.5, get rotation() { return [0, faceCenter(-4, -9), 0]; } },
+  // Outer ring cottages (behind inner buildings, forming a real village)
+  { path: '/models/cottage.glb', position: [-13, 0, -9],  scale: 2.5, get rotation() { return [0, faceCenter(-13, -9), 0]; } },
+  { path: '/models/cottage.glb', position: [13, 0, -8],   scale: 2.5, get rotation() { return [0, faceCenter(13, -8), 0]; } },
+  { path: '/models/cottage.glb', position: [-14, 0, -2],  scale: 2.3, get rotation() { return [0, faceCenter(-14, -2), 0]; } },
+  { path: '/models/cottage.glb', position: [14, 0, -1],   scale: 2.3, get rotation() { return [0, faceCenter(14, -1), 0]; } },
+  { path: '/models/cottage.glb', position: [-13, 0, 6],   scale: 2.3, get rotation() { return [0, faceCenter(-13, 6), 0]; } },
+  { path: '/models/cottage.glb', position: [13, 0, 7],    scale: 2.3, get rotation() { return [0, faceCenter(13, 7), 0]; } },
+  { path: '/models/cottage.glb', position: [-9, 0, 12],   scale: 2.5, get rotation() { return [0, faceCenter(-9, 12), 0]; } },
+  { path: '/models/cottage.glb', position: [9, 0, 13],    scale: 2.5, get rotation() { return [0, faceCenter(9, 13), 0]; } },
+  { path: '/models/cottage.glb', position: [4, 0, -14],   scale: 2.3, get rotation() { return [0, faceCenter(4, -14), 0]; } },
+  { path: '/models/cottage.glb', position: [-8, 0, -13],  scale: 2.3, get rotation() { return [0, faceCenter(-8, -13), 0]; } },
 ];
 
-// Auto-generate cobblestone street from center [0,0] toward a building
-// cobblestone native: 1.912 along X → rotate X-axis to point at building
-const makeStreet = (bx, bz, width = 5) => ({
-  position: [bx / 2, 0, bz / 2],
-  rotation: [0, Math.atan2(-bz, bx), 0],
-  scale: [Math.sqrt(bx * bx + bz * bz) / 1.9, 3, width],
-});
+// Street helper: from point A [ax,az] to point B [bx,bz]
+// rue.glb native: 1.912 along X, 0.44 along Z
+const makeStreet = (ax, az, bx, bz, width = 5) => {
+  const dx = bx - ax, dz = bz - az;
+  const dist = Math.sqrt(dx * dx + dz * dz);
+  return {
+    position: [(ax + bx) / 2, 0, (az + bz) / 2],
+    rotation: [0, Math.atan2(-dz, dx), 0],
+    scale: [dist / 1.9, 3, width],
+  };
+};
 
 const STREETS = [
-  makeStreet(-8, -6, 6),     // → forge
-  makeStreet(8, -5, 6),      // → tavern
-  makeStreet(0, -10, 6),     // → chapel
-  makeStreet(-10, 2, 5),     // → cottage west
-  makeStreet(9, 3, 5),       // → cottage east
-  makeStreet(-6, 7, 5),      // → cottage SW
-  makeStreet(6, 8, 5),       // → cottage SE
-  makeStreet(-4, -9, 5),     // → cottage near chapel
+  // Radial streets: center → inner buildings
+  makeStreet(0, 0, -8, -6, 5),     // → forge
+  makeStreet(0, 0, 8, -5, 5),      // → tavern
+  makeStreet(0, 0, 0, -10, 5),     // → chapel
+  makeStreet(0, 0, -10, 2, 4),     // → cottage W
+  makeStreet(0, 0, 9, 3, 4),       // → cottage E
+  makeStreet(0, 0, -6, 7, 4),      // → cottage SW
+  makeStreet(0, 0, 6, 8, 4),       // → cottage SE
+  makeStreet(0, 0, -4, -9, 4),     // → cottage near chapel
+  // Inner ring road (connecting inner buildings to each other)
+  makeStreet(-8, -6, -4, -9, 4),   // forge ↔ cottage chapel
+  makeStreet(-4, -9, 0, -10, 4),   // cottage chapel ↔ chapel
+  makeStreet(0, -10, 8, -5, 4),    // chapel ↔ tavern
+  makeStreet(-8, -6, -10, 2, 4),   // forge ↔ cottage W
+  makeStreet(8, -5, 9, 3, 4),      // tavern ↔ cottage E
+  makeStreet(-10, 2, -6, 7, 4),    // cottage W ↔ cottage SW
+  makeStreet(9, 3, 6, 8, 4),       // cottage E ↔ cottage SE
+  makeStreet(-6, 7, 6, 8, 3),      // cottage SW ↔ cottage SE (south)
+  // Streets to outer ring
+  makeStreet(-8, -6, -13, -9, 3),  // forge → outer NW
+  makeStreet(8, -5, 13, -8, 3),    // tavern → outer NE
+  makeStreet(-10, 2, -14, -2, 3),  // cottage W → outer W
+  makeStreet(9, 3, 14, -1, 3),     // cottage E → outer E
+  makeStreet(-10, 2, -13, 6, 3),   // cottage W → outer SW
+  makeStreet(9, 3, 13, 7, 3),      // cottage E → outer SE
+  makeStreet(-6, 7, -9, 12, 3),    // cottage SW → outer S
+  makeStreet(6, 8, 9, 13, 3),      // cottage SE → outer S
+  makeStreet(0, -10, 4, -14, 3),   // chapel → outer N
+  makeStreet(-4, -9, -8, -13, 3),  // cottage chapel → outer NW
 ];
 
 // Background mountains — ring around the village, closer and shorter
@@ -320,7 +355,7 @@ const Village = ({ isDay }) => (
 
     {/* Cobblestone streets connecting buildings to center */}
     {STREETS.map((s, i) => (
-      <MeshyModel key={`street-${i}`} path="/models/cobblestone_circle.glb" position={s.position} rotation={s.rotation} scale={s.scale} embedY />
+      <MeshyModel key={`street-${i}`} path="/models/rue.glb" position={s.position} rotation={s.rotation} scale={s.scale} embedY />
     ))}
 
     {/* Torches (night only) */}
@@ -827,7 +862,10 @@ const MainScene = () => {
 
           {/* Sky & atmosphere */}
           {game.isDay ? (
-            <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
+            <>
+              <color attach="background" args={['#87CEEB']} />
+              <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
+            </>
           ) : (
             <>
               <color attach="background" args={['#060818']} />
@@ -987,7 +1025,7 @@ const NightAmbiance = () => {
 export default MainScene;
 
 // Preload Meshy AI models for faster loading
-useGLTF.preload('/models/cobblestone_circle.glb');
+useGLTF.preload('/models/rue.glb');
 useGLTF.preload('/models/gallows.glb');
 useGLTF.preload('/models/forge.glb');
 useGLTF.preload('/models/tavern.glb');
