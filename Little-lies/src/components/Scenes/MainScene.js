@@ -324,7 +324,7 @@ const Village = ({ isDay }) => (
   <group>
     {/* Cobblestone ground — paved village floor, slightly raised */}
     {GROUND_TILES.map((t, i) => (
-      <MeshyModel key={`ground-${i}`} path="/models/cobblestone_platform.glb" position={[t.position[0], 0.15, t.position[2]]} scale={t.scale} embedY />
+      <MeshyModel key={`ground-${i}`} path="/models/cobblestone_platform.glb" position={[t.position[0], 0.25, t.position[2]]} scale={t.scale * 0.7} embedY />
     ))}
 
     {/* Gallows at center */}
