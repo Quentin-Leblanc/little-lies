@@ -35,6 +35,9 @@ const Bouncer = ({ position, size = [5, 0.15, 5], color = '#ff3366' }) => {
   const handleCollision = useCallback((e) => {
     const body = e.other.rigidBody;
     if (!body) return;
+    // Reset Y velocity first so the bounce is always the same height
+    const vel = body.linvel();
+    body.setLinvel({ x: vel.x, y: 0, z: vel.z }, true);
     body.applyImpulse({ x: 0, y: 10, z: 0 }, true);
   }, []);
 
