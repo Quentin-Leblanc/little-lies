@@ -35,7 +35,7 @@ const Bouncer = ({ position, size = [5, 0.15, 5], color = '#ff3366' }) => {
   const handleCollision = useCallback((e) => {
     const body = e.other.rigidBody;
     if (!body) return;
-    body.applyImpulse({ x: 0, y: 14, z: 0 }, true);
+    body.applyImpulse({ x: 0, y: 20, z: 0 }, true);
   }, []);
 
   return (
