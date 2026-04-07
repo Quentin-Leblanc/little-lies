@@ -78,8 +78,10 @@ const Player = () => {
                             <h2>{me.character.label}</h2>
                         </div>
 
+                        <h4 className="role-section-title"><i className="fas fa-info-circle"></i> Description</h4>
                         <p className="role-description">{me.character.description}</p>
 
+                        <h4 className="role-section-title"><i className="fas fa-crosshairs"></i> Objectif</h4>
                         <div className="role-objective">
                             <span>{me.character.objectif}</span>
                             {execTarget && (
@@ -89,6 +91,7 @@ const Player = () => {
                             )}
                         </div>
 
+                        <h4 className="role-section-title"><i className="fas fa-bolt"></i> Actions</h4>
                         <div className="role-actions">
                             {me.character.actions?.length > 0 ? (
                                 <ul>

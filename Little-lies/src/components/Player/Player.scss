@@ -39,15 +39,26 @@
   font-size: 20px;
 }
 
+.role-section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #777;
+  margin: 12px 0 4px 0;
+  font-weight: 600;
+  i { margin-right: 5px; font-size: 10px; }
+}
+
 .role-description {
-  margin-top: 6px;
-  font-size: 12px;
+  margin-top: 2px;
+  font-size: 13px;
   color: #aaa;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .role-objective {
-  font-size: 12px;
+  font-size: 13px;
   color: #bbb;
   font-style: italic;
   margin: 10px 0 12px;
@@ -64,8 +75,8 @@
 }
 
 .role-actions {
-  font-size: 10px;
-  color: #888;
+  font-size: 13px;
+  color: #999;
 
   ul {
     list-style: none;
