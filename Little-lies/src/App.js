@@ -38,7 +38,7 @@ function App() {
         if (!prev || prev === phase) return;
 
         const PHASE_BANNERS = {
-            [CONSTANTS.PHASE.NIGHT]: { text: 'La nuit tombe...', icon: 'fa-moon', className: 'banner-night' },
+            // Night banner removed — handled by fade overlay text
             [CONSTANTS.PHASE.DEATH_REPORT]: { text: `Jour ${dayCount}`, icon: 'fa-sun', className: 'banner-morning' },
             // Discussion banner removed
             [CONSTANTS.PHASE.VOTING]: { text: 'Vote', icon: 'fa-gavel', className: 'banner-vote' },

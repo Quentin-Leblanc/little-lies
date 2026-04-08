@@ -1004,17 +1004,18 @@ const MainScene = () => {
     fadeTimers.current.forEach(clearTimeout);
     fadeTimers.current = [];
 
-    // Pre-night phases: start walk-away, then fade to black after 2s
+    // Pre-night phases: show players, start walk-away, then fade to black
     if (PRE_NIGHT_PHASES.includes(phase)) {
+      // Ensure players are visible for walk-away
+      setNightPlayersHidden(false);
       // Delay fade so walk-away is visible first
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
         setShowNightText(true);
       }, 2000));
-      // Trigger walk-away animation during pre-night (still daytime scene)
+      // Trigger walk-away animation
       if (nightStartedForDay.current !== game.dayCount) {
         nightStartedForDay.current = game.dayCount;
-        setNightPlayersHidden(false);
         setNightTransition(true);
         fadeTimers.current.push(setTimeout(() => {
           setNightTransition(false);
@@ -1025,8 +1026,8 @@ const MainScene = () => {
 
     // Night starts: already black from pre-night, reveal night scene quickly
     if (phase === CONSTANTS.PHASE.NIGHT && lastPhaseForFade.current !== CONSTANTS.PHASE.NIGHT) {
-      // Hide text after a moment, then reveal night scene
-      fadeTimers.current.push(setTimeout(() => setShowNightText(false), 1000));
+      // Hide text after it finishes its animation
+      fadeTimers.current.push(setTimeout(() => setShowNightText(false), 3000));
       setNightFade('from-black');
       fadeTimers.current.push(setTimeout(() => setNightFade('none'), 1500));
 
