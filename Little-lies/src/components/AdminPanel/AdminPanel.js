@@ -85,7 +85,7 @@ const AdminPanel = () => {
   const sendAnnouncement = () => {
     if (!announcement.trim()) return;
     setGame(prev => ({ ...prev, adminAnnouncement: announcement.trim() }));
-    setTimeout(() => setGame(prev => ({ ...prev, adminAnnouncement: null })), 8000);
+    setTimeout(() => setGame(prev => ({ ...prev, adminAnnouncement: null })), 3000);
     setAnnouncement('');
   };
 

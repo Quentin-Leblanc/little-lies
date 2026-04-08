@@ -366,14 +366,15 @@ function Chat(props) {
       {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> Chat des morts</div>}
       <div className="chat-messages">
         {filteredMessages.map((message, index) => {
-          // Only system/info messages from past phases are grayed (not player messages)
-          const isPastSystem = index < lastSeparatorIndex && message.type === 'system';
+          // Admin messages are never grayed
+          const isAdmin = message.type === 'system' && message.content?.startsWith('[ADMIN]');
+          const isPastSystem = !isAdmin && index < lastSeparatorIndex && message.type === 'system';
           const pastClass = isPastSystem ? 'msg-past' : '';
 
           // System messages: render as clean separator
           if (message.type === 'system') {
             return (
-              <div className={`chat-message-wrapper msg-system ${pastClass}`} key={message.id || index}>
+              <div className={`chat-message-wrapper msg-system ${isAdmin ? 'msg-admin' : ''} ${pastClass}`} key={message.id || index}>
                 <div className="chat-message chat-day-separator">
                   {message.content}
                 </div>

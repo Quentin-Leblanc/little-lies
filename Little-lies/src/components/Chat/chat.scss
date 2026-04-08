@@ -152,6 +152,16 @@
     border-left: 2px solid #cc0000;
   }
 
+  // Admin messages — always visible, red bold on dark bg
+  &.msg-admin {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-left: 2px solid #ff4444;
+    .chat-message, .chat-day-separator {
+      color: #ff4444 !important;
+      font-weight: bold;
+    }
+  }
+
   // Messages from previous days/nights — grayed out
   &.msg-past {
     opacity: 0.4;
