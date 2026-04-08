@@ -534,23 +534,26 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
     }
   });
 
-  // Fade-out opacity during walk-away transition
-  const [walkOpacity, setWalkOpacity] = useState(1);
-  useEffect(() => {
-    if (isTransitioning) {
-      setWalkOpacity(1);
-      const fadeInterval = setInterval(() => {
-        setWalkOpacity(prev => Math.max(prev - 0.03, 0));
-      }, 100);
-      return () => clearInterval(fadeInterval);
-    } else {
-      setWalkOpacity(1);
+  // Fade-out: make character materials transparent during walk-away
+  const charGroupRef = useRef();
+  useFrame(() => {
+    if (!charGroupRef.current) return;
+    if (isTransitioning && transitionStartTime.current !== null) {
+      const elapsed = performance.now() / 1000 - transitionStartTime.current;
+      // Start fading after 1s, fully gone by 2.5s
+      const opacity = Math.max(1 - Math.max(elapsed - 1, 0) / 1.5, 0);
+      charGroupRef.current.traverse((child) => {
+        if (child.isMesh && child.material) {
+          child.material.transparent = true;
+          child.material.opacity = opacity;
+        }
+      });
     }
-  }, [isTransitioning]);
+  });
 
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
-      <group scale={isTransitioning ? [walkOpacity, walkOpacity, walkOpacity] : [1, 1, 1]}>
+      <group ref={charGroupRef}>
         <Character
           color={color}
           animation={pauseAnim || currentAnim}
