@@ -130,21 +130,21 @@
   font-family: 'Cinzel', serif;
   font-size: 26px;
   font-weight: 700;
-  color: #111;
+  color: #eee;
   padding: 14px 36px;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.7);
   border-radius: 8px;
   backdrop-filter: blur(4px);
   animation: announcement-fade-in 0.5s ease-out;
 
   &.announcement-spared {
-    color: #0d5e0d;
-    background: rgba(200, 255, 200, 0.5);
+    color: #78ff78;
+    background: rgba(0, 40, 0, 0.7);
   }
 
   &.announcement-execution {
-    color: #8b0000;
-    background: rgba(255, 200, 200, 0.5);
+    color: #ff6666;
+    background: rgba(40, 0, 0, 0.7);
   }
 
   &.announcement-report {

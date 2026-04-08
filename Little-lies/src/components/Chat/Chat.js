@@ -307,11 +307,13 @@ function Chat(props) {
   const filteredMessages = (messages || [])
     .filter(filterMessage);
 
-  // Find index of the last day separator ("--- Jour X ---") to gray everything before it
-  let lastDaySeparatorIndex = -1;
+  // Find last phase separator to gray everything before it
+  // Separators: "--- Jour X ---" (new day) or "La nuit tombe..." (night starts)
+  let lastSeparatorIndex = -1;
   for (let i = filteredMessages.length - 1; i >= 0; i--) {
-    if (filteredMessages[i].type === 'system' && filteredMessages[i].content?.startsWith('--- Jour')) {
-      lastDaySeparatorIndex = i;
+    const c = filteredMessages[i].content;
+    if (filteredMessages[i].type === 'system' && (c?.startsWith('--- Jour') || c?.startsWith('La nuit tombe'))) {
+      lastSeparatorIndex = i;
       break;
     }
   }
@@ -364,8 +366,8 @@ function Chat(props) {
       {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> Chat des morts</div>}
       <div className="chat-messages">
         {filteredMessages.map((message, index) => {
-          // Everything before the last "--- Jour X ---" separator is grayed
-          const isPast = index < lastDaySeparatorIndex;
+          // Everything before the last phase separator is grayed
+          const isPast = index < lastSeparatorIndex;
           const pastClass = isPast ? 'msg-past' : '';
 
           // System messages: render as clean separator

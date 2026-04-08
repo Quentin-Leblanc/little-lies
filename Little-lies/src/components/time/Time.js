@@ -52,7 +52,7 @@ const Time = () => {
           <i className={`fas ${phaseIcon}`}></i>
           {headerText}
         </div>
-        {!isInfoPhase && (
+        {!isInfoPhase && !(dayCount === 1 && phase === 'DISCUSSION') && (
           <div className="timer">
             <motion.div
               key={localTimer}
@@ -73,7 +73,7 @@ const Time = () => {
 /** Progress bar — rendered inside the 3D scene container, hidden during info phases */
 export const TimeBar = () => {
   const {
-    game: { timer, phase },
+    game: { timer, phase, dayCount },
     CONSTANTS,
   } = useGameEngine();
 
@@ -91,8 +91,9 @@ export const TimeBar = () => {
     setLocalTimer(timer);
   }, [timer]);
 
-  // Hide bar during information-only phases (after hooks)
-  if (INFO_PHASES.includes(phase)) return null;
+  // Hide bar during info phases + first day discussion
+  const isFirstDayDiscussion = dayCount === 1 && phase === 'DISCUSSION';
+  if (INFO_PHASES.includes(phase) || isFirstDayDiscussion) return null;
 
   const progressPercentage = (localTimer / totalDuration) * 100;
 
