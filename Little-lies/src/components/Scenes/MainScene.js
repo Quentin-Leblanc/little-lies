@@ -1033,13 +1033,23 @@ const MainScene = () => {
     }
   }, [phase]);
 
-  // Day circle positions (for night walk-away start)
+  // Day circle positions (walk-away start) + house positions (walk-away end)
   const dayPositions = useMemo(() => {
     const positions = {};
     const circleRadius = 4;
     alivePlayers.forEach((p, i) => {
       const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
       positions[p.id] = [Math.cos(angle) * circleRadius, 0, Math.sin(angle) * circleRadius];
+    });
+    return positions;
+  }, [alivePlayers.length]);
+
+  // House positions — where players walk to at end of day (radius 12, toward buildings)
+  const housePositions = useMemo(() => {
+    const positions = {};
+    alivePlayers.forEach((p, i) => {
+      const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
+      positions[p.id] = [Math.cos(angle) * 12, 0, Math.sin(angle) * 12];
     });
     return positions;
   }, [alivePlayers.length]);
@@ -1203,8 +1213,10 @@ const MainScene = () => {
             const isVoteTarget = myVoteTarget === player.id;
             const showJudgmentBtn = isJudgmentPhase && isAccused && me?.isAlive && me.id !== game.accusedId && !hasJudged;
             const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
-            // During pause, override local player's position, rotation and animation
-            const usePos = (isPaused && isMe && pausePos) ? pausePos : pData.position;
+            // During pause: use pause position. During walk-away: use house as destination.
+            const usePos = (isPaused && isMe && pausePos) ? pausePos
+              : nightTransition ? (housePositions[player.id] || pData.position)
+              : pData.position;
             const useRot = (isPaused && isMe) ? [0, pauseYaw + Math.PI, 0] : pData.rotation;
             return (
               <PlayerFigure

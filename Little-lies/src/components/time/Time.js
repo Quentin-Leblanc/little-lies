@@ -91,7 +91,6 @@ export const TimeBar = () => {
   } = useGameEngine();
 
   const isPaused = !!adminFreeRoam;
-  const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
   const [localTimer, setLocalTimer] = useState(timer);
 
   useEffect(() => {
@@ -106,11 +105,27 @@ export const TimeBar = () => {
     setLocalTimer(timer);
   }, [timer]);
 
-  // Hide bar during info phases + first day discussion
+  // Hide bar during night, info phases, first day discussion
   const isFirstDayDiscussion = dayCount === 1 && phase === 'DISCUSSION';
-  if (INFO_PHASES.includes(phase) || isFirstDayDiscussion) return null;
+  if (phase === 'NIGHT' || INFO_PHASES.includes(phase) || isFirstDayDiscussion) return null;
 
-  const progressPercentage = (localTimer / totalDuration) * 100;
+  // Calculate progress as countdown to night (not just current phase)
+  // Day phases order: DISCUSSION → VOTING → (DEFENSE → JUDGMENT → ...)
+  const DAY_PHASE_ORDER = ['DEATH_REPORT', 'DISCUSSION', 'VOTING', 'DEFENSE', 'JUDGMENT', 'LAST_WORDS', 'EXECUTION', 'NO_LYNCH', 'SPARED'];
+  const currentIdx = DAY_PHASE_ORDER.indexOf(phase);
+  // Time remaining in current phase
+  const currentRemaining = localTimer;
+  // Time remaining in upcoming phases until night
+  let futureTime = 0;
+  for (let i = currentIdx + 1; i < DAY_PHASE_ORDER.length; i++) {
+    const p = DAY_PHASE_ORDER[i];
+    if (p === 'DEFENSE' || p === 'JUDGMENT' || p === 'LAST_WORDS' || p === 'EXECUTION' || p === 'SPARED') break; // these are conditional
+    futureTime += CONSTANTS.DURATIONS[p] || 0;
+  }
+  // Total day time (from DISCUSSION to end of VOTING = main day phases)
+  const totalDayTime = (CONSTANTS.DURATIONS.DISCUSSION || 15000) + (CONSTANTS.DURATIONS.VOTING || 30000);
+  const totalRemaining = currentRemaining + futureTime;
+  const progressPercentage = Math.min((totalRemaining / totalDayTime) * 100, 100);
 
   let barColor;
   if (progressPercentage <= 25) barColor = '#ff4757';
