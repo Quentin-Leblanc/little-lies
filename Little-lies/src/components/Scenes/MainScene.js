@@ -678,8 +678,8 @@ const CameraController = ({ phase, CONSTANTS }) => {
 
     prevPhaseRef.current = phase;
 
-    // Smooth lerp
-    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.015 : 0.02;
+    // Smooth lerp — very slow at night for gentle transitions
+    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.006 : 0.02;
     camera.position.lerp(targetPos.current, lerpSpeed);
     const currentLookAt = new THREE.Vector3();
     camera.getWorldDirection(currentLookAt);
