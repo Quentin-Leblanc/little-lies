@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import './Time.scss';
 import { useEffect, useState } from 'react';
@@ -60,19 +60,37 @@ const Time = () => {
   return (
     <div className="time-container">
       {/* Day/Night label — top left */}
-      <div className="day-label">
-        <i className={`fas ${phaseIcon}`}></i>
-        {dayNightLabel}
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          className="day-label"
+          key={dayNightLabel}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <i className={`fas ${phaseIcon}`}></i>
+          {dayNightLabel}
+        </motion.div>
+      </AnimatePresence>
       {/* Phase + countdown — top right */}
       <div className="phase-info" style={{ background: phaseBg }}>
-        <div className="progress-content">
-          {isPaused ? (
-            <><i className="fas fa-pause"></i> PAUSE</>
-          ) : (
-            phaseLabel
-          )}
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="progress-content"
+            key={phaseLabel}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            {isPaused ? (
+              <><i className="fas fa-pause"></i> PAUSE</>
+            ) : (
+              phaseLabel
+            )}
+          </motion.div>
+        </AnimatePresence>
         {!isInfoPhase && !(dayCount === 1 && phase === 'DISCUSSION') && (
           <div className="timer">
             <motion.div
