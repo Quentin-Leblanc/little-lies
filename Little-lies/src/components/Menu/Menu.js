@@ -29,17 +29,31 @@ const Menu = () => {
 
   const filteredLogs = messages?.filter((message) => message.chat !== 'mafia' && message.chat !== 'whisper' && message.chat !== 'dead') || [];
 
+  const copyCode = () => {
+    navigator.clipboard.writeText(roomCode);
+  };
+
   return (
-    <div className="menu-container">
-      <button className="menu-buttons" onClick={() => setShowMenu(true)}>
-        <i className="fas fa-bars"></i> Menu
-      </button>
-      <button className="menu-buttons" onClick={() => setShowHelp(true)}>
-        <i className="fas fa-book"></i> Aide
-      </button>
-      <button className="menu-buttons" onClick={() => setShowLogs(true)}>
-        <i className="fas fa-scroll"></i> Logs
-      </button>
+    <div className="menu-wrapper">
+      <div className="menu-title-block">
+        <h1 className="menu-game-title">Little Lies</h1>
+        <div className="menu-lobby-code" onClick={copyCode} title="Cliquer pour copier">
+          <span className="menu-code-label">Code lobby :</span>
+          <span className="menu-code-value">{roomCode || '...'}</span>
+          <i className="fas fa-copy menu-code-copy"></i>
+        </div>
+      </div>
+      <div className="menu-container">
+        <button className="menu-buttons" onClick={() => setShowMenu(true)}>
+          <i className="fas fa-bars"></i> Menu
+        </button>
+        <button className="menu-buttons" onClick={() => setShowHelp(true)}>
+          <i className="fas fa-book"></i> Aide
+        </button>
+        <button className="menu-buttons" onClick={() => setShowLogs(true)}>
+          <i className="fas fa-scroll"></i> Logs
+        </button>
+      </div>
       {showMenu && (
         <MenuDialog
           roomCode={roomCode}
