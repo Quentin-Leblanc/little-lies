@@ -1246,7 +1246,7 @@ const MainScene = () => {
       {/* Phase announcements */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
         <div className="scene-announcement">
-          <div className="announcement-text">Personne ne sera lynché aujourd'hui.</div>
+          <div className="announcement-text">Personne n'a été lynché aujourd'hui.</div>
         </div>
       )}
       {phase === CONSTANTS.PHASE.SPARED && (

@@ -504,7 +504,7 @@ export const GameEngineProvider = ({ children }) => {
         } else {
           // No majority → show NO_LYNCH announcement then go to night
           addChatSystem('Personne n\'a été lynché aujourd\'hui.', '#ffa502');
-          Events.add({ type: 'NO_LYNCH', content: { chatMessage: 'Personne ne sera lynché aujourd\'hui.' }, displayed: true });
+          Events.add({ type: 'NO_LYNCH', content: { chatMessage: 'Personne n\'a été lynché aujourd\'hui.' }, displayed: true });
           resetTrial();
           nextGame = { ...nextGame, phase: PHASE.NO_LYNCH, timer: dur('NO_LYNCH'), accusedId: null };
         }
