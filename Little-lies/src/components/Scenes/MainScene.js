@@ -613,20 +613,37 @@ const DeadPlayerFigure = ({ player, position }) => (
 // Pause player controller — moves the local player's character with ZQSD,
 // camera follows behind in third person
 // Simple collision check against building positions (circle-based)
-// Native model width ~1.5u, so collision radius = 0.75 * scale
-const checkCollision = (x, z) => {
+// Collision check — y-aware: skip if player is above the obstacle
+const checkCollision = (x, z, y, otherPlayers) => {
+  // Buildings (height ~4u at scale 3)
   for (const b of MESHY_BUILDINGS) {
     const bx = b.position[0], bz = b.position[2];
+    const s = typeof b.scale === 'number' ? b.scale : 3;
     const dx = x - bx, dz = z - bz;
-    const r = 0.75 * (typeof b.scale === 'number' ? b.scale : 3);
-    if (dx * dx + dz * dz < r * r) {
-      return true;
+    const r = 0.7 * s;
+    const h = 1.5 * s; // building height
+    if (dx * dx + dz * dz < r * r && y < h) return true;
+  }
+  // Gallows at center (radius 1.2, height ~2.5)
+  if (x * x + z * z < 1.4 && y < 2.5) return true;
+  // Mountains (large radius, tall)
+  for (const m of MOUNTAINS) {
+    const mx = m.position[0], mz = m.position[2];
+    const dx = x - mx, dz = z - mz;
+    const r = 0.4 * m.scale;
+    if (dx * dx + dz * dz < r * r) return true;
+  }
+  // Other players (small radius, can jump over)
+  if (otherPlayers) {
+    for (const p of otherPlayers) {
+      const dx = x - p[0], dz = z - p[2];
+      if (dx * dx + dz * dz < 0.4 && y < 1.5) return true;
     }
   }
   return false;
 };
 
-const PausePlayerController = ({ pausePos, setPausePos, setPauseAnim, setPauseYaw, playerRotation }) => {
+const PausePlayerController = ({ pausePos, setPausePos, setPauseAnim, setPauseYaw, playerRotation, otherPlayerPositions }) => {
   const { camera } = useThree();
   const keys = useRef({});
   const yaw = useRef(0);
@@ -665,13 +682,13 @@ const PausePlayerController = ({ pausePos, setPausePos, setPauseAnim, setPauseYa
     if (k['KeyW'] || k['KeyZ'] || k['ArrowUp']) {
       const nx = newPos[0] + forward.x * speed;
       const nz = newPos[2] + forward.z * speed;
-      if (!checkCollision(nx, nz)) { newPos[0] = nx; newPos[2] = nz; }
+      if (!checkCollision(nx, nz, newPos[1] || 0, otherPlayerPositions)) { newPos[0] = nx; newPos[2] = nz; }
       moved = true;
     }
     if (k['KeyS'] || k['ArrowDown']) {
       const nx = newPos[0] - forward.x * speed;
       const nz = newPos[2] - forward.z * speed;
-      if (!checkCollision(nx, nz)) { newPos[0] = nx; newPos[2] = nz; }
+      if (!checkCollision(nx, nz, newPos[1] || 0, otherPlayerPositions)) { newPos[0] = nx; newPos[2] = nz; }
       moved = true;
     }
 
@@ -1084,6 +1101,7 @@ const MainScene = () => {
               setPauseAnim={setPauseAnim}
               setPauseYaw={setPauseYaw}
               playerRotation={playerPositions[me?.id]?.rotation?.[1] || 0}
+              otherPlayerPositions={alivePlayers.filter(p => p.id !== me?.id).map(p => playerPositions[p.id]?.position || [0,0,0])}
             />
           ) : (
             <CameraController phase={phase} CONSTANTS={CONSTANTS} />
@@ -1222,9 +1240,9 @@ const MainScene = () => {
         </div>
       )}
 
-      {/* Admin pause overlay */}
+      {/* Admin pause overlay — shows for 5s then fades */}
       {game.adminFreeRoam && (
-        <div className="scene-announcement">
+        <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 5s ease-out forwards' }}>
           <div className="announcement-text" style={{ fontSize: '42px', letterSpacing: '8px', border: '2px solid rgba(255,68,68,0.4)' }}>
             <i className="fas fa-pause" style={{ marginRight: 12 }}></i> PAUSE
           </div>
