@@ -417,6 +417,104 @@ const Fireflies = ({ count = 40 }) => {
 };
 
 // ============================================================
+// Butterflies (day particle effect — colorful, fluttering movement)
+// ============================================================
+const Butterflies = ({ count = 20 }) => {
+  const meshRef = useRef();
+  const colors = useMemo(() => ['#ff8844', '#ffcc44', '#ffffff', '#88ccff', '#ff88cc', '#aaffaa'], []);
+  const particles = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push({
+        x: (Math.random() - 0.5) * 30,
+        y: Math.random() * 4 + 1,
+        z: (Math.random() - 0.5) * 30,
+        speed: Math.random() * 0.6 + 0.3,
+        flutter: Math.random() * 3 + 2,
+        offset: Math.random() * Math.PI * 2,
+        radius: Math.random() * 2 + 1,
+      });
+    }
+    return arr;
+  }, [count]);
+
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    particles.forEach((p, i) => {
+      // Circular fluttering path
+      const px = p.x + Math.sin(t * p.speed + p.offset) * p.radius;
+      const py = p.y + Math.sin(t * p.flutter + p.offset) * 0.6;
+      const pz = p.z + Math.cos(t * p.speed * 0.7 + p.offset) * p.radius;
+      dummy.position.set(px, py, pz);
+      // Wing flap scale
+      const flap = 0.5 + Math.abs(Math.sin(t * p.flutter * 2 + p.offset)) * 0.5;
+      dummy.scale.set(flap, 0.3, 1);
+      dummy.rotation.y = Math.atan2(
+        Math.cos(t * p.speed + p.offset) * p.radius,
+        -Math.sin(t * p.speed * 0.7 + p.offset) * p.radius
+      );
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <planeGeometry args={[0.15, 0.1]} />
+      <meshBasicMaterial color="#ffcc66" transparent opacity={0.85} side={THREE.DoubleSide} />
+    </instancedMesh>
+  );
+};
+
+// ============================================================
+// Dust / pollen particles (day — floating specks in sunlight)
+// ============================================================
+const DustParticles = ({ count = 60 }) => {
+  const meshRef = useRef();
+  const particles = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push({
+        x: (Math.random() - 0.5) * 40,
+        y: Math.random() * 6 + 0.5,
+        z: (Math.random() - 0.5) * 40,
+        speed: Math.random() * 0.15 + 0.05,
+        drift: Math.random() * 0.5 + 0.2,
+        offset: Math.random() * Math.PI * 2,
+      });
+    }
+    return arr;
+  }, [count]);
+
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    particles.forEach((p, i) => {
+      const px = p.x + Math.sin(t * p.drift + p.offset) * 2;
+      const py = p.y + Math.sin(t * p.speed * 2 + p.offset) * 0.8;
+      const pz = p.z + Math.cos(t * p.drift * 0.8 + p.offset) * 2;
+      dummy.position.set(px, py, pz);
+      const s = 0.3 + Math.sin(t * 1.5 + p.offset) * 0.2;
+      dummy.scale.setScalar(s);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <sphereGeometry args={[0.02, 3, 3]} />
+      <meshBasicMaterial color="#ffffee" transparent opacity={0.5} />
+    </instancedMesh>
+  );
+};
+
+// ============================================================
 // Ghost Orb (floats above dead players)
 // ============================================================
 const GhostOrb = ({ position }) => {
@@ -856,6 +954,8 @@ const MainScene = () => {
             <>
               <color attach="background" args={['#87CEEB']} />
               <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
+              <Butterflies count={20} />
+              <DustParticles count={60} />
             </>
           ) : (
             <>
@@ -863,7 +963,7 @@ const MainScene = () => {
               <fog attach="fog" args={['#060818', 25, 55]} />
               <Stars radius={80} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
               <Moon />
-              <Fireflies count={40} />
+              <Fireflies count={50} />
             </>
           )}
 
