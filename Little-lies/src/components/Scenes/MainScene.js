@@ -740,8 +740,8 @@ const PausePlayerController = ({ pausePos, setPausePos, setPauseAnim, setPauseYa
 const NIGHT_CAMERA_WAYPOINTS = [
   { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 5 },    // Overview while players walk away
   { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 18 },   // Long slow alley walk
-  { pos: [-1, 4, -2],     lookAt: [0, 30, -2],       duration: 20 },   // Gentle rise, tilting up to sky
-  { pos: [0, 5, -1],      lookAt: [0, 40, 0],        duration: 30, hold: true },  // Low, gazing at stars
+  { pos: [-1, 3.5, -1],   lookAt: [0, 12, -3],       duration: 20 },   // Gentle rise, looking slightly up
+  { pos: [0, 4, 0],       lookAt: [0, 15, -2],       duration: 30, hold: true },  // Settled, sky visible but not straight up
 ];
 
 const CameraController = ({ phase, CONSTANTS }) => {
@@ -803,10 +803,19 @@ const CameraController = ({ phase, CONSTANTS }) => {
       }
     }
 
+    // Detect transition from night → day: use very slow lerp for smooth fade
+    const comingFromNight = prevPhaseRef.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT;
     prevPhaseRef.current = phase;
 
-    // Smooth lerp — very slow at night, even slower for sky waypoints
-    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.002 : 0.02;
+    // Lerp speed: ultra slow leaving night, slow during night, normal for day
+    let lerpSpeed;
+    if (phase === CONSTANTS.PHASE.NIGHT) {
+      lerpSpeed = 0.002;
+    } else if (comingFromNight || phase === CONSTANTS.PHASE.DEATH_REPORT) {
+      lerpSpeed = 0.008; // gentle transition from stars back to village
+    } else {
+      lerpSpeed = 0.02;
+    }
     camera.position.lerp(targetPos.current, lerpSpeed);
     const currentLookAt = new THREE.Vector3();
     camera.getWorldDirection(currentLookAt);
