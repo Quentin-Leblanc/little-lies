@@ -578,17 +578,20 @@ export const GameEngineProvider = ({ children }) => {
     if (game.adminFreeRoam) return;
 
     const tick = setTimeout(() => {
+      // Re-check pause inside timeout (flag may have changed since setTimeout was set)
+      if (game.adminFreeRoam) return;
+
       // During VOTING, check for majority each tick
       if (game.phase === PHASE.VOTING && game.timer > 0) {
         const accusedId = checkVotingMajority();
         if (accusedId && game.trialsToday < MAX_TRIALS_PER_DAY) {
-          setGame({
-            ...game,
+          setGame(prev => ({
+            ...prev,
             phase: PHASE.DEFENSE,
             timer: dur('DEFENSE'),
             accusedId,
-            trialsToday: game.trialsToday + 1,
-          });
+            trialsToday: prev.trialsToday + 1,
+          }));
           return;
         }
       }
@@ -596,7 +599,7 @@ export const GameEngineProvider = ({ children }) => {
       if (game.timer <= 0) {
         transitionPhase();
       } else {
-        setGame({ ...game, timer: game.timer - 1000 });
+        setGame(prev => ({ ...prev, timer: prev.timer - 1000 }));
       }
     }, 1000);
 

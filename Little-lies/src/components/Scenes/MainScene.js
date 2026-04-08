@@ -613,8 +613,20 @@ const DeadPlayerFigure = ({ player, position }) => (
 const AdminFreeRoamCamera = () => {
   const { camera, gl } = useThree();
   const keys = useRef({});
-  const euler = useRef({ yaw: 0, pitch: -0.3 });
+  const initialized = useRef(false);
+  const euler = useRef({ yaw: 0, pitch: 0 });
   const isDragging = useRef(false);
+
+  // Initialize yaw/pitch from current camera direction (don't jump)
+  useFrame(() => {
+    if (!initialized.current) {
+      const dir = new THREE.Vector3();
+      camera.getWorldDirection(dir);
+      euler.current.yaw = Math.atan2(-dir.x, -dir.z);
+      euler.current.pitch = Math.asin(dir.y);
+      initialized.current = true;
+    }
+  });
 
   useEffect(() => {
     const onKeyDown = (e) => { keys.current[e.code] = true; };
