@@ -613,12 +613,13 @@ const DeadPlayerFigure = ({ player, position }) => (
 // Pause player controller — moves the local player's character with ZQSD,
 // camera follows behind in third person
 // Simple collision check against building positions (circle-based)
-const COLLISION_RADIUS = 2.5; // approximate building half-width
+// Native model width ~1.5u, so collision radius = 0.75 * scale
 const checkCollision = (x, z) => {
   for (const b of MESHY_BUILDINGS) {
     const bx = b.position[0], bz = b.position[2];
     const dx = x - bx, dz = z - bz;
-    if (dx * dx + dz * dz < COLLISION_RADIUS * COLLISION_RADIUS * (b.scale || 3)) {
+    const r = 0.75 * (typeof b.scale === 'number' ? b.scale : 3);
+    if (dx * dx + dz * dz < r * r) {
       return true;
     }
   }
