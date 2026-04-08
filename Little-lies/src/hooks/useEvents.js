@@ -308,8 +308,9 @@ export const EventsProvider = ({ children }) => {
       }
     });
 
-    // Apply kills + Executioner→Jester in a single setPlayers to avoid stale state
+    // === Collect ALL player modifications, apply in ONE setPlayers at the end ===
     const killedIds = Object.keys(killed);
+    const allKilledIds = new Set(killedIds);
 
     // Death flavor messages by kill type
     const MAFIA_DEATH_MSGS = [
@@ -357,34 +358,7 @@ export const EventsProvider = ({ children }) => {
       });
     });
 
-    // Single atomic update: kill players + convert Executioner→Jester
-    const jesterRole = killedIds.length > 0 ? {
-      label: 'Jester', key: 'jester', team: 'neutral', category: 'neutral_benign',
-      description: 'Votre cible est morte. Vous êtes maintenant un Jester.',
-      couleur: '#ff69b4', icon: 'fa-face-grin-tears', actions: [],
-      objectif: 'Se faire lyncher par le village.',
-      nightImmune: false, detectResult: 'non-suspect',
-      attackLevel: 0, defenseLevel: 0, winCondition: 'getLynched',
-    } : null;
-
-    if (killedIds.length > 0) {
-      setPlayers(
-        players.map((p) => {
-          // Kill dead players
-          if (killedIds.includes(p.id)) {
-            return { ...p, isAlive: false };
-          }
-          // Convert Executioner → Jester if their target died
-          if (jesterRole && p.character?.winCondition === 'getTargetLynched' && killedIds.includes(p.executionerTarget) && p.isAlive) {
-            addNotif(p.id, 'Votre cible est morte... Vous êtes maintenant un Jester. Faites-vous lyncher !');
-            return { ...p, character: jesterRole, executionerTarget: null };
-          }
-          return p;
-        })
-      );
-    }
-
-    // === Vigilante guilt ===
+    // === Vigilante guilt events ===
     Object.entries(vigilanteKills).forEach(([targetId, vigilanteId]) => {
       const target = players.find((p) => p.id === targetId);
       if (target?.character?.team === 'town' && killed[targetId]) {
@@ -394,6 +368,25 @@ export const EventsProvider = ({ children }) => {
           displayed: true,
         });
         addNotif(vigilanteId, 'Vous avez tué un innocent... La culpabilité vous ronge.');
+      }
+    });
+
+    // === Vigilante guilt from previous night (suicide) ===
+    const guiltEvents = get().filter(
+      (e) => e.type === 'VIGILANTE_GUILT' && e.dayCount === game.dayCount - 1
+    );
+    guiltEvents.forEach((e) => {
+      const vigilante = players.find((p) => p.id === e.content.target);
+      if (vigilante?.isAlive && !allKilledIds.has(e.content.target)) {
+        allKilledIds.add(e.content.target);
+        addEvent({
+          type: 'KILL_RESULT',
+          content: {
+            target: e.content.target,
+            chatMessage: `${vigilante.profile.name} s'est suicidé de culpabilité. Son rôle était : Vigilante.`,
+          },
+          displayed: false,
+        });
       }
     });
 
@@ -456,33 +449,34 @@ export const EventsProvider = ({ children }) => {
         );
       });
 
-    // === Apply blackmail ===
-    const updatedPlayers = players.map((p) => ({
-      ...p,
-      isBlackmailed: !!blackmailedPlayers[p.id],
-    }));
-    if (updatedPlayers.some((p, i) => p.isBlackmailed !== players[i]?.isBlackmailed)) {
-      setPlayers(updatedPlayers);
-    }
+    // === SINGLE ATOMIC setPlayers: kills + blackmail + Executioner→Jester ===
+    const jesterRole = {
+      label: 'Jester', key: 'jester', team: 'neutral', category: 'neutral_benign',
+      description: 'Votre cible est morte. Vous êtes maintenant un Jester.',
+      couleur: '#ff69b4', icon: 'fa-face-grin-tears', actions: [],
+      objectif: 'Se faire lyncher par le village.',
+      nightImmune: false, detectResult: 'non-suspect',
+      attackLevel: 0, defenseLevel: 0, winCondition: 'getLynched',
+    };
 
-    // === Vigilante guilt from previous night ===
-    const guiltEvents = get().filter(
-      (e) => e.type === 'VIGILANTE_GUILT' && e.dayCount === game.dayCount - 1
+    setPlayers(
+      players.map((p) => {
+        let updated = { ...p };
+        // Kill dead players
+        if (allKilledIds.has(p.id)) {
+          updated.isAlive = false;
+        }
+        // Apply blackmail
+        updated.isBlackmailed = !!blackmailedPlayers[p.id];
+        // Convert Executioner → Jester if their target died
+        if (killedIds.length > 0 && p.character?.winCondition === 'getTargetLynched' && killedIds.includes(p.executionerTarget) && p.isAlive) {
+          addNotif(p.id, 'Votre cible est morte... Vous êtes maintenant un Jester. Faites-vous lyncher !');
+          updated.character = jesterRole;
+          updated.executionerTarget = null;
+        }
+        return updated;
+      })
     );
-    guiltEvents.forEach((e) => {
-      const vigilante = players.find((p) => p.id === e.content.target);
-      if (vigilante?.isAlive) {
-        killPlayer(e.content.target);
-        addEvent({
-          type: 'KILL_RESULT',
-          content: {
-            target: e.content.target,
-            chatMessage: `${vigilante.profile.name} s'est suicidé de culpabilité. Son rôle était : Vigilante.`,
-          },
-          displayed: false,
-        });
-      }
-    });
 
     // --- Flush all accumulated events and notifications at once ---
     setEvents(pendingEvents);
