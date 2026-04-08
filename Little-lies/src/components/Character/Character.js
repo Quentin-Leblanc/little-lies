@@ -6,6 +6,7 @@ import { SkeletonUtils } from 'three-stdlib';
 export function Character({
   color,
   animation = 'Idle',
+  animOffset = 0,
   ...props
 }) {
   const group = useRef();
@@ -53,9 +54,13 @@ export function Character({
     const action = actions[anim];
     if (action) {
       action.reset().fadeIn(0.2).play();
+      // Offset animation time so characters aren't all in sync
+      if (animOffset && action.time !== undefined) {
+        action.time = animOffset;
+      }
       return () => action.fadeOut(0.2);
     }
-  }, [animation, actions]);
+  }, [animation, actions, animOffset]);
 
   // Store original materials once, then clone + tint for player color
   useEffect(() => {

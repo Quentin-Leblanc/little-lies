@@ -152,14 +152,20 @@
     border-left: 2px solid #cc0000;
   }
 
-  // Admin messages — always visible, red bold on dark bg
+  // Admin messages — always visible, red bold on dark bg, fade after 10s
   &.msg-admin {
     background-color: rgba(255, 0, 0, 0.1);
     border-left: 2px solid #ff4444;
+    animation: admin-msg-fade 10s ease-out forwards;
     .chat-message, .chat-day-separator {
       color: #ff4444 !important;
       font-weight: bold;
     }
+  }
+
+  @keyframes admin-msg-fade {
+    0%, 70% { opacity: 1; }
+    100% { opacity: 0.3; }
   }
 
   // Messages from previous days/nights — grayed out

@@ -1,6 +1,6 @@
 // Hidden admin dot
 .admin-dot {
-  position: absolute;
+  position: fixed;
   bottom: 8px;
   left: 8px;
   width: 10px;
@@ -18,7 +18,7 @@
 
 // Password prompt
 .admin-prompt {
-  position: absolute;
+  position: fixed;
   bottom: 8px;
   left: 8px;
   display: flex;

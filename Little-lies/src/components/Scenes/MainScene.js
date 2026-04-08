@@ -540,6 +540,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
         color={color}
         animation={currentAnim}
         scale={characterScale || 0.8}
+        animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
       />
       {/* Player color glow — colored light under the character */}
       <pointLight position={[0, 0.5, 0]} color={color} intensity={1.5} distance={4} />

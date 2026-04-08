@@ -98,12 +98,12 @@ function App() {
                     </div>
 
                     {/* Left - Menu + Roles + Graveyard */}
-                    <div className="layout-players" style={{ position: 'relative' }}>
+                    <div className="layout-players">
                         <Menu />
                         <Roles />
                         <Graveyard />
-                        <AdminPanel />
                     </div>
+                    <AdminPanel />
 
                     {/* Center - 3D scene + progress bar overlay */}
                     <div className="layout-center">
