@@ -612,6 +612,19 @@ const DeadPlayerFigure = ({ player, position }) => (
 // ============================================================
 // Pause player controller — moves the local player's character with ZQSD,
 // camera follows behind in third person
+// Simple collision check against building positions (circle-based)
+const COLLISION_RADIUS = 2.5; // approximate building half-width
+const checkCollision = (x, z) => {
+  for (const b of MESHY_BUILDINGS) {
+    const bx = b.position[0], bz = b.position[2];
+    const dx = x - bx, dz = z - bz;
+    if (dx * dx + dz * dz < COLLISION_RADIUS * COLLISION_RADIUS * (b.scale || 3)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const PausePlayerController = ({ pausePos, setPausePos, setPauseAnim, setPauseYaw, playerRotation }) => {
   const { camera } = useThree();
   const keys = useRef({});
@@ -649,13 +662,15 @@ const PausePlayerController = ({ pausePos, setPausePos, setPauseAnim, setPauseYa
     const newPos = [...pausePos];
 
     if (k['KeyW'] || k['KeyZ'] || k['ArrowUp']) {
-      newPos[0] += forward.x * speed;
-      newPos[2] += forward.z * speed;
+      const nx = newPos[0] + forward.x * speed;
+      const nz = newPos[2] + forward.z * speed;
+      if (!checkCollision(nx, nz)) { newPos[0] = nx; newPos[2] = nz; }
       moved = true;
     }
     if (k['KeyS'] || k['ArrowDown']) {
-      newPos[0] -= forward.x * speed;
-      newPos[2] -= forward.z * speed;
+      const nx = newPos[0] - forward.x * speed;
+      const nz = newPos[2] - forward.z * speed;
+      if (!checkCollision(nx, nz)) { newPos[0] = nx; newPos[2] = nz; }
       moved = true;
     }
 
@@ -1106,7 +1121,7 @@ const MainScene = () => {
             const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
             // During pause, override local player's position, rotation and animation
             const usePos = (isPaused && isMe && pausePos) ? pausePos : pData.position;
-            const useRot = (isPaused && isMe) ? [0, pauseYaw, 0] : pData.rotation;
+            const useRot = (isPaused && isMe) ? [0, pauseYaw + Math.PI, 0] : pData.rotation;
             return (
               <PlayerFigure
                 key={player.id}
