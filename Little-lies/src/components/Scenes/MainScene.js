@@ -27,7 +27,6 @@ const NIGHT_AMBIANCE = [
   'Une bougie s\'allume puis s\'éteint dans une fenêtre...',
   'On entend un craquement du côté de la forge...',
   'Un villageois semble errer seul dans la pénombre...',
-  'Le silence est pesant ce soir... trop pesant.',
   'Une porte grince doucement dans la nuit...',
   'Quelque chose a bougé près de l\'église...',
   'La brume s\'épaissit autour du village...',
@@ -39,20 +38,10 @@ const NIGHT_AMBIANCE = [
 // ============================================================
 const GroundPlane = ({ isDay }) => (
   <group>
-    {/* Main grass */}
+    {/* Main grass — no inner circles */}
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
       <circleGeometry args={[30, 64]} />
       <meshStandardMaterial color={isDay ? '#3a6e2c' : '#1a2e1c'} />
-    </mesh>
-    {/* Dirt path ring around village */}
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.0, 0]} receiveShadow>
-      <ringGeometry args={[7, 9, 32]} />
-      <meshStandardMaterial color={isDay ? '#8B7355' : '#3d3325'} />
-    </mesh>
-    {/* Inner dirt area */}
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.0, 0]} receiveShadow>
-      <circleGeometry args={[6.5, 32]} />
-      <meshStandardMaterial color={isDay ? '#7a6a50' : '#352d20'} />
     </mesh>
     {/* Night ground fog layer */}
     {!isDay && (
@@ -189,7 +178,9 @@ const GallowsModel = () => {
 
 const VillageCenter = () => (
   <group>
-    {/* Gallows only — no roads at center */}
+    {/* Circular wicker place — ground-level center of village */}
+    <MeshyModel path="/models/Meshy_AI_Circular_Wicker_Place_0408110924_texture.glb" position={[0, -0.5, 0]} scale={6} />
+    {/* Gallows on top */}
     <GallowsModel />
   </group>
 );
@@ -332,32 +323,17 @@ const TREE_POSITIONS = [
 
 const Village = ({ isDay }) => (
   <group>
-    {/* Ground tiles removed */}
-
-    {/* Gallows at center */}
-    <VillageCenter />
-
-    {/* Buildings */}
-    {MESHY_BUILDINGS.map((b, i) => (
-      <MeshyModel key={`meshy-${i}`} path={b.path} position={b.position} rotation={b.rotation} scale={b.scale} />
-    ))}
-
-    {/* A few decorative alleys between buildings */}
-    {ALLEYS.map((a, i) => (
-      <MeshyModel key={`alley-${i}`} path="/models/rue.glb" position={a.position} rotation={a.rotation} scale={a.scale} />
-    ))}
-
-    {/* Torches (night only) */}
-    {!isDay && TORCH_POS.map((pos, i) => <Torch key={`torch-${i}`} position={pos} />)}
-
-    {/* Trees */}
-    {TREE_POSITIONS.map((pos, i) => (
-      <LowPolyTree key={`tree-${i}`} position={pos} scale={0.7 + (i % 4) * 0.2} variant={i} />
-    ))}
+    {/* Main village model */}
+    <MeshyModel path="/models/Meshy_AI_Clifftop_Village_at_D_0408220909_texture.glb" position={[0.15, 5.0, -4]} scale={14} />
 
     {/* Background mountains */}
     {MOUNTAINS.map((m, i) => (
       <MeshyModel key={`mountain-${i}`} path="/models/mountain.glb" position={m.position} rotation={m.rotation} scale={m.scale} />
+    ))}
+
+    {/* Trees */}
+    {TREE_POSITIONS.map((pos, i) => (
+      <LowPolyTree key={`tree-${i}`} position={pos} scale={0.7 + (i % 4) * 0.2} variant={i} />
     ))}
   </group>
 );
@@ -1010,6 +986,7 @@ const MainScene = () => {
   const [showNightText, setShowNightText] = useState(false);
   const [showDayText, setShowDayText] = useState(false);
   const [nightAmbianceMsg, setNightAmbianceMsg] = useState(null);
+  const [showDeathReport, setShowDeathReport] = useState(false);
   const fadeTimerRef = useRef(null);
   const lastPhaseForFade = useRef(phase);
 
@@ -1049,6 +1026,9 @@ const MainScene = () => {
 
     // Night starts: already black from pre-night, reveal night scene quickly
     if (phase === CONSTANTS.PHASE.NIGHT && lastPhaseForFade.current !== CONSTANTS.PHASE.NIGHT) {
+      // Ensure players are hidden during night (safety net)
+      setNightPlayersHidden(true);
+      setNightTransition(false);
       // Hide text after it finishes its animation
       fadeTimers.current.push(setTimeout(() => setShowNightText(false), 3000));
       setNightFade('from-black');
@@ -1093,6 +1073,16 @@ const MainScene = () => {
     return () => fadeTimers.current.forEach(clearTimeout);
   }, [phase]);
 
+  // Delay death report by 1s so "Le village se lève..." finishes fading
+  useEffect(() => {
+    if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
+      const t = setTimeout(() => setShowDeathReport(true), 1000);
+      return () => clearTimeout(t);
+    } else {
+      setShowDeathReport(false);
+    }
+  }, [phase]);
+
   // Night walk-away — now triggered in pre-night phases above
   const nightStartedForDay = useRef(null);
   const [nightTransition, setNightTransition] = useState(false);
@@ -1106,12 +1096,13 @@ const MainScene = () => {
   }, [phase]);
 
   // Day circle positions (walk-away start) + house positions (walk-away end)
+  const PLAYER_Y = 0.3; // lift players slightly above ground
   const dayPositions = useMemo(() => {
     const positions = {};
     const circleRadius = 4;
     alivePlayers.forEach((p, i) => {
       const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
-      positions[p.id] = [Math.cos(angle) * circleRadius, 0, Math.sin(angle) * circleRadius];
+      positions[p.id] = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
     });
     return positions;
   }, [alivePlayers.length]);
@@ -1121,7 +1112,7 @@ const MainScene = () => {
     const positions = {};
     alivePlayers.forEach((p, i) => {
       const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
-      positions[p.id] = [Math.cos(angle) * 12, 0, Math.sin(angle) * 12];
+      positions[p.id] = [Math.cos(angle) * 12, PLAYER_Y, Math.sin(angle) * 12];
     });
     return positions;
   }, [alivePlayers.length]);
@@ -1180,7 +1171,7 @@ const MainScene = () => {
     if (phase === CONSTANTS.PHASE.NIGHT) {
       alivePlayers.forEach((p, i) => {
         const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2;
-        const pos = [Math.cos(angle) * 8, 0, Math.sin(angle) * 8];
+        const pos = [Math.cos(angle) * 8, PLAYER_Y, Math.sin(angle) * 8];
         positions[p.id] = {
           position: pos,
           rotation: [0, Math.atan2(pos[0], pos[2]), 0], // face outward
@@ -1189,13 +1180,12 @@ const MainScene = () => {
     } else if (isTrialPhase) {
       alivePlayers.forEach((p, i) => {
         if (p.id === game.accusedId) {
-          positions[p.id] = { position: [0, 0.3, -1.5], rotation: [0, Math.PI, 0] }; // face crowd
+          positions[p.id] = { position: [0, PLAYER_Y + 0.3, -1.5], rotation: [0, Math.PI, 0] }; // face crowd
         } else {
           const idx = i - (players.findIndex(pl => pl.id === game.accusedId) < i ? 1 : 0);
           const count = alivePlayers.length - 1;
           const angle = (idx / Math.max(count, 1)) * Math.PI - Math.PI / 2;
-          const pos = [Math.cos(angle) * 4, 0, Math.sin(angle) * 4 + 2];
-          // Face towards accused (center area)
+          const pos = [Math.cos(angle) * 4, PLAYER_Y, Math.sin(angle) * 4 + 2];
           const dx = -pos[0];
           const dz = -1.5 - pos[2];
           positions[p.id] = {
@@ -1207,7 +1197,7 @@ const MainScene = () => {
     } else {
       alivePlayers.forEach((p, i) => {
         const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
-        const pos = [Math.cos(angle) * circleRadius, 0, Math.sin(angle) * circleRadius];
+        const pos = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
         positions[p.id] = {
           position: pos,
           rotation: [0, Math.atan2(pos[0], pos[2]) + Math.PI, 0], // face center
@@ -1216,7 +1206,7 @@ const MainScene = () => {
     }
 
     deadPlayers.forEach((p, i) => {
-      positions[p.id] = { position: [-12 + i * 2, 0, -12], rotation: [0, 0, 0] };
+      positions[p.id] = { position: [-12 + i * 2, PLAYER_Y, -12], rotation: [0, 0, 0] };
     });
 
     return positions;
@@ -1277,8 +1267,8 @@ const MainScene = () => {
           <GroundPlane isDay={game.isDay} />
           <Village isDay={game.isDay} />
 
-          {/* Alive Players — hidden after night walk finishes */}
-          {!nightPlayersHidden && alivePlayers.map((player) => {
+          {/* Alive Players — hidden during night and after walk finishes */}
+          {!nightPlayersHidden && phase !== CONSTANTS.PHASE.NIGHT && alivePlayers.map((player) => {
             const isMe = player.id === me?.id;
             const isAccused = player.id === game.accusedId;
             const showVoteBtn = isVotingPhase;
@@ -1346,9 +1336,8 @@ const MainScene = () => {
       {/* Night ambiance messages */}
       {/* Night ambiance now handled via nightAmbianceMsg overlay */}
 
-      {/* Death report overlay */}
-      {phase === CONSTANTS.PHASE.DEATH_REPORT && (() => {
-        // Find players who died this night (killed between last night and now)
+      {/* Death report overlay — delayed 1s to avoid overlap with "Le village se lève..." */}
+      {phase === CONSTANTS.PHASE.DEATH_REPORT && showDeathReport && (() => {
         const killedMessages = (chatMessages || []).filter(
           m => m.type === 'system' && m.dayCount === game.dayCount
             && !m.content?.startsWith('--- Jour')
@@ -1359,18 +1348,25 @@ const MainScene = () => {
           const match = m.content?.match(/^(.+?) a été tué/);
           return match ? match[1] : null;
         }).filter(Boolean);
+        const hasDead = killedNames.length > 0;
 
         return (
-          <div className="night-text-overlay" style={{ animation: 'night-text-anim 5s ease-in-out forwards' }}>
-            <div className="night-text-content" style={{ fontSize: '28px' }}>
-              {killedNames.length === 0 ? (
-                'Pas de mort cette nuit.'
+          <div className={`death-report-overlay ${hasDead ? 'has-dead' : 'no-dead'}`}>
+            <div className="death-report-card">
+              <div className="death-report-icon">
+                <i className={`fas ${hasDead ? 'fa-skull' : 'fa-moon'}`}></i>
+              </div>
+              {hasDead ? (
+                <>
+                  {killedNames.map((name, i) => (
+                    <div key={i} className="death-report-name">
+                      <span className="death-name">{name}</span>
+                      <span className="death-desc">a été retrouvé(e) sans vie ce matin...</span>
+                    </div>
+                  ))}
+                </>
               ) : (
-                killedNames.map((name, i) => (
-                  <div key={i} style={{ marginBottom: 8 }}>
-                    {name} a été retrouvé(e) sans vie ce matin...
-                  </div>
-                ))
+                <div className="death-report-safe">La nuit a été calme... personne n'est mort.</div>
               )}
             </div>
           </div>
@@ -1478,12 +1474,6 @@ const NightAmbiance = () => {
 export default MainScene;
 
 // Preload Meshy AI models for faster loading
-useGLTF.preload('/models/rue.glb');
-useGLTF.preload('/models/gallows.glb');
-useGLTF.preload('/models/forge.glb');
-useGLTF.preload('/models/tavern.glb');
-useGLTF.preload('/models/chapel.glb');
-useGLTF.preload('/models/cottage.glb');
+// Single scene model
+useGLTF.preload('/models/Meshy_AI_Clifftop_Village_at_D_0408220909_texture.glb');
 useGLTF.preload('/models/mountain.glb');
-useGLTF.preload('/models/cobblestone_platform.glb');
-useGLTF.preload('/models/terrain.glb');
