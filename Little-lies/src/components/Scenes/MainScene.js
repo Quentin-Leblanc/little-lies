@@ -1239,7 +1239,9 @@ const MainScene = () => {
       {/* Death report overlay */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && (() => {
         const dayMessages = (chatMessages || []).filter(
-          m => m.type === 'system' && m.dayCount === game.dayCount && m.content !== `--- Jour ${game.dayCount} ---`
+          m => m.type === 'system' && m.dayCount === game.dayCount
+            && !m.content?.startsWith('--- Jour')
+            && !m.content?.startsWith('La nuit a été calme')
         );
         return dayMessages.length > 0 ? (
           <div className="scene-announcement">
