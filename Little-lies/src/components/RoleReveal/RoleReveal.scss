@@ -1,3 +1,40 @@
+// ── Curtain transition ──
+.curtain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  pointer-events: none;
+  display: flex;
+}
+
+.curtain-panel {
+  width: 50%;
+  height: 100%;
+  background: #000;
+  transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.curtain-left {
+  transform: translateX(-100%);
+}
+
+.curtain-right {
+  transform: translateX(100%);
+}
+
+// When curtain is closed, panels slide in
+.curtain-overlay.closed {
+  .curtain-left {
+    transform: translateX(0);
+  }
+  .curtain-right {
+    transform: translateX(0);
+  }
+}
+
 .role-reveal-overlay {
   position: fixed;
   top: 0;
@@ -9,7 +46,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 2001;
   perspective: 800px;
 }
 
@@ -79,11 +116,23 @@
   filter: drop-shadow(0 0 10px currentColor);
 }
 
+.card-name-wrapper {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.card-assigned-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #889;
+  margin-bottom: 6px;
+}
+
 .card-name {
   font-family: 'Cinzel', serif;
-  font-size: 1.8rem;
+  font-size: 2.4rem;
   font-weight: bold;
-  margin-bottom: 16px;
   text-shadow: 0 0 20px currentColor;
 }
 

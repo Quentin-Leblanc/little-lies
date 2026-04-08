@@ -29,6 +29,29 @@ function App() {
 
     const isGameOver = status === CONSTANTS.GAME_ENDED;
 
+    // ── Curtain managed at App level (persists across RoleReveal unmount) ──
+    const [curtainVisible, setCurtainVisible] = useState(false);
+    const [curtainClosed, setCurtainClosed] = useState(false);
+
+    // When game starts → show curtain and close it
+    useEffect(() => {
+        if (isGameStarted && showRoleReveal && !curtainVisible) {
+            setCurtainVisible(true);
+            requestAnimationFrame(() => setCurtainClosed(true));
+        }
+    }, [isGameStarted]);
+
+    // RoleReveal is done → swap content behind closed curtain, then open
+    const handleRoleRevealComplete = () => {
+        // Curtain is already closed from game start — card sits on top of it
+        // 1. Remove card, render game behind the closed curtain
+        setShowRoleReveal(false);
+        // 2. Open curtain immediately to reveal the game
+        requestAnimationFrame(() => setCurtainClosed(false));
+        // 3. Remove curtain after opening animation (1s)
+        setTimeout(() => setCurtainVisible(false), 1200);
+    };
+
     // Phase banner overlay
     const [phaseBanner, setPhaseBanner] = useState(null);
     useEffect(() => {
@@ -79,10 +102,20 @@ function App() {
         <div className="App">
             {/* Game over overlay */}
             {isGameOver && <GameOver />}
+
+            {/* Curtain — persists across role reveal → game transition */}
+            {curtainVisible && (
+                <div className={`curtain-overlay ${curtainClosed ? 'closed' : ''}`}>
+                    <div className="curtain-panel curtain-left" />
+                    <div className="curtain-panel curtain-right" />
+                </div>
+            )}
+
             {/* Role reveal animation on game start — full black screen */}
             {isGameStarted && showRoleReveal && (
-                <RoleReveal onComplete={() => setShowRoleReveal(false)} />
+                <RoleReveal onComplete={handleRoleRevealComplete} />
             )}
+
             {/* Phase transition banner — hidden during role reveal */}
             {phaseBanner && !showRoleReveal && (
                 <div className={`phase-banner ${phaseBanner.className}`}>
@@ -90,8 +123,9 @@ function App() {
                     <span>{phaseBanner.text}</span>
                 </div>
             )}
-            {/* Hide game UI during role reveal */}
-            <GameComponent>
+
+            {/* Game UI — renders once role reveal content is gone (curtain may still be covering) */}
+            {!showRoleReveal && <GameComponent>
                 <div className="game-layout">
                     {/* Left - Menu + Roles + Graveyard */}
                     <div className="layout-players">
@@ -108,17 +142,17 @@ function App() {
                         <MainScene />
                     </div>
 
-                    {/* Right - Role info */}
+                    {/* Right - Role info + player list */}
                     <div className="layout-sidebar">
                         <Player />
                     </div>
 
                     {/* Bottom - Chat */}
-                    <div className="layout-chat">
+                    <div className={`layout-chat ${phase === CONSTANTS.PHASE.DISCUSSION ? 'highlight-discussion' : ''}`}>
                         <Chat night={isNight} />
                     </div>
                 </div>
-            </GameComponent>
+            </GameComponent>}
         </div>
     );
 }
