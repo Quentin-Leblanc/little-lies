@@ -417,72 +417,18 @@ const Fireflies = ({ count = 40 }) => {
 };
 
 // ============================================================
-// Butterflies (day particle effect — colorful, fluttering movement)
+// Day Fireflies (golden, gentle floating)
 // ============================================================
-const Butterflies = ({ count = 20 }) => {
-  const meshRef = useRef();
-  const colors = useMemo(() => ['#ff8844', '#ffcc44', '#ffffff', '#88ccff', '#ff88cc', '#aaffaa'], []);
-  const particles = useMemo(() => {
-    const arr = [];
-    for (let i = 0; i < count; i++) {
-      arr.push({
-        x: (Math.random() - 0.5) * 30,
-        y: Math.random() * 4 + 1,
-        z: (Math.random() - 0.5) * 30,
-        speed: Math.random() * 0.6 + 0.3,
-        flutter: Math.random() * 3 + 2,
-        offset: Math.random() * Math.PI * 2,
-        radius: Math.random() * 2 + 1,
-      });
-    }
-    return arr;
-  }, [count]);
-
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    particles.forEach((p, i) => {
-      // Circular fluttering path
-      const px = p.x + Math.sin(t * p.speed + p.offset) * p.radius;
-      const py = p.y + Math.sin(t * p.flutter + p.offset) * 0.6;
-      const pz = p.z + Math.cos(t * p.speed * 0.7 + p.offset) * p.radius;
-      dummy.position.set(px, py, pz);
-      // Wing flap scale
-      const flap = 0.5 + Math.abs(Math.sin(t * p.flutter * 2 + p.offset)) * 0.5;
-      dummy.scale.set(flap, 0.3, 1);
-      dummy.rotation.y = Math.atan2(
-        Math.cos(t * p.speed + p.offset) * p.radius,
-        -Math.sin(t * p.speed * 0.7 + p.offset) * p.radius
-      );
-      dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
-    });
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <instancedMesh ref={meshRef} args={[null, null, count]}>
-      <planeGeometry args={[0.15, 0.1]} />
-      <meshBasicMaterial color="#ffcc66" transparent opacity={0.85} side={THREE.DoubleSide} />
-    </instancedMesh>
-  );
-};
-
-// ============================================================
-// Dust / pollen particles (day — floating specks in sunlight)
-// ============================================================
-const DustParticles = ({ count = 60 }) => {
+const DayFireflies = ({ count = 40 }) => {
   const meshRef = useRef();
   const particles = useMemo(() => {
     const arr = [];
     for (let i = 0; i < count; i++) {
       arr.push({
-        x: (Math.random() - 0.5) * 40,
-        y: Math.random() * 6 + 0.5,
-        z: (Math.random() - 0.5) * 40,
-        speed: Math.random() * 0.15 + 0.05,
-        drift: Math.random() * 0.5 + 0.2,
+        x: (Math.random() - 0.5) * 35,
+        y: Math.random() * 4 + 0.5,
+        z: (Math.random() - 0.5) * 35,
+        speed: Math.random() * 0.3 + 0.1,
         offset: Math.random() * Math.PI * 2,
       });
     }
@@ -494,12 +440,12 @@ const DustParticles = ({ count = 60 }) => {
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     particles.forEach((p, i) => {
-      const px = p.x + Math.sin(t * p.drift + p.offset) * 2;
-      const py = p.y + Math.sin(t * p.speed * 2 + p.offset) * 0.8;
-      const pz = p.z + Math.cos(t * p.drift * 0.8 + p.offset) * 2;
+      const px = p.x + Math.sin(t * p.speed + p.offset) * 2;
+      const py = p.y + Math.sin(t * p.speed * 1.5 + p.offset) * 0.5;
+      const pz = p.z + Math.cos(t * p.speed + p.offset) * 2;
       dummy.position.set(px, py, pz);
-      const s = 0.3 + Math.sin(t * 1.5 + p.offset) * 0.2;
-      dummy.scale.setScalar(s);
+      const pulse = 0.4 + Math.sin(t * 2.5 + p.offset) * 0.3;
+      dummy.scale.setScalar(pulse);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     });
@@ -508,8 +454,8 @@ const DustParticles = ({ count = 60 }) => {
 
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
-      <sphereGeometry args={[0.02, 3, 3]} />
-      <meshBasicMaterial color="#ffffee" transparent opacity={0.5} />
+      <sphereGeometry args={[0.04, 4, 4]} />
+      <meshBasicMaterial color="#ffdd66" transparent opacity={0.6} />
     </instancedMesh>
   );
 };
@@ -668,7 +614,7 @@ const NIGHT_CAMERA_WAYPOINTS = [
   { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 4 },   // Brief overview while players walk away
   { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 12 },  // Low alley walk, steady forward pace
   { pos: [-2, 6, -6],     lookAt: [0, 20, -6],       duration: 10 },  // Slow rise, looking up to the sky
-  { pos: [0, 16, -2],     lookAt: [0, 30, -5],       duration: 6 },   // High above, gazing at stars
+  { pos: [0, 16, -2],     lookAt: [0, 30, -5],       duration: 6, hold: true },  // Stars — hold still
 ];
 
 const CameraController = ({ phase, CONSTANTS }) => {
@@ -702,6 +648,14 @@ const CameraController = ({ phase, CONSTANTS }) => {
       const wp = NIGHT_CAMERA_WAYPOINTS[wpIdx];
       targetPos.current.set(...wp.pos);
       targetLookAt.current.set(...wp.lookAt);
+
+      // If last waypoint with hold: snap camera and stop moving
+      if (wp.hold) {
+        camera.position.lerp(targetPos.current, 0.02);
+        camera.lookAt(...wp.lookAt);
+        prevPhaseRef.current = phase;
+        return;
+      }
     } else {
       switch (phase) {
         case CONSTANTS.PHASE.DEFENSE:
@@ -724,7 +678,7 @@ const CameraController = ({ phase, CONSTANTS }) => {
 
     prevPhaseRef.current = phase;
 
-    // Smooth lerp — slightly faster for night transitions
+    // Smooth lerp
     const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.015 : 0.02;
     camera.position.lerp(targetPos.current, lerpSpeed);
     const currentLookAt = new THREE.Vector3();
@@ -954,8 +908,7 @@ const MainScene = () => {
             <>
               <color attach="background" args={['#87CEEB']} />
               <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
-              <Butterflies count={20} />
-              <DustParticles count={60} />
+              <DayFireflies count={40} />
             </>
           ) : (
             <>
