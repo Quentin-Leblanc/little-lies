@@ -15,8 +15,8 @@ const DURATIONS = {
   JUDGMENT: 15000,
   LAST_WORDS: 5000,
   EXECUTION: 3000,
-  NO_LYNCH: 4000,
-  SPARED: 4000,
+  NO_LYNCH: 6000,
+  SPARED: 5000,
 };
 
 // All game phases in order

@@ -1000,6 +1000,7 @@ const MainScene = () => {
   // Phases that lead directly to night (last phases before night falls)
   const PRE_NIGHT_PHASES = [CONSTANTS.PHASE.NO_LYNCH, CONSTANTS.PHASE.SPARED, CONSTANTS.PHASE.EXECUTION];
   const fadeTimers = useRef([]);
+  const walkTimer = useRef(null);
 
   useEffect(() => {
     // Clear all pending fade timers on phase change
@@ -1015,14 +1016,15 @@ const MainScene = () => {
         setNightFade('to-black');
         setShowNightText(true);
       }, 2000));
-      // Trigger walk-away animation
+      // Trigger walk-away animation (separate timer, not cleared on phase change)
       if (nightStartedForDay.current !== game.dayCount) {
         nightStartedForDay.current = game.dayCount;
         setNightTransition(true);
-        fadeTimers.current.push(setTimeout(() => {
+        if (walkTimer.current) clearTimeout(walkTimer.current);
+        walkTimer.current = setTimeout(() => {
           setNightTransition(false);
           setNightPlayersHidden(true);
-        }, 5000));
+        }, 4000);
       }
     }
 
@@ -1340,7 +1342,7 @@ const MainScene = () => {
 
       {/* Phase announcements */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
-        <div className="scene-announcement">
+        <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 2.5s ease-out forwards' }}>
           <div className="announcement-text">Personne n'a été lynché aujourd'hui.</div>
         </div>
       )}
