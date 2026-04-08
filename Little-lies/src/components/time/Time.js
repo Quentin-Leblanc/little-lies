@@ -8,11 +8,12 @@ const INFO_PHASES = ['DEATH_REPORT', 'LAST_WORDS', 'EXECUTION', 'NO_LYNCH', 'SPA
 
 const Time = () => {
   const {
-    game: { isDay, timer, dayCount, phase },
+    game: { isDay, timer, dayCount, phase, adminFreeRoam },
     CONSTANTS,
   } = useGameEngine();
 
   const isInfoPhase = INFO_PHASES.includes(phase);
+  const isPaused = !!adminFreeRoam;
   const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
   const phaseLabel = CONSTANTS.PHASE_LABELS[phase] || phase;
 
@@ -21,11 +22,13 @@ const Time = () => {
   const progressPercentage = (localTimer / totalDuration) * 100;
 
   useEffect(() => {
+    // Freeze countdown when admin pauses
+    if (isPaused) return;
     const interval = setInterval(() => {
       setLocalTimer((prevTimer) => Math.max(prevTimer - 100, 0));
     }, 100);
     return () => clearInterval(interval);
-  }, []);
+  }, [isPaused]);
 
   useEffect(() => {
     setLocalTimer(timer);
@@ -49,8 +52,8 @@ const Time = () => {
       <span className="game-title">Little Lies</span>
       <div className="phase-info">
         <div className="progress-content">
-          <i className={`fas ${phaseIcon}`}></i>
-          {headerText}
+          <i className={`fas ${isPaused ? 'fa-pause' : phaseIcon}`}></i>
+          {isPaused ? `${headerText} — PAUSE` : headerText}
         </div>
         {!isInfoPhase && !(dayCount === 1 && phase === 'DISCUSSION') && (
           <div className="timer">
@@ -73,19 +76,21 @@ const Time = () => {
 /** Progress bar — rendered inside the 3D scene container, hidden during info phases */
 export const TimeBar = () => {
   const {
-    game: { timer, phase, dayCount },
+    game: { timer, phase, dayCount, adminFreeRoam },
     CONSTANTS,
   } = useGameEngine();
 
+  const isPaused = !!adminFreeRoam;
   const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
   const [localTimer, setLocalTimer] = useState(timer);
 
   useEffect(() => {
+    if (isPaused) return;
     const interval = setInterval(() => {
       setLocalTimer((prev) => Math.max(prev - 100, 0));
     }, 100);
     return () => clearInterval(interval);
-  }, []);
+  }, [isPaused]);
 
   useEffect(() => {
     setLocalTimer(timer);

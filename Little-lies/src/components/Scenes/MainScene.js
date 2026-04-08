@@ -1156,8 +1156,17 @@ const MainScene = () => {
         </div>
       )}
 
+      {/* Admin pause overlay */}
+      {game.adminFreeRoam && (
+        <div className="scene-announcement">
+          <div className="announcement-text" style={{ fontSize: '42px', letterSpacing: '8px', border: '2px solid rgba(255,68,68,0.4)' }}>
+            <i className="fas fa-pause" style={{ marginRight: 12 }}></i> PAUSE
+          </div>
+        </div>
+      )}
+
       {/* Admin custom announcement */}
-      {game.adminAnnouncement && (
+      {game.adminAnnouncement && !game.adminFreeRoam && (
         <div className="scene-announcement">
           <div className="announcement-text" style={{ borderLeft: '3px solid #ff4444' }}>
             {game.adminAnnouncement}
