@@ -975,10 +975,15 @@ const MainScene = () => {
   const lastPhaseForFade = useRef(phase);
 
   useEffect(() => {
-    // When night starts: schedule fade-to-black before night ends
+    // When night starts (= day ends): fade to black, then reveal night scene
     if (phase === CONSTANTS.PHASE.NIGHT && lastPhaseForFade.current !== CONSTANTS.PHASE.NIGHT) {
+      setNightFade('to-black');
+      // After 2s black, reveal night scene
+      setTimeout(() => setNightFade('from-black'), 2000);
+      setTimeout(() => setNightFade('none'), 4000);
+
+      // Also schedule fade-to-black before night ends (for night→day transition)
       const nightDuration = CONSTANTS.DURATIONS?.NIGHT || 30000;
-      // Start fading to black 3s before night ends
       fadeTimerRef.current = setTimeout(() => {
         setNightFade('to-black');
       }, nightDuration - 3000);
