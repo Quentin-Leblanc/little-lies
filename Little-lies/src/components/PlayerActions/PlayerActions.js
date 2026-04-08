@@ -287,7 +287,7 @@ const PlayerActions = memo(function () {
                         </button>
                       )}
                       {isVotingPhase && (
-                        <span className="vote-count">
+                        <span className={`vote-count ${(trial?.suspects[player.id]?.suspectedBy?.length || 0) > 0 ? 'has-votes' : ''}`}>
                           {trial?.suspects[player.id]?.suspectedBy?.length || 0}/{players.filter(p => p.isAlive).length}
                         </span>
                       )}

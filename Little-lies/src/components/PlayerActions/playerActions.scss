@@ -74,10 +74,14 @@
   text-align: center;
   font-size: 15px;
   font-weight: bold;
-  color: #ff6666;
-  background: rgba(255, 50, 50, 0.15);
+  color: #ccc;
   padding: 2px 6px;
   border-radius: 4px;
+
+  &.has-votes {
+    color: #ff4444;
+    background: rgba(255, 50, 50, 0.15);
+  }
 }
 
 // Death flash (stays fixed overlay)
