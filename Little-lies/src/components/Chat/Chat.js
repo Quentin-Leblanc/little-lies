@@ -307,12 +307,12 @@ function Chat(props) {
   const filteredMessages = (messages || [])
     .filter(filterMessage);
 
-  // Find last phase separator to gray everything before it
-  // Separators: "--- Jour X ---" (new day) or "La nuit tombe..." (night starts)
+  // Find last day separator to gray everything before it
+  // Only "--- Jour X ---" counts as separator (not "La nuit tombe" which is mid-day)
   let lastSeparatorIndex = -1;
   for (let i = filteredMessages.length - 1; i >= 0; i--) {
     const c = filteredMessages[i].content;
-    if (filteredMessages[i].type === 'system' && (c?.startsWith('--- Jour') || c?.startsWith('La nuit tombe'))) {
+    if (filteredMessages[i].type === 'system' && c?.startsWith('--- Jour')) {
       lastSeparatorIndex = i;
       break;
     }

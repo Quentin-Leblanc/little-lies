@@ -569,7 +569,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
             backgroundColor: 'rgba(0,0,0,0.6)',
             padding: '2px 8px',
             borderRadius: '4px',
-            fontSize: '14px',
+            fontSize: '16px',
             fontWeight: 'bold',
             textShadow: '1px 1px 2px black',
             border: `1px solid ${player.profile?.color || color}`,
@@ -1252,12 +1252,7 @@ const MainScene = () => {
         ) : null;
       })()}
 
-      {/* Discussion start */}
-      {phase === CONSTANTS.PHASE.DISCUSSION && (
-        <div className="scene-announcement scene-announcement-fade">
-          <div className="announcement-text">Le village se réveille...</div>
-        </div>
-      )}
+      {/* Discussion start message removed */}
 
       {/* Phase announcements */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
