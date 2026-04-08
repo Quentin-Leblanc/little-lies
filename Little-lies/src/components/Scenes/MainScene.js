@@ -803,19 +803,17 @@ const CameraController = ({ phase, CONSTANTS }) => {
       }
     }
 
-    // Detect transition from night → day: use very slow lerp for smooth fade
+    // When leaving night: snap camera instantly to day position (no lerp from stars)
     const comingFromNight = prevPhaseRef.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT;
+    if (comingFromNight) {
+      camera.position.set(0, 8, 12);
+      camera.lookAt(0, 0, 0);
+      targetPos.current.set(0, 8, 12);
+      targetLookAt.current.set(0, 0, 0);
+    }
     prevPhaseRef.current = phase;
 
-    // Lerp speed: ultra slow leaving night, slow during night, normal for day
-    let lerpSpeed;
-    if (phase === CONSTANTS.PHASE.NIGHT) {
-      lerpSpeed = 0.002;
-    } else if (comingFromNight || phase === CONSTANTS.PHASE.DEATH_REPORT) {
-      lerpSpeed = 0.008; // gentle transition from stars back to village
-    } else {
-      lerpSpeed = 0.02;
-    }
+    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.002 : 0.02;
     camera.position.lerp(targetPos.current, lerpSpeed);
     const currentLookAt = new THREE.Vector3();
     camera.getWorldDirection(currentLookAt);
@@ -956,8 +954,19 @@ const MainScene = () => {
   const isVotingPhase = phase === CONSTANTS.PHASE.VOTING;
   const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
 
+  // Black fade overlay for night→day transition
+  const [nightFade, setNightFade] = useState(false);
+  const lastPhaseForFade = useRef(phase);
+  useEffect(() => {
+    // Trigger black fade when leaving NIGHT
+    if (lastPhaseForFade.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT) {
+      setNightFade(true);
+      setTimeout(() => setNightFade(false), 2500);
+    }
+    lastPhaseForFade.current = phase;
+  }, [phase]);
+
   // Night walk-away transition + hide after walk
-  // Use dayCount guard to ensure walk only triggers ONCE per night (no re-trigger on state flicker)
   const nightStartedForDay = useRef(null);
   const [nightTransition, setNightTransition] = useState(false);
   const [nightPlayersHidden, setNightPlayersHidden] = useState(false);
@@ -1269,6 +1278,9 @@ const MainScene = () => {
           </div>
         </div>
       )}
+
+      {/* Night→Day black fade transition */}
+      {nightFade && <div className="night-day-fade" />}
     </div>
   );
 };
