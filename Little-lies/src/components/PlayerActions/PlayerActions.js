@@ -248,23 +248,24 @@ const PlayerActions = memo(function () {
           </div>
         )}
 
-        {/* Action confirmation */}
-        {actionUsed && isNightPhase && (
-          <div className="action-confirmation">
-            <i className="fas fa-check-circle"></i> {actionUsed.type} → {actionUsed.targetName}
+        {/* Player list — always show all players */}
+        <div className={`player-list-wrapper ${isVotingPhase ? 'highlight-vote' : ''}`}>
+        {isVotingPhase && (
+          <div className="vote-arrow-indicator">
+            <i className="fas fa-arrow-down"></i> Votez ici
           </div>
         )}
-
-        {/* Player list — always show all players */}
         <h4 className="player-list-title"><i className="fas fa-users"></i> Joueurs vivants ({players.filter(p => p.isAlive).length}/{players.length})</h4>
         <ul className="player-list">
           {players.map((player) => {
             const hasActions = me.isAlive && player.isAlive;
             return (
-              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''}`}>
+              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''}`}
+                style={player.isAlive ? { background: player.profile.color || '#888' } : undefined}
+              >
                 <span className="player-name-cell">
-                  <i className="fas fa-gem player-color-icon" style={{ color: player.profile.color || '#888' }} />
-                  <span style={{ color: player.profile.color }}>
+                  <i className="fas fa-gem player-color-icon" style={{ color: '#fff' }} />
+                  <span style={{ color: '#fff' }}>
                     {player.profile.name}{player.id === me.id ? ' (toi)' : ''}
                   </span>
                   {player.isRevealed && (
@@ -326,6 +327,7 @@ const PlayerActions = memo(function () {
             );
           })}
         </ul>
+        </div>
       </div>
     </>
   );

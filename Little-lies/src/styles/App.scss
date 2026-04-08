@@ -76,6 +76,13 @@
   min-height: 0;
   border-top: none;
   overflow: hidden;
+  transition: box-shadow 0.4s, border-color 0.4s;
+
+  &.highlight-discussion {
+    box-shadow: 0 0 16px rgba(120, 255, 120, 0.2), inset 0 0 12px rgba(120, 255, 120, 0.03);
+    border: 1px solid rgba(120, 255, 120, 0.3);
+    border-radius: 4px;
+  }
 }
 
 // === PHASE BANNER ===
@@ -95,63 +102,52 @@
   pointer-events: none;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 40px;
-  border-radius: 8px;
+  gap: 18px;
+  padding: 0;
+  background: none;
+  border: none;
   font-family: 'Cinzel', serif;
-  font-size: 24px;
+  font-size: 42px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 4px;
   text-transform: uppercase;
   animation: banner-in 2s ease-out forwards;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 
-  i { font-size: 22px; }
+  i { font-size: 38px; }
 
   &.banner-night {
-    background: rgba(20, 20, 60, 0.9);
     color: #8899cc;
-    border-color: rgba(100, 120, 180, 0.3);
-    text-shadow: 0 0 20px rgba(100, 120, 200, 0.5);
+    text-shadow: 0 0 30px rgba(100, 120, 200, 0.6), 0 2px 8px rgba(0,0,0,0.8);
   }
 
   &.banner-morning {
-    background: rgba(60, 50, 20, 0.9);
     color: #ffcc44;
-    border-color: rgba(255, 200, 60, 0.3);
-    text-shadow: 0 0 20px rgba(255, 200, 60, 0.4);
+    text-shadow: 0 0 30px rgba(255, 200, 60, 0.5), 0 2px 8px rgba(0,0,0,0.8);
   }
 
   &.banner-day {
-    background: rgba(30, 50, 30, 0.9);
     color: #78ff78;
-    border-color: rgba(120, 255, 120, 0.2);
+    text-shadow: 0 0 30px rgba(120, 255, 120, 0.4), 0 2px 8px rgba(0,0,0,0.8);
   }
 
   &.banner-vote {
-    background: rgba(60, 40, 10, 0.9);
     color: #ffa502;
-    border-color: rgba(255, 165, 2, 0.3);
+    text-shadow: 0 0 30px rgba(255, 165, 2, 0.5), 0 2px 8px rgba(0,0,0,0.8);
   }
 
   &.banner-defense {
-    background: rgba(60, 20, 20, 0.9);
     color: #ff6666;
-    border-color: rgba(255, 100, 100, 0.3);
+    text-shadow: 0 0 30px rgba(255, 100, 100, 0.5), 0 2px 8px rgba(0,0,0,0.8);
   }
 
   &.banner-judgment {
-    background: rgba(40, 30, 50, 0.9);
     color: #cc88ff;
-    border-color: rgba(200, 130, 255, 0.3);
+    text-shadow: 0 0 30px rgba(200, 130, 255, 0.5), 0 2px 8px rgba(0,0,0,0.8);
   }
 
   &.banner-execution {
-    background: rgba(60, 10, 10, 0.9);
     color: #ff4444;
-    border-color: rgba(255, 68, 68, 0.4);
-    text-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    text-shadow: 0 0 40px rgba(255, 0, 0, 0.6), 0 2px 8px rgba(0,0,0,0.8);
   }
 }
 
