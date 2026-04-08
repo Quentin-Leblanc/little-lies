@@ -261,11 +261,11 @@ const PlayerActions = memo(function () {
           {players.map((player) => {
             const hasActions = me.isAlive && player.isAlive;
             return (
-              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''}`}>
+              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''}`}>
                 <span className="player-name-cell">
                   <i className="fas fa-gem player-color-icon" style={{ color: player.profile.color || '#888' }} />
                   <span style={{ color: player.profile.color }}>
-                    {player.profile.name}
+                    {player.profile.name}{player.id === me.id ? ' (toi)' : ''}
                   </span>
                   {player.isRevealed && (
                     <span className="revealed-badge" title="Maire révélé">
