@@ -564,8 +564,8 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
           <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
         </mesh>
       )}
-      {/* Name label + vote counter */}
-      <Html position={[0, 2.0, 0]} center distanceFactor={8}>
+      {/* Name label + vote counter — hidden during walk-away */}
+      {!isTransitioning && <Html position={[0, 2.0, 0]} center distanceFactor={8}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -597,7 +597,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
             </div>
           )}
         </div>
-      </Html>
+      </Html>}
       {/* Vote/Judgment buttons removed — handled in action panel */}
     </group>
   );
@@ -983,16 +983,25 @@ const MainScene = () => {
     fadeTimers.current.forEach(clearTimeout);
     fadeTimers.current = [];
 
-    // Pre-night phases: start fading to black during this phase
+    // Pre-night phases: start walk-away + fade to black
     if (PRE_NIGHT_PHASES.includes(phase)) {
       setNightFade('to-black');
+      // Trigger walk-away animation during pre-night (still daytime scene)
+      if (nightStartedForDay.current !== game.dayCount) {
+        nightStartedForDay.current = game.dayCount;
+        setNightPlayersHidden(false);
+        setNightTransition(true);
+        fadeTimers.current.push(setTimeout(() => {
+          setNightTransition(false);
+          setNightPlayersHidden(true);
+        }, 3000));
+      }
     }
 
-    // Night starts: ensure we're in black, then reveal night scene
+    // Night starts: already black from pre-night, reveal night scene quickly
     if (phase === CONSTANTS.PHASE.NIGHT && lastPhaseForFade.current !== CONSTANTS.PHASE.NIGHT) {
-      setNightFade('to-black');
-      fadeTimers.current.push(setTimeout(() => setNightFade('from-black'), 1500));
-      fadeTimers.current.push(setTimeout(() => setNightFade('none'), 3500));
+      setNightFade('from-black');
+      fadeTimers.current.push(setTimeout(() => setNightFade('none'), 1500));
 
       // Schedule fade-to-black before night ends (for night→day)
       const nightDuration = CONSTANTS.DURATIONS?.NIGHT || 30000;
@@ -1004,35 +1013,24 @@ const MainScene = () => {
     // Leaving night: reveal day scene
     if (lastPhaseForFade.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT) {
       setNightFade('from-black');
-      fadeTimers.current.push(setTimeout(() => setNightFade('none'), 2000));
+      fadeTimers.current.push(setTimeout(() => setNightFade('none'), 1500));
     }
 
     lastPhaseForFade.current = phase;
     return () => fadeTimers.current.forEach(clearTimeout);
   }, [phase]);
 
-  // Night walk-away transition + hide after walk
+  // Night walk-away — now triggered in pre-night phases above
   const nightStartedForDay = useRef(null);
   const [nightTransition, setNightTransition] = useState(false);
   const [nightPlayersHidden, setNightPlayersHidden] = useState(false);
 
   useEffect(() => {
-    if (phase === CONSTANTS.PHASE.NIGHT) {
-      if (nightStartedForDay.current !== game.dayCount) {
-        // First time entering this night — trigger walk-away once
-        nightStartedForDay.current = game.dayCount;
-        setNightPlayersHidden(false);
-        setNightTransition(true);
-        const walkTimer = setTimeout(() => {
-          setNightTransition(false);
-          setNightPlayersHidden(true);
-        }, 3000);
-        return () => clearTimeout(walkTimer);
-      }
-    } else {
+    // Reset when leaving night (show players again for day)
+    if (phase !== CONSTANTS.PHASE.NIGHT && !PRE_NIGHT_PHASES.includes(phase)) {
       setNightPlayersHidden(false);
     }
-  }, [phase, game.dayCount]);
+  }, [phase]);
 
   // Day circle positions (for night walk-away start)
   const dayPositions = useMemo(() => {

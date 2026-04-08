@@ -206,7 +206,7 @@
   background: black;
   z-index: 30;
   pointer-events: none;
-  animation: fade-to-black 3s ease-in forwards;
+  animation: fade-to-black 1.5s ease-in forwards;
 }
 
 @keyframes fade-to-black {
@@ -224,7 +224,7 @@
   background: black;
   z-index: 30;
   pointer-events: none;
-  animation: fade-from-black 2s ease-out forwards;
+  animation: fade-from-black 1.5s ease-out forwards;
 }
 
 @keyframes fade-from-black {
