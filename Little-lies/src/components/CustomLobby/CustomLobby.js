@@ -23,8 +23,12 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const localRotRef = useRef(0);
 
   useEffect(() => {
-    const down = (e) => setKeys((p) => ({ ...p, [e.code]: true }));
-    const up = (e) => setKeys((p) => ({ ...p, [e.code]: false }));
+    const isTyping = () => {
+      const tag = document.activeElement?.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+    };
+    const down = (e) => { if (!isTyping()) setKeys((p) => ({ ...p, [e.code]: true })); };
+    const up = (e) => { setKeys((p) => ({ ...p, [e.code]: false })); };
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
