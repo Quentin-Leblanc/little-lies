@@ -21,7 +21,7 @@ import './styles/global.scss';
 import './styles/App.scss';
 
 function App() {
-    const { game: { isGameStarted, isGameSetup, isDay, status, phase }, CONSTANTS } = useGameEngine();
+    const { game: { isGameStarted, isGameSetup, isDay, status, phase, dayCount }, CONSTANTS } = useGameEngine();
     const isNight = phase === CONSTANTS.PHASE.NIGHT;
     const [isSelectingRoles, setIsSelectingRoles] = useState(false);
     const [showRoleReveal, setShowRoleReveal] = useState(true);
@@ -39,7 +39,7 @@ function App() {
 
         const PHASE_BANNERS = {
             [CONSTANTS.PHASE.NIGHT]: { text: 'La nuit tombe...', icon: 'fa-moon', className: 'banner-night' },
-            [CONSTANTS.PHASE.DEATH_REPORT]: { text: 'Aube', icon: 'fa-sun', className: 'banner-morning' },
+            [CONSTANTS.PHASE.DEATH_REPORT]: { text: `Jour ${dayCount}`, icon: 'fa-sun', className: 'banner-morning' },
             [CONSTANTS.PHASE.DISCUSSION]: { text: 'Discussion', icon: 'fa-comments', className: 'banner-day' },
             [CONSTANTS.PHASE.VOTING]: { text: 'Vote', icon: 'fa-gavel', className: 'banner-vote' },
             [CONSTANTS.PHASE.DEFENSE]: { text: 'Defense', icon: 'fa-shield', className: 'banner-defense' },
