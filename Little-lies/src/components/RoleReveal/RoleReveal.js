@@ -81,32 +81,22 @@ const RoleReveal = ({ onComplete }) => {
                 {role.label}
               </motion.div>
 
-              {/* Details appear after flip */}
-              <AnimatePresence>
-                {phase === 'details' && (
-                  <motion.div
-                    className="card-details"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <p className="card-description">{role.description}</p>
-                    <p className="card-objective">{role.objectif}</p>
-                    {execTarget && (
-                      <p className="card-exec-target">
-                        <i className="fas fa-bullseye"></i> Cible : {execTarget.profile.name}
-                      </p>
-                    )}
-                    {role.actions?.length > 0 && (
-                      <div className="card-abilities">
-                        {role.actions.map((a, i) => (
-                          <span key={i} className="card-ability">{a.label}</span>
-                        ))}
-                      </div>
-                    )}
-                  </motion.div>
+              {/* Details always visible — no size jump */}
+              <div className="card-details">
+                <p className="card-objective">{role.objectif}</p>
+                {execTarget && (
+                  <p className="card-exec-target">
+                    <i className="fas fa-bullseye"></i> Cible : {execTarget.profile.name}
+                  </p>
                 )}
-              </AnimatePresence>
+                {role.actions?.length > 0 && (
+                  <div className="card-abilities">
+                    {role.actions.map((a, i) => (
+                      <span key={i} className="card-ability">{a.label}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
