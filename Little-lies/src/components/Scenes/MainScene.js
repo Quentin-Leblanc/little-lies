@@ -784,29 +784,13 @@ const CameraController = ({ phase, CONSTANTS }) => {
         return;
       }
     } else {
-      switch (phase) {
-        case CONSTANTS.PHASE.DEFENSE:
-        case CONSTANTS.PHASE.JUDGMENT:
-        case CONSTANTS.PHASE.LAST_WORDS:
-        case CONSTANTS.PHASE.EXECUTION:
-          targetPos.current.set(3, 4, 5);
-          targetLookAt.current.set(0, 1, 0);
-          break;
-        case CONSTANTS.PHASE.DISCUSSION:
-        case CONSTANTS.PHASE.VOTING: {
-          // Very subtle orbit around the village center
-          const orbitAngle = Date.now() * 0.00003; // ultra slow rotation using global time
-          const orbitRadius = 12;
-          const orbitX = Math.sin(orbitAngle) * orbitRadius;
-          const orbitZ = Math.cos(orbitAngle) * orbitRadius;
-          targetPos.current.set(orbitX, 9, orbitZ);
-          targetLookAt.current.set(0, 0, 0);
-          break;
-        }
-        default:
-          targetPos.current.set(0, 8, 12);
-          targetLookAt.current.set(0, 0, 0);
-      }
+      // Day phases: continuous very slow orbit — same movement for all phases
+      const orbitAngle = Date.now() * 0.000008; // ~13 min per full orbit
+      const orbitRadius = 12;
+      const orbitX = Math.sin(orbitAngle) * orbitRadius;
+      const orbitZ = Math.cos(orbitAngle) * orbitRadius;
+      targetPos.current.set(orbitX, 9, orbitZ);
+      targetLookAt.current.set(0, 0, 0);
     }
 
     // When leaving night: snap camera instantly to day position (no lerp from stars)
@@ -960,16 +944,29 @@ const MainScene = () => {
   const isVotingPhase = phase === CONSTANTS.PHASE.VOTING;
   const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
 
-  // Black fade overlay for night→day transition
-  const [nightFade, setNightFade] = useState(false);
+  // Black fade: starts fading to black a few seconds before night ends,
+  // holds black during transition, then fades in when day starts
+  const [nightFade, setNightFade] = useState('none'); // 'none' | 'to-black' | 'from-black'
+  const fadeTimerRef = useRef(null);
   const lastPhaseForFade = useRef(phase);
+
   useEffect(() => {
-    // Trigger black fade when leaving NIGHT
+    // When night starts: schedule fade-to-black before night ends
+    if (phase === CONSTANTS.PHASE.NIGHT && lastPhaseForFade.current !== CONSTANTS.PHASE.NIGHT) {
+      const nightDuration = CONSTANTS.DURATIONS?.NIGHT || 30000;
+      // Start fading to black 3s before night ends
+      fadeTimerRef.current = setTimeout(() => {
+        setNightFade('to-black');
+      }, nightDuration - 3000);
+    }
+    // When leaving night: switch to fade-from-black (reveal day scene)
     if (lastPhaseForFade.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT) {
-      setNightFade(true);
-      setTimeout(() => setNightFade(false), 2500);
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+      setNightFade('from-black');
+      setTimeout(() => setNightFade('none'), 2000);
     }
     lastPhaseForFade.current = phase;
+    return () => { if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current); };
   }, [phase]);
 
   // Night walk-away transition + hide after walk
@@ -1286,7 +1283,8 @@ const MainScene = () => {
       )}
 
       {/* Night→Day black fade transition */}
-      {nightFade && <div className="night-day-fade" />}
+      {nightFade === 'to-black' && <div className="night-fade-to-black" />}
+      {nightFade === 'from-black' && <div className="night-fade-from-black" />}
     </div>
   );
 };
