@@ -368,7 +368,10 @@ function Chat(props) {
         {filteredMessages.map((message, index) => {
           // Admin messages are never grayed
           const isAdmin = message.type === 'system' && message.content?.startsWith('[ADMIN]');
-          const isPastSystem = !isAdmin && index < lastSeparatorIndex && message.type === 'system';
+          // Gray system messages: before last day separator OR all during night
+          const isPastSystem = !isAdmin && message.type === 'system' && (
+            index < lastSeparatorIndex || isNight
+          );
           const pastClass = isPastSystem ? 'msg-past' : '';
 
           // System messages: render as clean separator

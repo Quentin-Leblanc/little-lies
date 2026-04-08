@@ -503,8 +503,7 @@ export const GameEngineProvider = ({ children }) => {
           nextGame = { ...nextGame, phase: PHASE.DEFENSE, timer: dur('DEFENSE'), accusedId, trialsToday: game.trialsToday + 1 };
         } else {
           // No majority → show NO_LYNCH announcement then go to night
-          addChatSystem('Personne n\'a été lynché aujourd\'hui.', '#ffa502');
-          Events.add({ type: 'NO_LYNCH', content: { chatMessage: 'Personne n\'a été lynché aujourd\'hui.' }, displayed: true });
+          Events.add({ type: 'NO_LYNCH', content: { chatMessage: '' }, displayed: true });
           resetTrial();
           nextGame = { ...nextGame, phase: PHASE.NO_LYNCH, timer: dur('NO_LYNCH'), accusedId: null };
         }
@@ -513,7 +512,7 @@ export const GameEngineProvider = ({ children }) => {
 
       case PHASE.NO_LYNCH:
         // After announcement, go to night
-        addChatSystem('La nuit tombe sur le village...', '#8899cc');
+        // Night message removed from chat
         nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
         break;
 
@@ -544,7 +543,7 @@ export const GameEngineProvider = ({ children }) => {
 
       case PHASE.SPARED: {
         // After spared announcement, go to night
-        addChatSystem('La nuit tombe sur le village...', '#8899cc');
+        // Night message removed from chat
         resetTrial();
         nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
         break;
@@ -559,7 +558,7 @@ export const GameEngineProvider = ({ children }) => {
         const winnerAfterExec = checkWinCondition();
         if (winnerAfterExec) { endGame(winnerAfterExec); return; }
         // After execution, go to night
-        addChatSystem('La nuit tombe sur le village...', '#8899cc');
+        // Night message removed from chat
         resetTrial();
         nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
         break;
@@ -618,7 +617,7 @@ export const GameEngineProvider = ({ children }) => {
     const majority = Math.ceil(aliveCount / 2);
 
     if (skipVoteCount >= majority) {
-      addChatSystem('La majorité a voté pour passer. La nuit tombe sur le village...', '#8899cc');
+      // Skip vote message removed from chat
       resetTrial();
       setGame({
         ...game,
