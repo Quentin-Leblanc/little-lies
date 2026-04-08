@@ -983,9 +983,10 @@ const MainScene = () => {
     fadeTimers.current.forEach(clearTimeout);
     fadeTimers.current = [];
 
-    // Pre-night phases: start walk-away + fade to black
+    // Pre-night phases: start walk-away, then fade to black after 2s
     if (PRE_NIGHT_PHASES.includes(phase)) {
-      setNightFade('to-black');
+      // Delay fade so walk-away is visible first
+      fadeTimers.current.push(setTimeout(() => setNightFade('to-black'), 2000));
       // Trigger walk-away animation during pre-night (still daytime scene)
       if (nightStartedForDay.current !== game.dayCount) {
         nightStartedForDay.current = game.dayCount;
