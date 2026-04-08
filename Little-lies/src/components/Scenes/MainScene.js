@@ -557,13 +557,13 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
         </mesh>
       )}
       {/* Name label — Html for consistent screen-space size */}
-      <Html position={[0, 2.4, 0]} center distanceFactor={8}>
+      <Html position={[0, 2.0, 0]} center distanceFactor={8}>
         <div style={{
           color: player.profile?.color || color,
           backgroundColor: 'rgba(0,0,0,0.6)',
           padding: '2px 8px',
           borderRadius: '4px',
-          fontSize: '13px',
+          fontSize: '14px',
           fontWeight: 'bold',
           whiteSpace: 'nowrap',
           textShadow: '1px 1px 2px black',
