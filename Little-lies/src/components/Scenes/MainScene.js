@@ -974,28 +974,41 @@ const MainScene = () => {
   const fadeTimerRef = useRef(null);
   const lastPhaseForFade = useRef(phase);
 
+  // Phases that lead directly to night (last phases before night falls)
+  const PRE_NIGHT_PHASES = [CONSTANTS.PHASE.NO_LYNCH, CONSTANTS.PHASE.SPARED, CONSTANTS.PHASE.EXECUTION];
+  const fadeTimers = useRef([]);
+
   useEffect(() => {
-    // When night starts (= day ends): fade to black, then reveal night scene
+    // Clear all pending fade timers on phase change
+    fadeTimers.current.forEach(clearTimeout);
+    fadeTimers.current = [];
+
+    // Pre-night phases: start fading to black during this phase
+    if (PRE_NIGHT_PHASES.includes(phase)) {
+      setNightFade('to-black');
+    }
+
+    // Night starts: ensure we're in black, then reveal night scene
     if (phase === CONSTANTS.PHASE.NIGHT && lastPhaseForFade.current !== CONSTANTS.PHASE.NIGHT) {
       setNightFade('to-black');
-      // After 2s black, reveal night scene
-      setTimeout(() => setNightFade('from-black'), 2000);
-      setTimeout(() => setNightFade('none'), 4000);
+      fadeTimers.current.push(setTimeout(() => setNightFade('from-black'), 1500));
+      fadeTimers.current.push(setTimeout(() => setNightFade('none'), 3500));
 
-      // Also schedule fade-to-black before night ends (for night→day transition)
+      // Schedule fade-to-black before night ends (for night→day)
       const nightDuration = CONSTANTS.DURATIONS?.NIGHT || 30000;
-      fadeTimerRef.current = setTimeout(() => {
+      fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
-      }, nightDuration - 3000);
+      }, nightDuration - 3000));
     }
-    // When leaving night: switch to fade-from-black (reveal day scene)
+
+    // Leaving night: reveal day scene
     if (lastPhaseForFade.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT) {
-      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
       setNightFade('from-black');
-      setTimeout(() => setNightFade('none'), 2000);
+      fadeTimers.current.push(setTimeout(() => setNightFade('none'), 2000));
     }
+
     lastPhaseForFade.current = phase;
-    return () => { if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current); };
+    return () => fadeTimers.current.forEach(clearTimeout);
   }, [phase]);
 
   // Night walk-away transition + hide after walk
