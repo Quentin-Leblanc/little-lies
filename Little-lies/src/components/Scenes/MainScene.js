@@ -682,8 +682,8 @@ const AdminFreeRoamCamera = () => {
 const NIGHT_CAMERA_WAYPOINTS = [
   { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 5 },    // Overview while players walk away
   { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 18 },   // Long slow alley walk
-  { pos: [0, 10, 0],      lookAt: [0, 50, 0],        duration: 15 },   // Slow rise toward the sky
-  { pos: [0, 14, 0],      lookAt: [0, 50, 0],        duration: 30, hold: true },  // Stars — stay here
+  { pos: [-1, 4, -2],     lookAt: [0, 30, -2],       duration: 20 },   // Gentle rise, tilting up to sky
+  { pos: [0, 5, -1],      lookAt: [0, 40, 0],        duration: 30, hold: true },  // Low, gazing at stars
 ];
 
 const CameraController = ({ phase, CONSTANTS }) => {
@@ -747,8 +747,8 @@ const CameraController = ({ phase, CONSTANTS }) => {
 
     prevPhaseRef.current = phase;
 
-    // Smooth lerp — very slow at night for gentle transitions
-    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.003 : 0.02;
+    // Smooth lerp — very slow at night, even slower for sky waypoints
+    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.002 : 0.02;
     camera.position.lerp(targetPos.current, lerpSpeed);
     const currentLookAt = new THREE.Vector3();
     camera.getWorldDirection(currentLookAt);
