@@ -41,19 +41,10 @@ const AdminPanel = () => {
   };
 
   // Admin actions
-  const skipToNextDay = () => {
-    const nextDayCount = (game.dayCount || 1) + 1;
-    setGame(prev => ({
-      ...prev,
-      phase: CONSTANTS.PHASE.DEATH_REPORT,
-      timer: CONSTANTS.DURATIONS.DEATH_REPORT,
-      isDay: true,
-      dayCount: nextDayCount,
-      trialsToday: 0,
-      accusedId: null,
-      skipVotes: [],
-    }));
-    addChatSystem(`[ADMIN] Passage au jour ${nextDayCount}`, '#ff4444');
+  const skipToNextPhase = () => {
+    // Force timer to 0 so the game engine transitions to the next phase naturally
+    setGame(prev => ({ ...prev, timer: 0 }));
+    addChatSystem('[ADMIN] Phase suivante', '#ff4444');
   };
 
   const kickToLobby = () => {
@@ -80,6 +71,11 @@ const AdminPanel = () => {
     const s = parseFloat(val);
     setCharScale(s);
     setGame(prev => ({ ...prev, characterScale: s }));
+  };
+
+  const resetCharScale = () => {
+    setCharScale(0.8);
+    setGame(prev => ({ ...prev, characterScale: 0.8 }));
   };
 
   const sendAnnouncement = () => {
@@ -164,8 +160,8 @@ const AdminPanel = () => {
       </div>
 
       <div className="admin-section">
-        <button className="admin-action-btn" onClick={skipToNextDay}>
-          <i className="fas fa-forward"></i> Passer au jour suivant
+        <button className="admin-action-btn" onClick={skipToNextPhase}>
+          <i className="fas fa-forward"></i> Phase suivante
         </button>
         <button className="admin-action-btn admin-danger" onClick={kickToLobby}>
           <i className="fas fa-sign-out-alt"></i> Kick tous → Lobby
@@ -177,7 +173,10 @@ const AdminPanel = () => {
       </div>
 
       <div className="admin-section">
-        <label className="admin-label">Taille personnages: {charScale.toFixed(1)}</label>
+        <div className="admin-input-row">
+          <label className="admin-label" style={{ flex: 1 }}>Taille personnages: {charScale.toFixed(1)}</label>
+          <button onClick={resetCharScale} className="admin-send">Reset</button>
+        </div>
         <input
           type="range"
           min="0.3"
