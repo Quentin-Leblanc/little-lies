@@ -1348,20 +1348,33 @@ const MainScene = () => {
 
       {/* Death report overlay */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && (() => {
-        const dayMessages = (chatMessages || []).filter(
+        // Find players who died this night (killed between last night and now)
+        const killedMessages = (chatMessages || []).filter(
           m => m.type === 'system' && m.dayCount === game.dayCount
             && !m.content?.startsWith('--- Jour')
             && !m.content?.startsWith('La nuit a été calme')
+            && m.content?.includes('tué')
         );
-        return dayMessages.length > 0 ? (
-          <div className="scene-announcement">
-            <div className="announcement-text announcement-report">
-              {dayMessages.map((m, i) => (
-                <div key={i}>{m.content}</div>
-              ))}
+        const killedNames = killedMessages.map(m => {
+          const match = m.content?.match(/^(.+?) a été tué/);
+          return match ? match[1] : null;
+        }).filter(Boolean);
+
+        return (
+          <div className="night-text-overlay" style={{ animation: 'night-text-anim 5s ease-in-out forwards' }}>
+            <div className="night-text-content" style={{ fontSize: '28px' }}>
+              {killedNames.length === 0 ? (
+                'Pas de mort cette nuit.'
+              ) : (
+                killedNames.map((name, i) => (
+                  <div key={i} style={{ marginBottom: 8 }}>
+                    {name} a été retrouvé(e) sans vie ce matin...
+                  </div>
+                ))
+              )}
             </div>
           </div>
-        ) : null;
+        );
       })()}
 
       {/* Discussion start message removed */}
