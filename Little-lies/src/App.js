@@ -39,7 +39,7 @@ function App() {
 
         const PHASE_BANNERS = {
             // Night banner removed — handled by fade overlay text
-            [CONSTANTS.PHASE.DEATH_REPORT]: { text: `Jour ${dayCount}`, icon: 'fa-sun', className: 'banner-morning' },
+            // Day banner removed — handled by fade overlay text
             // Discussion banner removed
             [CONSTANTS.PHASE.VOTING]: { text: 'Vote', icon: 'fa-gavel', className: 'banner-vote' },
             [CONSTANTS.PHASE.DEFENSE]: { text: 'Defense', icon: 'fa-shield', className: 'banner-defense' },

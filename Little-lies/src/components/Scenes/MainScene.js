@@ -992,6 +992,8 @@ const MainScene = () => {
   // holds black during transition, then fades in when day starts
   const [nightFade, setNightFade] = useState('none'); // 'none' | 'to-black' | 'from-black'
   const [showNightText, setShowNightText] = useState(false);
+  const [showDayText, setShowDayText] = useState(false);
+  const [nightAmbianceMsg, setNightAmbianceMsg] = useState(null);
   const fadeTimerRef = useRef(null);
   const lastPhaseForFade = useRef(phase);
 
@@ -1035,13 +1037,28 @@ const MainScene = () => {
       const nightDuration = CONSTANTS.DURATIONS?.NIGHT || 30000;
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
+        setShowDayText(true);
       }, nightDuration - 3000));
+
+      // Night ambiance messages — 2 messages during the night
+      const shuffled = [...NIGHT_AMBIANCE].sort(() => Math.random() - 0.5);
+      fadeTimers.current.push(setTimeout(() => {
+        setNightAmbianceMsg(shuffled[0]);
+        setTimeout(() => setNightAmbianceMsg(null), 3000);
+      }, 8000));
+      fadeTimers.current.push(setTimeout(() => {
+        setNightAmbianceMsg(shuffled[1]);
+        setTimeout(() => setNightAmbianceMsg(null), 3000);
+      }, 14000));
     }
 
     // Leaving night: reveal day scene
     if (lastPhaseForFade.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT) {
       setNightFade('from-black');
-      fadeTimers.current.push(setTimeout(() => setNightFade('none'), 1500));
+      fadeTimers.current.push(setTimeout(() => {
+        setNightFade('none');
+        setShowDayText(false);
+      }, 2000));
     }
 
     lastPhaseForFade.current = phase;
@@ -1299,7 +1316,7 @@ const MainScene = () => {
       </Canvas>
 
       {/* Night ambiance messages */}
-      {phase === CONSTANTS.PHASE.NIGHT && <NightAmbiance />}
+      {/* Night ambiance now handled via nightAmbianceMsg overlay */}
 
       {/* Death report overlay */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && (() => {
@@ -1366,6 +1383,16 @@ const MainScene = () => {
       {showNightText && (
         <div className="night-text-overlay">
           <div className="night-text-content">La nuit tombe...</div>
+        </div>
+      )}
+      {showDayText && (
+        <div className="night-text-overlay">
+          <div className="night-text-content">Le village se lève...</div>
+        </div>
+      )}
+      {nightAmbianceMsg && (
+        <div className="night-text-overlay" key={nightAmbianceMsg}>
+          <div className="night-text-content night-text-ambiance">{nightAmbianceMsg}</div>
         </div>
       )}
     </div>

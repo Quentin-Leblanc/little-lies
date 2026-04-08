@@ -255,9 +255,15 @@
   text-shadow: 0 0 20px rgba(100, 120, 180, 0.4);
 }
 
+.night-text-ambiance {
+  font-size: 26px;
+  font-style: italic;
+  color: rgba(180, 200, 230, 0.8);
+}
+
 @keyframes night-text-anim {
   0% { opacity: 0; }
-  20% { opacity: 1; }
-  70% { opacity: 1; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
   100% { opacity: 0; }
 }
