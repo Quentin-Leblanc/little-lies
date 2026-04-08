@@ -483,7 +483,7 @@ const GhostOrb = ({ position }) => {
 // ============================================================
 // Player Figure — uses Character model with rotation + walk
 // ============================================================
-const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8 }) => {
+const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8, pauseAnim = null }) => {
   const groupRef = useRef();
   const transitionStartTime = useRef(null);
   const walkStarted = useRef(false);
@@ -538,7 +538,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
     <group ref={groupRef} position={position} rotation={rotation}>
       <Character
         color={color}
-        animation={currentAnim}
+        animation={pauseAnim || currentAnim}
         scale={characterScale || 0.8}
         animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
       />
@@ -612,12 +612,13 @@ const DeadPlayerFigure = ({ player, position }) => (
 // ============================================================
 // Pause player controller — moves the local player's character with ZQSD,
 // camera follows behind in third person
-const PausePlayerController = ({ pausePos, setPausePos, playerRotation }) => {
+const PausePlayerController = ({ pausePos, setPausePos, setPauseAnim, setPauseYaw, playerRotation }) => {
   const { camera } = useThree();
   const keys = useRef({});
   const yaw = useRef(0);
+  const jumpVel = useRef(0);
+  const isGrounded = useRef(true);
 
-  // Init yaw from player's current facing direction
   useEffect(() => {
     yaw.current = playerRotation || 0;
   }, []);
@@ -642,11 +643,11 @@ const PausePlayerController = ({ pausePos, setPausePos, playerRotation }) => {
     if (k['KeyA'] || k['KeyQ'] || k['ArrowLeft']) yaw.current += turnSpeed;
     if (k['KeyD'] || k['ArrowRight']) yaw.current -= turnSpeed;
 
-    // Forward/backward relative to yaw
+    // Forward/backward
     const forward = new THREE.Vector3(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
     let moved = false;
-
     const newPos = [...pausePos];
+
     if (k['KeyW'] || k['KeyZ'] || k['ArrowUp']) {
       newPos[0] += forward.x * speed;
       newPos[2] += forward.z * speed;
@@ -658,17 +659,42 @@ const PausePlayerController = ({ pausePos, setPausePos, playerRotation }) => {
       moved = true;
     }
 
-    if (moved || k['KeyA'] || k['KeyQ'] || k['KeyD'] || k['ArrowLeft'] || k['ArrowRight']) {
-      setPausePos(newPos);
+    // Jump
+    if (k['Space'] && isGrounded.current) {
+      jumpVel.current = 8;
+      isGrounded.current = false;
     }
 
-    // Camera follows behind player (third person)
+    // Gravity
+    if (!isGrounded.current) {
+      jumpVel.current -= 20 * delta;
+      newPos[1] = (newPos[1] || 0) + jumpVel.current * delta;
+      if (newPos[1] <= 0) {
+        newPos[1] = 0;
+        isGrounded.current = true;
+        jumpVel.current = 0;
+      }
+    }
+
+    setPausePos(newPos);
+    setPauseYaw(yaw.current);
+
+    // Animation state
+    if (!isGrounded.current) {
+      setPauseAnim('Jump');
+    } else if (moved) {
+      setPauseAnim('Walk');
+    } else {
+      setPauseAnim('Idle');
+    }
+
+    // Camera follows behind player
     const camDist = 8;
     const camHeight = 5;
     const camX = newPos[0] + Math.sin(yaw.current) * camDist;
     const camZ = newPos[2] + Math.cos(yaw.current) * camDist;
-    camera.position.lerp(new THREE.Vector3(camX, camHeight, camZ), 0.05);
-    camera.lookAt(newPos[0], 1, newPos[2]);
+    camera.position.lerp(new THREE.Vector3(camX, camHeight + (newPos[1] || 0), camZ), 0.05);
+    camera.lookAt(newPos[0], 1 + (newPos[1] || 0), newPos[2]);
   });
 
   return null;
@@ -874,8 +900,10 @@ const MainScene = () => {
   const alivePlayers = players.filter((p) => p.isAlive);
   const deadPlayers = players.filter((p) => !p.isAlive);
 
-  // Pause mode — local player position + walk animation
+  // Pause mode — local player position, animation, rotation
   const [pausePos, setPausePos] = useState(null);
+  const [pauseAnim, setPauseAnim] = useState('Idle');
+  const [pauseYaw, setPauseYaw] = useState(0);
 
   const isTrialPhase = [
     CONSTANTS.PHASE.DEFENSE, CONSTANTS.PHASE.JUDGMENT,
@@ -1037,6 +1065,8 @@ const MainScene = () => {
             <PausePlayerController
               pausePos={pausePos}
               setPausePos={setPausePos}
+              setPauseAnim={setPauseAnim}
+              setPauseYaw={setPauseYaw}
               playerRotation={playerPositions[me?.id]?.rotation?.[1] || 0}
             />
           ) : (
@@ -1074,14 +1104,16 @@ const MainScene = () => {
             const isVoteTarget = myVoteTarget === player.id;
             const showJudgmentBtn = isJudgmentPhase && isAccused && me?.isAlive && me.id !== game.accusedId && !hasJudged;
             const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
-            // During pause, override local player's position
+            // During pause, override local player's position, rotation and animation
             const usePos = (isPaused && isMe && pausePos) ? pausePos : pData.position;
+            const useRot = (isPaused && isMe) ? [0, pauseYaw, 0] : pData.rotation;
             return (
               <PlayerFigure
                 key={player.id}
                 player={player}
                 position={usePos}
-                rotation={pData.rotation}
+                rotation={useRot}
+                pauseAnim={(isPaused && isMe) ? pauseAnim : null}
                 startPosition={nightTransition ? dayPositions[player.id] : null}
                 isTransitioning={nightTransition}
                 transitionDuration={3}
