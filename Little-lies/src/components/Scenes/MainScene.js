@@ -710,10 +710,10 @@ const SceneLighting = ({ isDay }) => {
     // Sun moves in a slow arc across the sky (day)
     // Full arc in ~120s, from east [20,15,-15] to west [-20,20,15]
     if (isDay && sunRef.current) {
-      const sunAngle = t * 0.04; // start behind camera (Z+), arc over the village
-      const sunX = Math.sin(sunAngle) * 20;
+      const sunAngle = -Math.PI * 0.8 + t * 0.04; // start behind+right of camera
+      const sunX = Math.cos(sunAngle) * 20;
       const sunY = 18 + Math.sin(sunAngle * 0.5) * 6;
-      const sunZ = Math.cos(sunAngle) * 20; // starts at Z+ (behind camera)
+      const sunZ = -Math.sin(sunAngle) * 20;
       sunRef.current.position.set(sunX, sunY, sunZ);
 
       // Move sun glow to match
