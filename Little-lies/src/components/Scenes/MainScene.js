@@ -793,10 +793,16 @@ const CameraController = ({ phase, CONSTANTS }) => {
           targetLookAt.current.set(0, 1, 0);
           break;
         case CONSTANTS.PHASE.DISCUSSION:
-        case CONSTANTS.PHASE.VOTING:
-          targetPos.current.set(0, 10, 10);
+        case CONSTANTS.PHASE.VOTING: {
+          // Very subtle orbit around the village center
+          const orbitAngle = Date.now() * 0.00003; // ultra slow rotation using global time
+          const orbitRadius = 12;
+          const orbitX = Math.sin(orbitAngle) * orbitRadius;
+          const orbitZ = Math.cos(orbitAngle) * orbitRadius;
+          targetPos.current.set(orbitX, 9, orbitZ);
           targetLookAt.current.set(0, 0, 0);
           break;
+        }
         default:
           targetPos.current.set(0, 8, 12);
           targetLookAt.current.set(0, 0, 0);
