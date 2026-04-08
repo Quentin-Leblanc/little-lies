@@ -11,10 +11,9 @@
 // === GAME LAYOUT (CSS Grid) ===
 .game-layout {
   display: grid;
-  grid-template-rows: auto 1fr 320px;
+  grid-template-rows: 1fr 320px;
   grid-template-columns: 280px 1fr 380px;
   grid-template-areas:
-    "players header  sidebar"
     "players center  sidebar"
     "players chat    sidebar";
   width: 100%;
@@ -23,10 +22,14 @@
   position: relative;
 }
 
-// Top bar
-.layout-header {
-  grid-area: header;
-  z-index: 10;
+// Phase info overlay — floats inside center area, below progress bar
+.phase-overlay {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  pointer-events: none;
 }
 
 // Left panel - menu + role list (top half) + graveyard (bottom half)

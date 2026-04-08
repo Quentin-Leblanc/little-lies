@@ -793,13 +793,11 @@ const CameraController = ({ phase, CONSTANTS }) => {
       targetLookAt.current.set(0, 0, 0);
     }
 
-    // When leaving night: snap camera instantly to day position (no lerp from stars)
+    // When leaving night: snap camera to current orbit position (no lerp from stars)
     const comingFromNight = prevPhaseRef.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT;
     if (comingFromNight) {
-      camera.position.set(0, 8, 12);
+      camera.position.copy(targetPos.current);
       camera.lookAt(0, 0, 0);
-      targetPos.current.set(0, 8, 12);
-      targetLookAt.current.set(0, 0, 0);
     }
     prevPhaseRef.current = phase;
 

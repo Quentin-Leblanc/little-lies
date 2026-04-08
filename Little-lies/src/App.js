@@ -92,11 +92,6 @@ function App() {
             )}
             <GameComponent>
                 <div className="game-layout">
-                    {/* Header - Phase timer */}
-                    <div className="layout-header">
-                        <Time />
-                    </div>
-
                     {/* Left - Menu + Roles + Graveyard */}
                     <div className="layout-players">
                         <Menu />
@@ -105,9 +100,10 @@ function App() {
                     </div>
                     <AdminPanel />
 
-                    {/* Center - 3D scene + progress bar overlay */}
+                    {/* Center - 3D scene + progress bar + phase info */}
                     <div className="layout-center">
                         <TimeBar />
+                        <div className="phase-overlay"><Time /></div>
                         <MainScene />
                     </div>
 
