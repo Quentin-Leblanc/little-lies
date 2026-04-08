@@ -165,6 +165,88 @@
   100% { opacity: 0; }
 }
 
+/* ── Death report overlay ── */
+.death-report-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 35;
+  pointer-events: none;
+  animation: death-report-anim 4.5s ease-in-out forwards;
+}
+
+.death-report-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 48px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 500px;
+}
+
+.death-report-icon {
+  font-size: 2.5rem;
+  margin-bottom: 4px;
+
+  .has-dead & {
+    color: #cc3333;
+    filter: drop-shadow(0 0 12px rgba(200, 50, 50, 0.5));
+  }
+
+  .no-dead & {
+    color: #88aacc;
+    filter: drop-shadow(0 0 12px rgba(100, 150, 200, 0.4));
+  }
+}
+
+.death-report-name {
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.death-name {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e44;
+  text-shadow: 0 0 16px rgba(200, 50, 50, 0.5);
+  letter-spacing: 2px;
+}
+
+.death-desc {
+  display: block;
+  font-size: 0.95rem;
+  color: rgba(200, 200, 220, 0.8);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.death-report-safe {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  color: rgba(180, 200, 230, 0.9);
+  text-shadow: 0 0 12px rgba(100, 150, 200, 0.3);
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+@keyframes death-report-anim {
+  0% { opacity: 0; transform: scale(0.92); }
+  12% { opacity: 1; transform: scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* Night ambiance messages */
 .night-ambiance {
   position: absolute;
@@ -244,7 +326,7 @@
   justify-content: center;
   z-index: 35;
   pointer-events: none;
-  animation: night-text-anim 6s ease-in-out forwards;
+  animation: night-text-anim 5s ease-in-out forwards;
 }
 
 .night-text-content {
@@ -263,7 +345,7 @@
 
 @keyframes night-text-anim {
   0% { opacity: 0; }
-  10% { opacity: 1; }
-  55% { opacity: 1; }
+  12% { opacity: 1; }
+  50% { opacity: 1; }
   100% { opacity: 0; }
 }
