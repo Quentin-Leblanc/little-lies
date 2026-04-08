@@ -38,32 +38,32 @@
   align-items: center;
   gap: 20px;
   padding: 12px 28px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 16px;
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: none;
+  border: none;
 }
 
 .progress-content {
-  font-size: 24px;
+  font-size: 26px;
   font-family: 'Cinzel', serif;
   display: flex;
   align-items: center;
   color: #fff;
   white-space: nowrap;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 
   i {
     margin-right: 10px;
-    font-size: 20px;
+    font-size: 22px;
     color: #ffcc44;
   }
 }
 
 .timer {
-  font-size: 28px;
+  font-size: 30px;
   color: #fff;
   font-family: monospace;
   font-weight: bold;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 /* Progress bar — top of the center scene area only */
