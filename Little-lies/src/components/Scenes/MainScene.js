@@ -957,26 +957,28 @@ const MainScene = () => {
   const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
 
   // Night walk-away transition + hide after walk
-  const prevPhaseRef = useRef(phase);
+  // Use dayCount guard to ensure walk only triggers ONCE per night (no re-trigger on state flicker)
+  const nightStartedForDay = useRef(null);
   const [nightTransition, setNightTransition] = useState(false);
   const [nightPlayersHidden, setNightPlayersHidden] = useState(false);
 
   useEffect(() => {
-    if (phase === CONSTANTS.PHASE.NIGHT && prevPhaseRef.current !== CONSTANTS.PHASE.NIGHT) {
+    if (phase === CONSTANTS.PHASE.NIGHT) {
+      if (nightStartedForDay.current !== game.dayCount) {
+        // First time entering this night — trigger walk-away once
+        nightStartedForDay.current = game.dayCount;
+        setNightPlayersHidden(false);
+        setNightTransition(true);
+        const walkTimer = setTimeout(() => {
+          setNightTransition(false);
+          setNightPlayersHidden(true);
+        }, 3000);
+        return () => clearTimeout(walkTimer);
+      }
+    } else {
       setNightPlayersHidden(false);
-      setNightTransition(true);
-      const walkTimer = setTimeout(() => {
-        setNightTransition(false);
-        setNightPlayersHidden(true); // hide characters after walk finishes
-      }, 3000);
-      return () => clearTimeout(walkTimer);
     }
-    // Reset when leaving night
-    if (phase !== CONSTANTS.PHASE.NIGHT) {
-      setNightPlayersHidden(false);
-    }
-    prevPhaseRef.current = phase;
-  }, [phase, CONSTANTS.PHASE.NIGHT]);
+  }, [phase, game.dayCount]);
 
   // Day circle positions (for night walk-away start)
   const dayPositions = useMemo(() => {
