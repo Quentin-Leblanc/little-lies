@@ -248,8 +248,11 @@ const PlayerActions = memo(function () {
         <ul className="player-list">
           {players.map((player) => {
             const hasActions = me.isAlive && player.isAlive;
+            const isNightTarget = isNightPhase && me.isAlive && me.character?.actions?.some(
+              (a) => a.type !== 'VOTE' && a.type !== 'REVEAL' && Events.getMyActionTarget(a.type) === player.id
+            );
             return (
-              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''}`}
+              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''} ${isNightTarget ? 'night-target' : ''}`}
                 style={player.isAlive ? { background: player.profile.color || '#888' } : undefined}
               >
                 <span className="player-name-cell">
@@ -295,11 +298,9 @@ const PlayerActions = memo(function () {
                         if (action.targets === 'self' && player.id !== me.id) return null;
 
                         const isSelected = Events.getMyActionTarget(action.type) === player.id;
-                        const actionStyle = getActionStyle(action.type);
                         return (
                           <button
                             className={`action-btn ${isSelected ? 'action-btn-active' : ''}`}
-                            style={{ background: isSelected ? actionStyle.hover : actionStyle.bg, color: actionStyle.color, border: 'none' }}
                             onClick={() => handleNightAction(action, player)}
                             key={action.type}
                           >
