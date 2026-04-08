@@ -47,10 +47,20 @@ const Time = () => {
   const dayNightLabel = `${isDay ? 'Jour' : 'Nuit'} ${dayCount}`;
   const headerText = isDay ? `${dayNightLabel} — ${phaseLabel}` : dayNightLabel;
 
+  // Phase-colored background
+  const PHASE_COLORS = {
+    DISCUSSION: 'rgba(40, 120, 40, 0.7)',
+    VOTING: 'rgba(140, 90, 20, 0.7)',
+    DEFENSE: 'rgba(140, 40, 40, 0.7)',
+    JUDGMENT: 'rgba(80, 40, 120, 0.7)',
+    NIGHT: 'rgba(20, 20, 60, 0.7)',
+  };
+  const phaseBg = PHASE_COLORS[phase] || 'rgba(0, 0, 0, 0.7)';
+
   return (
     <div className="time-container">
       <span className="game-title">Little Lies</span>
-      <div className="phase-info">
+      <div className="phase-info" style={{ background: phaseBg }}>
         <div className="progress-content">
           <i className={`fas ${isPaused ? 'fa-pause' : phaseIcon}`}></i>
           {isPaused ? `${headerText} — PAUSE` : headerText}
