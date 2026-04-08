@@ -308,17 +308,48 @@ export const EventsProvider = ({ children }) => {
       }
     });
 
-    // Apply kills
+    // Apply kills + Executioner→Jester in a single setPlayers to avoid stale state
     const killedIds = Object.keys(killed);
+
+    // Death flavor messages by kill type
+    const MAFIA_DEATH_MSGS = [
+      'a été retrouvé(e) criblé(e) de balles à l\'aube.',
+      'a été retrouvé(e) sans vie dans une ruelle sombre... une exécution propre.',
+      'a été retrouvé(e) mort(e) chez lui. Un travail de professionnel.',
+      'a été retrouvé(e) abattu(e) froidement devant sa porte.',
+      'n\'a pas survécu à la nuit... la Mafia ne pardonne pas.',
+    ];
+    const SK_DEATH_MSGS = [
+      'a été retrouvé(e) poignardé(e) sauvagement.',
+      'a été retrouvé(e) dans un bain de sang... l\'œuvre d\'un psychopathe.',
+      'a été retrouvé(e) lacéré(e) derrière la taverne.',
+      'a été retrouvé(e) mutilé(e)... un acte de pure folie.',
+    ];
+    const VIGILANTE_DEATH_MSGS = [
+      'a été retrouvé(e) abattu(e)... justice expéditive ?',
+      'a été retrouvé(e) avec une balle dans le cœur... un justicier a frappé.',
+    ];
+    const BODYGUARD_DEATH_MSGS = [
+      'est mort(e) en protégeant quelqu\'un.',
+    ];
+
+    const getDeathFlavor = (killType) => {
+      if (killType === 'MAFIA_KILL' || killType === 'KILL') return MAFIA_DEATH_MSGS[Math.floor(Math.random() * MAFIA_DEATH_MSGS.length)];
+      if (killType === 'SK_KILL') return SK_DEATH_MSGS[Math.floor(Math.random() * SK_DEATH_MSGS.length)];
+      if (killType === 'VIGILANTE_KILL') return VIGILANTE_DEATH_MSGS[Math.floor(Math.random() * VIGILANTE_DEATH_MSGS.length)];
+      if (killType === 'bodyguard_sacrifice' || killType === 'bodyguard_kill') return BODYGUARD_DEATH_MSGS[0];
+      return 'a été retrouvé(e) mort(e) dans des circonstances mystérieuses.';
+    };
+
+    // Build chat messages for kills
     killedIds.forEach((targetId) => {
       const target = players.find((p) => p.id === targetId);
-      killPlayer(targetId);
-
-      let deathMsg = `${target?.profile?.name} a été tué durant la nuit. Son rôle était : ${target?.character?.label}.`;
+      const killInfo = killed[targetId];
+      const flavor = getDeathFlavor(killInfo.type);
+      let deathMsg = `${target?.profile?.name} ${flavor} Son rôle était : ${target?.character?.label}.`;
       if (target?.lastWill) {
         deathMsg += `\n📜 Testament : "${target.lastWill}"`;
       }
-
       addEvent({
         type: 'KILL_RESULT',
         content: { target: targetId, chatMessage: deathMsg },
@@ -326,19 +357,25 @@ export const EventsProvider = ({ children }) => {
       });
     });
 
-    // Executioner -> Jester: if executioner's target died at night
+    // Single atomic update: kill players + convert Executioner→Jester
+    const jesterRole = killedIds.length > 0 ? {
+      label: 'Jester', key: 'jester', team: 'neutral', category: 'neutral_benign',
+      description: 'Votre cible est morte. Vous êtes maintenant un Jester.',
+      couleur: '#ff69b4', icon: 'fa-face-grin-tears', actions: [],
+      objectif: 'Se faire lyncher par le village.',
+      nightImmune: false, detectResult: 'non-suspect',
+      attackLevel: 0, defenseLevel: 0, winCondition: 'getLynched',
+    } : null;
+
     if (killedIds.length > 0) {
-      const jesterRole = {
-        label: 'Jester', key: 'jester', team: 'neutral', category: 'neutral_benign',
-        description: 'Votre cible est morte. Vous êtes maintenant un Jester.',
-        couleur: '#ff69b4', icon: 'fa-face-grin-tears', actions: [],
-        objectif: 'Se faire lyncher par le village.',
-        nightImmune: false, detectResult: 'non-suspect',
-        attackLevel: 0, defenseLevel: 0, winCondition: 'getLynched',
-      };
       setPlayers(
         players.map((p) => {
-          if (p.character?.winCondition === 'getTargetLynched' && killedIds.includes(p.executionerTarget) && p.isAlive) {
+          // Kill dead players
+          if (killedIds.includes(p.id)) {
+            return { ...p, isAlive: false };
+          }
+          // Convert Executioner → Jester if their target died
+          if (jesterRole && p.character?.winCondition === 'getTargetLynched' && killedIds.includes(p.executionerTarget) && p.isAlive) {
             addNotif(p.id, 'Votre cible est morte... Vous êtes maintenant un Jester. Faites-vous lyncher !');
             return { ...p, character: jesterRole, executionerTarget: null };
           }

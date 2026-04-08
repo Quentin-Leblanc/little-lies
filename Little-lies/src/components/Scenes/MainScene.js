@@ -1342,26 +1342,34 @@ const MainScene = () => {
           m => m.type === 'system' && m.dayCount === game.dayCount
             && !m.content?.startsWith('--- Jour')
             && !m.content?.startsWith('La nuit a été calme')
-            && m.content?.includes('tué')
+            && (m.content?.includes('retrouvé') || m.content?.includes('mort') || m.content?.includes('survécu'))
         );
-        const killedNames = killedMessages.map(m => {
-          const match = m.content?.match(/^(.+?) a été tué/);
-          return match ? match[1] : null;
+        // Extract name + flavor from messages like "Joueur a été retrouvé(e) criblé(e)... Son rôle était : X."
+        const killedEntries = killedMessages.map(m => {
+          const match = m.content?.match(/^(.+?) (a été retrouvé|n'a pas survécu|est mort)/);
+          if (!match) return null;
+          const name = match[1];
+          // Extract the flavor text (everything before "Son rôle")
+          const flavorMatch = m.content?.match(/^.+? (a été retrouvé.+?|n'a pas survécu.+?|est mort.+?)(?:\s*Son rôle|$)/);
+          const flavor = flavorMatch ? flavorMatch[1].replace(/\.$/, '') : 'a été retrouvé(e) sans vie';
+          return { name, flavor };
         }).filter(Boolean);
-        const hasDead = killedNames.length > 0;
+        const hasDead = killedEntries.length > 0;
 
         return (
           <div className={`death-report-overlay ${hasDead ? 'has-dead' : 'no-dead'}`}>
             <div className="death-report-card">
-              <div className="death-report-icon">
-                <i className={`fas ${hasDead ? 'fa-skull' : 'fa-moon'}`}></i>
-              </div>
+              {hasDead && (
+                <div className="death-report-icon">
+                  <i className="fas fa-skull"></i>
+                </div>
+              )}
               {hasDead ? (
                 <>
-                  {killedNames.map((name, i) => (
+                  {killedEntries.map((entry, i) => (
                     <div key={i} className="death-report-name">
-                      <span className="death-name">{name}</span>
-                      <span className="death-desc">a été retrouvé(e) sans vie ce matin...</span>
+                      <span className="death-name">{entry.name}</span>
+                      <span className="death-desc">{entry.flavor}</span>
                     </div>
                   ))}
                 </>
