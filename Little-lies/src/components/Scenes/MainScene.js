@@ -611,10 +611,10 @@ const DeadPlayerFigure = ({ player, position }) => (
 // ============================================================
 // Night cinematic camera — slow alley walk then gentle rise to stars
 const NIGHT_CAMERA_WAYPOINTS = [
-  { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 4 },   // Brief overview while players walk away
-  { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 12 },  // Low alley walk, steady forward pace
-  { pos: [-2, 6, -6],     lookAt: [0, 20, -6],       duration: 10 },  // Slow rise, looking up to the sky
-  { pos: [0, 16, -2],     lookAt: [0, 30, -5],       duration: 6, hold: true },  // Stars — hold still
+  { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 4 },    // Brief overview while players walk away
+  { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 12 },   // Low alley walk, steady forward pace
+  { pos: [0, 10, 0],      lookAt: [0, 50, 0],        duration: 10 },   // Rise straight up, looking at zenith
+  { pos: [0, 14, 0],      lookAt: [0, 50, 0],        duration: 6, hold: true },  // Stars — locked still
 ];
 
 const CameraController = ({ phase, CONSTANTS }) => {
@@ -649,9 +649,9 @@ const CameraController = ({ phase, CONSTANTS }) => {
       targetPos.current.set(...wp.pos);
       targetLookAt.current.set(...wp.lookAt);
 
-      // If last waypoint with hold: snap camera and stop moving
+      // If hold waypoint: snap position and freeze looking direction
       if (wp.hold) {
-        camera.position.lerp(targetPos.current, 0.02);
+        camera.position.set(...wp.pos);
         camera.lookAt(...wp.lookAt);
         prevPhaseRef.current = phase;
         return;
