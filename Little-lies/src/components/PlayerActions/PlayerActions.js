@@ -256,14 +256,14 @@ const PlayerActions = memo(function () {
         )}
 
         {/* Player list — always show all players */}
-        <h4 className="player-list-title"><i className="fas fa-users"></i> Résidents</h4>
+        <h4 className="player-list-title"><i className="fas fa-users"></i> Joueurs</h4>
         <ul className="player-list">
           {players.map((player) => {
             const hasActions = me.isAlive && player.isAlive;
             return (
               <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''}`}>
                 <span className="player-name-cell">
-                  <span className="player-color-dot" style={{ backgroundColor: player.profile.color || '#888' }} />
+                  <i className="fas fa-gem player-color-icon" style={{ color: player.profile.color || '#888' }} />
                   <span style={{ color: player.profile.color }}>
                     {player.profile.name}
                   </span>
