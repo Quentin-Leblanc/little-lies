@@ -366,9 +366,9 @@ function Chat(props) {
       {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> Chat des morts</div>}
       <div className="chat-messages">
         {filteredMessages.map((message, index) => {
-          // Everything before the last phase separator is grayed
-          const isPast = index < lastSeparatorIndex;
-          const pastClass = isPast ? 'msg-past' : '';
+          // Only system/info messages from past phases are grayed (not player messages)
+          const isPastSystem = index < lastSeparatorIndex && message.type === 'system';
+          const pastClass = isPastSystem ? 'msg-past' : '';
 
           // System messages: render as clean separator
           if (message.type === 'system') {
@@ -382,7 +382,7 @@ function Chat(props) {
           }
 
           return (
-            <div className={`chat-message-wrapper ${getMessageClass(message)} ${pastClass}`} key={message.id || index}>
+            <div className={`chat-message-wrapper ${getMessageClass(message)}`} key={message.id || index}>
               <div
                 className="chat-message-background"
                 style={{ backgroundColor: message.color }}
@@ -390,7 +390,7 @@ function Chat(props) {
               <div className="chat-message">
                 {formatPrefix(message)}
                 {message.type !== 'whisper_notice' && (
-                  <strong style={{ color: isPast ? '#555' : message.color }}>{message.player}</strong>
+                  <strong style={{ color: message.color }}>{message.player}</strong>
                 )}
                 {message.type === 'whisper_notice' ? (
                   <span className="whisper-notice-text">{message.content}</span>
