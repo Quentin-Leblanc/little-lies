@@ -534,16 +534,32 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
     }
   });
 
+  // Fade-out opacity during walk-away transition
+  const [walkOpacity, setWalkOpacity] = useState(1);
+  useEffect(() => {
+    if (isTransitioning) {
+      setWalkOpacity(1);
+      const fadeInterval = setInterval(() => {
+        setWalkOpacity(prev => Math.max(prev - 0.03, 0));
+      }, 100);
+      return () => clearInterval(fadeInterval);
+    } else {
+      setWalkOpacity(1);
+    }
+  }, [isTransitioning]);
+
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
-      <Character
-        color={color}
-        animation={pauseAnim || currentAnim}
-        scale={characterScale || 0.8}
-        animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
-      />
-      {/* Player color glow — only during day */}
-      {isDay && <>
+      <group scale={isTransitioning ? [walkOpacity, walkOpacity, walkOpacity] : [1, 1, 1]}>
+        <Character
+          color={color}
+          animation={pauseAnim || currentAnim}
+          scale={characterScale || 0.8}
+          animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
+        />
+      </group>
+      {/* Player color glow — only during day, not during walk-away */}
+      {isDay && !isTransitioning && <>
         <pointLight position={[0, 0.8, 0]} color={color} intensity={3} distance={5} />
         <pointLight position={[0, 1.5, 0]} color={color} intensity={1.5} distance={3} />
         <pointLight position={[0, 0.2, 0.5]} color={color} intensity={1} distance={2.5} />
@@ -995,7 +1011,7 @@ const MainScene = () => {
         fadeTimers.current.push(setTimeout(() => {
           setNightTransition(false);
           setNightPlayersHidden(true);
-        }, 3000));
+        }, 5000));
       }
     }
 
@@ -1227,7 +1243,7 @@ const MainScene = () => {
                 pauseAnim={(isPaused && isMe) ? pauseAnim : null}
                 startPosition={nightTransition ? dayPositions[player.id] : null}
                 isTransitioning={nightTransition}
-                transitionDuration={3}
+                transitionDuration={5}
                 color={player.profile?.color || '#ffffff'}
                 isAccused={isAccused}
                 showVote={showVoteBtn}

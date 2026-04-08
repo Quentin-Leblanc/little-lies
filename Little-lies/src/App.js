@@ -40,7 +40,7 @@ function App() {
         const PHASE_BANNERS = {
             [CONSTANTS.PHASE.NIGHT]: { text: 'La nuit tombe...', icon: 'fa-moon', className: 'banner-night' },
             [CONSTANTS.PHASE.DEATH_REPORT]: { text: `Jour ${dayCount}`, icon: 'fa-sun', className: 'banner-morning' },
-            [CONSTANTS.PHASE.DISCUSSION]: { text: 'Discussion', icon: 'fa-comments', className: 'banner-day' },
+            // Discussion banner removed
             [CONSTANTS.PHASE.VOTING]: { text: 'Vote', icon: 'fa-gavel', className: 'banner-vote' },
             [CONSTANTS.PHASE.DEFENSE]: { text: 'Defense', icon: 'fa-shield', className: 'banner-defense' },
             [CONSTANTS.PHASE.JUDGMENT]: { text: 'Jugement', icon: 'fa-scale-balanced', className: 'banner-judgment' },
