@@ -134,7 +134,11 @@
 }
 
 .reveal-hint {
-  margin-top: 24px;
+  position: absolute;
+  bottom: 8%;
+  left: 0;
+  right: 0;
+  text-align: center;
   color: #889;
   font-size: 1rem;
   font-family: 'Cinzel', serif;
