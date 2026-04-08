@@ -544,17 +544,25 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
 
   // Fade-out: make character materials transparent during walk-away
   const charGroupRef = useRef();
-  useFrame(() => {
+  useFrame((state) => {
     if (!charGroupRef.current) return;
     if (isTransitioning && transitionStartTime.current !== null) {
-      const elapsed = performance.now() / 1000 - transitionStartTime.current;
-      // Start fading after 2.5s of walking, fully gone by 4.5s
-      const opacity = Math.max(1 - Math.max(elapsed - 2.5, 0) / 2, 0);
+      const elapsed = state.clock.elapsedTime - transitionStartTime.current;
+      // Start fading after 2s of walking, fully gone by 4s
+      const opacity = Math.max(1 - Math.max(elapsed - 2, 0) / 2, 0);
       charGroupRef.current.traverse((child) => {
         if (child.isMesh && child.material) {
           child.material.transparent = true;
           child.material.opacity = opacity;
           child.castShadow = opacity > 0.1;
+        }
+      });
+    } else if (charGroupRef.current) {
+      // Reset opacity when not transitioning
+      charGroupRef.current.traverse((child) => {
+        if (child.isMesh && child.material && child.material.opacity < 1) {
+          child.material.opacity = 1;
+          child.castShadow = true;
         }
       });
     }
@@ -1022,8 +1030,11 @@ const MainScene = () => {
       // Delay fade so walk-away is visible first
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
-        setShowNightText(true);
       }, 2000));
+      // Show "La nuit tombe..." AFTER the screen is black (fade takes 1.5s)
+      fadeTimers.current.push(setTimeout(() => {
+        setShowNightText(true);
+      }, 3800));
       // Trigger walk-away animation (separate timer, not cleared on phase change)
       if (nightStartedForDay.current !== game.dayCount) {
         nightStartedForDay.current = game.dayCount;
@@ -1047,8 +1058,11 @@ const MainScene = () => {
       const nightDuration = CONSTANTS.DURATIONS?.NIGHT || 30000;
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
-        setShowDayText(true);
       }, nightDuration - 3000));
+      // Show "Le village se lève..." AFTER screen is black
+      fadeTimers.current.push(setTimeout(() => {
+        setShowDayText(true);
+      }, nightDuration - 1000));
 
       // Night ambiance messages — 2 messages during the night
       const shuffled = [...NIGHT_AMBIANCE].sort(() => Math.random() - 0.5);
