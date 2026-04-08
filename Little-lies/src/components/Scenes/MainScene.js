@@ -556,20 +556,38 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
           <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
         </mesh>
       )}
-      {/* Name label — Html for consistent screen-space size */}
+      {/* Name label + vote counter */}
       <Html position={[0, 2.0, 0]} center distanceFactor={8}>
         <div style={{
-          color: player.profile?.color || color,
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          padding: '2px 8px',
-          borderRadius: '4px',
-          fontSize: '14px',
-          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
           whiteSpace: 'nowrap',
-          textShadow: '1px 1px 2px black',
-          border: `1px solid ${player.profile?.color || color}`,
         }}>
-          {player.profile.name}
+          <div style={{
+            color: player.profile?.color || color,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            textShadow: '1px 1px 2px black',
+            border: `1px solid ${player.profile?.color || color}`,
+          }}>
+            {player.profile.name}
+          </div>
+          {showVote && voteCount > 0 && (
+            <div style={{
+              backgroundColor: 'rgba(255,68,68,0.8)',
+              color: '#fff',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+            }}>
+              Vote {voteCount}/{totalAlive}
+            </div>
+          )}
         </div>
       </Html>
       {/* Vote/Judgment buttons removed — handled in action panel */}
@@ -1156,7 +1174,7 @@ const MainScene = () => {
           {!nightPlayersHidden && alivePlayers.map((player) => {
             const isMe = player.id === me?.id;
             const isAccused = player.id === game.accusedId;
-            const showVoteBtn = isVotingPhase && me?.isAlive && !isMe;
+            const showVoteBtn = isVotingPhase;
             const isVoteTarget = myVoteTarget === player.id;
             const showJudgmentBtn = isJudgmentPhase && isAccused && me?.isAlive && me.id !== game.accusedId && !hasJudged;
             const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
