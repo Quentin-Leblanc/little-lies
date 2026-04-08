@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useMultiplayerState } from 'playroomkit';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import './AdminPanel.scss';
 
@@ -15,13 +16,14 @@ async function sha256(text) {
 
 const AdminPanel = () => {
   const { game, setGame, setPlayers, getPlayers, addChatSystem, CONSTANTS } = useGameEngine();
+  const [adminCharScale, setAdminCharScale] = useMultiplayerState('adminCharScale', 0.8);
   const [showPrompt, setShowPrompt] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [announcement, setAnnouncement] = useState('');
   const [chatMsg, setChatMsg] = useState('');
-  const [charScale, setCharScale] = useState(game?.characterScale || 0.8);
+  const charScale = adminCharScale || 0.8;
 
   const handleUnlock = useCallback(async () => {
     const hash = await sha256(password);
@@ -68,14 +70,11 @@ const AdminPanel = () => {
   };
 
   const updateCharScale = (val) => {
-    const s = parseFloat(val);
-    setCharScale(s);
-    setGame(prev => ({ ...prev, characterScale: s }));
+    setAdminCharScale(parseFloat(val));
   };
 
   const resetCharScale = () => {
-    setCharScale(0.8);
-    setGame(prev => ({ ...prev, characterScale: 0.8 }));
+    setAdminCharScale(0.8);
   };
 
   const sendAnnouncement = () => {

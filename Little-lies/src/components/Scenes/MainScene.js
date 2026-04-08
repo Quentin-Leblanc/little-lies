@@ -928,7 +928,8 @@ const MainScene = () => {
   const players = getPlayers();
   const me = getMe();
   const phase = game.phase;
-  const characterScale = game.characterScale || 0.8;
+  const [adminCharScale] = useMultiplayerState('adminCharScale', 0.8);
+  const characterScale = adminCharScale || 0.8;
   const isPaused = !!game.adminFreeRoam;
   const alivePlayers = players.filter((p) => p.isAlive);
   const deadPlayers = players.filter((p) => !p.isAlive);
