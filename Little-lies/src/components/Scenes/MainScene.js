@@ -540,12 +540,13 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
     if (!charGroupRef.current) return;
     if (isTransitioning && transitionStartTime.current !== null) {
       const elapsed = performance.now() / 1000 - transitionStartTime.current;
-      // Start fading after 1s, fully gone by 2.5s
-      const opacity = Math.max(1 - Math.max(elapsed - 1, 0) / 1.5, 0);
+      // Start fading after 2.5s of walking, fully gone by 4.5s
+      const opacity = Math.max(1 - Math.max(elapsed - 2.5, 0) / 2, 0);
       charGroupRef.current.traverse((child) => {
         if (child.isMesh && child.material) {
           child.material.transparent = true;
           child.material.opacity = opacity;
+          child.castShadow = opacity > 0.1;
         }
       });
     }
