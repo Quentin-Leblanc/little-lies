@@ -126,12 +126,41 @@ const AdminPanel = () => {
     );
   }
 
+  const killPlayer = (playerId) => {
+    setPlayers(getPlayers().map(p =>
+      p.id === playerId ? { ...p, isAlive: false } : p
+    ));
+  };
+
+  const players = getPlayers();
+
   // Admin panel
   return (
     <div className="admin-panel">
       <div className="admin-header">
         <span><i className="fas fa-shield-alt"></i> Admin</span>
         <button onClick={() => setUnlocked(false)} className="admin-close">X</button>
+      </div>
+
+      {/* Player list with kill buttons */}
+      <div className="admin-section">
+        <label className="admin-label">Joueurs ({players.filter(p => p.isAlive).length}/{players.length})</label>
+        <div className="admin-player-list">
+          {players.map(p => (
+            <div key={p.id} className={`admin-player-item ${!p.isAlive ? 'admin-player-dead' : ''}`}>
+              <span style={{ color: p.profile?.color || '#aaa' }}>
+                <i className="fas fa-gem" style={{ marginRight: 6 }}></i>
+                {p.profile?.name || 'Joueur'}
+              </span>
+              {p.isAlive && (
+                <button className="admin-kill-btn" onClick={() => killPlayer(p.id)}>
+                  <i className="fas fa-skull"></i>
+                </button>
+              )}
+              {!p.isAlive && <span className="admin-dead-tag">mort</span>}
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="admin-section">

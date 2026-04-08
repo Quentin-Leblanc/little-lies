@@ -56,18 +56,18 @@
 // Admin panel overlay — fixed, floats above everything
 .admin-panel {
   position: fixed;
-  bottom: 40px;
-  left: 40px;
-  width: 320px;
-  max-height: 80vh;
+  bottom: 30px;
+  left: 30px;
+  width: 370px;
+  max-height: 85vh;
   overflow-y: auto;
   background: rgba(10, 10, 18, 0.97);
   border: 1px solid rgba(255, 68, 68, 0.3);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 16px;
   z-index: 999;
   backdrop-filter: blur(10px);
-  font-size: 13px;
+  font-size: 14px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
 }
 
@@ -75,8 +75,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  font-size: 13px;
+  margin-bottom: 12px;
+  font-size: 15px;
   font-weight: bold;
   color: #ff4444;
 
@@ -102,9 +102,9 @@
 
 .admin-action-btn {
   width: 100%;
-  padding: 6px 10px;
-  margin-bottom: 4px;
-  font-size: 11px;
+  padding: 8px 12px;
+  margin-bottom: 5px;
+  font-size: 13px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
@@ -137,7 +137,7 @@
 
 .admin-label {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -156,8 +156,8 @@
 
 .admin-input {
   flex: 1;
-  padding: 4px 8px;
-  font-size: 11px;
+  padding: 6px 10px;
+  font-size: 13px;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
@@ -167,9 +167,54 @@
   &:focus { border-color: rgba(255, 68, 68, 0.4); }
 }
 
-.admin-send {
+// Player list with kill buttons
+.admin-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.admin-player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+
+  &.admin-player-dead {
+    opacity: 0.4;
+  }
+}
+
+.admin-kill-btn {
+  background: rgba(255, 68, 68, 0.15);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  border-radius: 4px;
+  color: #ff4444;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: rgba(255, 68, 68, 0.4);
+    color: #fff;
+  }
+}
+
+.admin-dead-tag {
   font-size: 10px;
+  color: #555;
+  font-style: italic;
+}
+
+.admin-send {
+  padding: 5px 10px;
+  font-size: 12px;
   background: rgba(255, 68, 68, 0.2);
   border: 1px solid rgba(255, 68, 68, 0.3);
   border-radius: 4px;
