@@ -26,7 +26,7 @@ const ACTION_COLORS = {
 const getActionStyle = (type) => ACTION_COLORS[type] || { bg: 'rgba(100,100,100,0.7)', hover: 'rgba(100,100,100,0.9)', color: '#fff' };
 
 const PlayerActions = memo(function () {
-  const { getPlayers, getMe, game, CONSTANTS, trial, setTrial, setPlayers, setGame } = useGameEngine();
+  const { getPlayers, getMe, game, CONSTANTS, trial, setTrial, setPlayers, setGame, addChatSystem } = useGameEngine();
   const Events = useEvents();
   const players = getPlayers();
   const me = getMe();
@@ -84,39 +84,20 @@ const PlayerActions = memo(function () {
     });
   };
 
-  // --- Vote handlers (with vote weight, allows changing vote) ---
+  // --- Vote handlers (vote is final, cannot be changed) ---
   const myVoteTarget = trial.suspects && Object.keys(trial.suspects).find((suspectedId) =>
     trial.suspects[suspectedId]?.suspectedBy?.some((voteId) => voteId === me.id)
   );
+  const hasVoted = !!myVoteTarget;
 
   const handleVoteClick = (suspectedPlayerId) => {
-    if (!me.isAlive || !isVotingPhase) return;
-
-    // If clicking the same target, unvote
-    if (myVoteTarget === suspectedPlayerId) {
-      const newSuspects = {};
-      Object.keys(trial.suspects || {}).forEach((sid) => {
-        const filtered = (trial.suspects[sid]?.suspectedBy || []).filter((vid) => vid !== me.id);
-        if (filtered.length > 0) {
-          newSuspects[sid] = { id: sid, suspectedBy: filtered };
-        }
-      });
-      setTrial({ ...trial, suspects: newSuspects });
-      return;
-    }
+    if (!me.isAlive || !isVotingPhase || hasVoted) return;
 
     const voteWeight = me.voteWeight || 1;
 
-    // Remove my votes from all targets first
-    const newSuspects = {};
-    Object.keys(trial.suspects || {}).forEach((sid) => {
-      const filtered = (trial.suspects[sid]?.suspectedBy || []).filter((vid) => vid !== me.id);
-      if (filtered.length > 0 || sid === suspectedPlayerId) {
-        newSuspects[sid] = { id: sid, suspectedBy: filtered };
-      }
-    });
+    const newSuspects = { ...(trial.suspects || {}) };
 
-    // Add my votes to the new target
+    // Add my votes to the target
     if (!newSuspects[suspectedPlayerId]) {
       newSuspects[suspectedPlayerId] = { id: suspectedPlayerId, suspectedBy: [] };
     }
@@ -125,6 +106,14 @@ const PlayerActions = memo(function () {
     }
 
     setTrial({ ...trial, suspects: newSuspects });
+
+    // Chat vote message
+    const targetPlayer = players.find(p => p.id === suspectedPlayerId);
+    const totalVotes = newSuspects[suspectedPlayerId]?.suspectedBy?.length || 0;
+    const aliveCount = players.filter(p => p.isAlive).length;
+    if (targetPlayer) {
+      addChatSystem(`Vote ${targetPlayer.profile.name} (${totalVotes}/${aliveCount})`, 'vote');
+    }
   };
 
   // --- Judgment handlers ---
@@ -278,10 +267,10 @@ const PlayerActions = memo(function () {
                 <div className="vote-container">
                   {player.isAlive ? (
                     <>
-                      {/* Vote button during VOTING phase — stays visible, pressed when selected */}
+                      {/* Vote button during VOTING phase — disabled after voting */}
                       {me.isAlive && player.id !== me.id && isVotingPhase && (
                         <button
-                          className={`vote-btn ${myVoteTarget === player.id ? 'vote-btn-active' : ''}`}
+                          className={`vote-btn ${myVoteTarget === player.id ? 'vote-btn-active' : ''} ${hasVoted && myVoteTarget !== player.id ? 'vote-btn-disabled' : ''}`}
                           onClick={() => handleVoteClick(player.id)}
                         >
                           Vote

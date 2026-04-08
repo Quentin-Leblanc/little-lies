@@ -152,6 +152,19 @@
     border-left: 2px solid #cc0000;
   }
 
+  &.msg-vote {
+    background-color: rgba(30, 60, 120, 0.5);
+    border-left: 3px solid #3a7bd5;
+    padding: 2px 8px;
+    border-radius: 3px;
+    min-height: auto;
+    .chat-message, .chat-day-separator {
+      color: #c8daf0 !important;
+      font-weight: 600;
+      font-size: 13px;
+    }
+  }
+
   // Admin messages — always visible, red bold on dark bg, fade after 10s
   &.msg-admin {
     background-color: rgba(255, 0, 0, 0.1);

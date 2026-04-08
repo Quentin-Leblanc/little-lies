@@ -335,6 +335,7 @@ function Chat(props) {
 
   // Message CSS class
   const getMessageClass = (message) => {
+    if (message.type === 'system' && message.color === 'vote') return 'msg-system msg-vote';
     if (message.type === 'system') return 'msg-system';
     if (message.type === 'whisper_notice') return 'msg-whisper-notice';
     if (message.chat === 'whisper') return 'msg-whisper';
@@ -373,6 +374,17 @@ function Chat(props) {
             index < lastSeparatorIndex || isNight
           );
           const pastClass = isPastSystem ? 'msg-past' : '';
+
+          // Vote messages: special blue background
+          if (message.type === 'system' && message.color === 'vote') {
+            return (
+              <div className={`chat-message-wrapper msg-vote ${pastClass}`} key={message.id || index}>
+                <div className="chat-message chat-day-separator">
+                  {message.content}
+                </div>
+              </div>
+            );
+          }
 
           // System messages: render as clean separator
           if (message.type === 'system') {
