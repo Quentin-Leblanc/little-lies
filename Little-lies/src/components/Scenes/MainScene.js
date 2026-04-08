@@ -324,10 +324,7 @@ const TREE_POSITIONS = [
 
 const Village = ({ isDay }) => (
   <group>
-    {/* Cobblestone ground — paved village floor, slightly raised */}
-    {GROUND_TILES.map((t, i) => (
-      <MeshyModel key={`ground-${i}`} path="/models/terrain.glb" position={[t.position[0], -0.55, t.position[2]]} scale={t.scale} />
-    ))}
+    {/* Ground tiles removed */}
 
     {/* Gallows at center */}
     <VillageCenter />
