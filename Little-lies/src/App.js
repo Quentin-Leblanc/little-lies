@@ -13,6 +13,7 @@ import { TimeBar } from './components/time/Time';
 import { useGameEngine } from './hooks/useGameEngine';
 import GameComponent from './components/GameComponent/GameComponent';
 import GameOver from './components/GameOver/GameOver';
+import AdminPanel from './components/AdminPanel/AdminPanel';
 import RoleReveal from './components/RoleReveal/RoleReveal';
 import CustomLobby from './components/CustomLobby/CustomLobby';
 import StarryBackground from './utils/StarryBackground';
@@ -97,10 +98,11 @@ function App() {
                     </div>
 
                     {/* Left - Menu + Roles + Graveyard */}
-                    <div className="layout-players">
+                    <div className="layout-players" style={{ position: 'relative' }}>
                         <Menu />
                         <Roles />
                         <Graveyard />
+                        <AdminPanel />
                     </div>
 
                     {/* Center - 3D scene + progress bar overlay */}

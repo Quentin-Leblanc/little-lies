@@ -636,6 +636,7 @@ export const GameEngineProvider = ({ children }) => {
         updatePlayerName,
         checkWinCondition,
         voteSkip,
+        addChatSystem,
       }}
     >
       {children}

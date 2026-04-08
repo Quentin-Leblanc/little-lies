@@ -483,7 +483,7 @@ const GhostOrb = ({ position }) => {
 // ============================================================
 // Player Figure — uses Character model with rotation + walk
 // ============================================================
-const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3 }) => {
+const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8 }) => {
   const groupRef = useRef();
   const transitionStartTime = useRef(null);
   const walkStarted = useRef(false);
@@ -539,7 +539,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
       <Character
         color={color}
         animation={currentAnim}
-        scale={0.8}
+        scale={characterScale || 0.8}
       />
       {/* Player color glow — colored light under the character */}
       <pointLight position={[0, 0.5, 0]} color={color} intensity={1.5} distance={4} />
@@ -801,6 +801,7 @@ const MainScene = () => {
   const players = getPlayers();
   const me = getMe();
   const phase = game.phase;
+  const characterScale = game.characterScale || 0.8;
   const alivePlayers = players.filter((p) => p.isAlive);
   const deadPlayers = players.filter((p) => !p.isAlive);
 
@@ -1001,6 +1002,7 @@ const MainScene = () => {
                 onVote={handleVote}
                 showJudgment={showJudgmentBtn}
                 onJudge={handleJudge}
+                characterScale={characterScale}
               />
             );
           })}
@@ -1076,6 +1078,15 @@ const MainScene = () => {
         <div className="scene-announcement">
           <div className="announcement-text announcement-execution">
             {players.find(p => p.id === game.accusedId)?.profile.name || 'Le joueur'} a été exécuté !
+          </div>
+        </div>
+      )}
+
+      {/* Admin custom announcement */}
+      {game.adminAnnouncement && (
+        <div className="scene-announcement">
+          <div className="announcement-text" style={{ borderLeft: '3px solid #ff4444' }}>
+            {game.adminAnnouncement}
           </div>
         </div>
       )}

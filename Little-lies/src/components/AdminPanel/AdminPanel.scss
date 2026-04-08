@@ -1,0 +1,171 @@
+// Hidden admin dot
+.admin-dot {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #111;
+  border: none;
+  opacity: 0.15;
+  cursor: pointer;
+  z-index: 20;
+  padding: 0;
+
+  &:hover { opacity: 0.4; }
+}
+
+// Password prompt
+.admin-prompt {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 20;
+}
+
+.admin-pw-input {
+  width: 100px;
+  padding: 3px 6px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #333;
+  border-radius: 3px;
+  color: #fff;
+  outline: none;
+}
+
+.admin-pw-btn, .admin-pw-close {
+  padding: 3px 6px;
+  font-size: 10px;
+  background: #222;
+  color: #888;
+  border: 1px solid #333;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.admin-pw-error {
+  font-size: 10px;
+  color: #ff4444;
+}
+
+// Admin panel overlay
+.admin-panel {
+  position: absolute;
+  bottom: 30px;
+  left: 10px;
+  width: 250px;
+  background: rgba(10, 10, 18, 0.95);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #ff4444;
+
+  i { margin-right: 5px; }
+}
+
+.admin-close {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 12px;
+  &:hover { color: #fff; }
+}
+
+.admin-section {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  &:last-child { border-bottom: none; margin-bottom: 0; }
+}
+
+.admin-action-btn {
+  width: 100%;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+
+  i { margin-right: 6px; width: 14px; text-align: center; }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+
+  &.admin-danger {
+    border-color: rgba(255, 68, 68, 0.2);
+    &:hover {
+      background: rgba(255, 68, 68, 0.15);
+      color: #ff6666;
+    }
+  }
+}
+
+.admin-label {
+  display: block;
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.admin-slider {
+  width: 100%;
+  accent-color: #ff4444;
+}
+
+.admin-input-row {
+  display: flex;
+  gap: 4px;
+}
+
+.admin-input {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #ddd;
+  outline: none;
+
+  &:focus { border-color: rgba(255, 68, 68, 0.4); }
+}
+
+.admin-send {
+  padding: 4px 8px;
+  font-size: 10px;
+  background: rgba(255, 68, 68, 0.2);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  border-radius: 4px;
+  color: #ff6666;
+  cursor: pointer;
+
+  &:hover { background: rgba(255, 68, 68, 0.35); }
+}
