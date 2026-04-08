@@ -58,7 +58,7 @@ const Player = () => {
             {/* Role info */}
             <div className="role-container">
                 <div className="status-line">
-                    <span className="status-name">{me.profile?.name || 'Joueur'}</span>
+                    <span className="status-name" style={{ color: me.profile?.color || '#fff' }}>{me.profile?.name || 'Joueur'}</span>
                     <span className="status-separator">—</span>
                     <span className="status-team" style={{ color: { town: '#78ff78', mafia: '#ff4444', neutral: '#9370db' }[me.character?.team] || '#aaa' }}>
                         {{ town: 'Village', mafia: 'Mafia', neutral: 'Neutre' }[me.character?.team] || me.character?.team}
