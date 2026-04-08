@@ -542,12 +542,20 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
         scale={characterScale || 0.8}
         animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
       />
-      {/* Player color glow — colored light under the character */}
-      <pointLight position={[0, 0.5, 0]} color={color} intensity={1.5} distance={4} />
+      {/* Player color glow — multiple lights for strong colored aura */}
+      <pointLight position={[0, 0.8, 0]} color={color} intensity={3} distance={5} />
+      <pointLight position={[0, 1.5, 0]} color={color} intensity={1.5} distance={3} />
+      <pointLight position={[0, 0.2, 0.5]} color={color} intensity={1} distance={2.5} />
+      <pointLight position={[0, 0.2, -0.5]} color={color} intensity={1} distance={2.5} />
       {/* Colored ground ring */}
       <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.4, 0.6, 24]} />
-        <meshBasicMaterial color={color} transparent opacity={0.5} />
+        <ringGeometry args={[0.3, 0.7, 24]} />
+        <meshBasicMaterial color={color} transparent opacity={0.6} />
+      </mesh>
+      {/* Glow pillar — transparent cylinder around character */}
+      <mesh position={[0, 0.8, 0]}>
+        <cylinderGeometry args={[0.5, 0.5, 1.8, 16, 1, true]} />
+        <meshBasicMaterial color={color} transparent opacity={0.08} side={THREE.DoubleSide} />
       </mesh>
       {/* Accused ring */}
       {isAccused && (
