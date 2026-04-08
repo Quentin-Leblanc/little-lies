@@ -604,7 +604,7 @@ export const GameEngineProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(tick);
-  }, [game.timer, game.phase, game.status, isHost()]);
+  }, [game.timer, game.phase, game.status, game.adminFreeRoam, isHost()]);
 
   // --- Skip day majority check (host only) ---
   const skipVoteCount = (game.skipVotes || []).length;
