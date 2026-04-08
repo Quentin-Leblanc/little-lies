@@ -696,46 +696,80 @@ const CameraController = ({ phase, CONSTANTS }) => {
 };
 
 // ============================================================
-// Scene Lighting (day/night with enhanced atmosphere)
+// Scene Lighting — warm sunlight (day) / cold moonlight (night)
 // ============================================================
 const SceneLighting = ({ isDay }) => {
-  const lightRef = useRef();
+  const sunRef = useRef();
+  const fillRef = useRef();
   const ambientRef = useRef();
 
   useFrame(() => {
-    if (lightRef.current) {
-      const t = isDay ? 2.5 : 0.6;
-      lightRef.current.intensity += (t - lightRef.current.intensity) * 0.03;
+    if (sunRef.current) {
+      const t = isDay ? 3.0 : 0.5;
+      sunRef.current.intensity += (t - sunRef.current.intensity) * 0.03;
+    }
+    if (fillRef.current) {
+      const t = isDay ? 1.0 : 0.2;
+      fillRef.current.intensity += (t - fillRef.current.intensity) * 0.03;
     }
     if (ambientRef.current) {
-      const t = isDay ? 0.5 : 0.25;
+      const t = isDay ? 0.6 : 0.2;
       ambientRef.current.intensity += (t - ambientRef.current.intensity) * 0.03;
     }
   });
 
   return (
     <>
-      <ambientLight ref={ambientRef} intensity={isDay ? 0.5 : 0.25} />
+      {/* Base ambient */}
+      <ambientLight ref={ambientRef} intensity={isDay ? 0.6 : 0.2} />
+
+      {/* Main sun / moon — casts shadows */}
       <directionalLight
-        ref={lightRef}
-        position={isDay ? [10, 15, 10] : [-5, 12, 8]}
-        intensity={isDay ? 2.5 : 0.6}
-        color={isDay ? '#ffffff' : '#6677aa'}
+        ref={sunRef}
+        position={isDay ? [15, 20, 10] : [-5, 12, 8]}
+        intensity={isDay ? 3.0 : 0.5}
+        color={isDay ? '#fff5e0' : '#6677aa'}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
-        shadow-camera-far={50}
-        shadow-camera-left={-20}
-        shadow-camera-right={20}
-        shadow-camera-top={20}
-        shadow-camera-bottom={-20}
+        shadow-camera-far={60}
+        shadow-camera-left={-25}
+        shadow-camera-right={25}
+        shadow-camera-top={25}
+        shadow-camera-bottom={-25}
+        shadow-bias={-0.001}
       />
-      {/* Warm hemisphere fill */}
+
+      {/* Warm fill light from opposite side (day) / dim blue (night) */}
+      <directionalLight
+        ref={fillRef}
+        position={isDay ? [-10, 8, -5] : [5, 6, -8]}
+        intensity={isDay ? 1.0 : 0.2}
+        color={isDay ? '#ffd4a0' : '#334466'}
+      />
+
+      {/* Hemisphere — sky/ground color bleed */}
       <hemisphereLight
         color={isDay ? '#87CEEB' : '#1a1a3a'}
-        groundColor={isDay ? '#3a6e2c' : '#0a0a15'}
-        intensity={isDay ? 0.3 : 0.15}
+        groundColor={isDay ? '#8B7355' : '#0a0a15'}
+        intensity={isDay ? 0.4 : 0.15}
       />
+
+      {/* Sun glow — visible warm sphere in the sky (day only) */}
+      {isDay && (
+        <group position={[40, 50, 25]}>
+          <pointLight color="#fff0cc" intensity={0.8} distance={120} />
+          <mesh>
+            <sphereGeometry args={[3, 16, 16]} />
+            <meshBasicMaterial color="#fffae0" />
+          </mesh>
+          {/* Glow halo */}
+          <mesh>
+            <sphereGeometry args={[5, 16, 16]} />
+            <meshBasicMaterial color="#fff5cc" transparent opacity={0.15} />
+          </mesh>
+        </group>
+      )}
     </>
   );
 };
