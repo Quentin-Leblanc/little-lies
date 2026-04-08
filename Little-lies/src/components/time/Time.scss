@@ -4,29 +4,48 @@
 .time-container {
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 16px;
   background: transparent;
+  pointer-events: none;
 }
 
 .game-title {
-  display: none; /* Title is now in the left panel */
+  display: none;
 }
 
+/* Day/Night label — top left */
+.day-label {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  i {
+    font-size: 24px;
+    color: #ffcc44;
+  }
+}
+
+/* Phase + countdown — top right */
 .phase-info {
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 14px 36px;
+  gap: 20px;
+  padding: 12px 28px;
   background: rgba(0, 0, 0, 0.7);
-  border-radius: 28px;
+  border-radius: 16px;
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .progress-content {
-  font-size: 28px;
+  font-size: 24px;
   font-family: 'Cinzel', serif;
   display: flex;
   align-items: center;
@@ -34,14 +53,14 @@
   white-space: nowrap;
 
   i {
-    margin-right: 14px;
-    font-size: 26px;
+    margin-right: 10px;
+    font-size: 20px;
     color: #ffcc44;
   }
 }
 
 .timer {
-  font-size: 30px;
+  font-size: 28px;
   color: #fff;
   font-family: monospace;
   font-weight: bold;

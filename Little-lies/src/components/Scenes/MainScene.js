@@ -1064,16 +1064,20 @@ const MainScene = () => {
         setShowDayText(true);
       }, nightDuration - 1000));
 
-      // Night ambiance messages — 2 messages during the night
+      // Night ambiance messages — 3 messages during the night
       const shuffled = [...NIGHT_AMBIANCE].sort(() => Math.random() - 0.5);
       fadeTimers.current.push(setTimeout(() => {
         setNightAmbianceMsg(shuffled[0]);
-        setTimeout(() => setNightAmbianceMsg(null), 3000);
-      }, 8000));
+        setTimeout(() => setNightAmbianceMsg(null), 6000);
+      }, 6000));
       fadeTimers.current.push(setTimeout(() => {
         setNightAmbianceMsg(shuffled[1]);
-        setTimeout(() => setNightAmbianceMsg(null), 3000);
-      }, 14000));
+        setTimeout(() => setNightAmbianceMsg(null), 6000);
+      }, 13000));
+      fadeTimers.current.push(setTimeout(() => {
+        setNightAmbianceMsg(shuffled[2]);
+        setTimeout(() => setNightAmbianceMsg(null), 6000);
+      }, 20000));
     }
 
     // Leaving night: reveal day scene

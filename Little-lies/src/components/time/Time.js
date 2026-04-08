@@ -59,11 +59,19 @@ const Time = () => {
 
   return (
     <div className="time-container">
-      <span className="game-title">Little Lies</span>
+      {/* Day/Night label — top left */}
+      <div className="day-label">
+        <i className={`fas ${phaseIcon}`}></i>
+        {dayNightLabel}
+      </div>
+      {/* Phase + countdown — top right */}
       <div className="phase-info" style={{ background: phaseBg }}>
         <div className="progress-content">
-          <i className={`fas ${isPaused ? 'fa-pause' : phaseIcon}`}></i>
-          {isPaused ? `${headerText} — PAUSE` : headerText}
+          {isPaused ? (
+            <><i className="fas fa-pause"></i> PAUSE</>
+          ) : (
+            phaseLabel
+          )}
         </div>
         {!isInfoPhase && !(dayCount === 1 && phase === 'DISCUSSION') && (
           <div className="timer">
