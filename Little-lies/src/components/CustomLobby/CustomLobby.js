@@ -126,7 +126,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
       {/* UI Panel */}
       <div className="lobby-panel">
         <div className="lobby-panel-inner">
-          <h1 className="lobby-title">LITTLE LIES</h1>
+          <h1 className="lobby-title">MAFIA & WOLVES</h1>
           <p className="lobby-subtitle">Salon multijoueur</p>
 
           <div className="lobby-section">

@@ -36,7 +36,7 @@ const Menu = () => {
   return (
     <div className="menu-wrapper">
       <div className="menu-title-block">
-        <h1 className="menu-game-title">Little Lies</h1>
+        <h1 className="menu-game-title">Mafia & Wolves</h1>
         <div className="menu-lobby-code" onClick={copyCode} title="Cliquer pour copier">
           <span className="menu-code-label">Code lobby :</span>
           <span className="menu-code-value">{roomCode || '...'}</span>

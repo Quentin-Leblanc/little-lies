@@ -17,53 +17,57 @@
 
 /* Day/Night label — top left */
 .day-label {
-  font-family: 'Cinzel', serif;
-  font-size: 28px;
-  font-weight: 700;
+  font-family: 'Cinzel', serif !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
   color: #fff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 2px 10px rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   gap: 10px;
 
   i {
-    font-size: 24px;
+    font-size: 24px !important;
     color: #ffcc44;
+    filter: drop-shadow(0 0 8px rgba(255, 200, 60, 0.4));
   }
 }
 
-/* Phase + countdown — top right */
+/* Phase + countdown — top right, no background */
 .phase-info {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 12px 28px;
-  background: none;
+  gap: 16px;
+  padding: 10px 20px;
+  background: none !important;
   border: none;
 }
 
 .progress-content {
-  font-size: 26px;
-  font-family: 'Cinzel', serif;
+  font-size: 26px !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px;
   display: flex;
   align-items: center;
   color: #fff;
   white-space: nowrap;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.4), 0 2px 10px rgba(0, 0, 0, 0.9);
 
   i {
     margin-right: 10px;
-    font-size: 22px;
+    font-size: 22px !important;
     color: #ffcc44;
+    filter: drop-shadow(0 0 8px rgba(255, 200, 60, 0.4));
   }
 }
 
 .timer {
-  font-size: 30px;
+  font-size: 30px !important;
   color: #fff;
   font-family: monospace;
   font-weight: bold;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.4), 0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
 /* Progress bar — top of the center scene area only */

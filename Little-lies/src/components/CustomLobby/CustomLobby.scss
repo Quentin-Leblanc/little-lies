@@ -178,8 +178,8 @@
   }
 }
 
-/* ── Player list ── */
-.player-list {
+/* ── Player list (lobby only) ── */
+.lobby-panel .player-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
