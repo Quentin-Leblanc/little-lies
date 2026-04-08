@@ -124,6 +124,12 @@
       color: #ff6666;
     }
   }
+
+  &.admin-active {
+    background: rgba(68, 255, 68, 0.15);
+    border-color: rgba(68, 255, 68, 0.3);
+    color: #66ff66;
+  }
 }
 
 .admin-label {

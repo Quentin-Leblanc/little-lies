@@ -574,6 +574,8 @@ export const GameEngineProvider = ({ children }) => {
   useEffect(() => {
     if (!isHost() || !game.isGameStarted) return;
     if (game.status === STATUS.ENDED) return;
+    // Admin free-roam pauses the game
+    if (game.adminFreeRoam) return;
 
     const tick = setTimeout(() => {
       // During VOTING, check for majority each tick

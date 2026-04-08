@@ -70,6 +70,12 @@ const AdminPanel = () => {
     addChatSystem('[ADMIN] Retour au lobby', '#ff4444');
   };
 
+  const toggleFreeRoam = () => {
+    const entering = !game.adminFreeRoam;
+    setGame(prev => ({ ...prev, adminFreeRoam: entering }));
+    addChatSystem(entering ? '[ADMIN] Mode libre activé — jeu en pause' : '[ADMIN] Reprise du jeu', '#ff4444');
+  };
+
   const updateCharScale = (val) => {
     const s = parseFloat(val);
     setCharScale(s);
@@ -134,6 +140,10 @@ const AdminPanel = () => {
         </button>
         <button className="admin-action-btn admin-danger" onClick={kickToLobby}>
           <i className="fas fa-sign-out-alt"></i> Kick tous → Lobby
+        </button>
+        <button className={`admin-action-btn ${game.adminFreeRoam ? 'admin-active' : ''}`} onClick={toggleFreeRoam}>
+          <i className={`fas ${game.adminFreeRoam ? 'fa-play' : 'fa-video'}`}></i>
+          {game.adminFreeRoam ? ' Reprendre le jeu' : ' Mode libre (pause)'}
         </button>
       </div>
 

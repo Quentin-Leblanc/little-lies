@@ -607,6 +607,74 @@ const DeadPlayerFigure = ({ player, position }) => (
 );
 
 // ============================================================
+// Admin Free-Roam Camera — ZQSD + mouse look
+// ============================================================
+const AdminFreeRoamCamera = () => {
+  const { camera, gl } = useThree();
+  const keys = useRef({});
+  const euler = useRef({ yaw: 0, pitch: -0.3 });
+  const isDragging = useRef(false);
+
+  useEffect(() => {
+    const onKeyDown = (e) => { keys.current[e.code] = true; };
+    const onKeyUp = (e) => { keys.current[e.code] = false; };
+    const onMouseDown = (e) => { if (e.button === 2 || e.button === 0) isDragging.current = true; };
+    const onMouseUp = () => { isDragging.current = false; };
+    const onMouseMove = (e) => {
+      if (!isDragging.current) return;
+      euler.current.yaw -= e.movementX * 0.003;
+      euler.current.pitch -= e.movementY * 0.003;
+      euler.current.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, euler.current.pitch));
+    };
+    const onContextMenu = (e) => e.preventDefault();
+
+    const canvas = gl.domElement;
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    canvas.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('contextmenu', onContextMenu);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      canvas.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('mousemove', onMouseMove);
+      canvas.removeEventListener('contextmenu', onContextMenu);
+    };
+  }, [gl]);
+
+  useFrame((_, delta) => {
+    const speed = 12 * delta;
+    const k = keys.current;
+
+    // Direction vectors from camera yaw
+    const forward = new THREE.Vector3(-Math.sin(euler.current.yaw), 0, -Math.cos(euler.current.yaw));
+    const right = new THREE.Vector3(forward.z, 0, -forward.x);
+
+    // ZQSD movement
+    if (k['KeyW'] || k['KeyZ'] || k['ArrowUp']) camera.position.addScaledVector(forward, speed);
+    if (k['KeyS'] || k['ArrowDown']) camera.position.addScaledVector(forward, -speed);
+    if (k['KeyA'] || k['KeyQ'] || k['ArrowLeft']) camera.position.addScaledVector(right, -speed);
+    if (k['KeyD'] || k['ArrowRight']) camera.position.addScaledVector(right, speed);
+    if (k['Space']) camera.position.y += speed;
+    if (k['ShiftLeft'] || k['ShiftRight']) camera.position.y -= speed;
+
+    // Apply rotation from mouse
+    const lookTarget = new THREE.Vector3(
+      camera.position.x - Math.sin(euler.current.yaw) * Math.cos(euler.current.pitch),
+      camera.position.y + Math.sin(euler.current.pitch),
+      camera.position.z - Math.cos(euler.current.yaw) * Math.cos(euler.current.pitch)
+    );
+    camera.lookAt(lookTarget);
+  });
+
+  return null;
+};
+
+// ============================================================
 // Camera Controller (smooth follow based on phase)
 // ============================================================
 // Night cinematic camera — slow alley walk then gentle rise to stars
@@ -951,7 +1019,12 @@ const MainScene = () => {
       >
         <Suspense fallback={null}>
           {/* Camera */}
-          <CameraController phase={phase} CONSTANTS={CONSTANTS} />
+          {/* Camera — admin free-roam or cinematic */}
+          {game.adminFreeRoam ? (
+            <AdminFreeRoamCamera />
+          ) : (
+            <CameraController phase={phase} CONSTANTS={CONSTANTS} />
+          )}
 
           {/* Lighting */}
           <SceneLighting isDay={game.isDay} />
