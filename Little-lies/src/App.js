@@ -79,17 +79,18 @@ function App() {
         <div className="App">
             {/* Game over overlay */}
             {isGameOver && <GameOver />}
-            {/* Role reveal animation on game start */}
+            {/* Role reveal animation on game start — full black screen */}
             {isGameStarted && showRoleReveal && (
                 <RoleReveal onComplete={() => setShowRoleReveal(false)} />
             )}
-            {/* Phase transition banner */}
-            {phaseBanner && (
+            {/* Phase transition banner — hidden during role reveal */}
+            {phaseBanner && !showRoleReveal && (
                 <div className={`phase-banner ${phaseBanner.className}`}>
                     <i className={`fas ${phaseBanner.icon}`}></i>
                     <span>{phaseBanner.text}</span>
                 </div>
             )}
+            {/* Hide game UI during role reveal */}
             <GameComponent>
                 <div className="game-layout">
                     {/* Left - Menu + Roles + Graveyard */}

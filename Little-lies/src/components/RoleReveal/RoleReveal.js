@@ -12,16 +12,17 @@ const RoleReveal = ({ onComplete }) => {
   useEffect(() => {
     const timers = [
       setTimeout(() => setPhase('flip'), 1500),
-      setTimeout(() => setPhase('details'), 3000),
-      // Auto-dismiss after 7s — no button needed
-      setTimeout(() => handleDismiss(), 7000),
+      setTimeout(() => setPhase('details'), 2500),
+      // Auto-dismiss after 8s
+      setTimeout(() => handleDismiss(), 8000),
     ];
     return () => timers.forEach(clearTimeout);
   }, []);
 
   const handleDismiss = () => {
     setPhase('fade');
-    setTimeout(() => onComplete?.(), 800);
+    // Wait for the 2s fade-out to complete before removing overlay
+    setTimeout(() => onComplete?.(), 2200);
   };
 
   if (!me?.character) return null;
@@ -38,7 +39,7 @@ const RoleReveal = ({ onComplete }) => {
         className="role-reveal-overlay"
         initial={{ opacity: 0 }}
         animate={{ opacity: phase === 'fade' ? 0 : 1 }}
-        transition={{ duration: phase === 'fade' ? 1 : 0.5 }}
+        transition={{ duration: phase === 'fade' ? 2 : 0.5 }}
       >
         {/* Intro text */}
         <AnimatePresence>
