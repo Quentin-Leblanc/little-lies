@@ -610,78 +610,65 @@ const DeadPlayerFigure = ({ player, position }) => (
 // ============================================================
 // Admin Free-Roam Camera — ZQSD + mouse look
 // ============================================================
-const AdminFreeRoamCamera = () => {
-  const { camera, gl } = useThree();
+// Pause player controller — moves the local player's character with ZQSD,
+// camera follows behind in third person
+const PausePlayerController = ({ pausePos, setPausePos, playerRotation }) => {
+  const { camera } = useThree();
   const keys = useRef({});
-  const initialized = useRef(false);
-  const euler = useRef({ yaw: 0, pitch: 0 });
-  const isDragging = useRef(false);
+  const yaw = useRef(0);
 
-  // Initialize yaw/pitch from current camera direction (don't jump)
-  useFrame(() => {
-    if (!initialized.current) {
-      const dir = new THREE.Vector3();
-      camera.getWorldDirection(dir);
-      euler.current.yaw = Math.atan2(-dir.x, -dir.z);
-      euler.current.pitch = Math.asin(dir.y);
-      initialized.current = true;
-    }
-  });
+  // Init yaw from player's current facing direction
+  useEffect(() => {
+    yaw.current = playerRotation || 0;
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e) => { keys.current[e.code] = true; };
     const onKeyUp = (e) => { keys.current[e.code] = false; };
-    const onMouseDown = (e) => { if (e.button === 2 || e.button === 0) isDragging.current = true; };
-    const onMouseUp = () => { isDragging.current = false; };
-    const onMouseMove = (e) => {
-      if (!isDragging.current) return;
-      euler.current.yaw -= e.movementX * 0.003;
-      euler.current.pitch -= e.movementY * 0.003;
-      euler.current.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, euler.current.pitch));
-    };
-    const onContextMenu = (e) => e.preventDefault();
-
-    const canvas = gl.domElement;
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
-    canvas.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mouseup', onMouseUp);
-    window.addEventListener('mousemove', onMouseMove);
-    canvas.addEventListener('contextmenu', onContextMenu);
-
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
-      canvas.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mouseup', onMouseUp);
-      window.removeEventListener('mousemove', onMouseMove);
-      canvas.removeEventListener('contextmenu', onContextMenu);
     };
-  }, [gl]);
+  }, []);
 
   useFrame((_, delta) => {
-    const speed = 12 * delta;
+    const speed = 6 * delta;
+    const turnSpeed = 2 * delta;
     const k = keys.current;
 
-    // Direction vectors from camera yaw
-    const forward = new THREE.Vector3(-Math.sin(euler.current.yaw), 0, -Math.cos(euler.current.yaw));
-    const right = new THREE.Vector3(forward.z, 0, -forward.x);
+    // Turn left/right
+    if (k['KeyA'] || k['KeyQ'] || k['ArrowLeft']) yaw.current += turnSpeed;
+    if (k['KeyD'] || k['ArrowRight']) yaw.current -= turnSpeed;
 
-    // ZQSD movement
-    if (k['KeyW'] || k['KeyZ'] || k['ArrowUp']) camera.position.addScaledVector(forward, speed);
-    if (k['KeyS'] || k['ArrowDown']) camera.position.addScaledVector(forward, -speed);
-    if (k['KeyA'] || k['KeyQ'] || k['ArrowLeft']) camera.position.addScaledVector(right, -speed);
-    if (k['KeyD'] || k['ArrowRight']) camera.position.addScaledVector(right, speed);
-    if (k['Space']) camera.position.y += speed;
-    if (k['ShiftLeft'] || k['ShiftRight']) camera.position.y -= speed;
+    // Forward/backward relative to yaw
+    const forward = new THREE.Vector3(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
+    let moved = false;
 
-    // Apply rotation from mouse
-    const lookTarget = new THREE.Vector3(
-      camera.position.x - Math.sin(euler.current.yaw) * Math.cos(euler.current.pitch),
-      camera.position.y + Math.sin(euler.current.pitch),
-      camera.position.z - Math.cos(euler.current.yaw) * Math.cos(euler.current.pitch)
-    );
-    camera.lookAt(lookTarget);
+    const newPos = [...pausePos];
+    if (k['KeyW'] || k['KeyZ'] || k['ArrowUp']) {
+      newPos[0] += forward.x * speed;
+      newPos[2] += forward.z * speed;
+      moved = true;
+    }
+    if (k['KeyS'] || k['ArrowDown']) {
+      newPos[0] -= forward.x * speed;
+      newPos[2] -= forward.z * speed;
+      moved = true;
+    }
+
+    if (moved || k['KeyA'] || k['KeyQ'] || k['KeyD'] || k['ArrowLeft'] || k['ArrowRight']) {
+      setPausePos(newPos);
+    }
+
+    // Camera follows behind player (third person)
+    const camDist = 8;
+    const camHeight = 5;
+    const camX = newPos[0] + Math.sin(yaw.current) * camDist;
+    const camZ = newPos[2] + Math.cos(yaw.current) * camDist;
+    camera.position.lerp(new THREE.Vector3(camX, camHeight, camZ), 0.05);
+    camera.lookAt(newPos[0], 1, newPos[2]);
   });
 
   return null;
@@ -883,8 +870,12 @@ const MainScene = () => {
   const me = getMe();
   const phase = game.phase;
   const characterScale = game.characterScale || 0.8;
+  const isPaused = !!game.adminFreeRoam;
   const alivePlayers = players.filter((p) => p.isAlive);
   const deadPlayers = players.filter((p) => !p.isAlive);
+
+  // Pause mode — local player position + walk animation
+  const [pausePos, setPausePos] = useState(null);
 
   const isTrialPhase = [
     CONSTANTS.PHASE.DEFENSE, CONSTANTS.PHASE.JUDGMENT,
@@ -1023,6 +1014,16 @@ const MainScene = () => {
     return positions;
   }, [phase, alivePlayers.length, deadPlayers.length, game.accusedId]);
 
+  // Init/reset pause position when entering/leaving pause
+  useEffect(() => {
+    if (isPaused && me) {
+      const myPos = playerPositions[me.id];
+      setPausePos(myPos ? [...myPos.position] : [0, 0, 0]);
+    } else {
+      setPausePos(null);
+    }
+  }, [isPaused]);
+
   return (
     <div className="main-scene-3d">
       <Canvas
@@ -1031,10 +1032,13 @@ const MainScene = () => {
         gl={{ antialias: true }}
       >
         <Suspense fallback={null}>
-          {/* Camera */}
-          {/* Camera — admin free-roam or cinematic */}
-          {game.adminFreeRoam ? (
-            <AdminFreeRoamCamera />
+          {/* Camera — pause: follows player, normal: cinematic */}
+          {isPaused && pausePos ? (
+            <PausePlayerController
+              pausePos={pausePos}
+              setPausePos={setPausePos}
+              playerRotation={playerPositions[me?.id]?.rotation?.[1] || 0}
+            />
           ) : (
             <CameraController phase={phase} CONSTANTS={CONSTANTS} />
           )}
@@ -1070,11 +1074,13 @@ const MainScene = () => {
             const isVoteTarget = myVoteTarget === player.id;
             const showJudgmentBtn = isJudgmentPhase && isAccused && me?.isAlive && me.id !== game.accusedId && !hasJudged;
             const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
+            // During pause, override local player's position
+            const usePos = (isPaused && isMe && pausePos) ? pausePos : pData.position;
             return (
               <PlayerFigure
                 key={player.id}
                 player={player}
-                position={pData.position}
+                position={usePos}
                 rotation={pData.rotation}
                 startPosition={nightTransition ? dayPositions[player.id] : null}
                 isTransitioning={nightTransition}
