@@ -679,7 +679,7 @@ const CameraController = ({ phase, CONSTANTS }) => {
     prevPhaseRef.current = phase;
 
     // Smooth lerp — very slow at night for gentle transitions
-    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.006 : 0.02;
+    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.003 : 0.02;
     camera.position.lerp(targetPos.current, lerpSpeed);
     const currentLookAt = new THREE.Vector3();
     camera.getWorldDirection(currentLookAt);
@@ -710,7 +710,7 @@ const SceneLighting = ({ isDay }) => {
     // Sun moves in a slow arc across the sky (day)
     // Full arc in ~120s, from east [20,15,-15] to west [-20,20,15]
     if (isDay && sunRef.current) {
-      const sunAngle = -Math.PI * 0.8 + t * 0.04; // start behind+right of camera
+      const sunAngle = -Math.PI * 0.8 + t * 0.02; // start behind+right of camera, slow arc
       const sunX = Math.cos(sunAngle) * 20;
       const sunY = 18 + Math.sin(sunAngle * 0.5) * 6;
       const sunZ = -Math.sin(sunAngle) * 20;

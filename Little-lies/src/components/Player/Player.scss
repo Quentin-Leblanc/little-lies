@@ -141,12 +141,11 @@
 
 /* Actions block (between role info and last will) */
 .sidebar-actions-block {
-  flex: 1;
+  flex: none;
   overflow-y: auto;
-  min-height: 0;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
 }
 
