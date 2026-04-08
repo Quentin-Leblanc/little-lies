@@ -991,6 +991,7 @@ const MainScene = () => {
   // Black fade: starts fading to black a few seconds before night ends,
   // holds black during transition, then fades in when day starts
   const [nightFade, setNightFade] = useState('none'); // 'none' | 'to-black' | 'from-black'
+  const [showNightText, setShowNightText] = useState(false);
   const fadeTimerRef = useRef(null);
   const lastPhaseForFade = useRef(phase);
 
@@ -1006,7 +1007,10 @@ const MainScene = () => {
     // Pre-night phases: start walk-away, then fade to black after 2s
     if (PRE_NIGHT_PHASES.includes(phase)) {
       // Delay fade so walk-away is visible first
-      fadeTimers.current.push(setTimeout(() => setNightFade('to-black'), 2000));
+      fadeTimers.current.push(setTimeout(() => {
+        setNightFade('to-black');
+        setShowNightText(true);
+      }, 2000));
       // Trigger walk-away animation during pre-night (still daytime scene)
       if (nightStartedForDay.current !== game.dayCount) {
         nightStartedForDay.current = game.dayCount;
@@ -1021,6 +1025,8 @@ const MainScene = () => {
 
     // Night starts: already black from pre-night, reveal night scene quickly
     if (phase === CONSTANTS.PHASE.NIGHT && lastPhaseForFade.current !== CONSTANTS.PHASE.NIGHT) {
+      // Hide text after a moment, then reveal night scene
+      fadeTimers.current.push(setTimeout(() => setShowNightText(false), 1000));
       setNightFade('from-black');
       fadeTimers.current.push(setTimeout(() => setNightFade('none'), 1500));
 
@@ -1356,6 +1362,11 @@ const MainScene = () => {
       {/* Night→Day black fade transition */}
       {nightFade === 'to-black' && <div className="night-fade-to-black" />}
       {nightFade === 'from-black' && <div className="night-fade-from-black" />}
+      {showNightText && (
+        <div className="night-text-overlay">
+          <div className="night-text-content">La nuit tombe...</div>
+        </div>
+      )}
     </div>
   );
 };
