@@ -611,10 +611,10 @@ const DeadPlayerFigure = ({ player, position }) => (
 // ============================================================
 // Night cinematic camera — slow alley walk then gentle rise to stars
 const NIGHT_CAMERA_WAYPOINTS = [
-  { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 4 },    // Brief overview while players walk away
-  { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 12 },   // Low alley walk, steady forward pace
-  { pos: [0, 10, 0],      lookAt: [0, 50, 0],        duration: 10 },   // Rise straight up, looking at zenith
-  { pos: [0, 14, 0],      lookAt: [0, 50, 0],        duration: 6, hold: true },  // Stars — locked still
+  { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 5 },    // Overview while players walk away
+  { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 18 },   // Long slow alley walk
+  { pos: [0, 10, 0],      lookAt: [0, 50, 0],        duration: 15 },   // Slow rise toward the sky
+  { pos: [0, 14, 0],      lookAt: [0, 50, 0],        duration: 30, hold: true },  // Stars — stay here
 ];
 
 const CameraController = ({ phase, CONSTANTS }) => {
