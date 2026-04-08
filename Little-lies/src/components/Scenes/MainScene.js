@@ -700,21 +700,40 @@ const CameraController = ({ phase, CONSTANTS }) => {
 // ============================================================
 const SceneLighting = ({ isDay }) => {
   const sunRef = useRef();
+  const sunGlowRef = useRef();
   const fillRef = useRef();
   const ambientRef = useRef();
 
-  useFrame(() => {
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+
+    // Sun moves in a slow arc across the sky (day)
+    // Full arc in ~120s, from east [20,15,-15] to west [-20,20,15]
+    if (isDay && sunRef.current) {
+      const sunAngle = Math.PI + t * 0.04; // start from opposite side, moderate speed
+      const sunX = Math.cos(sunAngle) * 20;
+      const sunY = 15 + Math.sin(sunAngle * 0.5) * 8;
+      const sunZ = Math.sin(sunAngle) * 15;
+      sunRef.current.position.set(sunX, sunY, sunZ);
+
+      // Move sun glow to match
+      if (sunGlowRef.current) {
+        sunGlowRef.current.position.set(sunX * 2.5, sunY * 2.5, sunZ * 2.5);
+      }
+    }
+
+    // Smooth intensity transitions
     if (sunRef.current) {
-      const t = isDay ? 3.0 : 0.5;
-      sunRef.current.intensity += (t - sunRef.current.intensity) * 0.03;
+      const target = isDay ? 3.0 : 0.5;
+      sunRef.current.intensity += (target - sunRef.current.intensity) * 0.03;
     }
     if (fillRef.current) {
-      const t = isDay ? 1.0 : 0.2;
-      fillRef.current.intensity += (t - fillRef.current.intensity) * 0.03;
+      const target = isDay ? 1.0 : 0.2;
+      fillRef.current.intensity += (target - fillRef.current.intensity) * 0.03;
     }
     if (ambientRef.current) {
-      const t = isDay ? 0.6 : 0.2;
-      ambientRef.current.intensity += (t - ambientRef.current.intensity) * 0.03;
+      const target = isDay ? 0.6 : 0.2;
+      ambientRef.current.intensity += (target - ambientRef.current.intensity) * 0.03;
     }
   });
 
@@ -723,7 +742,7 @@ const SceneLighting = ({ isDay }) => {
       {/* Base ambient */}
       <ambientLight ref={ambientRef} intensity={isDay ? 0.6 : 0.2} />
 
-      {/* Main sun / moon — casts shadows */}
+      {/* Main sun / moon — casts shadows, position animated in useFrame */}
       <directionalLight
         ref={sunRef}
         position={isDay ? [15, 20, 10] : [-5, 12, 8]}
@@ -740,7 +759,7 @@ const SceneLighting = ({ isDay }) => {
         shadow-bias={-0.001}
       />
 
-      {/* Warm fill light from opposite side (day) / dim blue (night) */}
+      {/* Warm fill light from opposite side */}
       <directionalLight
         ref={fillRef}
         position={isDay ? [-10, 8, -5] : [5, 6, -8]}
@@ -755,15 +774,14 @@ const SceneLighting = ({ isDay }) => {
         intensity={isDay ? 0.4 : 0.15}
       />
 
-      {/* Sun glow — visible warm sphere in the sky (day only) */}
+      {/* Sun glow — visible sphere that moves with the light */}
       {isDay && (
-        <group position={[40, 50, 25]}>
+        <group ref={sunGlowRef} position={[40, 50, 25]}>
           <pointLight color="#fff0cc" intensity={0.8} distance={120} />
           <mesh>
             <sphereGeometry args={[3, 16, 16]} />
             <meshBasicMaterial color="#fffae0" />
           </mesh>
-          {/* Glow halo */}
           <mesh>
             <sphereGeometry args={[5, 16, 16]} />
             <meshBasicMaterial color="#fff5cc" transparent opacity={0.15} />
