@@ -99,12 +99,14 @@ export const EventsProvider = ({ children }) => {
       (event) => event.dayCount === nightDayCount && !event.displayed
     );
 
-    // --- Batch notifications to avoid stale state overwrites ---
-    // Each addNotification() call spreads the same `notifications` ref,
-    // so only the last call would survive. We accumulate locally instead.
+    // --- Batch notifications AND events to avoid stale state overwrites ---
     const pendingNotifs = [...(notifications || [])];
     const addNotif = (playerId, message) => {
       pendingNotifs.push({ playerId, message, dayCount: game.dayCount, read: false });
+    };
+    const pendingEvents = [...(events || [])];
+    const addEvent = (event) => {
+      pendingEvents.push({ dayCount: game.dayCount, createdAt: Date.now(), ...event });
     };
 
     // Data structures for resolution
@@ -289,7 +291,7 @@ export const EventsProvider = ({ children }) => {
             (e) => e.type === 'PROTECT' && e.content.target === targetId
           );
           if (wasProtectedByDoctor) {
-            add({
+            addEvent({
               type: 'PROTECTION_SUCCESS',
               content: {
                 target: targetId,
@@ -317,7 +319,7 @@ export const EventsProvider = ({ children }) => {
         deathMsg += `\n📜 Testament : "${target.lastWill}"`;
       }
 
-      add({
+      addEvent({
         type: 'KILL_RESULT',
         content: { target: targetId, chatMessage: deathMsg },
         displayed: false,
@@ -349,7 +351,7 @@ export const EventsProvider = ({ children }) => {
     Object.entries(vigilanteKills).forEach(([targetId, vigilanteId]) => {
       const target = players.find((p) => p.id === targetId);
       if (target?.character?.team === 'town' && killed[targetId]) {
-        add({
+        addEvent({
           type: 'VIGILANTE_GUILT',
           content: { target: vigilanteId, chatMessage: '' },
           displayed: true,
@@ -434,7 +436,7 @@ export const EventsProvider = ({ children }) => {
       const vigilante = players.find((p) => p.id === e.content.target);
       if (vigilante?.isAlive) {
         killPlayer(e.content.target);
-        add({
+        addEvent({
           type: 'KILL_RESULT',
           content: {
             target: e.content.target,
@@ -445,8 +447,10 @@ export const EventsProvider = ({ children }) => {
       }
     });
 
-    // --- Flush all accumulated notifications at once ---
+    // --- Flush all accumulated events and notifications at once ---
+    setEvents(pendingEvents);
     setNotifications(pendingNotifs);
+    return pendingEvents; // return so addMorningMessages can read them
   };
 
   const addMorningMessages = () => {
@@ -461,10 +465,10 @@ export const EventsProvider = ({ children }) => {
       chat: 'default',
     });
 
-    resolveNightActions();
+    const resolvedEvents = resolveNightActions();
 
-    // Check if no one died
-    const deathEvents = get().filter(
+    // Check if no one died (using the freshly resolved events)
+    const deathEvents = resolvedEvents.filter(
       (e) => e.type === 'KILL_RESULT' && e.dayCount === game.dayCount && !e.displayed
     );
 
@@ -479,7 +483,7 @@ export const EventsProvider = ({ children }) => {
       });
     }
 
-    const currEvents = get().map((event) => {
+    const currEvents = resolvedEvents.map((event) => {
       if (!event.displayed && event.content.chatMessage) {
         newMessages.push({
           player: 'system',

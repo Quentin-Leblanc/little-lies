@@ -1423,7 +1423,7 @@ const MainScene = () => {
       {nightFade === 'from-black' && <div className="night-fade-from-black" />}
       {showNightText && (
         <div className="night-text-overlay">
-          <div className="night-text-content">La nuit tombe...</div>
+          <div className="night-text-content">Le village s'endort...</div>
         </div>
       )}
       {showDayText && (
