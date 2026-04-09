@@ -32,24 +32,29 @@ function App() {
     // ── Curtain managed at App level (persists across RoleReveal unmount) ──
     const [curtainVisible, setCurtainVisible] = useState(false);
     const [curtainClosed, setCurtainClosed] = useState(false);
+    const [curtainReady, setCurtainReady] = useState(false); // true once curtain is fully closed
 
-    // When game starts → show curtain and close it
+    // When game starts → show curtain and close it, wait for it to finish
     useEffect(() => {
         if (isGameStarted && showRoleReveal && !curtainVisible) {
             setCurtainVisible(true);
+            // Start closing curtain
             requestAnimationFrame(() => setCurtainClosed(true));
+            // Curtain animation is 1s — mark ready once fully closed
+            setTimeout(() => setCurtainReady(true), 1100);
         }
     }, [isGameStarted]);
 
-    // RoleReveal is done → swap content behind closed curtain, then open
+    // RoleReveal is done → remove overlay and open curtain immediately
     const handleRoleRevealComplete = () => {
-        // Curtain is already closed from game start — card sits on top of it
-        // 1. Remove card, render game behind the closed curtain
         setShowRoleReveal(false);
-        // 2. Open curtain immediately to reveal the game
+        // Open curtain right away
         requestAnimationFrame(() => setCurtainClosed(false));
-        // 3. Remove curtain after opening animation (1s)
-        setTimeout(() => setCurtainVisible(false), 1200);
+        // Remove curtain element after opening animation (1s)
+        setTimeout(() => {
+            setCurtainVisible(false);
+            setCurtainReady(false);
+        }, 1200);
     };
 
     // Phase banner overlay
@@ -111,8 +116,8 @@ function App() {
                 </div>
             )}
 
-            {/* Role reveal animation on game start — full black screen */}
-            {isGameStarted && showRoleReveal && (
+            {/* Role reveal (loader + card) — shown only after curtain is fully closed */}
+            {isGameStarted && showRoleReveal && curtainReady && (
                 <RoleReveal onComplete={handleRoleRevealComplete} />
             )}
 
@@ -124,8 +129,8 @@ function App() {
                 </div>
             )}
 
-            {/* Game UI — renders once role reveal content is gone (curtain may still be covering) */}
-            {!showRoleReveal && <GameComponent>
+            {/* Game UI — pre-mounts behind curtain during role reveal, stays after curtain opens */}
+            {(curtainReady || !showRoleReveal) && <GameComponent>
                 <div className="game-layout">
                     {/* Left - Menu + Roles + Graveyard */}
                     <div className="layout-players">

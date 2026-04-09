@@ -129,12 +129,30 @@ export const EventsProvider = ({ children }) => {
         addNotif(e.content.target, 'Vous avez été emprisonné par le Jailor !');
       });
 
+    // === Jailor Execute (unstoppable attack on jailed target) ===
+    currentEvents
+      .filter((e) => e.type === 'JAILOR_EXECUTE')
+      .forEach((e) => {
+        const targetId = e.content.target;
+        // Only execute if the target is actually jailed by this Jailor
+        if (jailedPlayers[targetId] === e.content.by) {
+          killAttempts.push({
+            targetId,
+            attackerId: e.content.by,
+            attackLevel: 2, // Powerful — bypasses basic defense
+            type: 'jailor_execute',
+          });
+        }
+      });
+
     // === Priority 0.5: Roleblock (Escort) ===
     currentEvents
       .filter((e) => e.type === 'ROLEBLOCK')
       .forEach((e) => {
-        // If escort visits a Serial Killer, SK kills the escort
         const target = players.find((p) => p.id === e.content.target);
+        // Skip dead targets
+        if (!target?.isAlive) return;
+        // If escort visits a Serial Killer, SK kills the escort
         if (target?.character?.key === 'serial_killer') {
           killAttempts.push({
             targetId: e.content.by,
@@ -202,6 +220,8 @@ export const EventsProvider = ({ children }) => {
     currentEvents
       .filter((e) => e.type === 'BLACKMAIL')
       .forEach((e) => {
+        const target = players.find((p) => p.id === e.content.target);
+        if (!target?.isAlive) return;
         blackmailedPlayers[e.content.target] = true;
         trackVisitor(visitorsMap, e.content.target, e.content.by);
       });
@@ -330,14 +350,20 @@ export const EventsProvider = ({ children }) => {
       'a été retrouvé(e) abattu(e)... justice expéditive ?',
       'a été retrouvé(e) avec une balle dans le cœur... un justicier a frappé.',
     ];
+    const JAILOR_DEATH_MSGS = [
+      'a été exécuté(e) en prison.',
+      'a été retrouvé(e) mort(e) dans sa cellule à l\'aube.',
+    ];
     const BODYGUARD_DEATH_MSGS = [
       'est mort(e) en protégeant quelqu\'un.',
     ];
 
     const getDeathFlavor = (killType) => {
-      if (killType === 'MAFIA_KILL' || killType === 'KILL') return MAFIA_DEATH_MSGS[Math.floor(Math.random() * MAFIA_DEATH_MSGS.length)];
-      if (killType === 'SK_KILL') return SK_DEATH_MSGS[Math.floor(Math.random() * SK_DEATH_MSGS.length)];
-      if (killType === 'VIGILANTE_KILL') return VIGILANTE_DEATH_MSGS[Math.floor(Math.random() * VIGILANTE_DEATH_MSGS.length)];
+      if (killType === 'mafia') return MAFIA_DEATH_MSGS[Math.floor(Math.random() * MAFIA_DEATH_MSGS.length)];
+      if (killType === 'neutral') return SK_DEATH_MSGS[Math.floor(Math.random() * SK_DEATH_MSGS.length)];
+      if (killType === 'vigilante') return VIGILANTE_DEATH_MSGS[Math.floor(Math.random() * VIGILANTE_DEATH_MSGS.length)];
+      if (killType === 'sk_retaliation') return SK_DEATH_MSGS[Math.floor(Math.random() * SK_DEATH_MSGS.length)];
+      if (killType === 'jailor_execute') return JAILOR_DEATH_MSGS[Math.floor(Math.random() * JAILOR_DEATH_MSGS.length)];
       if (killType === 'bodyguard_sacrifice' || killType === 'bodyguard_kill') return BODYGUARD_DEATH_MSGS[0];
       return 'a été retrouvé(e) mort(e) dans des circonstances mystérieuses.';
     };
@@ -390,12 +416,12 @@ export const EventsProvider = ({ children }) => {
       }
     });
 
-    // === Priority 6: Investigations (skip if roleblocked) ===
+    // === Priority 6: Investigations (skip if roleblocked or target dead) ===
     activeEvents
       .filter((e) => e.type === 'INVESTIGATE')
       .forEach((e) => {
         const target = players.find((p) => p.id === e.content.target);
-        if (target) {
+        if (target?.isAlive) {
           const isFramed = framedPlayers[target.id];
           const detectResult = isFramed ? 'suspect' : (target.character?.detectResult || 'non-suspect');
           addNotif(
@@ -411,7 +437,7 @@ export const EventsProvider = ({ children }) => {
       .filter((e) => e.type === 'INVESTIGATE_ROLE')
       .forEach((e) => {
         const target = players.find((p) => p.id === e.content.target);
-        if (target) {
+        if (target?.isAlive) {
           addNotif(
             e.content.by,
             `Votre cible (${target.profile.name}) est : ${target.character?.label}.`
@@ -431,14 +457,16 @@ export const EventsProvider = ({ children }) => {
         }
       });
 
-    // === Priority 7: Lookout ===
+    // === Priority 7: Lookout (filter out dead visitors) ===
     activeEvents
       .filter((e) => e.type === 'LOOKOUT')
       .forEach((e) => {
         const targetId = e.content.target;
         const target = players.find((p) => p.id === targetId);
         const visitors = (visitorsMap[targetId] || [])
-          .map((vid) => players.find((p) => p.id === vid)?.profile?.name)
+          .map((vid) => players.find((p) => p.id === vid))
+          .filter((p) => p?.isAlive && !allKilledIds.has(p.id))
+          .map((p) => p.profile?.name)
           .filter(Boolean);
 
         addNotif(

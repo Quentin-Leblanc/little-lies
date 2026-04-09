@@ -146,6 +146,20 @@ const PlayerActions = memo(function () {
       }
     }
 
+    // Jailor execute use tracking
+    if (action.type === 'JAILOR_EXECUTE' && action.maxUses) {
+      const alreadyUsed = Events.hasDoneThisActionTonight(action.type);
+      if (!alreadyUsed) {
+        const execUses = me.jailorExecutes || 0;
+        if (execUses >= action.maxUses) return;
+        setPlayers((prev) =>
+          prev.map((p) =>
+            p.id === me.id ? { ...p, jailorExecutes: execUses + 1 } : p
+          )
+        );
+      }
+    }
+
     // Night 1: Vigilante can't shoot
     if (action.type === 'VIGILANTE_KILL' && game.dayCount <= 1) return;
 
@@ -292,10 +306,17 @@ const PlayerActions = memo(function () {
 
                         if (action.type === 'VIGILANTE_KILL' && game.dayCount <= 1) return null;
                         if (action.type === 'VEST' && action.maxUses && !Events.hasDoneThisActionTonight(action.type) && (me.vestUses || 0) >= action.maxUses) return null;
+                        // Jailor execute: only show on the jailed target, and respect max uses
+                        if (action.type === 'JAILOR_EXECUTE') {
+                          const jailTarget = Events.getMyActionTarget('JAIL');
+                          if (player.id !== jailTarget) return null;
+                          if (action.maxUses && (me.jailorExecutes || 0) >= action.maxUses) return null;
+                        }
 
                         if (action.targets === 'notMyTeam' && me.character.team === player.character?.team) return null;
                         if (action.targets === 'notMe' && player.id === me.id) return null;
                         if (action.targets === 'self' && player.id !== me.id) return null;
+                        if (action.targets === 'jailed') return null; // handled above for JAILOR_EXECUTE
 
                         const isSelected = Events.getMyActionTarget(action.type) === player.id;
                         return (

@@ -1,70 +1,175 @@
 @import '../../styles/variables';
-@import '../../styles/global';
 
-.rolesSetup {
+// ── Setup Screen ──
+.setup-screen {
+  position: relative;
+  z-index: 10;
   display: flex;
-  flex-direction: column;
-  margin-top: 80px;
-  padding: 0 20px;
-
-  h2 {
-    margin: 0 0 10px 0;
-    font-size: 18px;
-    text-align: left;
-  }
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px 20px;
 }
 
-.playersNumber {
-  font-size: 18px;
-  text-align: center;
+.setup-card {
+  width: 100%;
+  max-width: 880px;
+  background: linear-gradient(160deg, rgba(15, 15, 25, 0.92), rgba(8, 8, 18, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 32px 36px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+// ── Header ──
+.setup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.setup-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #e8e8f0;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.setup-players-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(47, 130, 255, 0.12);
+  border: 1px solid rgba(47, 130, 255, 0.25);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  color: #a0c4ff;
 
   i {
-    margin-right: 8px;
+    font-size: 0.8rem;
     color: $blue;
   }
 
   span {
+    font-weight: 700;
     color: $blue;
-    font-weight: bold;
   }
 }
 
+// ── Presets ──
+.setup-presets {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.presets-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.presets-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  font-size: 0.75rem;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Cinzel', serif;
+
+  &:hover {
+    background: rgba(47, 130, 255, 0.15);
+    border-color: rgba(47, 130, 255, 0.4);
+    color: #a0c4ff;
+    transform: translateY(-1px);
+  }
+}
+
+// ── Dual Box ──
 .dualBox {
   display: flex;
   justify-content: center;
   font-family: 'Cinzel', serif;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0;
+  margin-bottom: 24px;
 
   .rolesAvailable, .rolesSelected {
-    border: 1px solid #333;
-    padding: 20px 16px;
-    border-radius: 12px;
-    width: 35%;
-    max-width: 400px;
-    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 18px 16px;
+    border-radius: 14px;
+    width: 45%;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .rolesAvailable {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+  }
+
+  .rolesSelected {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  h2 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.35);
+    margin: 0 0 14px 0;
+    font-weight: 600;
   }
 
   .arrow {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 36px;
-    color: $blue;
-    padding: 0 16px;
-    align-self: center;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.15);
+    padding: 0;
+    width: 36px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 }
 
-// Role team groups
+// ── Role team groups ──
 .role-team-group {
   margin-bottom: 12px;
 
+  &:last-child { margin-bottom: 0; }
+
   h3 {
-    font-size: 13px;
+    font-size: 0.6rem;
     margin: 0 0 6px 0;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    opacity: 0.8;
   }
 }
 
@@ -74,34 +179,43 @@
   gap: 4px;
 }
 
-// Role pick button (available)
+// ── Role pick button (available) ──
 .role-pick-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  font-size: 12px;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 0.7rem;
   border-width: 1px;
   border-style: solid;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  cursor: pointer;
   transition: all 0.2s;
+  color: rgba(255, 255, 255, 0.7);
 
   &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
     transform: translateY(-1px);
+    color: #fff;
   }
 
-  i { font-size: 11px; }
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  i { font-size: 0.6rem; }
 }
 
-// Selected roles
+// ── Selected roles ──
 .rolesSelected {
-  min-height: 200px;
+  min-height: 180px;
 
   .selected {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
 }
 
@@ -110,78 +224,75 @@
   align-items: center;
   gap: 6px;
   padding: 5px 10px;
-  font-size: 12px;
-  border-width: 2px;
+  font-size: 0.7rem;
+  border-width: 1px;
   border-style: solid;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
   width: 100%;
   text-align: left;
   position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: rgba(255, 255, 255, 0.7);
 
   .remove-icon {
     margin-left: auto;
     color: #ff4444;
-    font-size: 10px;
-    opacity: 0.5;
+    font-size: 0.55rem;
+    opacity: 0;
+    transition: opacity 0.2s;
   }
 
   &:hover:not(:disabled) {
+    background: rgba(255, 60, 60, 0.08);
     .remove-icon { opacity: 1; }
   }
 
-  i:first-child { font-size: 11px; }
+  &:disabled { cursor: default; }
+
+  i:first-child { font-size: 0.6rem; }
 }
 
-// Presets
-.presets-container {
+// ── Footer / Start button ──
+.setup-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.start-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
+  gap: 10px;
+  padding: 14px 36px;
+  font-size: 0.95rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+  transition: all 0.3s;
+  letter-spacing: 0.5px;
 
-.presets-label {
-  font-size: 12px;
-  color: #888;
-}
+  i { font-size: 0.8rem; }
 
-.preset-btn {
-  font-size: 11px;
-  padding: 4px 10px;
-  background: rgba(47, 130, 255, 0.1);
-  border: 1px solid rgba(47, 130, 255, 0.3);
-  color: #6aa3ff;
-  border-radius: 12px;
-
-  &:hover {
-    background: rgba(47, 130, 255, 0.25);
-    color: white;
-  }
-}
-
-.startGame {
-  text-align: center;
-  margin: 20px auto 0;
-
-  button {
-    border: 1px solid #999;
-    background: $blue;
-    font-weight: bold;
-    padding: 12px 30px;
-    font-size: 16px;
+  &.ready {
+    background: linear-gradient(135deg, rgba(47, 130, 255, 0.2), rgba(47, 130, 255, 0.35));
+    border-color: rgba(47, 130, 255, 0.5);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(47, 130, 255, 0.2);
 
     &:hover {
-      background: $darkBlue;
-      border: 1px solid #333;
+      background: linear-gradient(135deg, rgba(47, 130, 255, 0.3), rgba(47, 130, 255, 0.5));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(47, 130, 255, 0.3);
     }
+  }
 
-    &:disabled {
-      background: #444;
-      color: #888;
-      cursor: not-allowed;
-      border-color: #555;
-    }
+  &:disabled {
+    pointer-events: none;
   }
 }

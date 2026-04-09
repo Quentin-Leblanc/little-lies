@@ -36,22 +36,39 @@ const NIGHT_AMBIANCE = [
 // ============================================================
 // Ground with dirt path
 // ============================================================
-const GroundPlane = ({ isDay }) => (
-  <group>
-    {/* Main grass — no inner circles */}
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-      <circleGeometry args={[30, 64]} />
-      <meshStandardMaterial color={isDay ? '#3a6e2c' : '#1a2e1c'} />
-    </mesh>
-    {/* Night ground fog layer */}
-    {!isDay && (
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
-        <circleGeometry args={[25, 32]} />
-        <meshBasicMaterial color="#1a2244" transparent opacity={0.1} depthWrite={false} />
+const GroundPlane = ({ isDay }) => {
+  const dirtColor = isDay ? '#8a7a5a' : '#3a3020';
+  const grassColor = isDay ? '#3a6e2c' : '#1a2e1c';
+  const stoneColor = isDay ? '#9a9080' : '#4a4438';
+  return (
+    <group>
+      {/* Main grass */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+        <circleGeometry args={[35, 64]} />
+        <meshStandardMaterial color={grassColor} />
       </mesh>
-    )}
-  </group>
-);
+      {/* Central stone plaza */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
+        <circleGeometry args={[5.5, 12]} />
+        <meshStandardMaterial color={stoneColor} roughness={0.95} />
+      </mesh>
+      {/* Dirt paths radiating from center */}
+      {[0, Math.PI / 2, Math.PI, -Math.PI / 2, Math.PI / 4, -Math.PI / 4, 3 * Math.PI / 4, -3 * Math.PI / 4].map((angle, i) => (
+        <mesh key={`path-${i}`} rotation={[-Math.PI / 2, 0, angle]} position={[Math.sin(angle) * 10, 0.005, Math.cos(angle) * 10]} receiveShadow>
+          <planeGeometry args={[1.5, 16]} />
+          <meshStandardMaterial color={dirtColor} roughness={1} />
+        </mesh>
+      ))}
+      {/* Night ground fog layer */}
+      {!isDay && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
+          <circleGeometry args={[25, 32]} />
+          <meshBasicMaterial color="#1a2244" transparent opacity={0.1} depthWrite={false} />
+        </mesh>
+      )}
+    </group>
+  );
+};
 
 // (Old procedural Building component removed — replaced by Meshy AI models)
 
@@ -129,10 +146,10 @@ const MODEL_BOUNDS = {
   '/models/gallows.glb':  { min: -0.616, max: 0.615 },
 };
 
-const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, embedY = false }) => {
+const MeshyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, embedY = false }) => {
   const { scene } = useGLTF(path);
   const clonedScene = useMemo(() => {
-    const clone = scene.clone(true);
+    const clone = scene.clone();
     clone.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
@@ -157,16 +174,16 @@ const MeshyModel = ({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 
       scale={typeof scale === 'number' ? [scale, scale, scale] : scale}
     />
   );
-};
+});
 
 // ============================================================
 // Village Center — Cobblestone circle + Gallows (Meshy AI)
 // ============================================================
 // Dedicated gallows component — bypasses auto-grounding with known dimensions
-const GallowsModel = () => {
+const GallowsModel = React.memo(() => {
   const { scene } = useGLTF('/models/gallows.glb');
   const clone = useMemo(() => {
-    const c = scene.clone(true);
+    const c = scene.clone();
     c.traverse((child) => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
     return c;
   }, [scene]);
@@ -174,7 +191,7 @@ const GallowsModel = () => {
   // Known: minY = -0.616 → Y offset = 0.616 * scale to sit on ground
   const s = 2;
   return <primitive object={clone} position={[0, 0.616 * s, 0]} scale={[s, s, s]} />;
-};
+});
 
 const VillageCenter = () => (
   <group>
@@ -213,7 +230,338 @@ const LowPolyTree = ({ position, scale = 1, variant = 0 }) => (
   </group>
 );
 
-// (Barrels removed)
+// ============================================================
+// Low-poly Well — stone cylinder + wooden roof + bucket
+// ============================================================
+const LowPolyWell = ({ position, scale = 1 }) => (
+  <group position={position} scale={scale}>
+    {/* Stone base */}
+    <mesh position={[0, 0.4, 0]} castShadow>
+      <cylinderGeometry args={[0.5, 0.55, 0.8, 8]} />
+      <meshStandardMaterial color="#8a8a7a" roughness={0.9} />
+    </mesh>
+    {/* Inner dark hole */}
+    <mesh position={[0, 0.81, 0]}>
+      <cylinderGeometry args={[0.38, 0.38, 0.05, 8]} />
+      <meshStandardMaterial color="#1a1a2a" />
+    </mesh>
+    {/* Support posts */}
+    {[[-0.35, 0, 0], [0.35, 0, 0]].map((p, i) => (
+      <mesh key={i} position={[p[0], 1.1, p[2]]} castShadow>
+        <cylinderGeometry args={[0.04, 0.04, 1.4, 4]} />
+        <meshStandardMaterial color="#5a3a1a" />
+      </mesh>
+    ))}
+    {/* Cross beam */}
+    <mesh position={[0, 1.75, 0]} castShadow>
+      <boxGeometry args={[0.85, 0.06, 0.06]} />
+      <meshStandardMaterial color="#5a3a1a" />
+    </mesh>
+    {/* Roof */}
+    <mesh position={[0, 2.0, 0]} castShadow>
+      <coneGeometry args={[0.65, 0.5, 4]} />
+      <meshStandardMaterial color="#6b4226" />
+    </mesh>
+    {/* Rope */}
+    <mesh position={[0.1, 1.3, 0]}>
+      <cylinderGeometry args={[0.015, 0.015, 0.9, 4]} />
+      <meshStandardMaterial color="#8a7a5a" />
+    </mesh>
+    {/* Bucket */}
+    <mesh position={[0.1, 0.85, 0]} castShadow>
+      <cylinderGeometry args={[0.08, 0.1, 0.15, 6]} />
+      <meshStandardMaterial color="#5a4a2a" />
+    </mesh>
+  </group>
+);
+
+// ============================================================
+// Low-poly Cart — wooden cart with wheels
+// ============================================================
+const LowPolyCart = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+  <group position={position} rotation={rotation} scale={scale}>
+    {/* Cart bed */}
+    <mesh position={[0, 0.45, 0]} castShadow>
+      <boxGeometry args={[1.6, 0.1, 0.9]} />
+      <meshStandardMaterial color="#6b4226" />
+    </mesh>
+    {/* Side walls */}
+    <mesh position={[0, 0.65, 0.4]} castShadow>
+      <boxGeometry args={[1.6, 0.3, 0.05]} />
+      <meshStandardMaterial color="#5a3a1a" />
+    </mesh>
+    <mesh position={[0, 0.65, -0.4]} castShadow>
+      <boxGeometry args={[1.6, 0.3, 0.05]} />
+      <meshStandardMaterial color="#5a3a1a" />
+    </mesh>
+    <mesh position={[-0.77, 0.65, 0]} castShadow>
+      <boxGeometry args={[0.05, 0.3, 0.9]} />
+      <meshStandardMaterial color="#5a3a1a" />
+    </mesh>
+    {/* Wheels */}
+    {[[-0.5, 0.25, 0.5], [-0.5, 0.25, -0.5], [0.5, 0.25, 0.5], [0.5, 0.25, -0.5]].map((p, i) => (
+      <mesh key={i} position={p} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <torusGeometry args={[0.2, 0.04, 6, 8]} />
+        <meshStandardMaterial color="#4a3a2a" />
+      </mesh>
+    ))}
+    {/* Axles */}
+    <mesh position={[-0.5, 0.25, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <cylinderGeometry args={[0.03, 0.03, 1.1, 4]} />
+      <meshStandardMaterial color="#3a2a1a" />
+    </mesh>
+    <mesh position={[0.5, 0.25, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <cylinderGeometry args={[0.03, 0.03, 1.1, 4]} />
+      <meshStandardMaterial color="#3a2a1a" />
+    </mesh>
+    {/* Handle */}
+    <mesh position={[1.1, 0.5, 0]} rotation={[0, 0, -0.2]} castShadow>
+      <boxGeometry args={[0.8, 0.05, 0.05]} />
+      <meshStandardMaterial color="#5a3a1a" />
+    </mesh>
+    {/* Hay in cart */}
+    <mesh position={[-0.1, 0.6, 0]}>
+      <sphereGeometry args={[0.35, 5, 4]} />
+      <meshStandardMaterial color="#c4a44a" roughness={1} />
+    </mesh>
+  </group>
+);
+
+// ============================================================
+// Low-poly Crates & Barrels stack
+// ============================================================
+const LowPolyCrates = ({ position, scale = 1 }) => (
+  <group position={position} scale={scale}>
+    {/* Large crate */}
+    <mesh position={[0, 0.3, 0]} rotation={[0, 0.3, 0]} castShadow>
+      <boxGeometry args={[0.6, 0.6, 0.6]} />
+      <meshStandardMaterial color="#7a5a2a" roughness={0.9} />
+    </mesh>
+    {/* Small crate on top */}
+    <mesh position={[0.05, 0.75, 0.05]} rotation={[0, 0.8, 0]} castShadow>
+      <boxGeometry args={[0.4, 0.3, 0.4]} />
+      <meshStandardMaterial color="#8a6a3a" roughness={0.9} />
+    </mesh>
+    {/* Barrel */}
+    <mesh position={[0.5, 0.35, 0.2]} castShadow>
+      <cylinderGeometry args={[0.22, 0.2, 0.7, 8]} />
+      <meshStandardMaterial color="#5a3a1a" roughness={0.85} />
+    </mesh>
+    {/* Barrel bands */}
+    <mesh position={[0.5, 0.2, 0.2]}>
+      <torusGeometry args={[0.21, 0.015, 4, 8]} />
+      <meshStandardMaterial color="#3a3a3a" metalness={0.4} />
+    </mesh>
+    <mesh position={[0.5, 0.5, 0.2]}>
+      <torusGeometry args={[0.21, 0.015, 4, 8]} />
+      <meshStandardMaterial color="#3a3a3a" metalness={0.4} />
+    </mesh>
+  </group>
+);
+
+// ============================================================
+// Low-poly Rock
+// ============================================================
+const LowPolyRock = ({ position, scale = 1, variant = 0 }) => (
+  <mesh position={[position[0], position[1] + scale * 0.15, position[2]]} rotation={[variant * 0.3, variant * 1.1, variant * 0.2]} scale={[scale, scale * 0.6, scale * 0.9]} castShadow>
+    <dodecahedronGeometry args={[0.35, 0]} />
+    <meshStandardMaterial color={variant % 2 === 0 ? '#6a6a5a' : '#7a7a6a'} roughness={0.95} flatShading />
+  </mesh>
+);
+
+// ============================================================
+// Low-poly Bush
+// ============================================================
+const LowPolyBush = ({ position, scale = 1, variant = 0 }) => (
+  <group position={position} scale={scale}>
+    <mesh position={[0, 0.2, 0]} castShadow>
+      <dodecahedronGeometry args={[0.35, 1]} />
+      <meshStandardMaterial color={variant % 2 === 0 ? '#2a5a1a' : '#1d4a1d'} roughness={0.9} flatShading />
+    </mesh>
+    <mesh position={[0.25, 0.15, 0.15]} castShadow>
+      <dodecahedronGeometry args={[0.25, 1]} />
+      <meshStandardMaterial color="#1a5a1a" roughness={0.9} flatShading />
+    </mesh>
+  </group>
+);
+
+// ============================================================
+// Low-poly Fence segment
+// ============================================================
+const LowPolyFence = ({ start, end }) => {
+  const dx = end[0] - start[0], dz = end[2] - start[2];
+  const len = Math.sqrt(dx * dx + dz * dz);
+  const angle = Math.atan2(dx, dz);
+  const cx = (start[0] + end[0]) / 2, cz = (start[2] + end[2]) / 2;
+  const postCount = Math.max(2, Math.round(len / 1.2));
+  return (
+    <group>
+      {/* Horizontal rails */}
+      <mesh position={[cx, 0.35, cz]} rotation={[0, angle, 0]} castShadow>
+        <boxGeometry args={[0.04, 0.04, len]} />
+        <meshStandardMaterial color="#5a3a1a" />
+      </mesh>
+      <mesh position={[cx, 0.6, cz]} rotation={[0, angle, 0]} castShadow>
+        <boxGeometry args={[0.04, 0.04, len]} />
+        <meshStandardMaterial color="#5a3a1a" />
+      </mesh>
+      {/* Posts */}
+      {Array.from({ length: postCount }, (_, i) => {
+        const t = i / (postCount - 1);
+        return (
+          <mesh key={i} position={[start[0] + dx * t, 0.4, start[2] + dz * t]} castShadow>
+            <boxGeometry args={[0.06, 0.8, 0.06]} />
+            <meshStandardMaterial color="#4a3020" />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+};
+
+// ============================================================
+// Low-poly River — sinuous water strip
+// ============================================================
+const LowPolyRiver = ({ isDay }) => {
+  const points = useMemo(() => [
+    new THREE.Vector3(25, 0.02, 10),
+    new THREE.Vector3(18, 0.02, 12),
+    new THREE.Vector3(12, 0.02, 15),
+    new THREE.Vector3(5, 0.02, 16),
+    new THREE.Vector3(-3, 0.02, 15),
+    new THREE.Vector3(-10, 0.02, 17),
+    new THREE.Vector3(-18, 0.02, 19),
+    new THREE.Vector3(-25, 0.02, 20),
+  ], []);
+
+  const geometry = useMemo(() => {
+    const verts = [];
+    const indices = [];
+    const width = 1.2;
+    points.forEach((p, i) => {
+      const next = points[Math.min(i + 1, points.length - 1)];
+      const dir = new THREE.Vector3().subVectors(next, p).normalize();
+      const perp = new THREE.Vector3(-dir.z, 0, dir.x);
+      verts.push(p.x + perp.x * width, p.y, p.z + perp.z * width);
+      verts.push(p.x - perp.x * width, p.y, p.z - perp.z * width);
+    });
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = i * 2, b = a + 1, c = a + 2, d = a + 3;
+      indices.push(a, c, b, b, c, d);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }, [points]);
+
+  return (
+    <mesh geometry={geometry}>
+      <meshStandardMaterial
+        color={isDay ? '#3a7ab8' : '#1a3a5a'}
+        transparent
+        opacity={0.65}
+        roughness={0.2}
+        metalness={0.1}
+      />
+    </mesh>
+  );
+};
+
+// ============================================================
+// Low-poly Bridge over river
+// ============================================================
+const LowPolyBridge = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+  <group position={position} rotation={rotation} scale={scale}>
+    {/* Deck */}
+    <mesh position={[0, 0.15, 0]} castShadow>
+      <boxGeometry args={[2.0, 0.1, 1.2]} />
+      <meshStandardMaterial color="#6b4226" />
+    </mesh>
+    {/* Planks (visual) */}
+    {Array.from({ length: 6 }, (_, i) => (
+      <mesh key={i} position={[-0.75 + i * 0.3, 0.21, 0]} castShadow>
+        <boxGeometry args={[0.25, 0.02, 1.15]} />
+        <meshStandardMaterial color={i % 2 === 0 ? '#7a5a3a' : '#6b4a2a'} />
+      </mesh>
+    ))}
+    {/* Railings */}
+    {[-0.55, 0.55].map((z, i) => (
+      <group key={i}>
+        <mesh position={[-0.8, 0.45, z]} castShadow>
+          <boxGeometry args={[0.06, 0.6, 0.06]} />
+          <meshStandardMaterial color="#4a3020" />
+        </mesh>
+        <mesh position={[0.8, 0.45, z]} castShadow>
+          <boxGeometry args={[0.06, 0.6, 0.06]} />
+          <meshStandardMaterial color="#4a3020" />
+        </mesh>
+        <mesh position={[0, 0.7, z]} castShadow>
+          <boxGeometry args={[1.8, 0.04, 0.04]} />
+          <meshStandardMaterial color="#5a3a1a" />
+        </mesh>
+      </group>
+    ))}
+  </group>
+);
+
+// ============================================================
+// Low-poly Hay Bale
+// ============================================================
+const LowPolyHayBale = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+  <mesh position={[position[0], position[1] + 0.25 * scale, position[2]]} rotation={rotation} scale={scale} castShadow>
+    <cylinderGeometry args={[0.3, 0.3, 0.4, 8]} />
+    <meshStandardMaterial color="#c4a44a" roughness={1} />
+  </mesh>
+);
+
+// ============================================================
+// Decoration positions
+// ============================================================
+const ROCK_POSITIONS = [
+  { position: [-6, 0, 5], scale: 0.8, variant: 0 },
+  { position: [7, 0, 6], scale: 0.6, variant: 1 },
+  { position: [-3, 0, -7], scale: 0.5, variant: 2 },
+  { position: [12, 0, -5], scale: 0.7, variant: 3 },
+  { position: [-14, 0, 3], scale: 0.9, variant: 4 },
+  { position: [5, 0, 11], scale: 0.5, variant: 5 },
+  { position: [-18, 0, -8], scale: 1.0, variant: 6 },
+  { position: [18, 0, 9], scale: 0.6, variant: 7 },
+  { position: [-8, 0, -14], scale: 0.7, variant: 8 },
+  { position: [3, 0, -14], scale: 0.8, variant: 9 },
+];
+
+const BUSH_POSITIONS = [
+  { position: [-5, 0, 7], scale: 0.9, variant: 0 },
+  { position: [6, 0, 8], scale: 0.7, variant: 1 },
+  { position: [-12, 0, 5], scale: 1.0, variant: 2 },
+  { position: [12, 0, 4], scale: 0.8, variant: 3 },
+  { position: [-9, 0, 11], scale: 0.6, variant: 4 },
+  { position: [8, 0, 12], scale: 0.7, variant: 5 },
+  { position: [-16, 0, -7], scale: 0.8, variant: 6 },
+  { position: [16, 0, -8], scale: 0.9, variant: 7 },
+  { position: [0, 0, -17], scale: 0.7, variant: 8 },
+  { position: [-2, 0, 14], scale: 0.8, variant: 9 },
+  { position: [14, 0, 14], scale: 0.6, variant: 10 },
+  { position: [-15, 0, 13], scale: 0.7, variant: 11 },
+];
+
+const FENCE_SEGMENTS = [
+  { start: [-7, 0, 5.5], end: [-4, 0, 6.5] },
+  { start: [4, 0, 6.5], end: [7, 0, 5.5] },
+  { start: [-12, 0, -3], end: [-12, 0, 0] },
+  { start: [12, 0, -3], end: [12, 0, 0] },
+  { start: [-5, 0, 14], end: [5, 0, 14] },
+];
+
+const HAY_POSITIONS = [
+  { position: [-8, 0, 3], rotation: [0, 0.5, 0] },
+  { position: [8.5, 0, 4], rotation: [0, -0.3, 0] },
+  { position: [-8.2, 0, 3.5], rotation: [Math.PI / 2, 0, 0.4] },
+  { position: [11, 0, 10], rotation: [0, 1.2, 0] },
+  { position: [-13, 0, -8], rotation: [0, 0.7, 0] },
+];
 
 // ============================================================
 // Village Layout
@@ -224,7 +572,7 @@ const faceCenter = (bx, bz) => Math.atan2(-bx, -bz);
 // Meshy AI building positions — all rotated to face center, spaced to avoid overlap
 // Buildings are ~3-4 units wide at their scale, so min ~5 units between each
 const MESHY_BUILDINGS = [
-  // Unique buildings (inner ring — well spaced)
+  // Unique buildings
   { path: '/models/forge.glb',   position: [-9, 0, -7],   scale: 3,   get rotation() { return [0, faceCenter(-9, -7), 0]; } },
   { path: '/models/tavern.glb',  position: [9, 0, -7],    scale: 3,   get rotation() { return [0, faceCenter(9, -7), 0]; } },
   { path: '/models/chapel.glb',  position: [0, 0, -12],   scale: 3.5, get rotation() { return [0, faceCenter(0, -12), 0]; } },
@@ -234,28 +582,13 @@ const MESHY_BUILDINGS = [
   { path: '/models/cottage.glb', position: [-7, 0, 8],    scale: 2.5, get rotation() { return [0, faceCenter(-7, 8), 0]; } },
   { path: '/models/cottage.glb', position: [7, 0, 9],     scale: 2.5, get rotation() { return [0, faceCenter(7, 9), 0]; } },
   { path: '/models/cottage.glb', position: [-5, 0, -10],  scale: 2.5, get rotation() { return [0, faceCenter(-5, -10), 0]; } },
-  // Outer ring — well spaced from inner
-  { path: '/models/cottage.glb', position: [-15, 0, -10], scale: 2.5, get rotation() { return [0, faceCenter(-15, -10), 0]; } },
-  { path: '/models/cottage.glb', position: [15, 0, -10],  scale: 2.5, get rotation() { return [0, faceCenter(15, -10), 0]; } },
-  { path: '/models/cottage.glb', position: [-16, 0, -3],  scale: 2.3, get rotation() { return [0, faceCenter(-16, -3), 0]; } },
-  { path: '/models/cottage.glb', position: [16, 0, -2],   scale: 2.3, get rotation() { return [0, faceCenter(16, -2), 0]; } },
-  { path: '/models/cottage.glb', position: [-15, 0, 5],   scale: 2.3, get rotation() { return [0, faceCenter(-15, 5), 0]; } },
-  { path: '/models/cottage.glb', position: [15, 0, 6],    scale: 2.3, get rotation() { return [0, faceCenter(15, 6), 0]; } },
-  { path: '/models/cottage.glb', position: [-11, 0, 13],  scale: 2.5, get rotation() { return [0, faceCenter(-11, 13), 0]; } },
-  { path: '/models/cottage.glb', position: [11, 0, 14],   scale: 2.5, get rotation() { return [0, faceCenter(11, 14), 0]; } },
-  { path: '/models/cottage.glb', position: [6, 0, -16],   scale: 2.3, get rotation() { return [0, faceCenter(6, -16), 0]; } },
-  { path: '/models/cottage.glb', position: [-8, 0, -15],  scale: 2.3, get rotation() { return [0, faceCenter(-8, -15), 0]; } },
-  // Fill — south and mid-ring
-  { path: '/models/cottage.glb', position: [-3, 0, 12],   scale: 2.3, get rotation() { return [0, faceCenter(-3, 12), 0]; } },
-  { path: '/models/cottage.glb', position: [3, 0, 13],    scale: 2.3, get rotation() { return [0, faceCenter(3, 13), 0]; } },
-  { path: '/models/cottage.glb', position: [0, 0, 17],    scale: 2.2, get rotation() { return [0, faceCenter(0, 17), 0]; } },
-  { path: '/models/cottage.glb', position: [-13, 0, -6],  scale: 2.4, get rotation() { return [0, faceCenter(-13, -6), 0]; } },
-  { path: '/models/cottage.glb', position: [13, 0, -4],   scale: 2.4, get rotation() { return [0, faceCenter(13, -4), 0]; } },
-  { path: '/models/cottage.glb', position: [-17, 0, 10],  scale: 2.2, get rotation() { return [0, faceCenter(-17, 10), 0]; } },
-  { path: '/models/cottage.glb', position: [17, 0, 11],   scale: 2.2, get rotation() { return [0, faceCenter(17, 11), 0]; } },
-  { path: '/models/cottage.glb', position: [9, 0, -13],   scale: 2.3, get rotation() { return [0, faceCenter(9, -13), 0]; } },
-  { path: '/models/cottage.glb', position: [-14, 0, 15],  scale: 2.2, get rotation() { return [0, faceCenter(-14, 15), 0]; } },
-  { path: '/models/cottage.glb', position: [14, 0, 16],   scale: 2.2, get rotation() { return [0, faceCenter(14, 16), 0]; } },
+  // Outer ring
+  { path: '/models/cottage.glb', position: [-15, 0, -8],  scale: 2.3, get rotation() { return [0, faceCenter(-15, -8), 0]; } },
+  { path: '/models/cottage.glb', position: [15, 0, -8],   scale: 2.3, get rotation() { return [0, faceCenter(15, -8), 0]; } },
+  { path: '/models/cottage.glb', position: [-14, 0, 5],   scale: 2.3, get rotation() { return [0, faceCenter(-14, 5), 0]; } },
+  { path: '/models/cottage.glb', position: [14, 0, 6],    scale: 2.3, get rotation() { return [0, faceCenter(14, 6), 0]; } },
+  { path: '/models/cottage.glb', position: [-3, 0, 13],   scale: 2.3, get rotation() { return [0, faceCenter(-3, 13), 0]; } },
+  { path: '/models/cottage.glb', position: [3, 0, 14],    scale: 2.3, get rotation() { return [0, faceCenter(3, 14), 0]; } },
 ];
 
 // Cobblestone ground tiles — cover village area with paved ground
@@ -263,15 +596,11 @@ const MESHY_BUILDINGS = [
 // Desert terrain tiles — cover entire village + surroundings
 // terrain.glb: 1.9 x 1.9 flat tile → scale 12 = ~23u per tile
 const GROUND_TILES = [
-  { position: [0, 0, 0],     scale: 12 },
-  { position: [22, 0, 0],    scale: 12 },
-  { position: [-22, 0, 0],   scale: 12 },
-  { position: [0, 0, 22],    scale: 12 },
-  { position: [0, 0, -22],   scale: 12 },
-  { position: [-22, 0, -22], scale: 12 },
-  { position: [22, 0, -22],  scale: 12 },
-  { position: [-22, 0, 22],  scale: 12 },
-  { position: [22, 0, 22],   scale: 12 },
+  { position: [0, 0, 0],     scale: 16 },
+  { position: [28, 0, 0],    scale: 14 },
+  { position: [-28, 0, 0],   scale: 14 },
+  { position: [0, 0, 28],    scale: 14 },
+  { position: [0, 0, -28],   scale: 14 },
 ];
 
 // A few short alleys between close buildings (decorative, using rue.glb)
@@ -286,31 +615,25 @@ const makeAlley = (ax, az, bx, bz) => {
 };
 
 const ALLEYS = [
-  makeAlley(-7, -8.5, -3, -10.5),   // between forge & cottage near chapel
-  makeAlley(3, -10, 6, -9),          // between chapel & tavern area
-  makeAlley(-9.5, -3, -9.5, 0),     // narrow alley W of forge
-  makeAlley(9.5, -2, 9.5, 1),       // narrow alley E of tavern
-  makeAlley(-8.5, 4, -7.5, 7),      // between W cottages
-  makeAlley(8.5, 5, 7.5, 8),        // between E cottages
+  makeAlley(-7, -8.5, -3, -10.5),   // between forge & chapel
+  makeAlley(3, -10, 6, -9),          // between chapel & tavern
+  makeAlley(-9.5, -1, -9.5, 1),     // narrow alley W
+  makeAlley(9.5, -1, 9.5, 1),       // narrow alley E
 ];
 
 // Background mountains — ring around the village, closer and shorter
 const MOUNTAINS = [
-  { position: [0, 0, -28],   rotation: [0, 0, 0],            scale: 15 },   // north (behind chapel)
-  { position: [-22, 0, -20], rotation: [0, 0.5, 0],          scale: 12 },   // northwest
-  { position: [22, 0, -20],  rotation: [0, -0.4, 0],         scale: 13 },   // northeast
-  { position: [-28, 0, 0],   rotation: [0, 0.8, 0],          scale: 11 },   // west
-  { position: [28, 0, 0],    rotation: [0, -0.7, 0],         scale: 11 },   // east
-  { position: [-24, 0, 18],  rotation: [0, 1.2, 0],          scale: 12 },   // southwest
-  { position: [24, 0, 18],   rotation: [0, -1.1, 0],         scale: 12 },   // southeast
-  { position: [0, 0, 24],    rotation: [0, Math.PI, 0],      scale: 13 },   // south
-  { position: [-12, 0, -26], rotation: [0, 0.3, 0],          scale: 9 },    // NNW (fill gap)
-  { position: [12, 0, -26],  rotation: [0, -0.2, 0],         scale: 9 },    // NNE (fill gap)
+  { position: [0, 0, -30],   rotation: [0, 0, 0],       scale: 16 },   // north
+  { position: [-25, 0, -20], rotation: [0, 0.5, 0],     scale: 13 },   // northwest
+  { position: [25, 0, -20],  rotation: [0, -0.4, 0],    scale: 14 },   // northeast
+  { position: [-30, 0, 0],   rotation: [0, 0.8, 0],     scale: 12 },   // west
+  { position: [30, 0, 0],    rotation: [0, -0.7, 0],    scale: 12 },   // east
+  { position: [-25, 0, 18],  rotation: [0, 1.2, 0],     scale: 13 },   // southwest
+  { position: [25, 0, 18],   rotation: [0, -1.1, 0],    scale: 13 },   // southeast
 ];
 
 const TORCH_POS = [
   [-4, 0, -4], [4, 0, -4], [-4, 0, 4], [4, 0, 4],
-  [0, 0, -5.5], [-5.5, 0, 0], [5.5, 0, 0], [0, 0, 5.5],
 ];
 
 const TREE_POSITIONS = [
@@ -321,22 +644,72 @@ const TREE_POSITIONS = [
   [-14, 0, 12], [14, 0, -11],
 ];
 
-const Village = ({ isDay }) => (
+const Village = React.memo(({ isDay }) => (
   <group>
-    {/* Main village model */}
-    <MeshyModel path="/models/Meshy_AI_Clifftop_Village_at_D_0408220909_texture.glb" position={[0.15, 5.0, -4]} scale={14} />
+    {/* ——— CENTRE : Plaza + Potence ——— */}
+    <VillageCenter />
 
-    {/* Background mountains */}
+    {/* ——— BATIMENTS : forge, taverne, chapelle, cottages ——— */}
+    {MESHY_BUILDINGS.map((b, i) => (
+      <MeshyModel key={`bld-${i}`} path={b.path} position={b.position} rotation={b.rotation} scale={b.scale} />
+    ))}
+
+    {/* ——— ALLEES : chemins paves entre batiments ——— */}
+    {ALLEYS.map((a, i) => (
+      <MeshyModel key={`alley-${i}`} path="/models/rue.glb" position={a.position} rotation={a.rotation} scale={a.scale} embedY />
+    ))}
+
+    {/* ——— SOL : tuiles de terrain ——— */}
+    {GROUND_TILES.map((t, i) => (
+      <MeshyModel key={`tile-${i}`} path="/models/terrain.glb" position={t.position} scale={t.scale} embedY />
+    ))}
+
+    {/* ——— TORCHES ——— */}
+    {TORCH_POS.map((pos, i) => (
+      <Torch key={`torch-${i}`} position={pos} />
+    ))}
+
+    {/* ——— MONTAGNES en arriere-plan ——— */}
     {MOUNTAINS.map((m, i) => (
       <MeshyModel key={`mountain-${i}`} path="/models/mountain.glb" position={m.position} rotation={m.rotation} scale={m.scale} />
     ))}
 
-    {/* Trees */}
+    {/* ——— ARBRES ——— */}
     {TREE_POSITIONS.map((pos, i) => (
       <LowPolyTree key={`tree-${i}`} position={pos} scale={0.7 + (i % 4) * 0.2} variant={i} />
     ))}
+
+    {/* ——— DECORATIONS : puits, charrette, caisses ——— */}
+    <LowPolyWell position={[-6, 0, -3]} scale={1.2} />
+    <LowPolyCart position={[7, 0, -3]} rotation={[0, -0.8, 0]} scale={1.1} />
+    <LowPolyCrates position={[6, 0, 3]} scale={1.1} />
+    <LowPolyCrates position={[-7, 0, -8]} scale={0.9} />
+
+    {/* ——— ROCHERS ——— */}
+    {ROCK_POSITIONS.map((r, i) => (
+      <LowPolyRock key={`rock-${i}`} position={r.position} scale={r.scale} variant={r.variant} />
+    ))}
+
+    {/* ——— BUISSONS ——— */}
+    {BUSH_POSITIONS.map((b, i) => (
+      <LowPolyBush key={`bush-${i}`} position={b.position} scale={b.scale} variant={b.variant} />
+    ))}
+
+    {/* ——— CLOTURES ——— */}
+    {FENCE_SEGMENTS.map((f, i) => (
+      <LowPolyFence key={`fence-${i}`} start={f.start} end={f.end} />
+    ))}
+
+    {/* ——— BOTTES DE FOIN ——— */}
+    {HAY_POSITIONS.map((h, i) => (
+      <LowPolyHayBale key={`hay-${i}`} position={h.position} rotation={h.rotation} />
+    ))}
+
+    {/* ——— RIVIERE + PONT ——— */}
+    <LowPolyRiver isDay={isDay} />
+    <LowPolyBridge position={[5, 0, 16]} rotation={[0, 0.15, 0]} scale={1.3} />
   </group>
-);
+));
 
 // ============================================================
 // Moon (night only)
@@ -1252,7 +1625,7 @@ const MainScene = () => {
             <>
               <color attach="background" args={['#87CEEB']} />
               <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
-              <DayFireflies count={40} />
+              <DayFireflies count={20} />
             </>
           ) : (
             <>
@@ -1260,7 +1633,7 @@ const MainScene = () => {
               <fog attach="fog" args={['#060818', 25, 55]} />
               <Stars radius={80} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
               <Moon />
-              <Fireflies count={50} />
+              <Fireflies count={25} />
             </>
           )}
 
@@ -1481,7 +1854,4 @@ const NightAmbiance = () => {
 
 export default MainScene;
 
-// Preload Meshy AI models for faster loading
-// Single scene model
-useGLTF.preload('/models/Meshy_AI_Clifftop_Village_at_D_0408220909_texture.glb');
-useGLTF.preload('/models/mountain.glb');
+// Models are preloaded by RoleReveal loader — no preload here to avoid racing

@@ -8,27 +8,27 @@ import trad from '../../trad/roles.json';
 // Role presets by player count
 const PRESETS = {
   classic_6: {
-    label: 'Classic (6j)',
+    label: 'Classic 6',
     count: 6,
     roles: ['villageois', 'villageois', 'sheriff', 'docteur', 'godfather', 'mafioso'],
   },
   classic_8: {
-    label: 'Classic (8j)',
+    label: 'Classic 8',
     count: 8,
     roles: ['villageois', 'villageois', 'sheriff', 'docteur', 'lookout', 'godfather', 'mafioso', 'framer'],
   },
   ranked_10: {
-    label: 'Ranked (10j)',
+    label: 'Ranked 10',
     count: 10,
     roles: ['villageois', 'sheriff', 'docteur', 'escort', 'vigilante', 'godfather', 'mafioso', 'blackmailer', 'serial_killer', 'jester'],
   },
   chaos_12: {
-    label: 'Chaos (12j)',
+    label: 'Chaos 12',
     count: 12,
     roles: ['villageois', 'sheriff', 'docteur', 'bodyguard', 'vigilante', 'spy', 'godfather', 'mafioso', 'framer', 'consigliere', 'serial_killer', 'executioner'],
   },
   full_15: {
-    label: 'Complet (15j)',
+    label: 'Complet 15',
     count: 15,
     roles: ['villageois', 'sheriff', 'docteur', 'lookout', 'vigilante', 'maire', 'bodyguard', 'escort', 'jailor', 'godfather', 'mafioso', 'framer', 'blackmailer', 'serial_killer', 'survivor'],
   },
@@ -49,7 +49,6 @@ const Setup = () => {
     setRolesSelected(roles);
   };
 
-  // Matching presets for current player count
   const matchingPresets = Object.entries(PRESETS).filter(
     ([, p]) => p.count <= players.length
   );
@@ -58,45 +57,63 @@ const Setup = () => {
     setGame({ ...game, config: newConfig });
   };
 
+  const allSlotsFilled = rolesSelected.length === players.length;
+
   return (
-    <div className="rolesSetup">
-      <p className="playersNumber">
-        <i className="fas fa-user"></i> Joueurs : <span>{players.length}</span>
-      </p>
+    <div className="setup-screen">
+      <div className="setup-card">
+        {/* Header */}
+        <div className="setup-header">
+          <h1 className="setup-title">Configuration de la partie</h1>
+          <div className="setup-players-badge">
+            <i className="fas fa-users"></i>
+            <span>{players.length}</span> joueurs
+          </div>
+        </div>
 
-      {/* Game config (host only) */}
-      <GameConfig config={game.config} onConfigChange={handleConfigChange} />
+        {/* Game config */}
+        <GameConfig config={game.config} onConfigChange={handleConfigChange} />
 
-      {/* Role presets */}
-      {isHost() && matchingPresets.length > 0 && (
-        <div className="presets-container">
-          <span className="presets-label">Presets :</span>
-          {matchingPresets.map(([key, preset]) => (
+        {/* Presets */}
+        {isHost() && matchingPresets.length > 0 && (
+          <div className="setup-presets">
+            <span className="presets-label">Presets</span>
+            <div className="presets-list">
+              {matchingPresets.map(([key, preset]) => (
+                <button
+                  key={key}
+                  className="preset-btn"
+                  onClick={() => applyPreset(preset)}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Roles dual box */}
+        <div className="dualBox">
+          <Roles />
+        </div>
+
+        {/* Start button */}
+        {isHost() && (
+          <div className="setup-footer">
             <button
-              key={key}
-              className="preset-btn"
-              onClick={() => applyPreset(preset)}
+              className={`start-btn ${allSlotsFilled ? 'ready' : ''}`}
+              disabled={!allSlotsFilled}
+              onClick={startGame}
             >
-              {preset.label}
+              <i className={`fas ${allSlotsFilled ? 'fa-play' : 'fa-lock'}`}></i>
+              {allSlotsFilled
+                ? 'Lancer la partie'
+                : `${rolesSelected.length}/${players.length} rôles assignés`
+              }
             </button>
-          ))}
-        </div>
-      )}
-
-      <div className="dualBox">
-        <Roles />
+          </div>
+        )}
       </div>
-
-      {isHost() && (
-        <div className="startGame">
-          <button
-            disabled={rolesSelected.length !== players.length}
-            onClick={startGame}
-          >
-            Débuter la partie ({rolesSelected.length}/{players.length})
-          </button>
-        </div>
-      )}
     </div>
   );
 };

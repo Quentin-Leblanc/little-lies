@@ -439,6 +439,15 @@
           "require": ["isDay"],
           "targets": "notMe",
           "priority": 0
+        },
+        {
+          "type": "JAILOR_EXECUTE",
+          "label": "Exécuter",
+          "description": "Exécute le prisonnier cette nuit (3 utilisations max)",
+          "require": ["isNight"],
+          "targets": "jailed",
+          "maxUses": 3,
+          "priority": 4
         }
       ],
       "objectif": "Interroge et élimine les suspects de manière contrôlée.",

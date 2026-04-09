@@ -80,7 +80,7 @@ const avatars = [
   'https://cdn2.f-cdn.com/contestentries/1440473/30778261/5bdd02db9ff4c_thumb900.jpg',
 ];
 
-const MAX_TRIALS_PER_DAY = 3;
+const MAX_TRIALS_PER_DAY = 1;
 
 // 15 distinct player colors — no duplicates possible
 const PLAYER_COLORS = [
@@ -256,12 +256,21 @@ export const GameEngineProvider = ({ children }) => {
         };
       });
 
-    // Assign Executioner targets (random town member)
+    // Assign Executioner targets (unique random town member per Executioner)
     const townPlayers = newPlayers.filter((p) => p.character?.team === 'town');
+    const usedTargets = new Set();
     newPlayers.forEach((p) => {
       if (p.character?.winCondition === 'getTargetLynched' && townPlayers.length > 0) {
-        const target = townPlayers[Math.floor(Math.random() * townPlayers.length)];
-        p.executionerTarget = target.id;
+        const available = townPlayers.filter((t) => !usedTargets.has(t.id));
+        if (available.length > 0) {
+          const target = available[Math.floor(Math.random() * available.length)];
+          p.executionerTarget = target.id;
+          usedTargets.add(target.id);
+        } else {
+          // Not enough town players — fallback to random
+          const target = townPlayers[Math.floor(Math.random() * townPlayers.length)];
+          p.executionerTarget = target.id;
+        }
       }
     });
 
@@ -378,11 +387,13 @@ export const GameEngineProvider = ({ children }) => {
   };
 
   // Check majority vote during VOTING phase
+  // Majority = strict >50% (like Town of Salem): Math.floor(n/2) + 1
+  // 4 players → need 3, 5 players → need 3, 6 players → need 4
   const checkVotingMajority = () => {
     if (!trial.suspects || Object.keys(trial.suspects).length === 0) return null;
 
     const totalPossibleVotes = players.filter((p) => p.isAlive).length;
-    const majority = Math.ceil(totalPossibleVotes / 2);
+    const majority = Math.floor(totalPossibleVotes / 2) + 1;
 
     let topSuspect = null;
     let topVotes = 0;
@@ -494,7 +505,7 @@ export const GameEngineProvider = ({ children }) => {
 
       case PHASE.DISCUSSION:
         resetTrial();
-        nextGame = { ...nextGame, phase: PHASE.VOTING, timer: dur('VOTING') };
+        nextGame = { ...nextGame, phase: PHASE.VOTING, timer: dur('VOTING'), skipVotes: [] };
         break;
 
       case PHASE.VOTING: {
@@ -523,9 +534,9 @@ export const GameEngineProvider = ({ children }) => {
 
       case PHASE.JUDGMENT: {
         const { guiltyCount, innocentCount } = resolveJudgment();
-        // Default: if no votes at all, player is guilty
+        // Default: if no votes at all, player is acquitted (like SC2)
         const totalVotes = guiltyCount + innocentCount;
-        const isGuilty = totalVotes === 0 ? true : guiltyCount >= innocentCount;
+        const isGuilty = totalVotes === 0 ? false : guiltyCount > innocentCount;
         const resultMsg = isGuilty
           ? `Coupable ! (${guiltyCount} vs ${innocentCount})`
           : `Acquitté ! (${guiltyCount} vs ${innocentCount})`;
@@ -603,7 +614,7 @@ export const GameEngineProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(tick);
-  }, [game.timer, game.phase, game.status, game.adminFreeRoam, isHost()]);
+  }, [game.timer, game.phase, game.status, game.adminFreeRoam, isHost(), trial]);
 
   // --- Skip day majority check (host only) ---
   const skipVoteCount = (game.skipVotes || []).length;
@@ -614,7 +625,7 @@ export const GameEngineProvider = ({ children }) => {
 
     const aliveCount = players.filter((p) => p.isAlive).length;
     if (aliveCount === 0) return;
-    const majority = Math.ceil(aliveCount / 2);
+    const majority = Math.floor(aliveCount / 2) + 1;
 
     if (skipVoteCount >= majority) {
       // Skip vote message removed from chat
