@@ -101,9 +101,10 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           {playroom_players.map((player, idx) => {
             const name = player.getState?.()?.profile?.name || 'Joueur';
             const isLocal = player.id === currentPlayer?.id;
-            // Spread players in a circle on the spawn platform
-            const spawnAngle = (idx / Math.max(playroom_players.length, 1)) * Math.PI * 2;
-            const spawnRadius = 4;
+            // Unique spawn based on player ID hash — avoids collisions
+            const idHash = player.id ? player.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) : idx * 137;
+            const spawnAngle = (idHash % 360) * (Math.PI / 180);
+            const spawnRadius = 3 + (idHash % 4);
             const spawnX = Math.cos(spawnAngle) * spawnRadius;
             const spawnZ = Math.sin(spawnAngle) * spawnRadius;
             return (

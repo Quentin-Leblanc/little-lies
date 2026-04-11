@@ -118,6 +118,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 15%;
   z-index: 20;
   pointer-events: none;
 
@@ -240,6 +241,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 15%;
   z-index: 35;
   pointer-events: none;
   animation: death-report-anim 4s ease-in-out forwards;
@@ -413,6 +415,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 15%;
   z-index: 35;
   pointer-events: none;
   animation: night-text-anim 5s ease-in-out forwards;
@@ -437,4 +440,13 @@
   10% { opacity: 1; transform: scale(1); filter: blur(0); }
   55% { opacity: 1; }
   100% { opacity: 0; transform: scale(1.02); filter: blur(4px); }
+}
+
+/* Chat bubble fade animation (used by Html overlay in 3D) */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: scale(0.5) translateY(4px); }
+  15% { opacity: 1; transform: scale(1.1) translateY(0); }
+  25% { transform: scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: scale(0.8) translateY(-4px); }
 }

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
+import { playVote } from '../../utils/AudioManager';
 
 import './playerActions.scss';
 
@@ -112,6 +113,7 @@ const PlayerActions = memo(function () {
 
   const handleVoteClick = (suspectedPlayerId) => {
     if (!me.isAlive || !isVotingPhase || hasVoted) return;
+    playVote();
 
     const voteWeight = me.voteWeight || 1;
 
@@ -273,11 +275,6 @@ const PlayerActions = memo(function () {
 
         {/* Player list — always show all players */}
         <div className={`player-list-wrapper ${isVotingPhase ? 'highlight-vote' : ''}`}>
-        {isVotingPhase && (
-          <div className="vote-arrow-indicator">
-            <i className="fas fa-arrow-down"></i> Votez ici
-          </div>
-        )}
         <h4 className="player-list-title"><i className="fas fa-users"></i> Joueurs vivants ({players.filter(p => p.isAlive).length}/{players.length})</h4>
         <ul className="player-list">
           {players.map((player) => {

@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sky, Stars, Html } from '@react-three/drei';
+import { Sky, Stars, Html, useGLTF } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
@@ -52,12 +52,25 @@ const GroundPlane = ({ isDay }) => {
         <circleGeometry args={[5.5, 8]} />
         <meshStandardMaterial color={stoneColor} roughness={0.95} flatShading />
       </mesh>
-      {/* Dirt paths radiating from center */}
+      {/* Dirt paths radiating from center — wider, organic look */}
       {[0, Math.PI / 2, Math.PI, -Math.PI / 2, Math.PI / 4, -Math.PI / 4, 3 * Math.PI / 4, -3 * Math.PI / 4].map((angle, i) => (
-        <mesh key={`path-${i}`} rotation={[-Math.PI / 2, 0, angle]} position={[Math.sin(angle) * 10, 0.005, Math.cos(angle) * 10]} receiveShadow>
-          <planeGeometry args={[1.5, 16]} />
-          <meshStandardMaterial color={dirtColor} roughness={1} flatShading />
-        </mesh>
+        <group key={`path-${i}`}>
+          {/* Main path strip */}
+          <mesh rotation={[-Math.PI / 2, 0, angle]} position={[Math.sin(angle) * 9, 0.005, Math.cos(angle) * 9]} receiveShadow>
+            <planeGeometry args={[2.5, 14]} />
+            <meshStandardMaterial color={dirtColor} roughness={1} flatShading />
+          </mesh>
+          {/* Left edge — rough border */}
+          <mesh rotation={[-Math.PI / 2, 0, angle + 0.04]} position={[Math.sin(angle + 0.08) * 9, 0.004, Math.cos(angle + 0.08) * 9]} receiveShadow>
+            <planeGeometry args={[1.2, 12]} />
+            <meshStandardMaterial color={dirtColor} transparent opacity={0.5} roughness={1} flatShading />
+          </mesh>
+          {/* Right edge — rough border */}
+          <mesh rotation={[-Math.PI / 2, 0, angle - 0.04]} position={[Math.sin(angle - 0.08) * 9, 0.004, Math.cos(angle - 0.08) * 9]} receiveShadow>
+            <planeGeometry args={[1.2, 12]} />
+            <meshStandardMaterial color={dirtColor} transparent opacity={0.5} roughness={1} flatShading />
+          </mesh>
+        </group>
       ))}
       {/* Night ground fog layer */}
       {!isDay && (
@@ -342,9 +355,15 @@ const LowPolyMountain = ({ position, scale = 1, variant = 0 }) => (
   </group>
 );
 
+// Preload village center models
+useGLTF.preload('/models/fountain-round-detail.glb');
+
 const VillageCenter = () => (
   <group>
-    <LowPolyGallows position={[0, 0, 0]} scale={0.9} />
+    {/* Potence au centre de la place */}
+    <LowPolyGallows position={[0, 0, 0]} scale={1.2} />
+    {/* Fontaine derrière les maisons */}
+    <KenneyModel path="/models/fountain-round-detail.glb" position={[-12, 0, 4]} scale={1.5} />
   </group>
 );
 
@@ -661,6 +680,37 @@ const LowPolyHayBale = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
 );
 
 // ============================================================
+// Dark ambiance — blood, claw marks, skulls, warning signs
+// ============================================================
+
+// ============================================================
+// Kenney Graveyard Kit assets — CC0 low-poly props
+// ============================================================
+const KenneyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1 }) => {
+  const { scene } = useGLTF(path);
+  const clone = useMemo(() => {
+    const c = scene.clone();
+    c.traverse((child) => {
+      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
+    });
+    return c;
+  }, [scene]);
+  return <primitive object={clone} position={position} rotation={rotation} scale={typeof scale === 'number' ? [scale, scale, scale] : scale} />;
+});
+
+// Preload all Kenney assets
+useGLTF.preload('/models/gravestone-cross.glb');
+useGLTF.preload('/models/gravestone-round.glb');
+useGLTF.preload('/models/gravestone-broken.glb');
+useGLTF.preload('/models/cross-wood.glb');
+useGLTF.preload('/models/lantern-candle.glb');
+useGLTF.preload('/models/coffin-old.glb');
+useGLTF.preload('/models/shovel-dirt.glb');
+useGLTF.preload('/models/candle-multiple.glb');
+useGLTF.preload('/models/iron-fence-damaged.glb');
+useGLTF.preload('/models/pumpkin-carved.glb');
+
+// ============================================================
 // Decoration positions
 // ============================================================
 const ROCK_POSITIONS = [
@@ -714,23 +764,27 @@ const faceCenter = (bx, bz) => Math.atan2(-bx, -bz);
 
 // Building positions — all rotated to face center
 const BUILDING_POSITIONS = [
-  // Unique buildings
-  { type: 'forge',   position: [-9, 0, -7],   scale: 1.2, get rotation() { return [0, faceCenter(-9, -7), 0]; } },
-  { type: 'tavern',  position: [9, 0, -7],    scale: 1.2, get rotation() { return [0, faceCenter(9, -7), 0]; } },
-  { type: 'chapel',  position: [0, 0, -12],   scale: 1.3, get rotation() { return [0, faceCenter(0, -12), 0]; } },
+  // Unique buildings — bigger scale
+  { type: 'forge',   position: [-9, 0, -7],   scale: 1.8, get rotation() { return [0, faceCenter(-9, -7), 0]; } },
+  { type: 'tavern',  position: [9, 0, -7],    scale: 1.8, get rotation() { return [0, faceCenter(9, -7), 0]; } },
+  { type: 'chapel',  position: [0, 0, -12],   scale: 2.0, get rotation() { return [0, faceCenter(0, -12), 0]; } },
   // Inner ring cottages
-  { type: 'cottage', position: [-10, 0, 1],   scale: 1.1, variant: 0, get rotation() { return [0, faceCenter(-10, 1), 0]; } },
-  { type: 'cottage', position: [10, 0, 2],    scale: 1.1, variant: 1, get rotation() { return [0, faceCenter(10, 2), 0]; } },
-  { type: 'cottage', position: [-7, 0, 8],    scale: 1.0, variant: 2, get rotation() { return [0, faceCenter(-7, 8), 0]; } },
-  { type: 'cottage', position: [7, 0, 9],     scale: 1.0, variant: 0, get rotation() { return [0, faceCenter(7, 9), 0]; } },
-  { type: 'cottage', position: [-5, 0, -10],  scale: 1.0, variant: 1, get rotation() { return [0, faceCenter(-5, -10), 0]; } },
-  // Outer ring
-  { type: 'cottage', position: [-15, 0, -8],  scale: 0.9, variant: 2, get rotation() { return [0, faceCenter(-15, -8), 0]; } },
-  { type: 'cottage', position: [15, 0, -8],   scale: 0.9, variant: 0, get rotation() { return [0, faceCenter(15, -8), 0]; } },
-  { type: 'cottage', position: [-14, 0, 5],   scale: 0.9, variant: 1, get rotation() { return [0, faceCenter(-14, 5), 0]; } },
-  { type: 'cottage', position: [14, 0, 6],    scale: 0.9, variant: 2, get rotation() { return [0, faceCenter(14, 6), 0]; } },
-  { type: 'cottage', position: [-3, 0, 13],   scale: 0.9, variant: 0, get rotation() { return [0, faceCenter(-3, 13), 0]; } },
-  { type: 'cottage', position: [3, 0, 14],    scale: 0.9, variant: 1, get rotation() { return [0, faceCenter(3, 14), 0]; } },
+  { type: 'cottage', position: [-10, 0, 1],   scale: 1.6, variant: 0, get rotation() { return [0, faceCenter(-10, 1), 0]; } },
+  { type: 'cottage', position: [10, 0, 2],    scale: 1.6, variant: 1, get rotation() { return [0, faceCenter(10, 2), 0]; } },
+  { type: 'cottage', position: [-7, 0, 8],    scale: 1.5, variant: 2, get rotation() { return [0, faceCenter(-7, 8), 0]; } },
+  { type: 'cottage', position: [7, 0, 9],     scale: 1.5, variant: 0, get rotation() { return [0, faceCenter(7, 9), 0]; } },
+  { type: 'cottage', position: [-5, 0, -10],  scale: 1.5, variant: 1, get rotation() { return [0, faceCenter(-5, -10), 0]; } },
+  // Outer ring — more cottages
+  { type: 'cottage', position: [-15, 0, -8],  scale: 1.4, variant: 2, get rotation() { return [0, faceCenter(-15, -8), 0]; } },
+  { type: 'cottage', position: [15, 0, -8],   scale: 1.4, variant: 0, get rotation() { return [0, faceCenter(15, -8), 0]; } },
+  { type: 'cottage', position: [-14, 0, 5],   scale: 1.4, variant: 1, get rotation() { return [0, faceCenter(-14, 5), 0]; } },
+  { type: 'cottage', position: [14, 0, 6],    scale: 1.4, variant: 2, get rotation() { return [0, faceCenter(14, 6), 0]; } },
+  { type: 'cottage', position: [-3, 0, 13],   scale: 1.4, variant: 0, get rotation() { return [0, faceCenter(-3, 13), 0]; } },
+  { type: 'cottage', position: [3, 0, 14],    scale: 1.4, variant: 1, get rotation() { return [0, faceCenter(3, 14), 0]; } },
+  // Extra cottages
+  { type: 'cottage', position: [-17, 0, -2],  scale: 1.3, variant: 2, get rotation() { return [0, faceCenter(-17, -2), 0]; } },
+  { type: 'cottage', position: [17, 0, -1],   scale: 1.3, variant: 0, get rotation() { return [0, faceCenter(17, -1), 0]; } },
+  { type: 'cottage', position: [0, 0, 16],    scale: 1.3, variant: 1, get rotation() { return [0, faceCenter(0, 16), 0]; } },
 ];
 
 // Background mountains — procedural cones
@@ -756,13 +810,31 @@ const TREE_POSITIONS = [
   [-14, 0, 12], [14, 0, -11],
 ];
 
+// KayKit model paths mapped by building type
+const KAYKIT_PATHS = {
+  forge:   '/models/kaykit/building_blacksmith_red.gltf',
+  tavern:  '/models/kaykit/building_tavern_red.gltf',
+  chapel:  '/models/kaykit/building_church_red.gltf',
+  cottage: '/models/kaykit/building_home_A_red.gltf',
+  cottageB:'/models/kaykit/building_home_B_red.gltf',
+};
+
+// Preload KayKit buildings
+Object.values(KAYKIT_PATHS).forEach((p) => useGLTF.preload(p));
+useGLTF.preload('/models/kaykit/building_well_red.gltf');
+useGLTF.preload('/models/kaykit/tree_single_A.gltf');
+useGLTF.preload('/models/kaykit/tree_single_B.gltf');
+useGLTF.preload('/models/kaykit/barrel.gltf');
+useGLTF.preload('/models/kaykit/crate_A_big.gltf');
+useGLTF.preload('/models/kaykit/flag_red.gltf');
+useGLTF.preload('/models/kaykit/resource_lumber.gltf');
+useGLTF.preload('/models/kaykit/rock_single_A.gltf');
+
 const BuildingRenderer = ({ type, position, rotation, scale, variant = 0 }) => {
-  switch (type) {
-    case 'forge':   return <LowPolyForge position={position} rotation={rotation} scale={scale} />;
-    case 'tavern':  return <LowPolyTavern position={position} rotation={rotation} scale={scale} />;
-    case 'chapel':  return <LowPolyChapel position={position} rotation={rotation} scale={scale} />;
-    default:        return <LowPolyCottage position={position} rotation={rotation} scale={scale} variant={variant} />;
-  }
+  const path = type === 'cottage' && variant % 2 === 1
+    ? KAYKIT_PATHS.cottageB
+    : KAYKIT_PATHS[type] || KAYKIT_PATHS.cottage;
+  return <KenneyModel path={path} position={position} rotation={rotation} scale={scale * 3} />;
 };
 
 const Village = React.memo(({ isDay }) => (
@@ -791,7 +863,7 @@ const Village = React.memo(({ isDay }) => (
     ))}
 
     {/* ——— DECORATIONS : puits, charrette, caisses ——— */}
-    <LowPolyWell position={[-6, 0, -3]} scale={1.2} />
+    <KenneyModel path="/models/kaykit/building_well_red.gltf" position={[-6, 0, -3]} scale={3} />
     <LowPolyCart position={[7, 0, -3]} rotation={[0, -0.8, 0]} scale={1.1} />
     <LowPolyCrates position={[6, 0, 3]} scale={1.1} />
     <LowPolyCrates position={[-7, 0, -8]} scale={0.9} />
@@ -806,6 +878,41 @@ const Village = React.memo(({ isDay }) => (
       <LowPolyBush key={`bush-${i}`} position={b.position} scale={b.scale} variant={b.variant} />
     ))}
 
+    {/* ——— DECORS KAYKIT entre les maisons ——— */}
+    {/* Arbres KayKit entre les bâtiments */}
+    <KenneyModel path="/models/kaykit/tree_single_A.gltf" position={[-6, 0, -1]} scale={3} />
+    <KenneyModel path="/models/kaykit/tree_single_B.gltf" position={[6, 0, -1]} scale={2.8} />
+    <KenneyModel path="/models/kaykit/tree_single_A.gltf" position={[-12, 0, 3]} scale={3.2} />
+    <KenneyModel path="/models/kaykit/tree_single_B.gltf" position={[12, 0, 4]} scale={2.5} />
+    <KenneyModel path="/models/kaykit/tree_single_A.gltf" position={[-3, 0, 11]} scale={2.8} />
+    <KenneyModel path="/models/kaykit/tree_single_B.gltf" position={[3, 0, 11]} scale={3} />
+
+    {/* Tonneaux et caisses à côté des maisons */}
+    <KenneyModel path="/models/kaykit/barrel.gltf" position={[-8, 0, -5.5]} rotation={[0, 0.5, 0]} scale={2.5} />
+    <KenneyModel path="/models/kaykit/barrel.gltf" position={[8, 0, -5]} rotation={[0, -0.8, 0]} scale={2.5} />
+    <KenneyModel path="/models/kaykit/barrel.gltf" position={[-11, 0, 3]} rotation={[0, 1.2, 0]} scale={2.2} />
+    <KenneyModel path="/models/kaykit/crate_A_big.gltf" position={[11, 0, 3.5]} rotation={[0, 0.3, 0]} scale={2.5} />
+    <KenneyModel path="/models/kaykit/crate_A_big.gltf" position={[-6, 0, 6.5]} rotation={[0, -0.5, 0]} scale={2.2} />
+    <KenneyModel path="/models/kaykit/resource_lumber.gltf" position={[-8.5, 0, -8.5]} rotation={[0, 0.7, 0]} scale={2.5} />
+    <KenneyModel path="/models/kaykit/resource_lumber.gltf" position={[7, 0, 7]} rotation={[0, -0.4, 0]} scale={2.2} />
+
+    {/* Drapeaux */}
+    <KenneyModel path="/models/kaykit/flag_red.gltf" position={[-4, 0, -4.5]} rotation={[0, 0.3, 0]} scale={3} />
+    <KenneyModel path="/models/kaykit/flag_red.gltf" position={[4, 0, -4.5]} rotation={[0, -0.3, 0]} scale={3} />
+
+    {/* Rochers KayKit */}
+    <KenneyModel path="/models/kaykit/rock_single_A.gltf" position={[-14, 0, -5]} scale={3} />
+    <KenneyModel path="/models/kaykit/rock_single_A.gltf" position={[15, 0, 3]} scale={2.5} />
+
+    {/* Lumières chaleureuses entre les maisons */}
+    <pointLight position={[-9, 2, -6]} color="#ff9944" intensity={1.5} distance={8} />
+    <pointLight position={[9, 2, -6]} color="#ff9944" intensity={1.5} distance={8} />
+    <pointLight position={[-10, 2, 2]} color="#ff8833" intensity={1.2} distance={7} />
+    <pointLight position={[10, 2, 3]} color="#ff8833" intensity={1.2} distance={7} />
+    <pointLight position={[-7, 2, 8]} color="#ff9944" intensity={1} distance={6} />
+    <pointLight position={[7, 2, 9]} color="#ff9944" intensity={1} distance={6} />
+    <pointLight position={[0, 2, -11]} color="#ffaa55" intensity={1.5} distance={8} />
+
     {/* ——— CLOTURES ——— */}
     {FENCE_SEGMENTS.map((f, i) => (
       <LowPolyFence key={`fence-${i}`} start={f.start} end={f.end} />
@@ -819,6 +926,64 @@ const Village = React.memo(({ isDay }) => (
     {/* ——— RIVIERE + PONT ——— */}
     <LowPolyRiver isDay={isDay} />
     <LowPolyBridge position={[5, 0, 16]} rotation={[0, 0.15, 0]} scale={1.3} />
+
+    {/* ——— TACHES DE SANG — nuit uniquement, groupes de petites taches ——— */}
+    {!isDay && <>
+      {/* Cluster spots — each is a group of 4-6 small splatters */}
+      {[
+        [2, -3], [-3.5, 2], [5, -8], [-8, -5], [0, 5],
+        [-1, -1.5], [3, 6], [-6, -9], [8, -6],
+      ].map(([cx, cz], ci) => (
+        <group key={`blood-cluster-${ci}`}>
+          {[
+            [0, 0], [0.2, 0.15], [-0.15, 0.2], [0.1, -0.2], [-0.25, -0.1], [0.3, 0.05],
+          ].map(([ox, oz], si) => (
+            <mesh key={`b-${ci}-${si}`}
+              position={[cx + ox, 0.03, cz + oz]}
+              rotation={[-Math.PI / 2, 0, (ci * 1.7 + si * 2.3)]}
+            >
+              <circleGeometry args={[0.06 + (si % 3) * 0.04, 4 + si % 2]} />
+              <meshBasicMaterial color={si % 2 === 0 ? '#7a1515' : '#5a0e0e'} transparent opacity={0.55} depthWrite={false} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </>}
+
+    {/* ——— AMBIANCE SOMBRE : Kenney Graveyard Kit (CC0) ——— */}
+    {/* Tombes dispersées autour du village */}
+    <KenneyModel path="/models/gravestone-cross.glb" position={[-11, 0, -12]} rotation={[0, 0.3, 0]} scale={2.5} />
+    <KenneyModel path="/models/gravestone-round.glb" position={[-12.5, 0, -11]} rotation={[0, -0.2, 0]} scale={2.2} />
+    <KenneyModel path="/models/gravestone-broken.glb" position={[-10.5, 0, -13]} rotation={[0, 0.8, 0]} scale={2.3} />
+    <KenneyModel path="/models/gravestone-cross.glb" position={[13, 0, -12]} rotation={[0, -0.5, 0]} scale={2.2} />
+    <KenneyModel path="/models/gravestone-round.glb" position={[14.5, 0, -11.5]} rotation={[0, 0.4, 0]} scale={2} />
+
+    {/* Croix en bois */}
+    <KenneyModel path="/models/cross-wood.glb" position={[-16, 0, -4]} rotation={[0, 0.6, 0.05]} scale={2.8} />
+    <KenneyModel path="/models/cross-wood.glb" position={[16, 0, -5]} rotation={[0, -0.4, -0.08]} scale={2.5} />
+
+    {/* Lanternes au sol */}
+    <KenneyModel path="/models/lantern-candle.glb" position={[-3, 0, -5]} rotation={[0, 1.2, 0]} scale={2.5} />
+    <KenneyModel path="/models/lantern-candle.glb" position={[4, 0, 3]} rotation={[0, -0.8, 0]} scale={2.2} />
+    <KenneyModel path="/models/lantern-candle.glb" position={[-6, 0, 9]} rotation={[0, 2.1, 0]} scale={2.3} />
+
+    {/* Bougies */}
+    <KenneyModel path="/models/candle-multiple.glb" position={[1, 0, -2]} rotation={[0, 0.5, 0]} scale={2.5} />
+    <KenneyModel path="/models/candle-multiple.glb" position={[-2, 0, 3.5]} rotation={[0, -1.2, 0]} scale={2.2} />
+
+    {/* Cercueil */}
+    <KenneyModel path="/models/coffin-old.glb" position={[-13, 0, -12.5]} rotation={[0, 0.4, 0]} scale={2.5} />
+
+    {/* Pelle */}
+    <KenneyModel path="/models/shovel-dirt.glb" position={[-11.5, 0, -10.5]} rotation={[0, -0.3, 0]} scale={2.5} />
+
+    {/* Clôtures en fer */}
+    <KenneyModel path="/models/iron-fence-damaged.glb" position={[-9, 0, -13]} rotation={[0, 0.1, 0]} scale={2.5} />
+    <KenneyModel path="/models/iron-fence-damaged.glb" position={[11, 0, -13]} rotation={[0, -0.1, 0]} scale={2.5} />
+
+    {/* Citrouilles */}
+    <KenneyModel path="/models/pumpkin-carved.glb" position={[8, 0, 3]} rotation={[0, 1.5, 0]} scale={2.5} />
+    <KenneyModel path="/models/pumpkin-carved.glb" position={[-5, 0, -9.5]} rotation={[0, -0.7, 0]} scale={2.2} />
   </group>
 ));
 
@@ -978,6 +1143,273 @@ const FloatingDust = ({ count = 80, isDay = true }) => {
 };
 
 // ============================================================
+// Ground fog — drifting cloud layers near the ground
+// ============================================================
+const GroundFog = ({ isDay = true }) => {
+  const count = 18;
+  const meshRef = useRef();
+  const clouds = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      // Day: spawn around buildings (radius 12-25), NOT center plaza
+      // Night: spawn everywhere including center
+      let x, z;
+      if (isDay) {
+        const angle = Math.random() * Math.PI * 2;
+        const r = 12 + Math.random() * 13; // radius 12 to 25
+        x = Math.cos(angle) * r;
+        z = Math.sin(angle) * r;
+      } else {
+        x = (Math.random() - 0.5) * 45;
+        z = (Math.random() - 0.5) * 45;
+      }
+      arr.push({
+        x,
+        y: Math.random() * 1.2 + 0.3,
+        z,
+        scaleX: 3 + Math.random() * 5,
+        scaleZ: 2 + Math.random() * 4,
+        speed: Math.random() * 0.08 + 0.02,
+        offset: Math.random() * Math.PI * 2,
+      });
+    }
+    return arr;
+  }, []);
+
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.elapsedTime;
+    clouds.forEach((c, i) => {
+      const px = c.x + Math.sin(t * c.speed + c.offset) * 6;
+      const pz = c.z + Math.cos(t * c.speed * 0.7 + c.offset) * 6;
+      dummy.position.set(px, c.y, pz);
+      dummy.scale.set(c.scaleX, 0.15 + Math.sin(t * 0.5 + c.offset) * 0.05, c.scaleZ);
+      dummy.rotation.set(0, t * c.speed * 0.3 + c.offset, 0);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <sphereGeometry args={[1, 8, 6]} />
+      <meshBasicMaterial
+        color={isDay ? '#dde8f0' : '#1a2244'}
+        transparent
+        opacity={isDay ? 0.12 : 0.25}
+        depthWrite={false}
+      />
+    </instancedMesh>
+  );
+};
+
+// ============================================================
+// Night prowler — dark shadow that roams behind buildings
+// ============================================================
+const NightProwler = () => {
+  const groupRef = useRef();
+  const opacityRef = useRef(0);
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    const t = state.clock.elapsedTime;
+    // Slow path far from center to avoid clipping through buildings
+    const x = Math.sin(t * 0.12) * 22;
+    const z = Math.cos(t * 0.08) * 20;
+    groupRef.current.position.set(x, 0.05, z);
+    groupRef.current.rotation.y = Math.atan2(Math.cos(t * 0.12) * 22 * 0.12, -Math.sin(t * 0.08) * 20 * 0.08);
+    // Pulse opacity — sometimes more visible, sometimes nearly invisible
+    opacityRef.current = 0.15 + Math.sin(t * 0.4) * 0.1;
+    groupRef.current.traverse((child) => {
+      if (child.material && child.material.opacity !== undefined && child.material.transparent) {
+        child.material.opacity = opacityRef.current;
+      }
+    });
+  });
+  return (
+    <group ref={groupRef}>
+      {/* Blurry dark mass — large, low, amorphous */}
+      <mesh position={[0, 0.8, 0]}>
+        <sphereGeometry args={[1.2, 6, 5]} />
+        <meshBasicMaterial color="#050008" transparent opacity={0.2} depthWrite={false} />
+      </mesh>
+      <mesh position={[0, 0.4, 0.3]}>
+        <sphereGeometry args={[0.8, 5, 4]} />
+        <meshBasicMaterial color="#080010" transparent opacity={0.15} depthWrite={false} />
+      </mesh>
+      {/* Eyes — tiny red glints */}
+      <mesh position={[-0.12, 1, 0.8]}>
+        <sphereGeometry args={[0.05, 4, 4]} />
+        <meshBasicMaterial color="#ff2200" transparent opacity={0.6} />
+      </mesh>
+      <mesh position={[0.12, 1, 0.8]}>
+        <sphereGeometry args={[0.05, 4, 4]} />
+        <meshBasicMaterial color="#ff2200" transparent opacity={0.6} />
+      </mesh>
+    </group>
+  );
+};
+
+// Dense black fog patches on the plaza at night
+const NightDarkFog = ({ count = 12 }) => {
+  const meshRef = useRef();
+  const clouds = useMemo(() => Array.from({ length: count }, (_, i) => ({
+    x: (Math.sin(i * 2.1) * 10),
+    z: (Math.cos(i * 1.7) * 10),
+    y: 0.2 + (i % 3) * 0.15,
+    scaleX: 2 + (i % 4) * 1.5,
+    scaleZ: 1.5 + (i % 3) * 1.2,
+    speed: 0.04 + (i % 5) * 0.01,
+    offset: i * 1.3,
+  })), [count]);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.elapsedTime;
+    clouds.forEach((c, i) => {
+      dummy.position.set(
+        c.x + Math.sin(t * c.speed + c.offset) * 4,
+        c.y,
+        c.z + Math.cos(t * c.speed * 0.8 + c.offset) * 4
+      );
+      dummy.scale.set(c.scaleX, 0.1 + Math.sin(t * 0.3 + c.offset) * 0.05, c.scaleZ);
+      dummy.rotation.set(0, t * c.speed * 0.2 + c.offset, 0);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <sphereGeometry args={[1, 7, 5]} />
+      <meshBasicMaterial color="#0a0014" transparent opacity={0.3} depthWrite={false} />
+    </instancedMesh>
+  );
+};
+
+// Crows — circle overhead at night
+const NightCrows = ({ count = 4 }) => {
+  const meshRef = useRef();
+  const birds = useMemo(() => Array.from({ length: count }, (_, i) => ({
+    offset: (i / count) * Math.PI * 2,
+    radius: 18 + (i % 3) * 4,
+    height: 12 + (i % 2) * 5,
+    speed: 0.12 + i * 0.02,
+    wingPhase: i * 1.7,
+  })), [count]);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.elapsedTime;
+    birds.forEach((b, i) => {
+      const angle = t * b.speed + b.offset;
+      dummy.position.set(
+        Math.cos(angle) * b.radius,
+        b.height + Math.sin(t * 0.8 + b.wingPhase) * 1.5,
+        Math.sin(angle) * b.radius
+      );
+      dummy.rotation.set(0, -angle + Math.PI / 2, Math.sin(t * 4 + b.wingPhase) * 0.3);
+      dummy.scale.set(1.2, 0.3 + Math.abs(Math.sin(t * 4 + b.wingPhase)) * 0.7, 1);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <boxGeometry args={[0.8, 0.1, 0.3]} />
+      <meshBasicMaterial color="#111122" />
+    </instancedMesh>
+  );
+};
+
+// ============================================================
+// Day rabbits — procedural bunnies hopping around
+// ============================================================
+const DayRabbits = ({ count = 5 }) => {
+  const rabbits = useMemo(() => Array.from({ length: count }, (_, i) => ({
+    baseX: (Math.sin(i * 2.4) * 12) + (i % 2 ? 3 : -3),
+    baseZ: (Math.cos(i * 3.1) * 10) + (i % 3 ? 5 : -5),
+    speed: 0.3 + (i % 3) * 0.15,
+    hopSpeed: 3 + i * 0.5,
+    offset: i * 1.8,
+    scale: 0.25 + (i % 3) * 0.08,
+  })), [count]);
+
+  return (
+    <group>
+      {rabbits.map((r, i) => (
+        <Rabbit key={i} {...r} />
+      ))}
+    </group>
+  );
+};
+
+const Rabbit = ({ baseX, baseZ, speed, hopSpeed, offset, scale }) => {
+  const groupRef = useRef();
+
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    const t = state.clock.elapsedTime;
+    // Wander in small circles
+    const x = baseX + Math.sin(t * speed + offset) * 3;
+    const z = baseZ + Math.cos(t * speed * 0.7 + offset) * 3;
+    // Hop
+    const hop = Math.abs(Math.sin(t * hopSpeed + offset)) * 0.3;
+    groupRef.current.position.set(x, hop, z);
+    // Face movement direction
+    groupRef.current.rotation.y = Math.atan2(
+      Math.cos(t * speed + offset) * speed * 3,
+      -Math.sin(t * speed * 0.7 + offset) * speed * 0.7 * 3
+    );
+  });
+
+  return (
+    <group ref={groupRef} scale={scale}>
+      {/* Body */}
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <sphereGeometry args={[0.4, 6, 5]} />
+        <meshStandardMaterial color="#d4c0a0" flatShading />
+      </mesh>
+      {/* Head */}
+      <mesh position={[0, 0.65, 0.25]} castShadow>
+        <sphereGeometry args={[0.25, 6, 5]} />
+        <meshStandardMaterial color="#ddd0b8" flatShading />
+      </mesh>
+      {/* Ears */}
+      <mesh position={[-0.08, 1, 0.2]} rotation={[0.3, 0, -0.15]} castShadow>
+        <capsuleGeometry args={[0.04, 0.3, 3, 4]} />
+        <meshStandardMaterial color="#c8b090" flatShading />
+      </mesh>
+      <mesh position={[0.08, 1, 0.2]} rotation={[0.3, 0, 0.15]} castShadow>
+        <capsuleGeometry args={[0.04, 0.3, 3, 4]} />
+        <meshStandardMaterial color="#c8b090" flatShading />
+      </mesh>
+      {/* Tail */}
+      <mesh position={[0, 0.35, -0.35]}>
+        <sphereGeometry args={[0.12, 4, 4]} />
+        <meshStandardMaterial color="#f0e8d8" flatShading />
+      </mesh>
+      {/* Eyes */}
+      <mesh position={[-0.08, 0.72, 0.44]}>
+        <sphereGeometry args={[0.03, 4, 4]} />
+        <meshBasicMaterial color="#1a1008" />
+      </mesh>
+      <mesh position={[0.08, 0.72, 0.44]}>
+        <sphereGeometry args={[0.03, 4, 4]} />
+        <meshBasicMaterial color="#1a1008" />
+      </mesh>
+    </group>
+  );
+};
+
+// ============================================================
 // Ghost Orb (floats above dead players)
 // ============================================================
 const GhostOrb = ({ position }) => {
@@ -1005,8 +1437,8 @@ const PhaseEmote = ({ phase, isAccused, CONSTANTS }) => {
   let color = '#fff';
   if (isAccused) { iconClass = 'fa-exclamation-triangle'; color = '#ff4444'; }
   else if (phase === CONSTANTS?.PHASE?.VOTING) { iconClass = 'fa-gavel'; color = '#ffa502'; }
-  else if (phase === CONSTANTS?.PHASE?.DISCUSSION) { iconClass = 'fa-comment'; color = '#78ff78'; }
   else if (phase === CONSTANTS?.PHASE?.JUDGMENT) { iconClass = 'fa-scale-balanced'; color = '#cc88ff'; }
+  // Discussion icon removed — handled by ChatBubble on message
 
   if (!iconClass) return null;
 
@@ -1024,10 +1456,45 @@ const PhaseEmote = ({ phase, isAccused, CONSTANTS }) => {
   );
 };
 
+// Chat bubble — appears for 2s when player sends a message
+const ChatBubble = ({ playerId, chatMessages, dayCount }) => {
+  const [visible, setVisible] = useState(false);
+  const lastMsgCount = useRef(0);
+
+  useEffect(() => {
+    if (!chatMessages || !playerId) return;
+    const playerMsgs = chatMessages.filter(
+      (m) => m.playerId === playerId && m.type === 'player' && m.dayCount === dayCount
+    );
+    if (playerMsgs.length > lastMsgCount.current) {
+      lastMsgCount.current = playerMsgs.length;
+      setVisible(true);
+      const timer = setTimeout(() => setVisible(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [chatMessages?.length, playerId, dayCount]);
+
+  if (!visible) return null;
+
+  return (
+    <Html position={[0, 2.8, 0]} center distanceFactor={8} style={{ pointerEvents: 'none' }}>
+      <div style={{
+        fontSize: '16px',
+        color: '#78ff78',
+        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))',
+        userSelect: 'none',
+        animation: 'fadeInOut 2s ease-out forwards',
+      }}>
+        <i className="fas fa-comment"></i>
+      </div>
+    </Html>
+  );
+};
+
 // ============================================================
 // Player Figure — uses Character model with rotation + walk
 // ============================================================
-const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8, pauseAnim = null, isDay = true, phase = null, CONSTANTS = null }) => {
+const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8, pauseAnim = null, isDay = true, phase = null, CONSTANTS = null, fadeOnTransition = true, chatMessages = null, dayCount = 0 }) => {
   const groupRef = useRef();
   const transitionStartTime = useRef(null);
   const walkStarted = useRef(false);
@@ -1078,11 +1545,11 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
     }
   });
 
-  // Fade-out: make character materials transparent during walk-away
+  // Fade-out: make character materials transparent during walk-away (only if fadeOnTransition)
   const charGroupRef = useRef();
   useFrame((state) => {
     if (!charGroupRef.current) return;
-    if (isTransitioning && transitionStartTime.current !== null) {
+    if (isTransitioning && fadeOnTransition && transitionStartTime.current !== null) {
       const elapsed = state.clock.elapsedTime - transitionStartTime.current;
       // Start fading after 2s of walking, fully gone by 4s
       const opacity = Math.max(1 - Math.max(elapsed - 2, 0) / 2, 0);
@@ -1174,6 +1641,10 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
       {/* Phase emote */}
       {!isTransitioning && phase && CONSTANTS && (
         <PhaseEmote phase={phase} isAccused={isAccused} CONSTANTS={CONSTANTS} />
+      )}
+      {/* Chat bubble — on message */}
+      {!isTransitioning && (
+        <ChatBubble playerId={player.id} chatMessages={chatMessages} dayCount={dayCount} />
       )}
       {/* Vote/Judgment buttons removed — handled in action panel */}
     </group>
@@ -1422,51 +1893,82 @@ const CameraController = ({ phase, CONSTANTS }) => {
 // ============================================================
 // Scene Lighting — warm sunlight (day) / cold moonlight (night)
 // ============================================================
-const SceneLighting = ({ isDay }) => {
+const SceneLighting = ({ isDay, isSunset = false }) => {
   const sunRef = useRef();
   const sunGlowRef = useRef();
   const fillRef = useRef();
   const ambientRef = useRef();
+  const sunsetProgress = useRef(0); // 0 = full day, 1 = sun on horizon
+  const sunColorRef = useRef(new THREE.Color('#fff5e0'));
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
 
-    // Sun moves in a slow arc across the sky (day)
-    // Full arc in ~120s, from east [20,15,-15] to west [-20,20,15]
-    if (isDay && sunRef.current) {
-      const sunAngle = -Math.PI * 0.8 + t * 0.02; // start behind+right of camera, slow arc
-      const sunX = Math.cos(sunAngle) * 20;
-      const sunY = 18 + Math.sin(sunAngle * 0.5) * 6;
-      const sunZ = -Math.sin(sunAngle) * 20;
-      sunRef.current.position.set(sunX, sunY, sunZ);
+    // Sunset animation — sun drops to horizon over ~3 seconds
+    if (isSunset) {
+      sunsetProgress.current = Math.min(sunsetProgress.current + delta * 0.2, 1);
+    } else if (isDay) {
+      sunsetProgress.current = 0;
+    }
 
-      // Move sun glow to match
+    const sp = sunsetProgress.current;
+    const sunsetEased = sp * sp; // ease-in for dramatic end
+
+    if (isDay && sunRef.current) {
+      const sunAngle = -Math.PI * 0.8 + t * 0.02;
+      const baseSunX = Math.cos(sunAngle) * 20;
+      const baseSunY = 18 + Math.sin(sunAngle * 0.5) * 6;
+      const baseSunZ = -Math.sin(sunAngle) * 20;
+
+      // During sunset, sun drops toward horizon
+      const sunX = baseSunX + sunsetEased * 15;
+      const sunY = baseSunY * (1 - sunsetEased * 0.85); // drops to ~3
+      const sunZ = baseSunZ;
+      sunRef.current.position.set(sunX, Math.max(sunY, 1), sunZ);
+
+      // Sun color shifts warm → orange → red
+      const dayColor = new THREE.Color('#fff5e0');
+      const sunsetColor = new THREE.Color('#ff4400');
+      sunColorRef.current.copy(dayColor).lerp(sunsetColor, sunsetEased);
+      sunRef.current.color.copy(sunColorRef.current);
+
+      // Intensity dims during sunset
+      const intensityTarget = 3.0 * (1 - sunsetEased * 0.7);
+      sunRef.current.intensity += (intensityTarget - sunRef.current.intensity) * 0.08;
+
       if (sunGlowRef.current) {
-        sunGlowRef.current.position.set(sunX * 2.5, sunY * 2.5, sunZ * 2.5);
+        sunGlowRef.current.position.set(sunX * 2.5, Math.max(sunY, 1) * 2.5, sunZ * 2.5);
+        // Glow goes orange
+        sunGlowRef.current.children.forEach((child) => {
+          if (child.material) {
+            child.material.color.copy(sunColorRef.current);
+          }
+        });
       }
     }
 
-    // Smooth intensity transitions
-    if (sunRef.current) {
-      const target = isDay ? 3.0 : 0.5;
-      sunRef.current.intensity += (target - sunRef.current.intensity) * 0.03;
+    // Smooth intensity transitions (day/night)
+    if (!isSunset) {
+      if (sunRef.current) {
+        const target = isDay ? 3.0 : 0.5;
+        sunRef.current.intensity += (target - sunRef.current.intensity) * 0.03;
+      }
     }
     if (fillRef.current) {
-      const target = isDay ? 1.0 : 0.2;
-      fillRef.current.intensity += (target - fillRef.current.intensity) * 0.03;
+      const target = isDay ? (1.0 - sunsetEased * 0.6) : 0.2;
+      fillRef.current.intensity += (target - fillRef.current.intensity) * 0.05;
+      if (isSunset) fillRef.current.color.set(sunsetEased > 0.3 ? '#ff8855' : '#ffd4a0');
     }
     if (ambientRef.current) {
-      const target = isDay ? 0.6 : 0.2;
-      ambientRef.current.intensity += (target - ambientRef.current.intensity) * 0.03;
+      const target = isDay ? (0.6 - sunsetEased * 0.3) : 0.2;
+      ambientRef.current.intensity += (target - ambientRef.current.intensity) * 0.05;
     }
   });
 
   return (
     <>
-      {/* Base ambient */}
       <ambientLight ref={ambientRef} intensity={isDay ? 0.6 : 0.2} />
 
-      {/* Main sun / moon — casts shadows, position animated in useFrame */}
       <directionalLight
         ref={sunRef}
         position={isDay ? [15, 20, 10] : [-5, 12, 8]}
@@ -1483,7 +1985,6 @@ const SceneLighting = ({ isDay }) => {
         shadow-bias={-0.001}
       />
 
-      {/* Warm fill light from opposite side */}
       <directionalLight
         ref={fillRef}
         position={isDay ? [-10, 8, -5] : [5, 6, -8]}
@@ -1491,14 +1992,12 @@ const SceneLighting = ({ isDay }) => {
         color={isDay ? '#ffd4a0' : '#334466'}
       />
 
-      {/* Hemisphere — sky/ground color bleed */}
       <hemisphereLight
         color={isDay ? '#87CEEB' : '#1a1a3a'}
         groundColor={isDay ? '#8B7355' : '#0a0a15'}
         intensity={isDay ? 0.4 : 0.15}
       />
 
-      {/* Sun glow — visible sphere that moves with the light */}
       {isDay && (
         <group ref={sunGlowRef} position={[40, 50, 25]}>
           <pointLight color="#fff0cc" intensity={0.8} distance={120} />
@@ -1547,6 +2046,7 @@ const MainScene = () => {
   // Black fade: starts fading to black a few seconds before night ends,
   // holds black during transition, then fades in when day starts
   const [nightFade, setNightFade] = useState('none'); // 'none' | 'to-black' | 'from-black'
+  const [isSunset, setIsSunset] = useState(false);
   const [showNightText, setShowNightText] = useState(false);
   const [showDayText, setShowDayText] = useState(false);
   const [nightAmbianceMsg, setNightAmbianceMsg] = useState(null);
@@ -1567,16 +2067,18 @@ const MainScene = () => {
 
     // Pre-night phases: show players, start walk-away, then fade to black
     if (PRE_NIGHT_PHASES.includes(phase)) {
+      // Start sunset animation immediately
+      setIsSunset(true);
       // Ensure players are visible for walk-away
       setNightPlayersHidden(false);
-      // Delay fade so walk-away is visible first
+      // Delay fade so sunset animation is fully visible (~5s)
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
-      }, 2000));
+      }, 4000));
       // Show "La nuit tombe..." AFTER the screen is black (fade takes 1.5s)
       fadeTimers.current.push(setTimeout(() => {
         setShowNightText(true);
-      }, 3800));
+      }, 5800));
       // Trigger walk-away animation (separate timer, not cleared on phase change)
       if (nightStartedForDay.current !== game.dayCount) {
         nightStartedForDay.current = game.dayCount;
@@ -1625,8 +2127,9 @@ const MainScene = () => {
       }, 20000));
     }
 
-    // Leaving night: reveal day scene
+    // Leaving night: reveal day scene + reset sunset
     if (lastPhaseForFade.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT) {
+      setIsSunset(false);
       setNightFade('from-black');
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('none');
@@ -1652,20 +2155,31 @@ const MainScene = () => {
     }
   }, [phase]);
 
-  // Night walk-away — now triggered in pre-night phases above
+  // Night walk-away / morning walk-in
   const nightStartedForDay = useRef(null);
+  const morningStartedForDay = useRef(null);
   const [nightTransition, setNightTransition] = useState(false);
+  const [morningTransition, setMorningTransition] = useState(false);
   const [nightPlayersHidden, setNightPlayersHidden] = useState(false);
+  const morningTimer = useRef(null);
 
   useEffect(() => {
     // Reset when leaving night (show players again for day)
     if (phase !== CONSTANTS.PHASE.NIGHT && !PRE_NIGHT_PHASES.includes(phase)) {
       setNightPlayersHidden(false);
     }
+    // Morning walk-in: when going from NIGHT to DEATH_REPORT, animate players back
+    if (phase === CONSTANTS.PHASE.DEATH_REPORT && morningStartedForDay.current !== game.dayCount) {
+      morningStartedForDay.current = game.dayCount;
+      setNightPlayersHidden(false);
+      setMorningTransition(true);
+      if (morningTimer.current) clearTimeout(morningTimer.current);
+      morningTimer.current = setTimeout(() => setMorningTransition(false), 4000);
+    }
   }, [phase]);
 
   // Day circle positions (walk-away start) + house positions (walk-away end)
-  const PLAYER_Y = 0.3; // lift players slightly above ground
+  const PLAYER_Y = 0; // players on ground level
   const dayPositions = useMemo(() => {
     const positions = {};
     const circleRadius = 4;
@@ -1814,15 +2328,18 @@ const MainScene = () => {
           )}
 
           {/* Lighting */}
-          <SceneLighting isDay={game.isDay} />
+          <SceneLighting isDay={game.isDay} isSunset={isSunset} />
 
           {/* Sky & atmosphere */}
           {game.isDay ? (
             <>
               <color attach="background" args={['#87CEEB']} />
+              <fog attach="fog" args={['#87CEEB', 40, 80]} />
               <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
               <DayFireflies count={50} />
               <FloatingDust count={80} isDay />
+              <GroundFog isDay />
+              <DayRabbits count={5} />
             </>
           ) : (
             <>
@@ -1832,6 +2349,10 @@ const MainScene = () => {
               <Moon />
               <Fireflies count={60} />
               <FloatingDust count={60} isDay={false} />
+              <GroundFog isDay={false} />
+              <NightProwler />
+              <NightCrows count={4} />
+              <NightDarkFog count={12} />
             </>
           )}
 
@@ -1846,10 +2367,22 @@ const MainScene = () => {
             const isVoteTarget = myVoteTarget === player.id;
             const showJudgmentBtn = isJudgmentPhase && isAccused && me?.isAlive && me.id !== game.accusedId && !hasJudged;
             const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
-            // During pause: use pause position. During walk-away: use house as destination.
-            const usePos = (isPaused && isMe && pausePos) ? pausePos
-              : nightTransition ? (housePositions[player.id] || pData.position)
-              : pData.position;
+            const isAnimating = nightTransition || morningTransition;
+            // Night: walk from circle → house. Morning: walk from house → circle.
+            let usePos, startPos;
+            if (isPaused && isMe && pausePos) {
+              usePos = pausePos;
+              startPos = null;
+            } else if (nightTransition) {
+              usePos = housePositions[player.id] || pData.position;
+              startPos = dayPositions[player.id];
+            } else if (morningTransition) {
+              usePos = pData.position; // circle position = destination
+              startPos = housePositions[player.id]; // house = start
+            } else {
+              usePos = pData.position;
+              startPos = null;
+            }
             const useRot = (isPaused && isMe) ? [0, pauseYaw + Math.PI, 0] : pData.rotation;
             return (
               <PlayerFigure
@@ -1858,9 +2391,10 @@ const MainScene = () => {
                 position={usePos}
                 rotation={useRot}
                 pauseAnim={(isPaused && isMe) ? pauseAnim : null}
-                startPosition={nightTransition ? dayPositions[player.id] : null}
-                isTransitioning={nightTransition}
-                transitionDuration={5}
+                startPosition={startPos}
+                isTransitioning={isAnimating}
+                fadeOnTransition={nightTransition}
+                transitionDuration={morningTransition ? 3.5 : 5}
                 color={player.profile?.color || '#ffffff'}
                 isAccused={isAccused}
                 showVote={showVoteBtn}
@@ -1874,6 +2408,8 @@ const MainScene = () => {
                 isDay={game.isDay}
                 phase={phase}
                 CONSTANTS={CONSTANTS}
+                chatMessages={chatMessages}
+                dayCount={game.dayCount}
               />
             );
           })}

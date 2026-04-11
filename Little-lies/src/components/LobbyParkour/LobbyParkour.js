@@ -1,8 +1,21 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { RigidBody, CuboidCollider, BallCollider, interactionGroups } from '@react-three/rapier';
-import { Text } from '@react-three/drei';
+import { Text, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+
+// KayKit model loader for lobby
+const LobbyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1 }) => {
+  const { scene } = useGLTF(path);
+  const clone = useMemo(() => {
+    const c = scene.clone();
+    c.traverse((child) => {
+      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
+    });
+    return c;
+  }, [scene]);
+  return <primitive object={clone} position={position} rotation={rotation} scale={typeof scale === 'number' ? [scale, scale, scale] : scale} />;
+});
 
 const G = interactionGroups([1], [0, 1]);
 
@@ -12,7 +25,7 @@ const Plat = ({ position, size = [6, 0.5, 6], color = '#6a7a9a', label }) => (
     <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
     <mesh castShadow receiveShadow>
       <boxGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={0.6} />
+      <meshStandardMaterial color={color} roughness={0.6} flatShading />
     </mesh>
     {label && (
       <Text position={[0, size[1] / 2 + 0.5, 0]} fontSize={0.5} color="#fff" anchorX="center">
@@ -22,77 +35,33 @@ const Plat = ({ position, size = [6, 0.5, 6], color = '#6a7a9a', label }) => (
   </RigidBody>
 );
 
-/* ── Trampoline — strong consistent bounce via impulse ── */
-const Bouncer = ({ position, size = [5, 0.15, 5], color = '#ff3366' }) => {
+/* ── Trampoline ── */
+const Bouncer = ({ position, size = [3, 0.15, 3], color = '#D4A574' }) => {
   const meshRef = useRef();
-
   useFrame(({ clock }) => {
-    if (meshRef.current) {
-      meshRef.current.scale.y = 1 + Math.sin(clock.getElapsedTime() * 4) * 0.15;
-    }
+    if (meshRef.current) meshRef.current.scale.y = 1 + Math.sin(clock.getElapsedTime() * 4) * 0.15;
   });
-
-  const handleCollision = useCallback((e) => {
-    const body = e.other.rigidBody;
-    if (!body) return;
-    // Reset Y velocity first so the bounce is always the same height
-    const vel = body.linvel();
-    body.setLinvel({ x: vel.x, y: 0, z: vel.z }, true);
-    body.applyImpulse({ x: 0, y: 10, z: 0 }, true);
-  }, []);
-
   return (
     <RigidBody type="fixed" position={position} collisionGroups={G} restitution={0} friction={1}
-      onCollisionEnter={handleCollision}
+      onCollisionEnter={(e) => {
+        const body = e.other.rigidBody;
+        if (!body) return;
+        const vel = body.linvel();
+        body.setLinvel({ x: vel.x, y: 0, z: vel.z }, true);
+        body.applyImpulse({ x: 0, y: 10, z: 0 }, true);
+      }}
     >
       <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
-      {/* Flat circular trampoline */}
       <mesh ref={meshRef} castShadow receiveShadow>
-        <cylinderGeometry args={[size[0] / 2, size[0] / 2, size[1], 24]} />
-        <meshStandardMaterial color={color} roughness={0.4} metalness={0.3} />
-      </mesh>
-      {/* Outer ring */}
-      <mesh position={[0, size[1] / 2, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[size[0] / 2, 0.08, 8, 24]} />
-        <meshStandardMaterial color="#ffffff" metalness={0.4} roughness={0.3} />
-      </mesh>
-    </RigidBody>
-  );
-};
-
-/* ── Moving platform — kinematicVelocity so players ride along ── */
-const Slider = ({ from, to, speed = 0.6, size = [6, 0.5, 6], color = '#3366cc' }) => {
-  const ref = useRef();
-  const prevPos = useRef({ x: from[0], y: from[1], z: from[2] });
-  useFrame(({ clock }, delta) => {
-    if (ref.current) {
-      const t = (Math.sin(clock.getElapsedTime() * speed) + 1) / 2;
-      const nx = from[0] + (to[0] - from[0]) * t;
-      const ny = from[1] + (to[1] - from[1]) * t;
-      const nz = from[2] + (to[2] - from[2]) * t;
-      const d = Math.max(delta, 0.001);
-      ref.current.setLinvel({
-        x: (nx - prevPos.current.x) / d,
-        y: (ny - prevPos.current.y) / d,
-        z: (nz - prevPos.current.z) / d,
-      }, true);
-      ref.current.setNextKinematicTranslation({ x: nx, y: ny, z: nz });
-      prevPos.current = { x: nx, y: ny, z: nz };
-    }
-  });
-  return (
-    <RigidBody ref={ref} type="kinematicVelocityBased" position={from} collisionGroups={G}>
-      <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={size} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.15} roughness={0.5} />
+        <cylinderGeometry args={[size[0] / 2, size[0] / 2, size[1], 16]} />
+        <meshStandardMaterial color={color} roughness={0.4} flatShading />
       </mesh>
     </RigidBody>
   );
 };
 
 /* ── Spinning bar ── */
-const Spinner = ({ position, speed = 0.4, length = 12, color = '#ff8800' }) => {
+const Spinner = ({ position, speed = 0.4, length = 10, color = '#8B6914' }) => {
   const ref = useRef();
   useFrame(({ clock }) => {
     if (ref.current) {
@@ -104,153 +73,229 @@ const Spinner = ({ position, speed = 0.4, length = 12, color = '#ff8800' }) => {
   });
   return (
     <RigidBody ref={ref} type="kinematicVelocityBased" position={position} collisionGroups={G}>
-      <CuboidCollider args={[length / 2, 0.2, 0.6]} />
+      <CuboidCollider args={[length / 2, 0.2, 0.5]} />
       <mesh castShadow receiveShadow>
-        <boxGeometry args={[length, 0.4, 1.2]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} roughness={0.4} />
+        <boxGeometry args={[length, 0.4, 1]} />
+        <meshStandardMaterial color={color} roughness={0.4} flatShading />
       </mesh>
     </RigidBody>
   );
 };
 
-/* ── Ramp ── */
-const Ramp = ({ position, rotation = [0, 0, 0], size = [8, 0.4, 6], color = '#556677' }) => (
-  <RigidBody type="fixed" position={position} rotation={rotation} collisionGroups={G}>
-    <CuboidCollider args={[size[0] / 2, size[1] / 2, size[2] / 2]} />
-    <mesh castShadow receiveShadow>
-      <boxGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={0.5} />
-    </mesh>
-  </RigidBody>
-);
-
-/* ── Ground — grassy terrain matching village style ── */
-const Ground = () => (
-  <RigidBody type="fixed" position={[0, -0.2, 0]} collisionGroups={G}>
-    <CuboidCollider args={[75, 0.2, 75]} />
-    <mesh receiveShadow>
-      <boxGeometry args={[150, 0.4, 150]} />
-      <meshStandardMaterial color="#7EC850" roughness={0.95} flatShading />
-    </mesh>
-  </RigidBody>
-);
-
-/* ── Trophy cup at the top ── */
-const Trophy = ({ position }) => {
-  const ref = useRef();
+/* ── Bell tower — final climb destination ── */
+const BellTower = ({ position }) => {
+  const bellRef = useRef();
   useFrame(({ clock }) => {
-    if (ref.current) ref.current.rotation.y = clock.getElapsedTime() * 0.5;
+    if (bellRef.current) bellRef.current.rotation.z = Math.sin(clock.getElapsedTime() * 0.8) * 0.1;
   });
   return (
     <group position={position}>
+      {/* Base */}
       <RigidBody type="fixed" collisionGroups={G}>
-        <CuboidCollider args={[3, 0.2, 3]} />
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[6, 0.4, 6]} />
-          <meshStandardMaterial color="#ffd700" emissive="#ffaa00" emissiveIntensity={0.6} roughness={0.2} />
+        <CuboidCollider args={[2, 2, 2]} position={[0, 2, 0]} />
+        <mesh position={[0, 2, 0]} castShadow receiveShadow>
+          <boxGeometry args={[4, 4, 4]} />
+          <meshStandardMaterial color="#C4A882" flatShading />
         </mesh>
       </RigidBody>
-      {/* Trophy cup shape */}
-      <group ref={ref} position={[0, 1, 0]}>
-        {/* Cup bowl */}
-        <mesh position={[0, 0.6, 0]}>
-          <cylinderGeometry args={[0.5, 0.3, 0.8, 12]} />
-          <meshStandardMaterial color="#ffd700" emissive="#ffcc00" emissiveIntensity={0.8} metalness={0.8} roughness={0.1} />
+      {/* Upper section */}
+      <RigidBody type="fixed" collisionGroups={G}>
+        <CuboidCollider args={[1.5, 2, 1.5]} position={[0, 6, 0]} />
+        <mesh position={[0, 6, 0]} castShadow receiveShadow>
+          <boxGeometry args={[3, 4, 3]} />
+          <meshStandardMaterial color="#E8DCC8" flatShading />
         </mesh>
-        {/* Cup stem */}
-        <mesh position={[0, 0.1, 0]}>
-          <cylinderGeometry args={[0.08, 0.08, 0.3, 8]} />
-          <meshStandardMaterial color="#ffd700" metalness={0.9} roughness={0.1} />
+      </RigidBody>
+      {/* Roof */}
+      <RigidBody type="fixed" collisionGroups={G}>
+        <CuboidCollider args={[1.8, 0.5, 1.8]} position={[0, 8.5, 0]} />
+        <mesh position={[0, 9, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+          <coneGeometry args={[2.5, 2, 4]} />
+          <meshStandardMaterial color="#6a6a7a" flatShading />
         </mesh>
-        {/* Cup base */}
-        <mesh position={[0, -0.1, 0]}>
-          <cylinderGeometry args={[0.3, 0.35, 0.1, 12]} />
-          <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.1} />
-        </mesh>
-        {/* Handles */}
-        <mesh position={[0.55, 0.55, 0]} rotation={[0, 0, Math.PI / 6]}>
-          <torusGeometry args={[0.15, 0.04, 6, 12]} />
-          <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.1} />
-        </mesh>
-        <mesh position={[-0.55, 0.55, 0]} rotation={[0, 0, -Math.PI / 6]}>
-          <torusGeometry args={[0.15, 0.04, 6, 12]} />
-          <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.1} />
+      </RigidBody>
+      {/* Bell */}
+      <group ref={bellRef} position={[0, 7.5, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.5, 0.7, 0.8, 8]} />
+          <meshStandardMaterial color="#c8a030" metalness={0.6} roughness={0.3} flatShading />
         </mesh>
       </group>
-      <pointLight position={[0, 2, 0]} color="#ffd700" intensity={4} distance={15} />
+      {/* Glow */}
+      <pointLight position={[0, 10, 0]} color="#FFD700" intensity={3} distance={20} />
     </group>
   );
 };
 
+/* ── Low-poly tree (reused from main scene style) ── */
+const LobbyTree = ({ position, scale = 1 }) => (
+  <group position={position} scale={scale}>
+    <mesh position={[0, 0.6, 0]} castShadow>
+      <cylinderGeometry args={[0.06, 0.1, 1.2, 5]} />
+      <meshStandardMaterial color="#8B6914" flatShading />
+    </mesh>
+    <mesh position={[0, 1.5, 0]} castShadow>
+      <coneGeometry args={[0.9, 1.6, 6]} />
+      <meshStandardMaterial color="#4CAF50" flatShading />
+    </mesh>
+    <mesh position={[0, 2.1, 0]} castShadow>
+      <coneGeometry args={[0.65, 1.2, 6]} />
+      <meshStandardMaterial color="#5BBF5E" flatShading />
+    </mesh>
+  </group>
+);
+
+/* ── Giant pushable ball ── */
+const GiantBall = ({ position, radius = 2.5, color = '#E8734A' }) => {
+  const ballRef = useRef();
+
+  // Apply push + torque when player collides — makes it roll
+  const handleCollision = (e) => {
+    if (!ballRef.current) return;
+    const other = e.other.rigidBody;
+    if (!other) return;
+    const otherVel = other.linvel();
+    const speed = Math.sqrt(otherVel.x ** 2 + otherVel.z ** 2);
+    if (speed > 0.5) {
+      const force = speed * 1.2;
+      // Push in direction of player movement
+      ballRef.current.applyImpulse(
+        { x: otherVel.x * 0.6, y: force * 0.3, z: otherVel.z * 0.6 }, true
+      );
+      // Spin the ball (torque perpendicular to movement direction)
+      ballRef.current.applyTorqueImpulse(
+        { x: otherVel.z * 0.5, y: 0, z: -otherVel.x * 0.5 }, true
+      );
+    }
+  };
+
+  return (
+    <RigidBody ref={ballRef} type="dynamic" position={position}
+      collisionGroups={interactionGroups([0, 1], [0, 1])}
+      restitution={0.8} friction={0.4}
+      linearDamping={0.2} angularDamping={0.05}
+      lockRotations={false}
+      enabledRotations={[true, true, true]}
+      ccd
+      onCollisionEnter={handleCollision}
+    >
+      <BallCollider args={[radius]} density={0.03} restitution={0.8} friction={0.4} />
+      <mesh castShadow receiveShadow>
+        <sphereGeometry args={[radius, 14, 12]} />
+        <meshStandardMaterial color={color} flatShading roughness={0.5} />
+      </mesh>
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[radius * 0.98, radius * 0.05, 6, 20]} />
+        <meshStandardMaterial color="#fff" flatShading />
+      </mesh>
+      <mesh rotation={[0, 0, Math.PI / 2]}>
+        <torusGeometry args={[radius * 0.98, radius * 0.05, 6, 20]} />
+        <meshStandardMaterial color="#fff" flatShading />
+      </mesh>
+    </RigidBody>
+  );
+};
+
 /* ══════════════════════════════
-   PARKOUR COURSE — spacious & fun
+   VILLAGE LOBBY — thematic parkour
    ═══════════════════════════════ */
 const LobbyParkour = () => (
   <group>
-    <Ground />
+    {/* ── Ground — grassy terrain ── */}
+    <RigidBody type="fixed" position={[0, -0.2, 0]} collisionGroups={G}>
+      <CuboidCollider args={[60, 0.2, 60]} />
+      <mesh receiveShadow>
+        <boxGeometry args={[120, 0.4, 120]} />
+        <meshStandardMaterial color="#7EC850" roughness={0.95} flatShading />
+      </mesh>
+    </RigidBody>
 
-    {/* ── Giant NOT ME text on the ground ── */}
+    {/* ── Title ── */}
     <Text
-      position={[0, 0.05, -20]}
+      position={[0, 0.05, -15]}
       rotation={[-Math.PI / 2, 0, 0]}
-      fontSize={14}
+      fontSize={10}
       color="#F5E6D0"
       anchorX="center"
       anchorY="middle"
-      letterSpacing={0.3}
+      letterSpacing={0.4}
+      font={undefined}
     >
       NOT ME
     </Text>
 
-    {/* ── Spawn area — village stone plaza ── */}
-    <Plat position={[0, 0.2, 0]} size={[20, 0.5, 20]} color="#C4A882" />
+    {/* ══ VILLAGE PLAZA — spawn area ══ */}
+    <Plat position={[0, 0.1, 0]} size={[16, 0.3, 16]} color="#C4A882" />
 
-    {/* ══ Path A (right): easy stairs + bouncer ══ */}
-    <Plat position={[16, 1, 0]} size={[7, 0.5, 7]} color="#E8734A" />
-    <Plat position={[26, 2, 0]} size={[7, 0.5, 7]} color="#D4A574" />
-    <Plat position={[36, 3, 0]} size={[7, 0.5, 7]} color="#F5E6D0" />
-    <Bouncer position={[36, 3.2, 10]} size={[6, 0.3, 6]} />
-    <Plat position={[36, 8, 20]} size={[8, 0.5, 8]} color="#8B6914" />
+    {/* ── Village cottages (walkable roofs) ── */}
+    {/* KayKit medieval buildings */}
+    <LobbyModel path="/models/kaykit/building_home_A_red.gltf" position={[-8, 0, -8]} rotation={[0, 0.4, 0]} scale={4} />
+    <LobbyModel path="/models/kaykit/building_home_B_red.gltf" position={[8, 0, -7]} rotation={[0, -0.3, 0]} scale={3.5} />
+    <LobbyModel path="/models/kaykit/building_tavern_red.gltf" position={[-9, 0, 6]} rotation={[0, 0.8, 0]} scale={3.5} />
+    <LobbyModel path="/models/kaykit/building_home_A_red.gltf" position={[9, 0, 7]} rotation={[0, -0.6, 0]} scale={3.8} />
 
-    {/* ══ Path B (left): ramp + slider ══ */}
-    <Ramp position={[-14, 1.2, 0]} rotation={[0, 0, -0.12]} size={[10, 0.4, 7]} color="#4CAF50" />
-    <Plat position={[-24, 2.5, 0]} size={[7, 0.5, 7]} color="#5BBF5E" />
-    <Slider from={[-24, 2.8, 4]} to={[-24, 2.8, 28]} speed={0.4} color="#FF6B35" />
-    <Plat position={[-24, 3, 32]} size={[7, 0.5, 7]} color="#7EC850" />
-    <Bouncer position={[-24, 3.2, 32]} size={[6, 0.3, 6]} />
-    <Plat position={[-16, 8, 32]} size={[8, 0.5, 8]} color="#FFD700" />
+    {/* ══ GIANT BALLS — light, pushable, bouncy ══ */}
+    <GiantBall position={[-5, 3, 10]} radius={2} color="#E8734A" />
+    <GiantBall position={[5, 3, 10]} radius={1.8} color="#4A9BD9" />
 
-    {/* ══ Mid zone: sliders connect Path A & B to center platform ══ */}
-    <Slider from={[32, 8.5, 20]} to={[10, 8.5, 27]} speed={0.3} size={[6, 0.5, 6]} color="#E8734A" />
-    <Slider from={[-12, 8.5, 32]} to={[2, 8.5, 28]} speed={0.3} size={[6, 0.5, 6]} color="#4A9BD9" />
-    <Plat position={[6, 9, 28]} size={[10, 0.5, 10]} color="#C4A882" />
+    {/* ══ ROOFTOP PARKOUR ══ */}
+    {/* From ground to rooftops */}
+    <Plat position={[0, 3.5, -7.5]} size={[3, 0.4, 3]} color="#D4A574" />
+    <Plat position={[-4, 4.5, 0]} size={[3, 0.4, 3]} color="#D4A574" />
+    <Plat position={[4, 5, 2]} size={[3, 0.4, 3]} color="#D4A574" />
 
-    {/* ── Spinner challenge ── */}
-    <Spinner position={[6, 9.4, 28]} speed={0.25} length={14} color="#8B6914" />
+    {/* Path to the bell tower */}
+    <Plat position={[0, 6, 10]} size={[4, 0.4, 4]} color="#C4A882" />
+    <Spinner position={[0, 6.5, 10]} speed={0.2} length={8} color="#8B6914" />
+    <Plat position={[0, 7.5, 18]} size={[5, 0.4, 5]} color="#D4A574" />
+    <Bouncer position={[0, 7.7, 18]} size={[4, 0.2, 4]} color="#8B6914" />
 
-    {/* ══ Final climb ══ */}
-    <Plat position={[6, 10.5, 40]} size={[7, 0.5, 7]} color="#5BBF5E" />
-    <Plat position={[0, 12, 50]} size={[7, 0.5, 7]} color="#E8734A" />
-    <Plat position={[6, 13.5, 60]} size={[7, 0.5, 7]} color="#D4A574" />
-    <Bouncer position={[6, 13.7, 60]} size={[6, 0.3, 6]} />
+    {/* ── Bell tower — mid-point ── */}
+    <BellTower position={[0, 0, 30]} />
 
-    {/* ── Trophy platform ── */}
-    <Trophy position={[6, 20, 72]} />
+    {/* ══ SKY CLIMB — above the bell tower ══ */}
+    <Plat position={[3, 12, 32]} size={[3, 0.4, 3]} color="#D4A574" />
+    <Plat position={[-3, 14, 35]} size={[3, 0.4, 3]} color="#C4A882" />
+    <Plat position={[2, 16, 38]} size={[3, 0.4, 3]} color="#D4A574" />
+    <Spinner position={[0, 17, 42]} speed={0.15} length={10} color="#8B6914" />
+    <Plat position={[-2, 18.5, 46]} size={[3.5, 0.4, 3.5]} color="#C4A882" />
+    <Bouncer position={[-2, 18.7, 46]} size={[3, 0.2, 3]} color="#c4a44a" />
+    <Plat position={[2, 22, 50]} size={[4, 0.4, 4]} color="#D4A574" />
+    <Plat position={[0, 25, 54]} size={[5, 0.5, 5]} color="#FFD700" />
 
-    {/* ── Trampolines spread across the map (away from spawn 0,0 r=10) ── */}
-    <Bouncer position={[25, 0.1, -20]} size={[5, 0.15, 5]} color="#ff3366" />
-    <Bouncer position={[-25, 0.1, 15]} size={[5, 0.15, 5]} color="#33ff66" />
-    <Bouncer position={[35, 0.1, 15]} size={[5, 0.15, 5]} color="#6633ff" />
-    <Bouncer position={[-30, 0.1, -20]} size={[5, 0.15, 5]} color="#ffcc00" />
-    <Bouncer position={[15, 0.1, 25]} size={[5, 0.15, 5]} color="#ff6600" />
-    <Bouncer position={[-15, 0.1, -30]} size={[5, 0.15, 5]} color="#00ccff" />
-    <Bouncer position={[40, 0.1, -5]} size={[5, 0.15, 5]} color="#ff44cc" />
-    <Bouncer position={[-35, 0.1, 30]} size={[5, 0.15, 5]} color="#44ffaa" />
+    {/* ── Hay bale bouncers around the village ── */}
+    <Bouncer position={[14, 0.1, 0]} size={[3, 0.2, 3]} color="#c4a44a" />
+    <Bouncer position={[-14, 0.1, 0]} size={[3, 0.2, 3]} color="#c4a44a" />
+    <Bouncer position={[0, 0.1, 14]} size={[3, 0.2, 3]} color="#c4a44a" />
+    <Bouncer position={[0, 0.1, -14]} size={[3, 0.2, 3]} color="#c4a44a" />
 
-    {/* ── Ambient lights ── */}
-    <pointLight position={[36, 6, 10]} color="#ff3366" intensity={2} distance={15} />
-    <pointLight position={[-24, 6, 32]} color="#ff3366" intensity={2} distance={15} />
-    <pointLight position={[6, 12, 28]} color="#ff8800" intensity={2} distance={15} />
+    {/* ── Trees around the village ── */}
+    {[
+      [-14, 0, -10], [14, 0, -12], [-16, 0, 8], [16, 0, 10],
+      [-6, 0, 14], [6, 0, -14], [-18, 0, -2], [18, 0, 3],
+      [-10, 0, 15], [12, 0, 14], [-4, 0, -16], [15, 0, -4],
+    ].map((pos, i) => (
+      <LobbyTree key={i} position={pos} scale={0.8 + (i % 3) * 0.3} />
+    ))}
+
+    {/* ── Torches around the plaza ── */}
+    {[[-6, 0, -6], [6, 0, -6], [-6, 0, 6], [6, 0, 6]].map((pos, i) => (
+      <group key={`torch-${i}`} position={pos}>
+        <mesh position={[0, 0.7, 0]} castShadow>
+          <cylinderGeometry args={[0.04, 0.07, 1.4, 6]} />
+          <meshStandardMaterial color="#5a3a1a" flatShading />
+        </mesh>
+        <mesh position={[0, 1.5, 0]}>
+          <coneGeometry args={[0.08, 0.25, 5]} />
+          <meshBasicMaterial color="#ff8800" transparent opacity={0.85} />
+        </mesh>
+        <pointLight position={[0, 1.6, 0]} color="#ff8833" intensity={1.5} distance={8} />
+      </group>
+    ))}
+
+    {/* ── Warm ambient lights ── */}
+    <pointLight position={[0, 8, 0]} color="#FFD700" intensity={1} distance={25} />
+    <pointLight position={[0, 5, 30]} color="#FFD700" intensity={2} distance={15} />
   </group>
 );
 

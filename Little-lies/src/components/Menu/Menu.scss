@@ -3,22 +3,22 @@
 
 /* Menu wrapper with title + lobby code + buttons */
 .menu-wrapper {
-  margin-bottom: 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(100, 120, 180, 0.1);
+  margin-bottom: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(180, 140, 80, 0.1);
 }
 
 .menu-title-block {
   text-align: left;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .menu-game-title {
   font-family: 'Cinzel', serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
   letter-spacing: 3px;
 }
 
@@ -53,14 +53,14 @@
 
 .menu-container {
   display: flex;
-  gap: 6px;
-  margin-bottom: 16px;
+  gap: 4px;
+  margin-bottom: 6px;
 }
 
 .menu-buttons {
   flex: 1;
-  background: linear-gradient(135deg, rgba(25, 25, 40, 0.7) 0%, rgba(15, 15, 28, 0.6) 100%);
-  border: 1px solid rgba(100, 120, 180, 0.12);
+  background: linear-gradient(135deg, rgba(25, 20, 12, 0.6) 0%, rgba(15, 12, 8, 0.5) 100%);
+  border: 1px solid rgba(180, 140, 80, 0.1);
   border-radius: 8px;
   color: #aab;
   font-family: 'Inter', sans-serif;
@@ -79,9 +79,9 @@
   i { font-size: 14px; }
 
   &:hover {
-    background: linear-gradient(135deg, rgba(35, 35, 55, 0.8) 0%, rgba(20, 20, 38, 0.7) 100%);
-    color: #dde;
-    border-color: rgba(100, 140, 220, 0.25);
+    background: linear-gradient(135deg, rgba(35, 28, 15, 0.7) 0%, rgba(22, 18, 10, 0.6) 100%);
+    color: #ede0cc;
+    border-color: rgba(200, 160, 80, 0.2);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
   }
 }

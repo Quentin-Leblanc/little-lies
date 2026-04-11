@@ -13,6 +13,26 @@ const MODELS_TO_PRELOAD = [
   '/models/Villager_Dead.glb',
 ];
 
+// Loading flavor messages by progress threshold
+const LOADING_MESSAGES = [
+  { at: 0,   text: 'Ouverture des volets...' },
+  { at: 0.15, text: 'Allumage des lanternes...' },
+  { at: 0.3, text: 'Préparation de la forge...' },
+  { at: 0.45, text: 'Ouverture de la taverne...' },
+  { at: 0.6, text: 'Balayage de la place du village...' },
+  { at: 0.75, text: 'Sonnerie des cloches de l\'église...' },
+  { at: 0.9, text: 'Les villageois se rassemblent...' },
+  { at: 1,   text: 'Le village est prêt.' },
+];
+
+const getLoadingMessage = (p) => {
+  let msg = LOADING_MESSAGES[0].text;
+  for (const m of LOADING_MESSAGES) {
+    if (p >= m.at) msg = m.text;
+  }
+  return msg;
+};
+
 const RoleReveal = ({ onComplete }) => {
   const { getMe, getPlayers } = useGameEngine();
   const me = getMe();
@@ -21,59 +41,35 @@ const RoleReveal = ({ onComplete }) => {
   const [phase, setPhase] = useState('loading');
   const [progress, setProgress] = useState(0);
 
-  // Preload all models with GLTFLoader (download + parse into Three.js cache)
+  // Preload models one by one with visual progress
   useEffect(() => {
     const loader = new GLTFLoader();
-    const fileProgress = new Array(MODELS_TO_PRELOAD.length).fill(0);
-    const fileTotals = new Array(MODELS_TO_PRELOAD.length).fill(1);
-    let completed = 0;
+    const total = MODELS_TO_PRELOAD.length;
+    let cancelled = false;
 
-    const updateProgress = () => {
-      const loaded = fileProgress.reduce((a, b) => a + b, 0);
-      const total = fileTotals.reduce((a, b) => a + b, 0);
-      setProgress(total > 0 ? loaded / total : 0);
-    };
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-    // Load sequentially in batches of 3 to avoid overwhelming the GPU
-    const batchSize = 3;
-    const loadModel = (url, i) =>
+    const loadModel = (url) =>
       new Promise((resolve) => {
-        loader.load(
-          url,
-          () => { // onLoad — model fully parsed
-            completed++;
-            fileProgress[i] = fileTotals[i];
-            updateProgress();
-            resolve();
-          },
-          (xhr) => { // onProgress — byte download progress
-            if (xhr.lengthComputable) {
-              fileProgress[i] = xhr.loaded;
-              fileTotals[i] = xhr.total;
-              updateProgress();
-            }
-          },
-          () => { // onError — don't block
-            completed++;
-            fileProgress[i] = fileTotals[i];
-            updateProgress();
-            resolve();
-          }
-        );
+        loader.load(url, () => resolve(), undefined, () => resolve());
       });
 
     const loadAll = async () => {
-      for (let i = 0; i < MODELS_TO_PRELOAD.length; i += batchSize) {
-        const batch = MODELS_TO_PRELOAD.slice(i, i + batchSize).map(
-          (url, j) => loadModel(url, i + j)
-        );
-        await Promise.all(batch);
+      for (let i = 0; i < total; i++) {
+        if (cancelled) return;
+        await loadModel(MODELS_TO_PRELOAD[i]);
+        // Small pause so UI can render each step visibly
+        await wait(120);
+        if (!cancelled) setProgress((i + 1) / total);
       }
-      setProgress(1);
-      setTimeout(() => setPhase('waiting'), 400);
+      if (!cancelled) {
+        setProgress(1);
+        setTimeout(() => setPhase('waiting'), 400);
+      }
     };
 
     loadAll();
+    return () => { cancelled = true; };
   }, []);
 
   // Role reveal sequence — starts once loading is done
@@ -119,7 +115,18 @@ const RoleReveal = ({ onComplete }) => {
             transition={{ duration: 0.5 }}
           >
             <p className="loading-title">Not Me</p>
-            <p className="loading-text">Chargement des ressources</p>
+            <AnimatePresence mode="wait">
+              <motion.p
+                className="loading-text"
+                key={getLoadingMessage(progress)}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.35 }}
+              >
+                {getLoadingMessage(progress)}
+              </motion.p>
+            </AnimatePresence>
             <div className="loading-bar-track">
               <div
                 className="loading-bar-fill"

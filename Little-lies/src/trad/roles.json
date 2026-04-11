@@ -17,11 +17,11 @@
       "key": "villageois",
       "team": "town",
       "category": "town_government",
-      "description": "Un simple villageois sans pouvoir spécial.",
+      "description": "Tu es un simple villageois sans pouvoir spécial.",
       "couleur": "#78ff78",
       "icon": "fa-user",
       "actions": [],
-      "objectif": "Identifie et élimine les membres de la mafia et les menaces neutres.",
+      "objectif": "Ton objectif : identifier et éliminer les membres de la mafia et les menaces neutres.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -32,7 +32,7 @@
       "key": "sheriff",
       "team": "town",
       "category": "town_investigative",
-      "description": "Chaque nuit, investigue un joueur pour savoir s'il est suspect ou non.",
+      "description": "Tu es le Sheriff. Chaque nuit, tu interroges un joueur pour savoir s'il est suspect.",
       "couleur": "#ffff00",
       "icon": "fa-star",
       "actions": [
@@ -45,7 +45,7 @@
           "priority": 6
         }
       ],
-      "objectif": "Découvre les membres de la mafia et aide le village à les éliminer.",
+      "objectif": "Ton objectif : découvrir les membres de la mafia et aider le village.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -56,7 +56,7 @@
       "key": "docteur",
       "team": "town",
       "category": "town_protective",
-      "description": "Chaque nuit, soigne un joueur pour le protéger d'une attaque.",
+      "description": "Tu es le Docteur. Chaque nuit, tu soignes un joueur pour le protéger.",
       "couleur": "#00bfff",
       "icon": "fa-medkit",
       "actions": [
@@ -69,7 +69,7 @@
           "priority": 2
         }
       ],
-      "objectif": "Protège les villageois en empêchant leur élimination.",
+      "objectif": "Ton objectif : protéger les villageois en empêchant leur élimination.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -80,7 +80,7 @@
       "key": "lookout",
       "team": "town",
       "category": "town_investigative",
-      "description": "Chaque nuit, surveille un joueur pour voir qui lui rend visite.",
+      "description": "Tu es le Guetteur. Chaque nuit, tu surveilles un joueur pour voir qui lui rend visite.",
       "couleur": "#7fff00",
       "icon": "fa-eye",
       "actions": [
@@ -93,7 +93,7 @@
           "priority": 7
         }
       ],
-      "objectif": "Identifie les visiteurs nocturnes pour aider le village.",
+      "objectif": "Ton objectif : identifier les visiteurs nocturnes pour aider le village.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -104,7 +104,7 @@
       "key": "vigilante",
       "team": "town",
       "category": "town_killing",
-      "description": "Peut tirer sur un joueur la nuit. Se suicide de culpabilité s'il tue un membre du village.",
+      "description": "Tu es le Vigilante. Tu peux tirer sur un joueur la nuit, mais tu te suicides si tu tues un innocent.",
       "couleur": "#c8e600",
       "icon": "fa-crosshairs",
       "actions": [
@@ -117,7 +117,7 @@
           "priority": 4
         }
       ],
-      "objectif": "Élimine les menaces du village par la force.",
+      "objectif": "Ton objectif : éliminer les menaces du village par la force.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 1,
@@ -128,7 +128,7 @@
       "key": "maire",
       "team": "town",
       "category": "town_government",
-      "description": "Peut se révéler pour obtenir 3 votes, mais ne peut plus être soigné après.",
+      "description": "Tu es le Maire. Tu peux te révéler pour obtenir 3 votes, mais tu ne pourras plus être soigné.",
       "couleur": "#ffd700",
       "icon": "fa-landmark",
       "actions": [
@@ -141,7 +141,7 @@
           "oneTimeUse": true
         }
       ],
-      "objectif": "Utilise son influence politique pour guider le village.",
+      "objectif": "Ton objectif : utiliser ton influence pour guider le village.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -152,7 +152,7 @@
       "key": "godfather",
       "team": "mafia",
       "category": "mafia_killing",
-      "description": "Le chef de la mafia. Ordonne les exécutions et apparaît non-suspect au Sheriff.",
+      "description": "Tu es le Parrain. Tu diriges la mafia et apparais non-suspect au Sheriff.",
       "couleur": "#ff0000",
       "icon": "fa-user-secret",
       "actions": [
@@ -165,7 +165,7 @@
           "priority": 4
         }
       ],
-      "objectif": "Élimine tous ceux qui s'opposent à la mafia.",
+      "objectif": "Ton objectif : éliminer tous ceux qui s'opposent à la mafia.",
       "unique": true,
       "nightImmune": true,
       "detectResult": "non-suspect",
@@ -177,7 +177,7 @@
       "key": "mafioso",
       "team": "mafia",
       "category": "mafia_killing",
-      "description": "L'exécutant de la mafia. Exécute les ordres du Godfather.",
+      "description": "Tu es l'exécutant de la mafia. Tu exécutes les ordres du Parrain.",
       "couleur": "#cc0000",
       "icon": "fa-gun",
       "actions": [
@@ -190,7 +190,7 @@
           "priority": 4
         }
       ],
-      "objectif": "Élimine tous ceux qui s'opposent à la mafia.",
+      "objectif": "Ton objectif : éliminer tous ceux qui s'opposent à la mafia.",
       "nightImmune": false,
       "detectResult": "suspect",
       "attackLevel": 1,
@@ -201,7 +201,7 @@
       "key": "framer",
       "team": "mafia",
       "category": "mafia_deception",
-      "description": "Peut piéger un joueur pour le faire apparaître suspect au Sheriff.",
+      "description": "Tu es le Piégeur. Tu peux faire apparaître un joueur comme suspect au Sheriff.",
       "couleur": "#ff4444",
       "icon": "fa-mask",
       "actions": [
@@ -214,7 +214,7 @@
           "priority": 3
         }
       ],
-      "objectif": "Sème la confusion pour protéger la mafia.",
+      "objectif": "Ton objectif : semer la confusion pour protéger la mafia.",
       "nightImmune": false,
       "detectResult": "suspect",
       "attackLevel": 0,
@@ -225,7 +225,7 @@
       "key": "blackmailer",
       "team": "mafia",
       "category": "mafia_support",
-      "description": "Peut faire chanter un joueur pour l'empêcher de parler le jour suivant.",
+      "description": "Tu es le Maître-chanteur. Tu peux empêcher un joueur de parler le jour suivant.",
       "couleur": "#ff6666",
       "icon": "fa-comment-slash",
       "actions": [
@@ -238,7 +238,7 @@
           "priority": 3
         }
       ],
-      "objectif": "Réduit au silence les menaces pour la mafia.",
+      "objectif": "Ton objectif : réduire au silence les menaces pour la mafia.",
       "nightImmune": false,
       "detectResult": "suspect",
       "attackLevel": 0,
@@ -249,7 +249,7 @@
       "key": "consigliere",
       "team": "mafia",
       "category": "mafia_support",
-      "description": "L'informateur de la mafia. Peut découvrir le rôle exact d'un joueur.",
+      "description": "Tu es le Consigliere. Tu peux découvrir le rôle exact d'un joueur.",
       "couleur": "#ff8888",
       "icon": "fa-binoculars",
       "actions": [
@@ -262,7 +262,7 @@
           "priority": 6
         }
       ],
-      "objectif": "Fournit des informations précieuses à la mafia.",
+      "objectif": "Ton objectif : fournir des informations précieuses à la mafia.",
       "nightImmune": false,
       "detectResult": "suspect",
       "attackLevel": 0,
@@ -273,7 +273,7 @@
       "key": "serial_killer",
       "team": "neutral",
       "category": "neutral_killing",
-      "description": "Un tueur solitaire qui élimine un joueur chaque nuit. Immunité nocturne.",
+      "description": "Tu es le Serial Killer, un tueur solitaire. Tu élimines un joueur chaque nuit. Tu as l'immunité nocturne.",
       "couleur": "#9370db",
       "icon": "fa-skull",
       "actions": [
@@ -286,7 +286,7 @@
           "priority": 4
         }
       ],
-      "objectif": "Être le dernier survivant.",
+      "objectif": "Ton objectif : être le dernier survivant.",
       "nightImmune": true,
       "detectResult": "suspect",
       "attackLevel": 1,
@@ -298,11 +298,11 @@
       "key": "jester",
       "team": "neutral",
       "category": "neutral_benign",
-      "description": "Un bouffon qui veut se faire lyncher par le village. Aucun pouvoir.",
+      "description": "Tu es le Bouffon. Tu veux te faire lyncher par le village. Tu n'as aucun pouvoir.",
       "couleur": "#ff69b4",
       "icon": "fa-face-grin-tears",
       "actions": [],
-      "objectif": "Se faire lyncher par le village.",
+      "objectif": "Ton objectif : te faire lyncher par le village.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -314,7 +314,7 @@
       "key": "survivor",
       "team": "neutral",
       "category": "neutral_benign",
-      "description": "Un survivant qui veut juste rester en vie. Possède un gilet pare-balles limité.",
+      "description": "Tu es le Survivant. Tu veux juste rester en vie. Tu possèdes un gilet pare-balles limité.",
       "couleur": "#daa520",
       "icon": "fa-shield-halved",
       "actions": [
@@ -328,7 +328,7 @@
           "priority": 1
         }
       ],
-      "objectif": "Survivre jusqu'à la fin de la partie.",
+      "objectif": "Ton objectif : survivre jusqu'à la fin de la partie.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -340,11 +340,11 @@
       "key": "executioner",
       "team": "neutral",
       "category": "neutral_evil",
-      "description": "A une cible secrète du village. Doit la faire lyncher.",
+      "description": "Tu es l'Exécuteur. Tu as une cible secrète du village que tu dois faire lyncher.",
       "couleur": "#808080",
       "icon": "fa-bullseye",
       "actions": [],
-      "objectif": "Faire lyncher votre cible par le village.",
+      "objectif": "Ton objectif : faire lyncher ta cible par le village.",
       "nightImmune": true,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -356,7 +356,7 @@
       "key": "escort",
       "team": "town",
       "category": "town_support",
-      "description": "Chaque nuit, bloque un joueur pour l'empêcher d'utiliser son pouvoir.",
+      "description": "Tu es l'Escort. Chaque nuit, tu bloques un joueur pour l'empêcher d'utiliser son pouvoir.",
       "couleur": "#ff99cc",
       "icon": "fa-ban",
       "actions": [
@@ -369,7 +369,7 @@
           "priority": 1
         }
       ],
-      "objectif": "Bloque les pouvoirs ennemis pour protéger le village.",
+      "objectif": "Ton objectif : bloquer les pouvoirs ennemis pour protéger le village.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -380,7 +380,7 @@
       "key": "bodyguard",
       "team": "town",
       "category": "town_protective",
-      "description": "Protège un joueur la nuit. Si la cible est attaquée, le Bodyguard tue l'attaquant mais meurt aussi.",
+      "description": "Tu es le Garde du corps. Tu protèges un joueur la nuit. Si ta cible est attaquée, tu tues l'attaquant mais tu meurs aussi.",
       "couleur": "#4682b4",
       "icon": "fa-shield",
       "actions": [
@@ -393,7 +393,7 @@
           "priority": 2
         }
       ],
-      "objectif": "Protège le village au prix de sa vie.",
+      "objectif": "Ton objectif : protéger le village au prix de ta vie.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 2,
@@ -404,7 +404,7 @@
       "key": "spy",
       "team": "town",
       "category": "town_investigative",
-      "description": "Peut lire le chat mafia la nuit et voir qui la mafia visite.",
+      "description": "Tu es l'Espion. Tu peux lire le chat mafia la nuit et voir qui la mafia visite.",
       "couleur": "#20b2aa",
       "icon": "fa-user-ninja",
       "actions": [
@@ -417,7 +417,7 @@
           "priority": 7
         }
       ],
-      "objectif": "Infiltre la mafia pour obtenir des informations cruciales.",
+      "objectif": "Ton objectif : infiltrer la mafia pour obtenir des informations cruciales.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 0,
@@ -428,7 +428,7 @@
       "key": "jailor",
       "team": "town",
       "category": "town_killing",
-      "description": "Choisit un joueur pendant le jour pour l'emprisonner la nuit. Peut l'exécuter (3 utilisations).",
+      "description": "Tu es le Geôlier. Tu choisis un joueur pendant le jour pour l'emprisonner la nuit. Tu peux l'exécuter (3 utilisations).",
       "couleur": "#b8860b",
       "icon": "fa-lock",
       "actions": [
@@ -450,7 +450,7 @@
           "priority": 4
         }
       ],
-      "objectif": "Interroge et élimine les suspects de manière contrôlée.",
+      "objectif": "Ton objectif : interroger et éliminer les suspects de manière contrôlée.",
       "nightImmune": false,
       "detectResult": "non-suspect",
       "attackLevel": 2,

@@ -143,6 +143,12 @@ function App() {
                         <TimeBar />
                         <div className="phase-overlay"><Time /></div>
                         <MainScene />
+                        {/* Vote arrow indicator — floats over 3D scene pointing right to sidebar */}
+                        {phase === CONSTANTS.PHASE.VOTING && (
+                            <div className="vote-scene-arrow">
+                                <i className="fas fa-arrow-right"></i>
+                            </div>
+                        )}
                     </div>
 
                     {/* Sidebar toggle (mobile/tablet) */}

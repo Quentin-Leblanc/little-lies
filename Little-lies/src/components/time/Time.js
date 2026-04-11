@@ -73,7 +73,7 @@ const Time = () => {
           {dayNightLabel}
         </motion.div>
       </AnimatePresence>
-      {/* Phase + countdown — top right */}
+      {/* Phase + countdown + progress bar — top right */}
       <div className="phase-info" style={{ background: phaseBg }}>
         <AnimatePresence mode="wait">
           <motion.div
@@ -102,6 +102,12 @@ const Time = () => {
             >
               {timeRemaining}s
             </motion.div>
+          </div>
+        )}
+        {/* Inline progress bar */}
+        {!isInfoPhase && !(dayCount === 1 && phase === 'DISCUSSION') && (
+          <div className="phase-progress-bar">
+            <div className="phase-progress-fill" style={{ width: `${progressPercentage}%`, backgroundColor: barColor }} />
           </div>
         )}
       </div>

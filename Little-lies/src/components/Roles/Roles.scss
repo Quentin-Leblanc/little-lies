@@ -1,19 +1,17 @@
 .roles-list-box {
-  margin-bottom: 16px;
-  padding: 10px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(100, 120, 180, 0.1);
-  background: linear-gradient(135deg, rgba(20, 20, 35, 0.4) 0%, rgba(10, 10, 20, 0.3) 100%);
-  border-radius: 10px;
-  border: 1px solid rgba(100, 120, 180, 0.08);
+  margin-bottom: 6px;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, rgba(25, 20, 12, 0.4) 0%, rgba(15, 12, 8, 0.3) 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(180, 140, 80, 0.08);
 
   h3 {
     font-family: 'Cinzel', serif;
-    font-size: 16px;
-    margin: 0 0 8px 0;
+    font-size: 13px;
+    margin: 0 0 6px 0;
     text-align: left;
     color: #99a;
-    i { margin-right: 6px; color: #99a; }
+    i { margin-right: 5px; color: #99a; font-size: 12px; }
   }
 }
 
@@ -24,7 +22,7 @@
 }
 
 .roles-group {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .roles-group-label {
