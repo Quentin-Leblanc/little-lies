@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { playDayStart } from './utils/AudioManager';
 import {
     Graveyard,
     Menu,
@@ -66,9 +65,6 @@ function App() {
         const prev = prevPhaseRef.current;
         prevPhaseRef.current = phase;
         if (!prev || prev === phase) return;
-
-        // Rooster sound when day starts
-        if (phase === CONSTANTS.PHASE.DEATH_REPORT) playDayStart();
 
         const PHASE_BANNERS = {
             [CONSTANTS.PHASE.VOTING]: { text: 'Vote', icon: 'fa-gavel', className: 'banner-vote' },

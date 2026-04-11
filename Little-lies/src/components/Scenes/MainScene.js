@@ -1265,6 +1265,45 @@ const NightRain = ({ count = 300 }) => {
   );
 };
 
+// Lightning flashes — random bright light bursts
+const NightLightning = () => {
+  const lightRef = useRef();
+  const nextFlash = useRef(3 + Math.random() * 8);
+  const flashTimer = useRef(0);
+
+  useFrame((_, delta) => {
+    if (!lightRef.current) return;
+    flashTimer.current += delta;
+    if (flashTimer.current >= nextFlash.current) {
+      // Flash!
+      lightRef.current.intensity = 8 + Math.random() * 6;
+      setTimeout(() => {
+        if (lightRef.current) lightRef.current.intensity = 0;
+      }, 80 + Math.random() * 60);
+      // Double flash sometimes
+      if (Math.random() > 0.5) {
+        setTimeout(() => {
+          if (lightRef.current) lightRef.current.intensity = 5 + Math.random() * 4;
+          setTimeout(() => {
+            if (lightRef.current) lightRef.current.intensity = 0;
+          }, 50);
+        }, 200);
+      }
+      flashTimer.current = 0;
+      nextFlash.current = 5 + Math.random() * 12;
+    }
+  });
+
+  return (
+    <directionalLight
+      ref={lightRef}
+      position={[10, 30, -10]}
+      intensity={0}
+      color="#ccddff"
+    />
+  );
+};
+
 // Dense black fog patches on the plaza at night
 const NightDarkFog = ({ count = 20 }) => {
   const meshRef = useRef();
@@ -2362,6 +2401,7 @@ const MainScene = () => {
               <FloatingDust count={60} isDay={false} />
               <GroundFog isDay={false} />
               <NightRain count={300} />
+              <NightLightning />
               <NightCrows count={4} />
               <NightDarkFog count={20} />
             </>

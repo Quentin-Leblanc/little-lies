@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom';
 
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
-import { playVote } from '../../utils/AudioManager';
-
 import './playerActions.scss';
 
 const ACTION_COLORS = {
@@ -113,7 +111,6 @@ const PlayerActions = memo(function () {
 
   const handleVoteClick = (suspectedPlayerId) => {
     if (!me.isAlive || !isVotingPhase || hasVoted) return;
-    playVote();
 
     const voteWeight = me.voteWeight || 1;
 
@@ -282,13 +279,11 @@ const PlayerActions = memo(function () {
             const isNightTarget = isNightPhase && me.isAlive && me.character?.actions?.some(
               (a) => a.type !== 'VOTE' && a.type !== 'REVEAL' && Events.getMyActionTarget(a.type) === player.id
             );
+            const voteCount = trial?.suspects?.[player.id]?.suspectedBy?.length || 0;
             return (
-              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''} ${isNightTarget ? 'night-target' : ''}`}
-                style={player.isAlive ? { background: player.profile.color || '#888' } : undefined}
-              >
+              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''} ${isNightTarget ? 'night-target' : ''}`}>
                 <span className="player-name-cell">
-                  <i className="fas fa-gem player-color-icon" style={{ color: '#fff' }} />
-                  <span style={{ color: '#fff' }}>
+                  <span className="player-name-text" style={{ color: player.isAlive ? (player.profile?.color || '#ccc') : '#666' }}>
                     {player.profile.name}{player.id === me.id ? ' (toi)' : ''}
                   </span>
                   {player.isRevealed && (
@@ -301,19 +296,18 @@ const PlayerActions = memo(function () {
                 <div className="vote-container">
                   {player.isAlive ? (
                     <>
-                      {/* Vote button during VOTING phase — disabled after voting */}
-                      {me.isAlive && player.id !== me.id && isVotingPhase && (
+                      {/* Vote button — always show during voting, with count */}
+                      {isVotingPhase && (
                         <button
-                          className={`vote-btn ${myVoteTarget === player.id ? 'vote-btn-active' : ''} ${hasVoted && myVoteTarget !== player.id ? 'vote-btn-disabled' : ''}`}
-                          onClick={() => handleVoteClick(player.id)}
+                          className={`vote-btn ${myVoteTarget === player.id ? 'vote-btn-active' : ''} ${(hasVoted && myVoteTarget !== player.id) || player.id === me.id ? 'vote-btn-disabled' : ''}`}
+                          onClick={() => player.id !== me.id && handleVoteClick(player.id)}
+                          disabled={player.id === me.id}
                         >
                           Vote
                         </button>
                       )}
                       {isVotingPhase && (
-                        <span className={`vote-count ${(trial?.suspects[player.id]?.suspectedBy?.length || 0) > 0 ? 'has-votes' : ''}`}>
-                          {trial?.suspects[player.id]?.suspectedBy?.length || 0}/{players.filter(p => p.isAlive).length}
-                        </span>
+                        <span className="vote-count-num">{voteCount}</span>
                       )}
 
                       {/* Night actions — stays visible, pressed when selected */}

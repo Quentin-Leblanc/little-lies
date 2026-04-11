@@ -63,12 +63,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
-  margin-bottom: 5px;
-  border-radius: 8px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   font-weight: bold;
-  font-size: 17px;
+  font-size: 15px;
+  background: rgba(0, 0, 0, 0.45);
   min-height: 42px;
   transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -112,19 +113,12 @@
   }
 }
 
-.vote-count {
-  min-width: 28px;
+.vote-count-num {
+  min-width: 20px;
   text-align: center;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
-  color: #ccc;
-  padding: 2px 6px;
-  border-radius: 4px;
-
-  &.has-votes {
-    color: #ff4444;
-    background: rgba(255, 50, 50, 0.15);
-  }
+  color: #fff;
 }
 
 // Death flash (stays fixed overlay)
@@ -282,32 +276,38 @@
 }
 
 .vote-btn {
-  padding: 8px 18px;
-  font-size: 15px;
+  padding: 4px 12px;
+  font-size: 12px;
   margin: 0;
-  background: #cc2222;
-  color: #fff;
-  border: 2px solid #000;
-  border-radius: 4px;
+  background: #111;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 3px;
   cursor: pointer;
   transition: all 0.15s;
-  font-weight: bold;
+  font-weight: 600;
+  text-transform: capitalize;
 
   &:hover {
-    background: #aa1111;
+    background: #222;
+    border-color: #888;
   }
 
   &.vote-btn-active {
-    background: #881111;
+    background: #cc2222;
     border-color: #ff4444;
-    box-shadow: 0 0 0 2px #ff4444;
+    color: #fff;
     cursor: default;
   }
 
   &.vote-btn-disabled {
-    opacity: 0.3;
+    opacity: 0.35;
     pointer-events: none;
   }
+}
+
+.player-name-text {
+  font-weight: bold;
 }
 
 .action-btn {
