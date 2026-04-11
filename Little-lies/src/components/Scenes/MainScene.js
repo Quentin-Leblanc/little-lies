@@ -1232,46 +1232,36 @@ const GroundFog = ({ isDay = true }) => {
 // ============================================================
 // Night prowler — dark shadow that roams behind buildings
 // ============================================================
-const NightProwler = () => {
-  const groupRef = useRef();
-  const opacityRef = useRef(0);
-  useFrame((state) => {
-    if (!groupRef.current) return;
-    const t = state.clock.elapsedTime;
-    // Slow path far from center to avoid clipping through buildings
-    const x = Math.sin(t * 0.12) * 22;
-    const z = Math.cos(t * 0.08) * 20;
-    groupRef.current.position.set(x, 0.05, z);
-    groupRef.current.rotation.y = Math.atan2(Math.cos(t * 0.12) * 22 * 0.12, -Math.sin(t * 0.08) * 20 * 0.08);
-    // Pulse opacity — sometimes more visible, sometimes nearly invisible
-    opacityRef.current = 0.15 + Math.sin(t * 0.4) * 0.1;
-    groupRef.current.traverse((child) => {
-      if (child.material && child.material.opacity !== undefined && child.material.transparent) {
-        child.material.opacity = opacityRef.current;
-      }
+// Night rain — falling streaks
+const NightRain = ({ count = 300 }) => {
+  const meshRef = useRef();
+  const drops = useMemo(() => Array.from({ length: count }, () => ({
+    x: (Math.random() - 0.5) * 50,
+    y: Math.random() * 20,
+    z: (Math.random() - 0.5) * 50,
+    speed: 15 + Math.random() * 10,
+    offset: Math.random() * 20,
+  })), [count]);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame((_, delta) => {
+    if (!meshRef.current) return;
+    drops.forEach((d, i) => {
+      d.y -= d.speed * delta;
+      if (d.y < 0) d.y = 18 + Math.random() * 4;
+      dummy.position.set(d.x, d.y, d.z);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
     });
+    meshRef.current.instanceMatrix.needsUpdate = true;
   });
+
   return (
-    <group ref={groupRef}>
-      {/* Blurry dark mass — large, low, amorphous */}
-      <mesh position={[0, 0.8, 0]}>
-        <sphereGeometry args={[1.2, 6, 5]} />
-        <meshBasicMaterial color="#050008" transparent opacity={0.2} depthWrite={false} />
-      </mesh>
-      <mesh position={[0, 0.4, 0.3]}>
-        <sphereGeometry args={[0.8, 5, 4]} />
-        <meshBasicMaterial color="#080010" transparent opacity={0.15} depthWrite={false} />
-      </mesh>
-      {/* Eyes — tiny red glints */}
-      <mesh position={[-0.12, 1, 0.8]}>
-        <sphereGeometry args={[0.05, 4, 4]} />
-        <meshBasicMaterial color="#ff2200" transparent opacity={0.6} />
-      </mesh>
-      <mesh position={[0.12, 1, 0.8]}>
-        <sphereGeometry args={[0.05, 4, 4]} />
-        <meshBasicMaterial color="#ff2200" transparent opacity={0.6} />
-      </mesh>
-    </group>
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <boxGeometry args={[0.02, 0.5, 0.02]} />
+      <meshBasicMaterial color="#8899bb" transparent opacity={0.25} depthWrite={false} />
+    </instancedMesh>
   );
 };
 
@@ -1973,29 +1963,29 @@ const SceneLighting = ({ isDay, isSunset = false }) => {
     // Smooth intensity transitions (day/night)
     if (!isSunset) {
       if (sunRef.current) {
-        const target = isDay ? 3.0 : 0.5;
+        const target = isDay ? 3.0 : 0.2;
         sunRef.current.intensity += (target - sunRef.current.intensity) * 0.03;
       }
     }
     if (fillRef.current) {
-      const target = isDay ? (1.0 - sunsetEased * 0.6) : 0.2;
+      const target = isDay ? (1.0 - sunsetEased * 0.6) : 0.05;
       fillRef.current.intensity += (target - fillRef.current.intensity) * 0.05;
       if (isSunset) fillRef.current.color.set(sunsetEased > 0.3 ? '#ff8855' : '#ffd4a0');
     }
     if (ambientRef.current) {
-      const target = isDay ? (0.6 - sunsetEased * 0.3) : 0.2;
+      const target = isDay ? (0.6 - sunsetEased * 0.3) : 0.08;
       ambientRef.current.intensity += (target - ambientRef.current.intensity) * 0.05;
     }
   });
 
   return (
     <>
-      <ambientLight ref={ambientRef} intensity={isDay ? 0.6 : 0.2} />
+      <ambientLight ref={ambientRef} intensity={isDay ? 0.6 : 0.08} />
 
       <directionalLight
         ref={sunRef}
         position={isDay ? [15, 20, 10] : [-5, 12, 8]}
-        intensity={isDay ? 3.0 : 0.5}
+        intensity={isDay ? 3.0 : 0.2}
         color={isDay ? '#fff5e0' : '#6677aa'}
         castShadow
         shadow-mapSize-width={2048}
@@ -2011,14 +2001,14 @@ const SceneLighting = ({ isDay, isSunset = false }) => {
       <directionalLight
         ref={fillRef}
         position={isDay ? [-10, 8, -5] : [5, 6, -8]}
-        intensity={isDay ? 1.0 : 0.2}
+        intensity={isDay ? 1.0 : 0.05}
         color={isDay ? '#ffd4a0' : '#334466'}
       />
 
       <hemisphereLight
         color={isDay ? '#87CEEB' : '#1a1a3a'}
         groundColor={isDay ? '#8B7355' : '#0a0a15'}
-        intensity={isDay ? 0.4 : 0.15}
+        intensity={isDay ? 0.4 : 0.05}
       />
 
       {isDay && (
@@ -2371,7 +2361,7 @@ const MainScene = () => {
               <Fireflies count={60} />
               <FloatingDust count={60} isDay={false} />
               <GroundFog isDay={false} />
-              <NightProwler />
+              <NightRain count={300} />
               <NightCrows count={4} />
               <NightDarkFog count={20} />
             </>
@@ -2456,8 +2446,8 @@ const MainScene = () => {
               mipmapBlur
             />
             <Vignette
-              offset={game.isDay ? 0.3 : 0.15}
-              darkness={game.isDay ? 0.3 : 0.65}
+              offset={game.isDay ? 0.3 : 0.1}
+              darkness={game.isDay ? 0.3 : 0.85}
             />
           </EffectComposer>
         </Suspense>

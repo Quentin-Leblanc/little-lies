@@ -1,12 +1,12 @@
 /**
- * AudioManager — Lightweight synthesized game sounds using Web Audio API
- * No external audio files needed. All sounds are generated procedurally.
+ * AudioManager — Game sounds using Kenney CC0 audio files + Web Audio API
  */
 
 let audioCtx = null;
 let masterGain = null;
 let _volume = 0.3;
 let _muted = false;
+const audioCache = {};
 
 const getCtx = () => {
   if (!audioCtx) {
@@ -40,136 +40,108 @@ export const toggleMute = () => {
 
 export const isMuted = () => _muted;
 
-// --- Synth helpers ---
-const playTone = (freq, duration, type = 'sine', fadeOut = true) => {
+// --- File-based audio playback ---
+const playFile = async (url, volume = 1) => {
+  try {
+    const ctx = getCtx();
+    let buffer = audioCache[url];
+    if (!buffer) {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      buffer = await ctx.decodeAudioData(arrayBuffer);
+      audioCache[url] = buffer;
+    }
+    const source = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+    source.buffer = buffer;
+    source.connect(gain);
+    gain.connect(getGain());
+    source.start(0);
+  } catch (e) {
+    // Silently fail — don't block gameplay
+  }
+};
+
+// --- Synth fallback for quick tones ---
+const playTone = (freq, duration, type = 'sine') => {
   const ctx = getCtx();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = type;
   osc.frequency.value = freq;
-  gain.gain.value = 0.4;
-  if (fadeOut) gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  gain.gain.value = 0.15;
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
   osc.connect(gain);
   gain.connect(getGain());
   osc.start(ctx.currentTime);
   osc.stop(ctx.currentTime + duration);
 };
 
-const playChord = (freqs, duration, type = 'sine') => {
-  freqs.forEach((f) => playTone(f, duration, type));
-};
-
-const playNoise = (duration, filter = 2000) => {
-  const ctx = getCtx();
-  const bufferSize = ctx.sampleRate * duration;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-  const source = ctx.createBufferSource();
-  source.buffer = buffer;
-  const bandpass = ctx.createBiquadFilter();
-  bandpass.type = 'lowpass';
-  bandpass.frequency.value = filter;
-  const gain = ctx.createGain();
-  gain.gain.value = 0.15;
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-  source.connect(bandpass);
-  bandpass.connect(gain);
-  gain.connect(getGain());
-  source.start();
-};
-
 // --- Game sounds ---
 
-/** Played when night phase starts */
-export const playNightStart = () => {
-  playTone(220, 1.5, 'sine');
-  setTimeout(() => playTone(165, 1.5, 'sine'), 200);
-  setTimeout(() => playTone(130, 2, 'sine'), 400);
-};
-
-/** Rooster crow — short, subtle, when day starts */
+/** Day starts — door creak (morning) */
 export const playDayStart = () => {
-  const ctx = getCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = 'triangle';
-  // Quick pitch sweep up then down — like a tiny "cocorico"
-  osc.frequency.setValueAtTime(400, ctx.currentTime);
-  osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 0.08);
-  osc.frequency.linearRampToValueAtTime(600, ctx.currentTime + 0.15);
-  osc.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.25);
-  osc.frequency.linearRampToValueAtTime(500, ctx.currentTime + 0.45);
-  gain.gain.setValueAtTime(0.15, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.1);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-  osc.connect(gain);
-  gain.connect(getGain());
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.5);
+  playFile('/sounds/creak1.ogg', 0.5);
 };
 
-/** Vote cast sound */
+/** Night starts — knife draw (ominous) */
+export const playNightStart = () => {
+  playFile('/sounds/drawKnife1.ogg', 0.6);
+};
+
+/** Vote cast */
 export const playVote = () => {
-  playTone(600, 0.15, 'square');
-  setTimeout(() => playTone(800, 0.1, 'square'), 80);
+  playFile('/sounds/metalClick.ogg', 0.7);
 };
 
-/** Death / kill announcement */
+/** Death / execution — chop */
 export const playDeath = () => {
-  playTone(200, 0.8, 'sawtooth');
-  setTimeout(() => playTone(150, 1, 'sawtooth'), 200);
-  setTimeout(() => playNoise(0.5, 800), 100);
+  playFile('/sounds/chop.ogg', 0.8);
 };
 
-/** Execution sound */
 export const playExecution = () => {
-  playTone(180, 0.5, 'sawtooth');
-  setTimeout(() => playTone(120, 0.8, 'sawtooth'), 300);
-  setTimeout(() => playTone(80, 1.2, 'sawtooth'), 600);
+  playFile('/sounds/chop.ogg', 0.9);
 };
 
-/** Player spared */
+/** Player spared — coins */
 export const playSpared = () => {
-  playChord([330, 415, 520], 0.6, 'triangle');
+  playFile('/sounds/handleCoins.ogg', 0.5);
 };
 
 /** Night action selected */
 export const playActionSelect = () => {
-  playTone(500, 0.08, 'square');
+  playFile('/sounds/click3.ogg', 0.5);
 };
 
-/** Discussion phase */
-export const playDiscussion = () => {
-  playTone(440, 0.2, 'triangle');
-  setTimeout(() => playTone(550, 0.3, 'triangle'), 120);
-};
-
-/** Game over — victory */
-export const playVictory = () => {
-  const notes = [330, 440, 550, 660, 880];
-  notes.forEach((n, i) => setTimeout(() => playTone(n, 0.4, 'triangle'), i * 120));
-};
-
-/** Game over — defeat */
-export const playDefeat = () => {
-  const notes = [440, 330, 260, 200, 150];
-  notes.forEach((n, i) => setTimeout(() => playTone(n, 0.5, 'sawtooth'), i * 200));
-};
-
-/** Tick — timer running low */
-export const playTick = () => {
-  playTone(800, 0.05, 'square');
-};
-
-/** Chat message received */
+/** Chat message */
 export const playChatMessage = () => {
-  playTone(700, 0.06, 'sine');
+  playFile('/sounds/click3.ogg', 0.3);
+};
+
+/** Door close — night transition */
+export const playDoorClose = () => {
+  playFile('/sounds/doorClose_1.ogg', 0.5);
+};
+
+/** Victory */
+export const playVictory = () => {
+  playFile('/sounds/handleCoins.ogg', 0.7);
+};
+
+/** Defeat */
+export const playDefeat = () => {
+  playFile('/sounds/drawKnife1.ogg', 0.6);
+};
+
+/** Tick */
+export const playTick = () => {
+  playTone(600, 0.05, 'square');
 };
 
 export default {
   setVolume, getVolume, toggleMute, isMuted,
   playNightStart, playDayStart, playVote, playDeath,
-  playExecution, playSpared, playActionSelect, playDiscussion,
-  playVictory, playDefeat, playTick, playChatMessage,
+  playExecution, playSpared, playActionSelect,
+  playVictory, playDefeat, playTick, playChatMessage, playDoorClose,
 };
