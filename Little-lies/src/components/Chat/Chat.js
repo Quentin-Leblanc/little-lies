@@ -24,6 +24,8 @@ function Chat(props) {
   const [inputError, setInputError] = useState('');
   const [timeouts, setTimeouts] = useState({});
   const [messageTimestamps, setMessageTimestamps] = useState({});
+  const [inputVisible, setInputVisible] = useState(false);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -31,10 +33,30 @@ function Chat(props) {
     }
   }, [messages]);
 
+  // Open input on Enter key (global)
+  useEffect(() => {
+    const onGlobalKey = (e) => {
+      if (e.key === 'Enter' && !inputVisible && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        setInputVisible(true);
+        setTimeout(() => inputRef.current?.focus(), 50);
+      }
+    };
+    window.addEventListener('keydown', onGlobalKey);
+    return () => window.removeEventListener('keydown', onGlobalKey);
+  }, [inputVisible]);
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      sendMessage();
+      if (inputValues.trim()) {
+        sendMessage();
+      }
+      setInputVisible(false);
+    }
+    if (e.key === 'Escape') {
+      setInputVisible(false);
+      setInputValues('');
     }
   };
 
@@ -421,25 +443,28 @@ function Chat(props) {
         })}
         <div ref={messagesEndRef}></div>
       </div>
-      <div className="chat-input-container">
-        <input
-          className={`chat-input ${inputError ? 'invalid-char' : ''}`}
-          type="text"
-          value={inputValues}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          disabled={isDisabled}
-        />
-        <button
-          className="chat-send-button"
-          onClick={sendMessage}
-          disabled={inputError !== '' || isDisabled}
-        >
-          Envoyer
-        </button>
-        {inputError && <div className="invalid-char-message">{inputError}</div>}
-      </div>
+      {inputVisible ? (
+        <div className="chat-input-container">
+          <span className="chat-input-name" style={{ color: myColor || '#ccc' }}>{myName}:</span>
+          <input
+            ref={inputRef}
+            className={`chat-input ${inputError ? 'invalid-char' : ''}`}
+            type="text"
+            value={inputValues}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onBlur={() => { if (!inputValues.trim()) setInputVisible(false); }}
+            placeholder="Tapez un message..."
+            disabled={isDisabled}
+            autoFocus
+          />
+          {inputError && <div className="invalid-char-message">{inputError}</div>}
+        </div>
+      ) : (
+        <div className="chat-input-hint">
+          Appuyez sur <kbd>Entrée</kbd> pour écrire
+        </div>
+      )}
     </div>
   );
 }
