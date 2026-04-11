@@ -88,11 +88,25 @@ export const playNightStart = () => {
   setTimeout(() => playTone(130, 2, 'sine'), 400);
 };
 
-/** Played when day phase starts */
+/** Rooster crow — short, subtle, when day starts */
 export const playDayStart = () => {
-  playTone(330, 0.3, 'triangle');
-  setTimeout(() => playTone(440, 0.3, 'triangle'), 150);
-  setTimeout(() => playTone(550, 0.5, 'triangle'), 300);
+  const ctx = getCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'triangle';
+  // Quick pitch sweep up then down — like a tiny "cocorico"
+  osc.frequency.setValueAtTime(400, ctx.currentTime);
+  osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 0.08);
+  osc.frequency.linearRampToValueAtTime(600, ctx.currentTime + 0.15);
+  osc.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.25);
+  osc.frequency.linearRampToValueAtTime(500, ctx.currentTime + 0.45);
+  gain.gain.setValueAtTime(0.15, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.1);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+  osc.connect(gain);
+  gain.connect(getGain());
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.5);
 };
 
 /** Vote cast sound */

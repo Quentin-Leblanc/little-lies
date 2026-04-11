@@ -16,7 +16,6 @@ const NIGHT_AMBIANCE = [
   'Le vent souffle et emporte des murmures lointains...',
   'Quelqu\'un frappe à une porte... puis le silence.',
   'Les torches vacillent dans l\'obscurité...',
-  'Le village retient son souffle.',
   'Une lumière s\'éteint dans une maison au loin...',
   'Les étoiles semblent observer le village cette nuit.',
   'Le bois de la potence grince sous le vent...',
@@ -30,7 +29,17 @@ const NIGHT_AMBIANCE = [
   'Une porte grince doucement dans la nuit...',
   'Quelque chose a bougé près de l\'église...',
   'La brume s\'épaissit autour du village...',
-  'Personne n\'ose regarder par la fenêtre ce soir...',
+  'Un corbeau croasse au loin...',
+  'Le vent apporte une odeur de sang...',
+  'Les flammes des torches dansent nerveusement...',
+  'On jurerait avoir vu des yeux rouges dans l\'ombre...',
+  'Un hurlement résonne dans la vallée...',
+  'Les feuilles craquent sous des pas invisibles...',
+  'Le brouillard enveloppe la place du village...',
+  'Quelqu\'un a laissé sa porte entrouverte...',
+  'Une chaîne grince au puits du village...',
+  'L\'air est chargé de tension cette nuit...',
+  'Un loup hurle au loin dans les montagnes...',
 ];
 
 // ============================================================

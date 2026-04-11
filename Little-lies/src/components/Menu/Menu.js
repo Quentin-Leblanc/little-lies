@@ -10,6 +10,7 @@ const Menu = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [roomCode, setRoomCode] = useState('');
+  const [muted, setMuted] = useState(Audio.isMuted());
 
   const [messages = []] = useMultiplayerState('chatMessages', []);
 
@@ -50,6 +51,9 @@ const Menu = () => {
         </button>
         <button className="menu-btn-icon" onClick={() => setShowLogs(true)} title="Logs">
           <i className="fas fa-scroll"></i>
+        </button>
+        <button className="menu-btn-icon" onClick={() => { const m = Audio.toggleMute(); setMuted(m); }} title={muted ? 'Activer le son' : 'Couper le son'}>
+          <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
         </button>
       </div>
       {showMenu && (
