@@ -129,27 +129,33 @@ function App() {
 
             {/* Game UI — pre-mounts behind curtain during role reveal, stays after curtain opens */}
             {(curtainReady || !showRoleReveal) && <GameComponent>
+                {/* 3D Scene — fullscreen background */}
+                <div className="layout-center">
+                    <MainScene />
+                </div>
+
+                {/* HUD — fixed top center */}
+                <div className="hud-top">
+                    <Time />
+                </div>
+
+                {/* Vote arrow */}
+                {phase === CONSTANTS.PHASE.VOTING && (
+                    <div className="vote-scene-arrow">
+                        <i className="fas fa-arrow-right"></i>
+                    </div>
+                )}
+
                 <div className="game-layout">
-                    {/* Left - Menu + Roles + Graveyard */}
+                    {/* Top-left — Menu + (Graveyard | Roles) */}
                     <div className="layout-players">
                         <Menu />
-                        <Roles />
-                        <Graveyard />
+                        <div className="players-row">
+                            <Graveyard />
+                            <Roles />
+                        </div>
                     </div>
                     <AdminPanel />
-
-                    {/* Center - 3D scene + progress bar + phase info */}
-                    <div className="layout-center">
-                        <TimeBar />
-                        <div className="phase-overlay"><Time /></div>
-                        <MainScene />
-                        {/* Vote arrow indicator — floats over 3D scene pointing right to sidebar */}
-                        {phase === CONSTANTS.PHASE.VOTING && (
-                            <div className="vote-scene-arrow">
-                                <i className="fas fa-arrow-right"></i>
-                            </div>
-                        )}
-                    </div>
 
                     {/* Sidebar toggle (mobile/tablet) */}
                     <button className="sidebar-toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
@@ -157,12 +163,12 @@ function App() {
                     </button>
                     {sidebarOpen && <div className="sidebar-backdrop show" onClick={() => setSidebarOpen(false)} />}
 
-                    {/* Right - Role info + player list */}
+                    {/* Right — Role info + player list */}
                     <div className={`layout-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
                         <Player />
                     </div>
 
-                    {/* Bottom - Chat */}
+                    {/* Bottom-left — Chat */}
                     <div className={`layout-chat ${phase === CONSTANTS.PHASE.DISCUSSION ? 'highlight-discussion' : ''}`}>
                         <Chat night={isNight} />
                     </div>

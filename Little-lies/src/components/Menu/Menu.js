@@ -36,23 +36,20 @@ const Menu = () => {
 
   return (
     <div className="menu-wrapper">
-      <div className="menu-title-block">
+      <div className="menu-bar">
         <h1 className="menu-game-title">Not Me</h1>
         <div className="menu-lobby-code" onClick={copyCode} title="Cliquer pour copier">
-          <span className="menu-code-label">Code lobby :</span>
           <span className="menu-code-value">{roomCode || '...'}</span>
           <i className="fas fa-copy menu-code-copy"></i>
         </div>
-      </div>
-      <div className="menu-container">
-        <button className="menu-buttons" onClick={() => setShowMenu(true)}>
-          <i className="fas fa-bars"></i> Menu
+        <button className="menu-btn-icon" onClick={() => setShowMenu(true)} title="Menu">
+          <i className="fas fa-bars"></i>
         </button>
-        <button className="menu-buttons" onClick={() => setShowHelp(true)}>
-          <i className="fas fa-book"></i> Aide
+        <button className="menu-btn-icon" onClick={() => setShowHelp(true)} title="Aide">
+          <i className="fas fa-book"></i>
         </button>
-        <button className="menu-buttons" onClick={() => setShowLogs(true)}>
-          <i className="fas fa-scroll"></i> Logs
+        <button className="menu-btn-icon" onClick={() => setShowLogs(true)} title="Logs">
+          <i className="fas fa-scroll"></i>
         </button>
       </div>
       {showMenu && (

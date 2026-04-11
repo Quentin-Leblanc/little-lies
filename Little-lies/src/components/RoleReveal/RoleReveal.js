@@ -13,25 +13,17 @@ const MODELS_TO_PRELOAD = [
   '/models/Villager_Dead.glb',
 ];
 
-// Loading flavor messages by progress threshold
+// Loading flavor messages — cycle independently of progress
 const LOADING_MESSAGES = [
-  { at: 0,   text: 'Ouverture des volets...' },
-  { at: 0.15, text: 'Allumage des lanternes...' },
-  { at: 0.3, text: 'Préparation de la forge...' },
-  { at: 0.45, text: 'Ouverture de la taverne...' },
-  { at: 0.6, text: 'Balayage de la place du village...' },
-  { at: 0.75, text: 'Sonnerie des cloches de l\'église...' },
-  { at: 0.9, text: 'Les villageois se rassemblent...' },
-  { at: 1,   text: 'Le village est prêt.' },
+  'Ouverture des volets...',
+  'Allumage des lanternes...',
+  'Préparation de la forge...',
+  'Ouverture de la taverne...',
+  'Balayage de la place du village...',
+  'Sonnerie des cloches de l\'église...',
+  'Les villageois se rassemblent...',
+  'Le village est prêt.',
 ];
-
-const getLoadingMessage = (p) => {
-  let msg = LOADING_MESSAGES[0].text;
-  for (const m of LOADING_MESSAGES) {
-    if (p >= m.at) msg = m.text;
-  }
-  return msg;
-};
 
 const RoleReveal = ({ onComplete }) => {
   const { getMe, getPlayers } = useGameEngine();
@@ -40,6 +32,16 @@ const RoleReveal = ({ onComplete }) => {
   // loading -> waiting -> intro -> flip -> details -> done
   const [phase, setPhase] = useState('loading');
   const [progress, setProgress] = useState(0);
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  // Cycle messages every 1.5s independently of loading
+  useEffect(() => {
+    if (phase !== 'loading') return;
+    const interval = setInterval(() => {
+      setMsgIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [phase]);
 
   // Preload models one by one with visual progress
   useEffect(() => {
@@ -118,13 +120,13 @@ const RoleReveal = ({ onComplete }) => {
             <AnimatePresence mode="wait">
               <motion.p
                 className="loading-text"
-                key={getLoadingMessage(progress)}
+                key={LOADING_MESSAGES[msgIndex]}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.35 }}
               >
-                {getLoadingMessage(progress)}
+                {LOADING_MESSAGES[msgIndex]}
               </motion.p>
             </AnimatePresence>
             <div className="loading-bar-track">

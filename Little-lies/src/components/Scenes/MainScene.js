@@ -789,13 +789,27 @@ const BUILDING_POSITIONS = [
 
 // Background mountains — procedural cones
 const MOUNTAINS = [
+  // North
   { position: [0, 0, -30],   scale: 5, variant: 0 },
+  { position: [-15, 0, -28], scale: 3.5, variant: 7 },
+  { position: [15, 0, -28],  scale: 4, variant: 8 },
+  // Northwest / Northeast
   { position: [-25, 0, -20], scale: 4, variant: 1 },
   { position: [25, 0, -20],  scale: 4.5, variant: 2 },
+  // West / East
   { position: [-30, 0, 0],   scale: 3.5, variant: 3 },
   { position: [30, 0, 0],    scale: 3.5, variant: 4 },
+  { position: [-32, 0, -10], scale: 3, variant: 9 },
+  { position: [32, 0, -10],  scale: 3, variant: 10 },
+  // Southwest / Southeast
   { position: [-25, 0, 18],  scale: 4, variant: 5 },
   { position: [25, 0, 18],   scale: 4, variant: 6 },
+  { position: [-30, 0, 10],  scale: 3, variant: 11 },
+  { position: [30, 0, 10],   scale: 3, variant: 12 },
+  // South — fill the gap
+  { position: [0, 0, 28],    scale: 4.5, variant: 13 },
+  { position: [-15, 0, 25],  scale: 3.5, variant: 14 },
+  { position: [15, 0, 25],   scale: 3.5, variant: 15 },
 ];
 
 const TORCH_POS = [
@@ -1253,16 +1267,16 @@ const NightProwler = () => {
 };
 
 // Dense black fog patches on the plaza at night
-const NightDarkFog = ({ count = 12 }) => {
+const NightDarkFog = ({ count = 20 }) => {
   const meshRef = useRef();
   const clouds = useMemo(() => Array.from({ length: count }, (_, i) => ({
-    x: (Math.sin(i * 2.1) * 10),
-    z: (Math.cos(i * 1.7) * 10),
-    y: 0.2 + (i % 3) * 0.15,
-    scaleX: 2 + (i % 4) * 1.5,
-    scaleZ: 1.5 + (i % 3) * 1.2,
-    speed: 0.04 + (i % 5) * 0.01,
-    offset: i * 1.3,
+    x: (Math.sin(i * 1.8) * 14),
+    z: (Math.cos(i * 1.4) * 14),
+    y: 0.3 + (i % 4) * 0.4,
+    scaleX: 3 + (i % 5) * 2,
+    scaleZ: 2.5 + (i % 4) * 1.8,
+    speed: 0.03 + (i % 5) * 0.008,
+    offset: i * 1.1,
   })), [count]);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
@@ -1285,8 +1299,8 @@ const NightDarkFog = ({ count = 12 }) => {
 
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
-      <sphereGeometry args={[1, 7, 5]} />
-      <meshBasicMaterial color="#0a0014" transparent opacity={0.3} depthWrite={false} />
+      <sphereGeometry args={[1.5, 7, 5]} />
+      <meshBasicMaterial color="#050010" transparent opacity={0.4} depthWrite={false} />
     </instancedMesh>
   );
 };
@@ -2141,13 +2155,11 @@ const MainScene = () => {
     return () => fadeTimers.current.forEach(clearTimeout);
   }, [phase]);
 
-  // Death report sequence: blood effect first, then text
+  // Death report sequence: blood effect + text together, quickly
   useEffect(() => {
     if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
-      // Blood effect appears first (after day text fades)
-      const t1 = setTimeout(() => setShowBloodEffect(true), 800);
-      // Death report text appears after blood has started
-      const t2 = setTimeout(() => setShowDeathReport(true), 1800);
+      const t1 = setTimeout(() => setShowBloodEffect(true), 300);
+      const t2 = setTimeout(() => setShowDeathReport(true), 600);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     } else {
       setShowDeathReport(false);
@@ -2352,7 +2364,7 @@ const MainScene = () => {
               <GroundFog isDay={false} />
               <NightProwler />
               <NightCrows count={4} />
-              <NightDarkFog count={12} />
+              <NightDarkFog count={20} />
             </>
           )}
 
@@ -2513,7 +2525,7 @@ const MainScene = () => {
       {/* Phase announcements */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
         <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 2.5s ease-out forwards' }}>
-          <div className="announcement-text">Personne n'a été lynché aujourd'hui.</div>
+          <div className="announcement-text">Tout le monde peut rentrer chez soi ce soir.</div>
         </div>
       )}
       {phase === CONSTANTS.PHASE.SPARED && (

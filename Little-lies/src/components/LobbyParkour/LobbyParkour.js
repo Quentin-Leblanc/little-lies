@@ -212,7 +212,7 @@ const LobbyParkour = () => (
 
     {/* ── Title ── */}
     <Text
-      position={[0, 0.05, -15]}
+      position={[0, 0.05, -30]}
       rotation={[-Math.PI / 2, 0, 0]}
       fontSize={10}
       color="#F5E6D0"
@@ -228,11 +228,11 @@ const LobbyParkour = () => (
     <Plat position={[0, 0.1, 0]} size={[16, 0.3, 16]} color="#C4A882" />
 
     {/* ── Village cottages (walkable roofs) ── */}
-    {/* KayKit medieval buildings */}
-    <LobbyModel path="/models/kaykit/building_home_A_red.gltf" position={[-8, 0, -8]} rotation={[0, 0.4, 0]} scale={4} />
-    <LobbyModel path="/models/kaykit/building_home_B_red.gltf" position={[8, 0, -7]} rotation={[0, -0.3, 0]} scale={3.5} />
-    <LobbyModel path="/models/kaykit/building_tavern_red.gltf" position={[-9, 0, 6]} rotation={[0, 0.8, 0]} scale={3.5} />
-    <LobbyModel path="/models/kaykit/building_home_A_red.gltf" position={[9, 0, 7]} rotation={[0, -0.6, 0]} scale={3.8} />
+    {/* KayKit medieval buildings — well outside spawn plaza */}
+    <LobbyModel path="/models/kaykit/building_home_A_red.gltf" position={[-14, 0, -12]} rotation={[0, 0.6, 0]} scale={4} />
+    <LobbyModel path="/models/kaykit/building_home_B_red.gltf" position={[14, 0, -11]} rotation={[0, -0.5, 0]} scale={3.5} />
+    <LobbyModel path="/models/kaykit/building_tavern_red.gltf" position={[-15, 0, 10]} rotation={[0, 1, 0]} scale={3.5} />
+    <LobbyModel path="/models/kaykit/building_home_A_red.gltf" position={[15, 0, 11]} rotation={[0, -0.8, 0]} scale={3.8} />
 
     {/* ══ GIANT BALLS — light, pushable, bouncy ══ */}
     <GiantBall position={[-5, 3, 10]} radius={2} color="#E8734A" />

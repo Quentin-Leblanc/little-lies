@@ -81,13 +81,13 @@
   }
 }
 
-// Phase info overlay — floats inside center area, below progress bar
-.phase-overlay {
-  position: absolute;
+// HUD — fixed top center, above everything
+.hud-top {
+  position: fixed;
   top: 8px;
-  left: 0;
-  right: 0;
-  z-index: 8;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
   pointer-events: none;
 }
 
@@ -106,7 +106,7 @@
   & > * { position: relative; z-index: 1; }
 }
 
-// Top-left — Menu + Roles + Graveyard (compact, transparent overlay)
+// Top-left — Menu + (Graveyard | Roles) side by side
 .layout-players {
   grid-area: players;
   overflow-y: auto;
@@ -117,9 +117,16 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 320px;
-  max-height: 50vh;
+  max-width: 480px;
+  max-height: 45vh;
   pointer-events: auto;
+
+  // Graveyard + Roles on one row
+  .players-row {
+    display: flex;
+    gap: 4px;
+    align-items: flex-start;
+  }
 }
 
 // Center — 3D scene fullscreen behind everything
@@ -130,29 +137,29 @@
   z-index: 0;
 }
 
-// Right panel — Role + Vote/Actions (full height)
+// Right panel — Role + Vote/Actions (no background)
 .layout-sidebar {
   grid-area: sidebar;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 6px;
   z-index: 5;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  background: none;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-// Bottom-left — Chat (transparent overlay)
+// Bottom-left — Chat (large, wide)
 .layout-chat {
   grid-area: chat;
   z-index: 10;
-  height: 280px;
-  max-height: 280px;
+  height: 380px;
+  max-height: 380px;
   min-height: 0;
-  max-width: 550px;
+  width: 50vw;
+  max-width: 50vw;
+  margin: 0 0 8px 8px;
   overflow: hidden;
   transition: box-shadow 0.4s, border-color 0.4s;
   pointer-events: auto;
@@ -277,8 +284,8 @@
 
 // Vote arrow on 3D scene — points right to sidebar
 .vote-scene-arrow {
-  position: absolute;
-  right: 12px;
+  position: fixed;
+  right: 350px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 12;

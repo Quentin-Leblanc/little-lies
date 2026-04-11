@@ -1,9 +1,10 @@
 .roles-list-box {
   margin-bottom: 6px;
   padding: 8px 10px;
-  background: linear-gradient(135deg, rgba(25, 20, 12, 0.4) 0%, rgba(15, 12, 8, 0.3) 100%);
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
   border-radius: 8px;
-  border: 1px solid rgba(180, 140, 80, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
   h3 {
     font-family: 'Cinzel', serif;

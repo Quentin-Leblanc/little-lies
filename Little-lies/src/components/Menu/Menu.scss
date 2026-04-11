@@ -1,45 +1,69 @@
 @import '../../styles/variables';
 @import '../../styles/global';
 
-/* Menu wrapper with title + lobby code + buttons */
+/* Menu — single compact bar */
 .menu-wrapper {
-  margin-bottom: 8px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(180, 140, 80, 0.1);
+  margin-bottom: 4px;
 }
 
-.menu-title-block {
-  text-align: left;
-  margin-bottom: 6px;
+.menu-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
 }
 
 .menu-game-title {
   font-family: 'Cinzel', serif;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 4px 0;
-  letter-spacing: 3px;
+  margin: 0;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+.menu-btn-icon {
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #aaa;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
 }
 
 .menu-lobby-code {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   cursor: pointer;
   transition: opacity 0.15s;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   &:hover { opacity: 0.7; }
 }
 
-.menu-code-label {
-  font-size: 12px;
-  color: #666;
-}
-
 .menu-code-value {
   font-family: 'Courier New', monospace;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: bold;
   color: #aaa;
   letter-spacing: 1px;
@@ -47,44 +71,10 @@
 }
 
 .menu-code-copy {
-  font-size: 10px;
+  font-size: 9px;
   color: #555;
 }
 
-.menu-container {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
-.menu-buttons {
-  flex: 1;
-  background: linear-gradient(135deg, rgba(25, 20, 12, 0.6) 0%, rgba(15, 12, 8, 0.5) 100%);
-  border: 1px solid rgba(180, 140, 80, 0.1);
-  border-radius: 8px;
-  color: #aab;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 10px 0;
-  cursor: pointer;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: all 0.2s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-
-  i { font-size: 14px; }
-
-  &:hover {
-    background: linear-gradient(135deg, rgba(35, 28, 15, 0.7) 0%, rgba(22, 18, 10, 0.6) 100%);
-    color: #ede0cc;
-    border-color: rgba(200, 160, 80, 0.2);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-  }
-}
 
 /* Styles pour la boîte de dialogue des logs */
 .log-dialog-overlay {
