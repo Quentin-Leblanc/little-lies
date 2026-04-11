@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sky, Stars, Html, useGLTF } from '@react-three/drei';
+import { Sky, Stars, Html } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
@@ -37,40 +37,38 @@ const NIGHT_AMBIANCE = [
 // Ground with dirt path
 // ============================================================
 const GroundPlane = ({ isDay }) => {
-  const dirtColor = isDay ? '#8a7a5a' : '#3a3020';
-  const grassColor = isDay ? '#3a6e2c' : '#1a2e1c';
-  const stoneColor = isDay ? '#9a9080' : '#4a4438';
+  const dirtColor = isDay ? '#D4A574' : '#5a4030';
+  const grassColor = isDay ? '#7EC850' : '#2D4A3E';
+  const stoneColor = isDay ? '#C4A882' : '#5a5040';
   return (
     <group>
       {/* Main grass */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
         <circleGeometry args={[35, 64]} />
-        <meshStandardMaterial color={grassColor} />
+        <meshStandardMaterial color={grassColor} flatShading />
       </mesh>
       {/* Central stone plaza */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
-        <circleGeometry args={[5.5, 12]} />
-        <meshStandardMaterial color={stoneColor} roughness={0.95} />
+        <circleGeometry args={[5.5, 8]} />
+        <meshStandardMaterial color={stoneColor} roughness={0.95} flatShading />
       </mesh>
       {/* Dirt paths radiating from center */}
       {[0, Math.PI / 2, Math.PI, -Math.PI / 2, Math.PI / 4, -Math.PI / 4, 3 * Math.PI / 4, -3 * Math.PI / 4].map((angle, i) => (
         <mesh key={`path-${i}`} rotation={[-Math.PI / 2, 0, angle]} position={[Math.sin(angle) * 10, 0.005, Math.cos(angle) * 10]} receiveShadow>
           <planeGeometry args={[1.5, 16]} />
-          <meshStandardMaterial color={dirtColor} roughness={1} />
+          <meshStandardMaterial color={dirtColor} roughness={1} flatShading />
         </mesh>
       ))}
       {/* Night ground fog layer */}
       {!isDay && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
           <circleGeometry args={[25, 32]} />
-          <meshBasicMaterial color="#1a2244" transparent opacity={0.1} depthWrite={false} />
+          <meshBasicMaterial color="#1B1464" transparent opacity={0.12} depthWrite={false} />
         </mesh>
       )}
     </group>
   );
 };
-
-// (Old procedural Building component removed — replaced by Meshy AI models)
 
 // ============================================================
 // Improved Torch with multi-layer flame
@@ -132,77 +130,223 @@ const Torch = ({ position }) => {
 };
 
 // ============================================================
-// Meshy AI GLB Model Loader — known Y bounds (no Box3 needed)
+// Low-Poly Procedural Buildings — flat-shaded, bright colors
 // ============================================================
-const MODEL_BOUNDS = {
-  '/models/rue.glb':                  { min: -0.226, max: 0.224 },
-  '/models/cobblestone_platform.glb': { min: -0.052, max: 0.039 },
-  '/models/terrain.glb':              { min: -0.028, max: 0.028 },
-  '/models/forge.glb':                { min: -0.957, max: 0.954 },
-  '/models/tavern.glb':               { min: -0.957, max: 0.955 },
-  '/models/chapel.glb':               { min: -0.957, max: 0.957 },
-  '/models/cottage.glb':              { min: -0.957, max: 0.954 },
-  '/models/mountain.glb':             { min: -0.407, max: 0.405 },
-  '/models/gallows.glb':  { min: -0.616, max: 0.615 },
+const LowPolyCottage = ({ position, rotation = [0, 0, 0], scale = 1, variant = 0 }) => {
+  const wallColor = variant % 3 === 0 ? '#F5E6D0' : variant % 3 === 1 ? '#E8DCC8' : '#F0DEC0';
+  const roofColor = variant % 2 === 0 ? '#E8734A' : '#D4613A';
+  return (
+    <group position={position} rotation={rotation} scale={scale}>
+      {/* Walls */}
+      <mesh position={[0, 1, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2, 2, 2.2]} />
+        <meshStandardMaterial color={wallColor} flatShading />
+      </mesh>
+      {/* Roof */}
+      <mesh position={[0, 2.5, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+        <coneGeometry args={[1.9, 1.2, 4]} />
+        <meshStandardMaterial color={roofColor} flatShading />
+      </mesh>
+      {/* Door */}
+      <mesh position={[0, 0.55, 1.11]}>
+        <boxGeometry args={[0.5, 1.1, 0.05]} />
+        <meshStandardMaterial color="#5a3a1a" flatShading />
+      </mesh>
+      {/* Window */}
+      <mesh position={[0.6, 1.3, 1.11]}>
+        <boxGeometry args={[0.4, 0.4, 0.05]} />
+        <meshBasicMaterial color="#FFD700" transparent opacity={0.5} />
+      </mesh>
+      {/* Chimney */}
+      <mesh position={[-0.6, 2.8, -0.5]} castShadow>
+        <boxGeometry args={[0.35, 0.8, 0.35]} />
+        <meshStandardMaterial color="#8a7a6a" flatShading />
+      </mesh>
+    </group>
+  );
 };
 
-const MeshyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, embedY = false }) => {
-  const { scene } = useGLTF(path);
-  const clonedScene = useMemo(() => {
-    const clone = scene.clone();
-    clone.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
-    return clone;
-  }, [scene]);
-
-  // Use known model bounds for reliable Y positioning
-  const bounds = MODEL_BOUNDS[path] || { min: 0, max: 0 };
-  const sy = typeof scale === 'number' ? scale : scale[1];
-  const yOffset = embedY
-    ? -bounds.max * sy + 0.05   // flat surface: top flush with ground
-    : -bounds.min * sy;          // object: bottom sits on ground
-
-  return (
-    <primitive
-      object={clonedScene}
-      position={[position[0], position[1] + yOffset, position[2]]}
-      rotation={rotation}
-      scale={typeof scale === 'number' ? [scale, scale, scale] : scale}
-    />
-  );
-});
-
-// ============================================================
-// Village Center — Cobblestone circle + Gallows (Meshy AI)
-// ============================================================
-// Dedicated gallows component — bypasses auto-grounding with known dimensions
-const GallowsModel = React.memo(() => {
-  const { scene } = useGLTF('/models/gallows.glb');
-  const clone = useMemo(() => {
-    const c = scene.clone();
-    c.traverse((child) => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
-    return c;
-  }, [scene]);
-
-  // Known: minY = -0.616 → Y offset = 0.616 * scale to sit on ground
-  const s = 2;
-  return <primitive object={clone} position={[0, 0.616 * s, 0]} scale={[s, s, s]} />;
-});
-
-const VillageCenter = () => (
-  <group>
-    {/* Circular wicker place — ground-level center of village */}
-    <MeshyModel path="/models/Meshy_AI_Circular_Wicker_Place_0408110924_texture.glb" position={[0, -0.5, 0]} scale={6} />
-    {/* Gallows on top */}
-    <GallowsModel />
+const LowPolyForge = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+  <group position={position} rotation={rotation} scale={scale}>
+    {/* Walls — darker stone */}
+    <mesh position={[0, 1.1, 0]} castShadow receiveShadow>
+      <boxGeometry args={[2.8, 2.2, 2.4]} />
+      <meshStandardMaterial color="#B8A898" flatShading />
+    </mesh>
+    {/* Roof — slanted */}
+    <mesh position={[0, 2.6, 0]} rotation={[0, 0, 0]} castShadow>
+      <coneGeometry args={[2.2, 1, 4]} />
+      <meshStandardMaterial color="#8B4513" flatShading />
+    </mesh>
+    {/* Big chimney */}
+    <mesh position={[0.8, 2.8, -0.6]} castShadow>
+      <boxGeometry args={[0.6, 1.4, 0.6]} />
+      <meshStandardMaterial color="#6a6a6a" flatShading />
+    </mesh>
+    {/* Anvil */}
+    <mesh position={[-1.2, 0.35, 1.3]} castShadow>
+      <boxGeometry args={[0.5, 0.7, 0.3]} />
+      <meshStandardMaterial color="#4a4a4a" metalness={0.4} flatShading />
+    </mesh>
+    {/* Door */}
+    <mesh position={[0, 0.65, 1.21]}>
+      <boxGeometry args={[0.8, 1.3, 0.05]} />
+      <meshStandardMaterial color="#4a2a0a" flatShading />
+    </mesh>
+    {/* Forge glow */}
+    <pointLight position={[0.8, 2, -0.6]} color="#ff6b35" intensity={0.5} distance={6} />
   </group>
 );
 
-// (Old procedural Gallows removed — now using Meshy AI model in VillageCenter)
+const LowPolyTavern = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+  <group position={position} rotation={rotation} scale={scale}>
+    {/* Main body — wider */}
+    <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
+      <boxGeometry args={[3.2, 2.4, 2.6]} />
+      <meshStandardMaterial color="#F0DEC0" flatShading />
+    </mesh>
+    {/* Roof */}
+    <mesh position={[0, 2.9, 0]} castShadow>
+      <coneGeometry args={[2.5, 1.2, 4]} />
+      <meshStandardMaterial color="#C45530" flatShading />
+    </mesh>
+    {/* Second floor overhang */}
+    <mesh position={[0, 1.6, 1.35]} castShadow>
+      <boxGeometry args={[3.4, 0.1, 0.3]} />
+      <meshStandardMaterial color="#8B6914" flatShading />
+    </mesh>
+    {/* Door */}
+    <mesh position={[0, 0.6, 1.31]}>
+      <boxGeometry args={[0.7, 1.2, 0.05]} />
+      <meshStandardMaterial color="#5a3a1a" flatShading />
+    </mesh>
+    {/* Sign bracket */}
+    <mesh position={[1.2, 1.8, 1.4]} castShadow>
+      <boxGeometry args={[0.05, 0.05, 0.4]} />
+      <meshStandardMaterial color="#3a3a3a" flatShading />
+    </mesh>
+    {/* Sign */}
+    <mesh position={[1.2, 1.6, 1.6]} castShadow>
+      <boxGeometry args={[0.6, 0.4, 0.05]} />
+      <meshStandardMaterial color="#8B6914" flatShading />
+    </mesh>
+    {/* Windows (warm light) */}
+    {[[-0.8, 1.5, 1.31], [0.8, 1.5, 1.31]].map((p, i) => (
+      <mesh key={i} position={p}>
+        <boxGeometry args={[0.45, 0.45, 0.05]} />
+        <meshBasicMaterial color="#FFD700" transparent opacity={0.6} />
+      </mesh>
+    ))}
+  </group>
+);
+
+const LowPolyChapel = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+  <group position={position} rotation={rotation} scale={scale}>
+    {/* Main body — taller */}
+    <mesh position={[0, 1.5, 0]} castShadow receiveShadow>
+      <boxGeometry args={[2.2, 3, 3]} />
+      <meshStandardMaterial color="#E8DCC8" flatShading />
+    </mesh>
+    {/* Main roof */}
+    <mesh position={[0, 3.4, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+      <coneGeometry args={[2.2, 1.2, 4]} />
+      <meshStandardMaterial color="#6a6a7a" flatShading />
+    </mesh>
+    {/* Steeple */}
+    <mesh position={[0, 4.5, -1]} castShadow>
+      <boxGeometry args={[0.6, 1.2, 0.6]} />
+      <meshStandardMaterial color="#E8DCC8" flatShading />
+    </mesh>
+    <mesh position={[0, 5.5, -1]} castShadow>
+      <coneGeometry args={[0.5, 1.2, 4]} />
+      <meshStandardMaterial color="#6a6a7a" flatShading />
+    </mesh>
+    {/* Cross */}
+    <mesh position={[0, 6.3, -1]}>
+      <boxGeometry args={[0.3, 0.5, 0.05]} />
+      <meshStandardMaterial color="#8B6914" flatShading />
+    </mesh>
+    <mesh position={[0, 6.4, -1]}>
+      <boxGeometry args={[0.05, 0.3, 0.3]} />
+      <meshStandardMaterial color="#8B6914" flatShading />
+    </mesh>
+    {/* Arched door */}
+    <mesh position={[0, 0.8, 1.51]}>
+      <boxGeometry args={[0.6, 1.6, 0.05]} />
+      <meshStandardMaterial color="#4a2a0a" flatShading />
+    </mesh>
+    {/* Round window */}
+    <mesh position={[0, 2.4, 1.51]}>
+      <circleGeometry args={[0.35, 8]} />
+      <meshBasicMaterial color="#FFD700" transparent opacity={0.4} />
+    </mesh>
+  </group>
+);
+
+const LowPolyGallows = ({ position = [0, 0, 0], scale = 1 }) => (
+  <group position={position} scale={scale}>
+    {/* Platform */}
+    <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
+      <boxGeometry args={[2.5, 0.3, 2]} />
+      <meshStandardMaterial color="#8B6914" flatShading />
+    </mesh>
+    {/* Uprights */}
+    <mesh position={[-0.8, 1.8, 0]} castShadow>
+      <boxGeometry args={[0.15, 3.3, 0.15]} />
+      <meshStandardMaterial color="#5a3a1a" flatShading />
+    </mesh>
+    <mesh position={[0.8, 1.8, 0]} castShadow>
+      <boxGeometry args={[0.15, 3.3, 0.15]} />
+      <meshStandardMaterial color="#5a3a1a" flatShading />
+    </mesh>
+    {/* Crossbeam */}
+    <mesh position={[0, 3.4, 0]} castShadow>
+      <boxGeometry args={[1.8, 0.12, 0.12]} />
+      <meshStandardMaterial color="#5a3a1a" flatShading />
+    </mesh>
+    {/* Rope */}
+    <mesh position={[0.3, 2.8, 0]}>
+      <cylinderGeometry args={[0.02, 0.02, 1.2, 4]} />
+      <meshStandardMaterial color="#8a7a5a" flatShading />
+    </mesh>
+    {/* Noose loop */}
+    <mesh position={[0.3, 2.15, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <torusGeometry args={[0.08, 0.02, 4, 6]} />
+      <meshStandardMaterial color="#8a7a5a" flatShading />
+    </mesh>
+    {/* Steps */}
+    <mesh position={[1.1, 0.08, 0.5]} castShadow>
+      <boxGeometry args={[0.6, 0.15, 0.8]} />
+      <meshStandardMaterial color="#6b4226" flatShading />
+    </mesh>
+  </group>
+);
+
+const LowPolyMountain = ({ position, scale = 1, variant = 0 }) => (
+  <group position={position}>
+    {/* Main peak */}
+    <mesh position={[0, scale * 2, 0]} castShadow>
+      <coneGeometry args={[scale * 3, scale * 4, 5 + variant % 3]} />
+      <meshStandardMaterial color={variant % 2 === 0 ? '#7a8a6a' : '#6a7a5a'} flatShading />
+    </mesh>
+    {/* Snow cap */}
+    <mesh position={[0, scale * 3.5, 0]}>
+      <coneGeometry args={[scale * 1.2, scale * 1.2, 5 + variant % 3]} />
+      <meshStandardMaterial color="#f0f0f0" flatShading />
+    </mesh>
+    {/* Secondary smaller peak */}
+    <mesh position={[scale * 1.5, scale * 1.2, scale * 0.5]} castShadow>
+      <coneGeometry args={[scale * 1.8, scale * 2.5, 4]} />
+      <meshStandardMaterial color={variant % 2 === 0 ? '#6a7a5a' : '#7a8a6a'} flatShading />
+    </mesh>
+  </group>
+);
+
+const VillageCenter = () => (
+  <group>
+    <LowPolyGallows position={[0, 0, 0]} scale={0.9} />
+  </group>
+);
 
 // ============================================================
 // Low-poly Tree
@@ -212,20 +356,20 @@ const LowPolyTree = ({ position, scale = 1, variant = 0 }) => (
     {/* Trunk */}
     <mesh position={[0, 0.6, 0]} castShadow>
       <cylinderGeometry args={[0.06, 0.1, 1.2, 5]} />
-      <meshStandardMaterial color="#4a3520" />
+      <meshStandardMaterial color="#8B6914" flatShading />
     </mesh>
     {/* Foliage layers */}
     <mesh position={[0, 1.5, 0]} castShadow>
       <coneGeometry args={[0.9, 1.6, 6]} />
-      <meshStandardMaterial color={variant % 2 === 0 ? '#1a5a1a' : '#1d4a1d'} />
+      <meshStandardMaterial color={variant % 2 === 0 ? '#4CAF50' : '#3d9142'} flatShading />
     </mesh>
     <mesh position={[0, 2.1, 0]} castShadow>
       <coneGeometry args={[0.65, 1.2, 6]} />
-      <meshStandardMaterial color={variant % 2 === 0 ? '#1d6a1d' : '#1a5a1a'} />
+      <meshStandardMaterial color={variant % 2 === 0 ? '#5BBF5E' : '#4CAF50'} flatShading />
     </mesh>
     <mesh position={[0, 2.5, 0]} castShadow>
       <coneGeometry args={[0.4, 0.9, 5]} />
-      <meshStandardMaterial color="#206a20" />
+      <meshStandardMaterial color="#66CC66" flatShading />
     </mesh>
   </group>
 );
@@ -365,7 +509,7 @@ const LowPolyCrates = ({ position, scale = 1 }) => (
 const LowPolyRock = ({ position, scale = 1, variant = 0 }) => (
   <mesh position={[position[0], position[1] + scale * 0.15, position[2]]} rotation={[variant * 0.3, variant * 1.1, variant * 0.2]} scale={[scale, scale * 0.6, scale * 0.9]} castShadow>
     <dodecahedronGeometry args={[0.35, 0]} />
-    <meshStandardMaterial color={variant % 2 === 0 ? '#6a6a5a' : '#7a7a6a'} roughness={0.95} flatShading />
+    <meshStandardMaterial color={variant % 2 === 0 ? '#9a9585' : '#a8a090'} roughness={0.95} flatShading />
   </mesh>
 );
 
@@ -376,11 +520,11 @@ const LowPolyBush = ({ position, scale = 1, variant = 0 }) => (
   <group position={position} scale={scale}>
     <mesh position={[0, 0.2, 0]} castShadow>
       <dodecahedronGeometry args={[0.35, 1]} />
-      <meshStandardMaterial color={variant % 2 === 0 ? '#2a5a1a' : '#1d4a1d'} roughness={0.9} flatShading />
+      <meshStandardMaterial color={variant % 2 === 0 ? '#4CAF50' : '#3d9142'} roughness={0.9} flatShading />
     </mesh>
     <mesh position={[0.25, 0.15, 0.15]} castShadow>
       <dodecahedronGeometry args={[0.25, 1]} />
-      <meshStandardMaterial color="#1a5a1a" roughness={0.9} flatShading />
+      <meshStandardMaterial color="#5BBF5E" roughness={0.9} flatShading />
     </mesh>
   </group>
 );
@@ -459,7 +603,7 @@ const LowPolyRiver = ({ isDay }) => {
   return (
     <mesh geometry={geometry}>
       <meshStandardMaterial
-        color={isDay ? '#3a7ab8' : '#1a3a5a'}
+        color={isDay ? '#4A9BD9' : '#1a3a5a'}
         transparent
         opacity={0.65}
         roughness={0.2}
@@ -564,72 +708,40 @@ const HAY_POSITIONS = [
 ];
 
 // ============================================================
-// Village Layout
+// Village Layout — Low-Poly Procedural
 // ============================================================
-// Rotation Y so a building faces center [0,0] from position [bx, bz]
 const faceCenter = (bx, bz) => Math.atan2(-bx, -bz);
 
-// Meshy AI building positions — all rotated to face center, spaced to avoid overlap
-// Buildings are ~3-4 units wide at their scale, so min ~5 units between each
-const MESHY_BUILDINGS = [
+// Building positions — all rotated to face center
+const BUILDING_POSITIONS = [
   // Unique buildings
-  { path: '/models/forge.glb',   position: [-9, 0, -7],   scale: 3,   get rotation() { return [0, faceCenter(-9, -7), 0]; } },
-  { path: '/models/tavern.glb',  position: [9, 0, -7],    scale: 3,   get rotation() { return [0, faceCenter(9, -7), 0]; } },
-  { path: '/models/chapel.glb',  position: [0, 0, -12],   scale: 3.5, get rotation() { return [0, faceCenter(0, -12), 0]; } },
+  { type: 'forge',   position: [-9, 0, -7],   scale: 1.2, get rotation() { return [0, faceCenter(-9, -7), 0]; } },
+  { type: 'tavern',  position: [9, 0, -7],    scale: 1.2, get rotation() { return [0, faceCenter(9, -7), 0]; } },
+  { type: 'chapel',  position: [0, 0, -12],   scale: 1.3, get rotation() { return [0, faceCenter(0, -12), 0]; } },
   // Inner ring cottages
-  { path: '/models/cottage.glb', position: [-10, 0, 1],   scale: 2.8, get rotation() { return [0, faceCenter(-10, 1), 0]; } },
-  { path: '/models/cottage.glb', position: [10, 0, 2],    scale: 2.8, get rotation() { return [0, faceCenter(10, 2), 0]; } },
-  { path: '/models/cottage.glb', position: [-7, 0, 8],    scale: 2.5, get rotation() { return [0, faceCenter(-7, 8), 0]; } },
-  { path: '/models/cottage.glb', position: [7, 0, 9],     scale: 2.5, get rotation() { return [0, faceCenter(7, 9), 0]; } },
-  { path: '/models/cottage.glb', position: [-5, 0, -10],  scale: 2.5, get rotation() { return [0, faceCenter(-5, -10), 0]; } },
+  { type: 'cottage', position: [-10, 0, 1],   scale: 1.1, variant: 0, get rotation() { return [0, faceCenter(-10, 1), 0]; } },
+  { type: 'cottage', position: [10, 0, 2],    scale: 1.1, variant: 1, get rotation() { return [0, faceCenter(10, 2), 0]; } },
+  { type: 'cottage', position: [-7, 0, 8],    scale: 1.0, variant: 2, get rotation() { return [0, faceCenter(-7, 8), 0]; } },
+  { type: 'cottage', position: [7, 0, 9],     scale: 1.0, variant: 0, get rotation() { return [0, faceCenter(7, 9), 0]; } },
+  { type: 'cottage', position: [-5, 0, -10],  scale: 1.0, variant: 1, get rotation() { return [0, faceCenter(-5, -10), 0]; } },
   // Outer ring
-  { path: '/models/cottage.glb', position: [-15, 0, -8],  scale: 2.3, get rotation() { return [0, faceCenter(-15, -8), 0]; } },
-  { path: '/models/cottage.glb', position: [15, 0, -8],   scale: 2.3, get rotation() { return [0, faceCenter(15, -8), 0]; } },
-  { path: '/models/cottage.glb', position: [-14, 0, 5],   scale: 2.3, get rotation() { return [0, faceCenter(-14, 5), 0]; } },
-  { path: '/models/cottage.glb', position: [14, 0, 6],    scale: 2.3, get rotation() { return [0, faceCenter(14, 6), 0]; } },
-  { path: '/models/cottage.glb', position: [-3, 0, 13],   scale: 2.3, get rotation() { return [0, faceCenter(-3, 13), 0]; } },
-  { path: '/models/cottage.glb', position: [3, 0, 14],    scale: 2.3, get rotation() { return [0, faceCenter(3, 14), 0]; } },
+  { type: 'cottage', position: [-15, 0, -8],  scale: 0.9, variant: 2, get rotation() { return [0, faceCenter(-15, -8), 0]; } },
+  { type: 'cottage', position: [15, 0, -8],   scale: 0.9, variant: 0, get rotation() { return [0, faceCenter(15, -8), 0]; } },
+  { type: 'cottage', position: [-14, 0, 5],   scale: 0.9, variant: 1, get rotation() { return [0, faceCenter(-14, 5), 0]; } },
+  { type: 'cottage', position: [14, 0, 6],    scale: 0.9, variant: 2, get rotation() { return [0, faceCenter(14, 6), 0]; } },
+  { type: 'cottage', position: [-3, 0, 13],   scale: 0.9, variant: 0, get rotation() { return [0, faceCenter(-3, 13), 0]; } },
+  { type: 'cottage', position: [3, 0, 14],    scale: 0.9, variant: 1, get rotation() { return [0, faceCenter(3, 14), 0]; } },
 ];
 
-// Cobblestone ground tiles — cover village area with paved ground
-// cobblestone_platform.glb: 1.90 x 0.09 x 1.90 (flat square)
-// Desert terrain tiles — cover entire village + surroundings
-// terrain.glb: 1.9 x 1.9 flat tile → scale 12 = ~23u per tile
-const GROUND_TILES = [
-  { position: [0, 0, 0],     scale: 16 },
-  { position: [28, 0, 0],    scale: 14 },
-  { position: [-28, 0, 0],   scale: 14 },
-  { position: [0, 0, 28],    scale: 14 },
-  { position: [0, 0, -28],   scale: 14 },
-];
-
-// A few short alleys between close buildings (decorative, using rue.glb)
-const makeAlley = (ax, az, bx, bz) => {
-  const dx = bx - ax, dz = bz - az;
-  const dist = Math.sqrt(dx * dx + dz * dz);
-  return {
-    position: [(ax + bx) / 2, 0, (az + bz) / 2],
-    rotation: [0, Math.atan2(-dz, dx), 0],
-    scale: [dist / 1.9, 1, 5],
-  };
-};
-
-const ALLEYS = [
-  makeAlley(-7, -8.5, -3, -10.5),   // between forge & chapel
-  makeAlley(3, -10, 6, -9),          // between chapel & tavern
-  makeAlley(-9.5, -1, -9.5, 1),     // narrow alley W
-  makeAlley(9.5, -1, 9.5, 1),       // narrow alley E
-];
-
-// Background mountains — ring around the village, closer and shorter
+// Background mountains — procedural cones
 const MOUNTAINS = [
-  { position: [0, 0, -30],   rotation: [0, 0, 0],       scale: 16 },   // north
-  { position: [-25, 0, -20], rotation: [0, 0.5, 0],     scale: 13 },   // northwest
-  { position: [25, 0, -20],  rotation: [0, -0.4, 0],    scale: 14 },   // northeast
-  { position: [-30, 0, 0],   rotation: [0, 0.8, 0],     scale: 12 },   // west
-  { position: [30, 0, 0],    rotation: [0, -0.7, 0],    scale: 12 },   // east
-  { position: [-25, 0, 18],  rotation: [0, 1.2, 0],     scale: 13 },   // southwest
-  { position: [25, 0, 18],   rotation: [0, -1.1, 0],    scale: 13 },   // southeast
+  { position: [0, 0, -30],   scale: 5, variant: 0 },
+  { position: [-25, 0, -20], scale: 4, variant: 1 },
+  { position: [25, 0, -20],  scale: 4.5, variant: 2 },
+  { position: [-30, 0, 0],   scale: 3.5, variant: 3 },
+  { position: [30, 0, 0],    scale: 3.5, variant: 4 },
+  { position: [-25, 0, 18],  scale: 4, variant: 5 },
+  { position: [25, 0, 18],   scale: 4, variant: 6 },
 ];
 
 const TORCH_POS = [
@@ -644,24 +756,23 @@ const TREE_POSITIONS = [
   [-14, 0, 12], [14, 0, -11],
 ];
 
+const BuildingRenderer = ({ type, position, rotation, scale, variant = 0 }) => {
+  switch (type) {
+    case 'forge':   return <LowPolyForge position={position} rotation={rotation} scale={scale} />;
+    case 'tavern':  return <LowPolyTavern position={position} rotation={rotation} scale={scale} />;
+    case 'chapel':  return <LowPolyChapel position={position} rotation={rotation} scale={scale} />;
+    default:        return <LowPolyCottage position={position} rotation={rotation} scale={scale} variant={variant} />;
+  }
+};
+
 const Village = React.memo(({ isDay }) => (
   <group>
-    {/* ——— CENTRE : Plaza + Potence ——— */}
+    {/* ——— CENTRE : Potence ——— */}
     <VillageCenter />
 
-    {/* ——— BATIMENTS : forge, taverne, chapelle, cottages ——— */}
-    {MESHY_BUILDINGS.map((b, i) => (
-      <MeshyModel key={`bld-${i}`} path={b.path} position={b.position} rotation={b.rotation} scale={b.scale} />
-    ))}
-
-    {/* ——— ALLEES : chemins paves entre batiments ——— */}
-    {ALLEYS.map((a, i) => (
-      <MeshyModel key={`alley-${i}`} path="/models/rue.glb" position={a.position} rotation={a.rotation} scale={a.scale} embedY />
-    ))}
-
-    {/* ——— SOL : tuiles de terrain ——— */}
-    {GROUND_TILES.map((t, i) => (
-      <MeshyModel key={`tile-${i}`} path="/models/terrain.glb" position={t.position} scale={t.scale} embedY />
+    {/* ——— BATIMENTS : procéduraux low-poly ——— */}
+    {BUILDING_POSITIONS.map((b, i) => (
+      <BuildingRenderer key={`bld-${i}`} {...b} />
     ))}
 
     {/* ——— TORCHES ——— */}
@@ -671,7 +782,7 @@ const Village = React.memo(({ isDay }) => (
 
     {/* ——— MONTAGNES en arriere-plan ——— */}
     {MOUNTAINS.map((m, i) => (
-      <MeshyModel key={`mountain-${i}`} path="/models/mountain.glb" position={m.position} rotation={m.rotation} scale={m.scale} />
+      <LowPolyMountain key={`mountain-${i}`} position={m.position} scale={m.scale} variant={m.variant} />
     ))}
 
     {/* ——— ARBRES ——— */}
@@ -730,19 +841,20 @@ const Moon = () => (
 );
 
 // ============================================================
-// Fireflies (night particle effect)
+// Fireflies (night) — bright green lucioles
 // ============================================================
-const Fireflies = ({ count = 40 }) => {
+const Fireflies = ({ count = 60 }) => {
   const meshRef = useRef();
   const particles = useMemo(() => {
     const arr = [];
     for (let i = 0; i < count; i++) {
       arr.push({
-        x: (Math.random() - 0.5) * 35,
-        y: Math.random() * 3.5 + 0.5,
-        z: (Math.random() - 0.5) * 35,
-        speed: Math.random() * 0.4 + 0.15,
+        x: (Math.random() - 0.5) * 40,
+        y: Math.random() * 5 + 0.3,
+        z: (Math.random() - 0.5) * 40,
+        speed: Math.random() * 0.5 + 0.1,
         offset: Math.random() * Math.PI * 2,
+        size: Math.random() * 0.5 + 0.6,
       });
     }
     return arr;
@@ -751,14 +863,15 @@ const Fireflies = ({ count = 40 }) => {
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
   useFrame((state) => {
+    if (!meshRef.current) return;
     const t = state.clock.elapsedTime;
     particles.forEach((p, i) => {
-      const px = p.x + Math.sin(t * p.speed + p.offset) * 1.5;
-      const py = p.y + Math.sin(t * p.speed * 1.5 + p.offset) * 0.4;
-      const pz = p.z + Math.cos(t * p.speed + p.offset) * 1.5;
+      const px = p.x + Math.sin(t * p.speed + p.offset) * 2;
+      const py = p.y + Math.sin(t * p.speed * 1.3 + p.offset) * 0.6;
+      const pz = p.z + Math.cos(t * p.speed * 0.8 + p.offset) * 2;
       dummy.position.set(px, py, pz);
-      const pulse = 0.4 + Math.sin(t * 3 + p.offset) * 0.35;
-      dummy.scale.setScalar(pulse);
+      const pulse = p.size * (0.3 + Math.sin(t * 3.5 + p.offset) * 0.5 + Math.sin(t * 7 + p.offset * 2) * 0.2);
+      dummy.scale.setScalar(Math.max(0.05, pulse));
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     });
@@ -767,25 +880,72 @@ const Fireflies = ({ count = 40 }) => {
 
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
-      <sphereGeometry args={[0.04, 4, 4]} />
-      <meshBasicMaterial color="#bbffaa" transparent opacity={0.75} />
+      <sphereGeometry args={[0.06, 6, 6]} />
+      <meshBasicMaterial color="#aaffaa" transparent opacity={0.85} />
     </instancedMesh>
   );
 };
 
 // ============================================================
-// Day Fireflies (golden, gentle floating)
+// Day particles — golden pollen + dust motes floating in sunlight
 // ============================================================
-const DayFireflies = ({ count = 40 }) => {
+const DayFireflies = ({ count = 50 }) => {
   const meshRef = useRef();
   const particles = useMemo(() => {
     const arr = [];
     for (let i = 0; i < count; i++) {
       arr.push({
-        x: (Math.random() - 0.5) * 35,
-        y: Math.random() * 4 + 0.5,
-        z: (Math.random() - 0.5) * 35,
-        speed: Math.random() * 0.3 + 0.1,
+        x: (Math.random() - 0.5) * 40,
+        y: Math.random() * 6 + 0.5,
+        z: (Math.random() - 0.5) * 40,
+        speed: Math.random() * 0.25 + 0.05,
+        offset: Math.random() * Math.PI * 2,
+        size: Math.random() * 0.4 + 0.4,
+      });
+    }
+    return arr;
+  }, [count]);
+
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.elapsedTime;
+    particles.forEach((p, i) => {
+      const px = p.x + Math.sin(t * p.speed + p.offset) * 3;
+      const py = p.y + Math.sin(t * p.speed * 1.2 + p.offset) * 0.8;
+      const pz = p.z + Math.cos(t * p.speed * 0.7 + p.offset) * 3;
+      dummy.position.set(px, py, pz);
+      const pulse = p.size * (0.5 + Math.sin(t * 2 + p.offset) * 0.3);
+      dummy.scale.setScalar(Math.max(0.05, pulse));
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <sphereGeometry args={[0.05, 5, 5]} />
+      <meshBasicMaterial color="#ffdd66" transparent opacity={0.55} />
+    </instancedMesh>
+  );
+};
+
+// ============================================================
+// Floating dust — tiny white specs that drift slowly (both day & night)
+// ============================================================
+const FloatingDust = ({ count = 80, isDay = true }) => {
+  const meshRef = useRef();
+  const particles = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push({
+        x: (Math.random() - 0.5) * 50,
+        y: Math.random() * 8 + 0.2,
+        z: (Math.random() - 0.5) * 50,
+        speed: Math.random() * 0.15 + 0.03,
+        drift: Math.random() * 0.3 + 0.05,
         offset: Math.random() * Math.PI * 2,
       });
     }
@@ -795,14 +955,14 @@ const DayFireflies = ({ count = 40 }) => {
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
   useFrame((state) => {
+    if (!meshRef.current) return;
     const t = state.clock.elapsedTime;
     particles.forEach((p, i) => {
-      const px = p.x + Math.sin(t * p.speed + p.offset) * 2;
-      const py = p.y + Math.sin(t * p.speed * 1.5 + p.offset) * 0.5;
-      const pz = p.z + Math.cos(t * p.speed + p.offset) * 2;
+      const px = p.x + Math.sin(t * p.drift + p.offset) * 4;
+      const py = p.y + Math.sin(t * p.speed * 2 + p.offset) * 1.2;
+      const pz = p.z + Math.cos(t * p.drift * 0.6 + p.offset) * 4;
       dummy.position.set(px, py, pz);
-      const pulse = 0.4 + Math.sin(t * 2.5 + p.offset) * 0.3;
-      dummy.scale.setScalar(pulse);
+      dummy.scale.setScalar(0.3 + Math.sin(t * 1.5 + p.offset) * 0.15);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     });
@@ -811,8 +971,8 @@ const DayFireflies = ({ count = 40 }) => {
 
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
-      <sphereGeometry args={[0.04, 4, 4]} />
-      <meshBasicMaterial color="#ffdd66" transparent opacity={0.6} />
+      <sphereGeometry args={[0.025, 4, 4]} />
+      <meshBasicMaterial color={isDay ? '#ffffff' : '#8899bb'} transparent opacity={isDay ? 0.3 : 0.2} />
     </instancedMesh>
   );
 };
@@ -838,9 +998,36 @@ const GhostOrb = ({ position }) => {
 };
 
 // ============================================================
+// Phase Emote — contextual floating icon above player
+// ============================================================
+const PhaseEmote = ({ phase, isAccused, CONSTANTS }) => {
+  let iconClass = null;
+  let color = '#fff';
+  if (isAccused) { iconClass = 'fa-exclamation-triangle'; color = '#ff4444'; }
+  else if (phase === CONSTANTS?.PHASE?.VOTING) { iconClass = 'fa-gavel'; color = '#ffa502'; }
+  else if (phase === CONSTANTS?.PHASE?.DISCUSSION) { iconClass = 'fa-comment'; color = '#78ff78'; }
+  else if (phase === CONSTANTS?.PHASE?.JUDGMENT) { iconClass = 'fa-scale-balanced'; color = '#cc88ff'; }
+
+  if (!iconClass) return null;
+
+  return (
+    <Html position={[0, 2.8, 0]} center distanceFactor={8} style={{ pointerEvents: 'none' }}>
+      <div style={{
+        fontSize: '16px',
+        color,
+        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))',
+        userSelect: 'none',
+      }}>
+        <i className={`fas ${iconClass}`}></i>
+      </div>
+    </Html>
+  );
+};
+
+// ============================================================
 // Player Figure — uses Character model with rotation + walk
 // ============================================================
-const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8, pauseAnim = null, isDay = true }) => {
+const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8, pauseAnim = null, isDay = true, phase = null, CONSTANTS = null }) => {
   const groupRef = useRef();
   const transitionStartTime = useRef(null);
   const walkStarted = useRef(false);
@@ -959,23 +1146,24 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
         }}>
           <div style={{
             color: player.profile?.color || color,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            fontSize: '16px',
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            padding: '4px 12px',
+            borderRadius: '6px',
+            fontSize: '22px',
             fontWeight: 'bold',
-            textShadow: '1px 1px 2px black',
-            border: `1px solid ${player.profile?.color || color}`,
+            textShadow: '0 2px 6px rgba(0,0,0,0.8)',
+            border: `2px solid ${player.profile?.color || color}`,
+            letterSpacing: '0.5px',
           }}>
             {player.profile.name}
           </div>
           {showVote && voteCount > 0 && (
             <div style={{
-              backgroundColor: 'rgba(255,68,68,0.8)',
+              backgroundColor: 'rgba(255,68,68,0.85)',
               color: '#fff',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              fontSize: '12px',
+              padding: '3px 10px',
+              borderRadius: '6px',
+              fontSize: '15px',
               fontWeight: 'bold',
             }}>
               Vote {voteCount}/{totalAlive}
@@ -983,6 +1171,10 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
           )}
         </div>
       </Html>}
+      {/* Phase emote */}
+      {!isTransitioning && phase && CONSTANTS && (
+        <PhaseEmote phase={phase} isAccused={isAccused} CONSTANTS={CONSTANTS} />
+      )}
       {/* Vote/Judgment buttons removed — handled in action panel */}
     </group>
   );
@@ -1004,12 +1196,12 @@ const DeadPlayerFigure = ({ player, position }) => (
       <div style={{
         color: '#888899',
         backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: '2px 8px',
-        borderRadius: '4px',
-        fontSize: '13px',
+        padding: '3px 10px',
+        borderRadius: '5px',
+        fontSize: '17px',
         fontWeight: 'bold',
         whiteSpace: 'nowrap',
-        textShadow: '1px 1px 2px black',
+        textShadow: '0 2px 4px rgba(0,0,0,0.8)',
         opacity: 0.7,
       }}>
         {player.profile.name}
@@ -1024,15 +1216,14 @@ const DeadPlayerFigure = ({ player, position }) => (
 // Pause player controller — moves the local player's character with ZQSD,
 // camera follows behind in third person
 // Simple collision check against building positions (circle-based)
-// Collision check — y-aware: skip if player is above the obstacle
 const checkCollision = (x, z, y, otherPlayers) => {
-  // Buildings (height ~4u at scale 3)
-  for (const b of MESHY_BUILDINGS) {
+  // Buildings
+  for (const b of BUILDING_POSITIONS) {
     const bx = b.position[0], bz = b.position[2];
-    const s = typeof b.scale === 'number' ? b.scale : 3;
+    const s = typeof b.scale === 'number' ? b.scale : 1;
     const dx = x - bx, dz = z - bz;
-    const r = 0.7 * s;
-    const h = 1.5 * s; // building height
+    const r = 1.8 * s;
+    const h = 3.5 * s;
     if (dx * dx + dz * dz < r * r && y < h) return true;
   }
   // Gallows at center (radius 1.2, height ~2.5)
@@ -1360,6 +1551,7 @@ const MainScene = () => {
   const [showDayText, setShowDayText] = useState(false);
   const [nightAmbianceMsg, setNightAmbianceMsg] = useState(null);
   const [showDeathReport, setShowDeathReport] = useState(false);
+  const [showBloodEffect, setShowBloodEffect] = useState(false);
   const fadeTimerRef = useRef(null);
   const lastPhaseForFade = useRef(phase);
 
@@ -1446,13 +1638,17 @@ const MainScene = () => {
     return () => fadeTimers.current.forEach(clearTimeout);
   }, [phase]);
 
-  // Delay death report by 1s so "Le village se lève..." finishes fading
+  // Death report sequence: blood effect first, then text
   useEffect(() => {
     if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
-      const t = setTimeout(() => setShowDeathReport(true), 1000);
-      return () => clearTimeout(t);
+      // Blood effect appears first (after day text fades)
+      const t1 = setTimeout(() => setShowBloodEffect(true), 800);
+      // Death report text appears after blood has started
+      const t2 = setTimeout(() => setShowDeathReport(true), 1800);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     } else {
       setShowDeathReport(false);
+      setShowBloodEffect(false);
     }
   }, [phase]);
 
@@ -1625,7 +1821,8 @@ const MainScene = () => {
             <>
               <color attach="background" args={['#87CEEB']} />
               <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
-              <DayFireflies count={20} />
+              <DayFireflies count={50} />
+              <FloatingDust count={80} isDay />
             </>
           ) : (
             <>
@@ -1633,7 +1830,8 @@ const MainScene = () => {
               <fog attach="fog" args={['#060818', 25, 55]} />
               <Stars radius={80} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
               <Moon />
-              <Fireflies count={25} />
+              <Fireflies count={60} />
+              <FloatingDust count={60} isDay={false} />
             </>
           )}
 
@@ -1674,6 +1872,8 @@ const MainScene = () => {
                 onJudge={handleJudge}
                 characterScale={characterScale}
                 isDay={game.isDay}
+                phase={phase}
+                CONSTANTS={CONSTANTS}
               />
             );
           })}
@@ -1709,7 +1909,30 @@ const MainScene = () => {
       {/* Night ambiance messages */}
       {/* Night ambiance now handled via nightAmbianceMsg overlay */}
 
-      {/* Death report overlay — delayed 1s to avoid overlap with "Le village se lève..." */}
+      {/* Blood effect — plays before death report text */}
+      {phase === CONSTANTS.PHASE.DEATH_REPORT && showBloodEffect && (() => {
+        const hasDeaths = (chatMessages || []).some(
+          m => m.type === 'system' && m.dayCount === game.dayCount
+            && !m.content?.startsWith('--- Jour')
+            && !m.content?.startsWith('La nuit a été calme')
+            && (m.content?.includes('retrouvé') || m.content?.includes('mort') || m.content?.includes('survécu'))
+        );
+        if (!hasDeaths) return null;
+        return (
+          <div className="blood-overlay">
+            <div className="blood-overlay-inner">
+              <div className="blood-vignette" />
+              <div className="blood-drip" />
+              <div className="blood-drip" />
+              <div className="blood-drip" />
+              <div className="blood-drip" />
+              <div className="blood-drip" />
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Death report overlay */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && showDeathReport && (() => {
         const killedMessages = (chatMessages || []).filter(
           m => m.type === 'system' && m.dayCount === game.dayCount
@@ -1732,11 +1955,6 @@ const MainScene = () => {
         return (
           <div className={`death-report-overlay ${hasDead ? 'has-dead' : 'no-dead'}`}>
             <div className="death-report-card">
-              {hasDead && (
-                <div className="death-report-icon">
-                  <i className="fas fa-skull"></i>
-                </div>
-              )}
               {hasDead ? (
                 <>
                   {killedEntries.map((entry, i) => (

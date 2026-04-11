@@ -14,10 +14,11 @@
   padding-bottom: 18px;
   margin-bottom: 14px;
   text-align: left;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(20, 20, 35, 0.6) 0%, rgba(10, 10, 20, 0.5) 100%);
+  border: 1px solid rgba(100, 120, 180, 0.12);
   flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .role-name {
@@ -293,5 +294,27 @@
     border-bottom: 1px solid rgba(255,255,255,0.05);
 
     &:last-child { border-bottom: none; }
+  }
+}
+
+// === RESPONSIVE ===
+@media (max-width: 768px) {
+  .player-container {
+    padding-top: 10px;
+    gap: 6px;
+  }
+  .role-container {
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+  .role-name {
+    font-size: 24px;
+  }
+  .role-description, .role-objective {
+    font-size: 12px;
+  }
+  .lw-dialog {
+    width: 92%;
+    padding: 16px;
   }
 }

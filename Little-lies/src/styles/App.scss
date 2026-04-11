@@ -22,6 +22,65 @@
   position: relative;
 }
 
+// Tablet: sidebar overlay
+@media (max-width: $bp-tablet) {
+  .game-layout {
+    grid-template-columns: 260px 1fr;
+    grid-template-areas:
+      "players center"
+      "players chat";
+  }
+  .layout-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 340px;
+    height: 100vh;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 20;
+    &.sidebar-open { transform: translateX(0); }
+  }
+}
+
+// Mobile: single column
+@media (max-width: $bp-mobile) {
+  .game-layout {
+    grid-template-rows: auto 1fr 180px;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "players"
+      "center"
+      "chat";
+  }
+  .layout-players {
+    max-height: 35vh;
+    overflow-y: auto;
+    padding: 6px 8px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    grid-template-rows: auto auto auto;
+  }
+  .layout-center {
+    min-height: 0;
+  }
+  .layout-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 85vw;
+    max-width: 360px;
+    height: 100vh;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 20;
+    &.sidebar-open { transform: translateX(0); }
+  }
+  .layout-chat {
+    max-height: 180px;
+  }
+}
+
 // Phase info overlay — floats inside center area, below progress bar
 .phase-overlay {
   position: absolute;
@@ -39,8 +98,8 @@
   overflow-x: hidden;
   padding: 10px;
   z-index: 5;
-  background: rgba(10, 10, 16, 0.75);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(180deg, rgba(12, 12, 22, 0.82) 0%, rgba(8, 8, 16, 0.78) 100%);
+  border-right: 1px solid rgba(100, 120, 180, 0.08);
   display: grid;
   grid-template-rows: auto auto 1fr;
   grid-template-columns: 1fr;
@@ -61,8 +120,8 @@
   overflow-x: hidden;
   padding: 10px;
   z-index: 5;
-  background: rgba(10, 10, 16, 0.75);
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(180deg, rgba(12, 12, 22, 0.82) 0%, rgba(8, 8, 16, 0.78) 100%);
+  border-left: 1px solid rgba(100, 120, 180, 0.08);
   display: flex;
   flex-direction: column;
 }
@@ -87,10 +146,11 @@
 
 // === PHASE BANNER ===
 @keyframes banner-in {
-  0% { opacity: 0; transform: translate(-50%, -50%); }
-  15% { opacity: 1; transform: translate(-50%, -50%); }
-  75% { opacity: 1; transform: translate(-50%, -50%); }
-  100% { opacity: 0; transform: translate(-50%, -50%); }
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); filter: blur(8px); }
+  12% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0); }
+  18% { transform: translate(-50%, -50%) scale(1); }
+  75% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); filter: blur(4px); }
 }
 
 .phase-banner {
@@ -160,4 +220,46 @@
   height: 100%;
   z-index: 0;
   pointer-events: none;
+}
+
+// Sidebar toggle button (mobile/tablet)
+.sidebar-toggle-btn {
+  display: none;
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 15;
+  background: rgba(10, 10, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ccc;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  margin: 0;
+
+  @media (max-width: $bp-tablet) { display: flex; align-items: center; justify-content: center; }
+}
+
+// Sidebar backdrop (mobile)
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 19;
+
+  &.show { display: block; }
+}
+
+// Phase banner responsive
+@media (max-width: $bp-mobile) {
+  .phase-banner {
+    font-size: 28px;
+    letter-spacing: 2px;
+    i { font-size: 24px; }
+  }
 }

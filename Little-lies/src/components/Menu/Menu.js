@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMultiplayerState, getRoomCode } from 'playroomkit';
 import trad from '../../trad/roles.json';
+import Audio from '../../utils/AudioManager';
 
 import './Menu.scss';
 
@@ -36,7 +37,7 @@ const Menu = () => {
   return (
     <div className="menu-wrapper">
       <div className="menu-title-block">
-        <h1 className="menu-game-title">Mafia & Wolves</h1>
+        <h1 className="menu-game-title">Not Me</h1>
         <div className="menu-lobby-code" onClick={copyCode} title="Cliquer pour copier">
           <span className="menu-code-label">Code lobby :</span>
           <span className="menu-code-value">{roomCode || '...'}</span>
@@ -69,11 +70,24 @@ const Menu = () => {
 
 const MenuDialog = ({ roomCode, onClose, onQuit }) => {
   const [copied, setCopied] = useState(false);
+  const [volume, setVolume] = useState(Audio.getVolume());
+  const [muted, setMuted] = useState(Audio.isMuted());
 
   const copyCode = () => {
     navigator.clipboard.writeText(roomCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleVolumeChange = (e) => {
+    const v = parseFloat(e.target.value);
+    setVolume(v);
+    Audio.setVolume(v);
+  };
+
+  const handleToggleMute = () => {
+    const m = Audio.toggleMute();
+    setMuted(m);
   };
 
   return (
@@ -91,6 +105,23 @@ const MenuDialog = ({ roomCode, onClose, onQuit }) => {
               <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`}></i>
             </div>
             {copied && <span className="copied-feedback">Copié !</span>}
+          </div>
+          <div className="volume-section">
+            <span className="room-code-label">Volume</span>
+            <div className="volume-controls">
+              <button className="volume-mute-btn" onClick={handleToggleMute}>
+                <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={muted ? 0 : volume}
+                onChange={handleVolumeChange}
+                className="volume-slider"
+              />
+            </div>
           </div>
           <button onClick={onQuit} className="quit-game-btn">
             <i className="fas fa-sign-out-alt"></i> Quitter la partie

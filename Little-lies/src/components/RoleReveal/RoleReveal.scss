@@ -56,30 +56,52 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 10px;
+}
+
+.loading-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin: 0 0 8px 0;
+  text-shadow: 0 0 20px rgba(100, 140, 220, 0.3);
 }
 
 .loading-bar-track {
-  width: 220px;
-  height: 3px;
+  width: 280px;
+  height: 5px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .loading-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 220, 150, 0.8));
-  border-radius: 2px;
+  background: linear-gradient(90deg, #2f82ff, #6bb5ff);
+  border-radius: 3px;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px rgba(47, 130, 255, 0.4);
 }
 
 .loading-text {
-  font-family: 'Cinzel', serif;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 3px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 2px;
   text-transform: uppercase;
+  margin: 0;
+}
+
+.loading-percent {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+  margin: 0;
 }
 
 // Intro text — positioned absolutely so it doesn't push the card

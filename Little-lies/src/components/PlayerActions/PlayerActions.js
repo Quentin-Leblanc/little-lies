@@ -25,6 +25,26 @@ const ACTION_COLORS = {
 };
 const getActionStyle = (type) => ACTION_COLORS[type] || { bg: 'rgba(100,100,100,0.7)', hover: 'rgba(100,100,100,0.9)', color: '#fff' };
 
+// Tooltips for night actions — helps new players
+const ACTION_TOOLTIPS = {
+  KILL: 'Élimine un joueur cette nuit',
+  MAFIA_KILL: 'La mafia élimine un joueur cette nuit',
+  VIGILANTE_KILL: 'Élimine un joueur (attention aux innocents !)',
+  SK_KILL: 'Élimine un joueur en silence',
+  HEAL: 'Soigne un joueur pour le protéger cette nuit',
+  PROTECT: 'Protège un joueur d\'une attaque',
+  BODYGUARD: 'Protège un joueur en risquant ta vie',
+  VEST: 'Porte un gilet pare-balles (nombre limité)',
+  INVESTIGATE: 'Découvre si ce joueur est suspect ou non',
+  LOOKOUT: 'Observe qui visite ce joueur cette nuit',
+  SPY: 'Espionne les activités de la mafia',
+  JAIL: 'Emprisonne un joueur pour la nuit (bloque ses actions)',
+  JAILOR_EXECUTE: 'Exécute le prisonnier (nombre limité)',
+  ROLEBLOCK: 'Bloque les actions d\'un joueur cette nuit',
+  FRAME: 'Fait paraître un joueur suspect aux enquêteurs',
+  BLACKMAIL: 'Empêche un joueur de parler le jour suivant',
+};
+
 const PlayerActions = memo(function () {
   const { getPlayers, getMe, game, CONSTANTS, trial, setTrial, setPlayers, setGame, addChatSystem } = useGameEngine();
   const Events = useEvents();
@@ -324,6 +344,7 @@ const PlayerActions = memo(function () {
                             className={`action-btn ${isSelected ? 'action-btn-active' : ''}`}
                             onClick={() => handleNightAction(action, player)}
                             key={action.type}
+                            title={ACTION_TOOLTIPS[action.type] || action.description || ''}
                           >
                             {action.label}
                           </button>

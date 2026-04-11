@@ -79,19 +79,19 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     <div className="custom-lobby-container">
       {/* 3D Scene */}
       <Canvas shadows camera={{ position: [0, 10, 18], fov: 55 }} dpr={[1, 1.5]}>
-        <color attach="background" args={['#4a90d9']} />
-        <fog attach="fog" args={['#4a90d9', 80, 180]} />
+        <color attach="background" args={['#87CEEB']} />
+        <fog attach="fog" args={['#87CEEB', 80, 180]} />
         <PerformanceMonitor />
-        <ambientLight intensity={0.7} />
+        <ambientLight intensity={0.6} />
         <directionalLight
-          castShadow position={[15, 25, 10]} intensity={1.2} color="#ffffff"
+          castShadow position={[15, 25, 10]} intensity={2.5} color="#fff5e0"
           shadow-mapSize-width={2048} shadow-mapSize-height={2048}
           shadow-camera-left={-35} shadow-camera-right={35}
           shadow-camera-top={35} shadow-camera-bottom={-35}
         />
-        <hemisphereLight intensity={0.5} groundColor="#b0b0c0" color="#ffffff" />
+        <hemisphereLight intensity={0.4} groundColor="#8B7355" color="#87CEEB" />
         <EffectComposer>
-          <Bloom intensity={0.8} luminanceThreshold={0.3} luminanceSmoothing={0.2} />
+          <Bloom intensity={0.3} luminanceThreshold={0.8} luminanceSmoothing={0.4} />
         </EffectComposer>
 
         <CameraFollow target={localBodyRef} rotationRef={localRotRef} />
@@ -126,7 +126,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
       {/* UI Panel */}
       <div className="lobby-panel">
         <div className="lobby-panel-inner">
-          <h1 className="lobby-title">MAFIA & WOLVES</h1>
+          <h1 className="lobby-title">NOT ME</h1>
           <p className="lobby-subtitle">Salon multijoueur</p>
 
           <div className="lobby-section">

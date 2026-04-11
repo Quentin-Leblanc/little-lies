@@ -1,15 +1,19 @@
 .roles-list-box {
   margin-bottom: 16px;
+  padding: 10px;
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(100, 120, 180, 0.1);
+  background: linear-gradient(135deg, rgba(20, 20, 35, 0.4) 0%, rgba(10, 10, 20, 0.3) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(100, 120, 180, 0.08);
 
   h3 {
     font-family: 'Cinzel', serif;
     font-size: 16px;
     margin: 0 0 8px 0;
     text-align: left;
-    color: #888;
-    i { margin-right: 6px; color: #888; }
+    color: #99a;
+    i { margin-right: 6px; color: #99a; }
   }
 }
 
@@ -43,24 +47,30 @@
 .role-chip {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 1px 6px;
-  border-radius: 10px;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
   border: 1px solid;
-  font-size: 10px;
+  font-size: 11px;
   font-style: italic;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   white-space: nowrap;
+  background: rgba(255, 255, 255, 0.03);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   }
 
   .role-count {
     font-size: 9px;
-    color: #888;
+    color: #999;
     margin-left: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0 4px;
+    border-radius: 6px;
   }
 }
 

@@ -28,6 +28,7 @@ function App() {
     const prevPhaseRef = useRef(null);
 
     const isGameOver = status === CONSTANTS.GAME_ENDED;
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // ── Curtain managed at App level (persists across RoleReveal unmount) ──
     const [curtainVisible, setCurtainVisible] = useState(false);
@@ -66,9 +67,6 @@ function App() {
         if (!prev || prev === phase) return;
 
         const PHASE_BANNERS = {
-            // Night banner removed — handled by fade overlay text
-            // Day banner removed — handled by fade overlay text
-            // Discussion banner removed
             [CONSTANTS.PHASE.VOTING]: { text: 'Vote', icon: 'fa-gavel', className: 'banner-vote' },
             [CONSTANTS.PHASE.DEFENSE]: { text: 'Defense', icon: 'fa-shield', className: 'banner-defense' },
             [CONSTANTS.PHASE.JUDGMENT]: { text: 'Jugement', icon: 'fa-scale-balanced', className: 'banner-judgment' },
@@ -147,8 +145,14 @@ function App() {
                         <MainScene />
                     </div>
 
+                    {/* Sidebar toggle (mobile/tablet) */}
+                    <button className="sidebar-toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-user'}`}></i>
+                    </button>
+                    {sidebarOpen && <div className="sidebar-backdrop show" onClick={() => setSidebarOpen(false)} />}
+
                     {/* Right - Role info + player list */}
-                    <div className="layout-sidebar">
+                    <div className={`layout-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
                         <Player />
                     </div>
 

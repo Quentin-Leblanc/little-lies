@@ -155,13 +155,78 @@
 }
 
 @keyframes announcement-fade-in {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+  0% { opacity: 0; transform: scale(0.8); filter: blur(6px); }
+  60% { opacity: 1; transform: scale(1.03); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes announcement-auto-fade {
   0% { opacity: 1; }
   70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── Blood flash overlay (plays before death report) ── */
+.blood-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 34;
+  pointer-events: none;
+  animation: blood-flash 2.5s ease-out forwards;
+}
+
+.blood-overlay-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Vignette rouge sang */
+.blood-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(120, 0, 0, 0.7) 100%);
+  animation: blood-vignette-pulse 2.5s ease-out forwards;
+}
+
+/* Coulées de sang depuis le haut */
+.blood-drip {
+  position: absolute;
+  top: -5%;
+  width: 6vw;
+  background: linear-gradient(180deg, rgba(140, 0, 0, 0.9) 0%, rgba(80, 0, 0, 0.6) 60%, transparent 100%);
+  border-radius: 0 0 50% 50%;
+  animation: blood-drip-fall 2s ease-in forwards;
+}
+.blood-drip:nth-child(2) { left: 8%; width: 4vw; height: 35vh; animation-delay: 0.1s; }
+.blood-drip:nth-child(3) { left: 25%; width: 5vw; height: 45vh; animation-delay: 0.25s; }
+.blood-drip:nth-child(4) { left: 50%; width: 3vw; height: 30vh; animation-delay: 0.05s; }
+.blood-drip:nth-child(5) { left: 70%; width: 6vw; height: 50vh; animation-delay: 0.15s; }
+.blood-drip:nth-child(6) { left: 88%; width: 4vw; height: 38vh; animation-delay: 0.3s; }
+
+@keyframes blood-flash {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes blood-vignette-pulse {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  30% { opacity: 0.8; }
+  50% { opacity: 1; }
+  70% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+@keyframes blood-drip-fall {
+  0% { transform: translateY(-100%); opacity: 0; }
+  15% { transform: translateY(0); opacity: 1; }
+  70% { opacity: 0.8; }
   100% { opacity: 0; }
 }
 
@@ -177,29 +242,31 @@
   justify-content: center;
   z-index: 35;
   pointer-events: none;
-  animation: death-report-anim 4.5s ease-in-out forwards;
+  animation: death-report-anim 4s ease-in-out forwards;
 }
 
 .death-report-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 32px 48px;
-  background: rgba(0, 0, 0, 0.75);
+  gap: 18px;
+  padding: 40px 60px;
+  background: rgba(10, 0, 0, 0.85);
   border-radius: 16px;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  max-width: 500px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 30, 30, 0.2);
+  max-width: 700px;
+  box-shadow: 0 0 60px rgba(150, 0, 0, 0.3), inset 0 0 30px rgba(100, 0, 0, 0.1);
 }
 
 .death-report-icon {
-  font-size: 2.5rem;
-  margin-bottom: 4px;
+  font-size: 3.5rem;
+  margin-bottom: 8px;
 
   .has-dead & {
-    color: #cc3333;
-    filter: drop-shadow(0 0 12px rgba(200, 50, 50, 0.5));
+    color: #cc2222;
+    filter: drop-shadow(0 0 20px rgba(200, 30, 30, 0.6));
+    animation: skull-pulse 1.5s ease-in-out infinite;
   }
 
   .no-dead & {
@@ -208,43 +275,65 @@
   }
 }
 
+@keyframes skull-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
 .death-report-name {
   text-align: center;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .death-name {
   display: block;
   font-family: 'Cinzel', serif;
-  font-size: 1.6rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  color: #e44;
-  text-shadow: 0 0 16px rgba(200, 50, 50, 0.5);
-  letter-spacing: 2px;
+  color: #ff3333;
+  text-shadow: 0 0 24px rgba(200, 30, 30, 0.6), 0 2px 8px rgba(0, 0, 0, 0.8);
+  letter-spacing: 3px;
 }
 
 .death-desc {
   display: block;
-  font-size: 0.95rem;
-  color: rgba(200, 200, 220, 0.8);
+  font-size: 1.15rem;
+  color: rgba(220, 210, 220, 0.85);
   font-style: italic;
-  margin-top: 4px;
+  margin-top: 8px;
+  line-height: 1.5;
+  max-width: 500px;
 }
 
 .death-report-safe {
   font-family: 'Cinzel', serif;
-  font-size: 1.3rem;
+  font-size: 1.6rem;
   color: rgba(180, 200, 230, 0.9);
   text-shadow: 0 0 12px rgba(100, 150, 200, 0.3);
   text-align: center;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 @keyframes death-report-anim {
-  0% { opacity: 0; transform: scale(0.92); }
-  12% { opacity: 1; transform: scale(1); }
+  0% { opacity: 0; transform: scale(0.7); filter: blur(10px); }
+  12% { opacity: 1; transform: scale(1.02); filter: blur(0); }
+  18% { transform: scale(1); }
   75% { opacity: 1; }
-  100% { opacity: 0; }
+  90% { opacity: 0.8; }
+  100% { opacity: 0; transform: scale(0.95); filter: blur(4px); }
+}
+
+@media (max-width: 768px) {
+  .death-report-card {
+    padding: 24px 20px;
+    max-width: 90vw;
+  }
+  .death-name {
+    font-size: 1.6rem;
+  }
+  .death-desc {
+    font-size: 1rem;
+  }
 }
 
 /* Night ambiance messages */
@@ -344,8 +433,8 @@
 }
 
 @keyframes night-text-anim {
-  0% { opacity: 0; }
-  12% { opacity: 1; }
-  50% { opacity: 1; }
-  100% { opacity: 0; }
+  0% { opacity: 0; transform: scale(0.9); filter: blur(6px); }
+  10% { opacity: 1; transform: scale(1); filter: blur(0); }
+  55% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.02); filter: blur(4px); }
 }

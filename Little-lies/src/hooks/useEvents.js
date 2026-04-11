@@ -43,6 +43,14 @@ export const EventsProvider = ({ children }) => {
     else throw new Error('Event must have a type and content properties');
   };
 
+  // Add multiple events at once (avoids stale state overwrites)
+  const addBatch = (newEvents) => {
+    const formatted = newEvents.map((e) => ({
+      dayCount: game.dayCount, createdAt: Date.now(), ...e,
+    }));
+    setEvents([...events, ...formatted]);
+  };
+
   const get = () => events;
 
   const hasDoneThisActionTonight = (actionType) =>
@@ -82,7 +90,7 @@ export const EventsProvider = ({ children }) => {
     ]);
   };
 
-  const eventsState = { add, get, hasDoneThisActionTonight, replaceAction, getMyActionTarget, getMyNotifications, addNotification };
+  const eventsState = { add, addBatch, get, hasDoneThisActionTonight, replaceAction, getMyActionTarget, getMyNotifications, addNotification };
 
   const killPlayer = (playerIdToKill) =>
     setPlayers(
@@ -526,9 +534,9 @@ export const EventsProvider = ({ children }) => {
 
     const resolvedEvents = resolveNightActions();
 
-    // Check if no one died (using the freshly resolved events)
+    // Check if no one died (using the freshly resolved events + disconnects)
     const deathEvents = resolvedEvents.filter(
-      (e) => e.type === 'KILL_RESULT' && e.dayCount === game.dayCount && !e.displayed
+      (e) => (e.type === 'KILL_RESULT' || e.type === 'disconnect') && !e.displayed && e.content?.chatMessage
     );
 
     if (deathEvents.length === 0) {

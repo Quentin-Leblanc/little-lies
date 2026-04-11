@@ -308,9 +308,10 @@ export const GameEngineProvider = ({ children }) => {
   // --- Disconnect handling ---
   const handleDisconnectPlayers = () => {
     const connectedIds = new Set(playroom_players.map((p) => p.id));
+    const disconnectEvents = [];
     const updated = players.map((player) => {
       if (!connectedIds.has(player.id) && player.connected && player.isAlive) {
-        Events.add({
+        disconnectEvents.push({
           type: 'disconnect',
           content: { chatMessage: `${player.profile.name} est mort de façon inconnue` },
           displayed: false,
@@ -319,6 +320,10 @@ export const GameEngineProvider = ({ children }) => {
       }
       return player;
     });
+    // Batch all disconnect events in a single state update
+    if (disconnectEvents.length > 0) {
+      Events.addBatch(disconnectEvents);
+    }
     if (updated.some((p, i) => p !== players[i])) {
       setPlayers(updated);
     }

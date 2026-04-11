@@ -4,17 +4,8 @@ import { useGameEngine } from '../../hooks/useGameEngine';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import './RoleReveal.scss';
 
-// All models to preload (download + parse into Three.js cache)
+// Character models to preload (village is now fully procedural)
 const MODELS_TO_PRELOAD = [
-  '/models/mountain.glb',
-  '/models/terrain.glb',
-  '/models/forge.glb',
-  '/models/tavern.glb',
-  '/models/chapel.glb',
-  '/models/rue.glb',
-  '/models/cottage.glb',
-  '/models/gallows.glb',
-  '/models/Meshy_AI_Circular_Wicker_Place_0408110924_texture.glb',
   '/models/Villager_Idle.glb',
   '/models/Villager_Walk.glb',
   '/models/Villager_Run.glb',
@@ -117,23 +108,25 @@ const RoleReveal = ({ onComplete }) => {
 
   return (
     <div className="role-reveal-overlay">
-      {/* Loading screen */}
+      {/* Loading screen — visible immediately */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
             className="loading-container"
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.5 }}
           >
+            <p className="loading-title">Not Me</p>
+            <p className="loading-text">Chargement des ressources</p>
             <div className="loading-bar-track">
               <div
                 className="loading-bar-fill"
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
             </div>
-            <p className="loading-text">Chargement...</p>
+            <p className="loading-percent">{Math.round(progress * 100)}%</p>
           </motion.div>
         )}
       </AnimatePresence>

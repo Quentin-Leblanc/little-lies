@@ -124,15 +124,14 @@ const Ramp = ({ position, rotation = [0, 0, 0], size = [8, 0.4, 6], color = '#55
   </RigidBody>
 );
 
-/* ── Ground ── */
+/* ── Ground — grassy terrain matching village style ── */
 const Ground = () => (
   <RigidBody type="fixed" position={[0, -0.2, 0]} collisionGroups={G}>
     <CuboidCollider args={[75, 0.2, 75]} />
     <mesh receiveShadow>
       <boxGeometry args={[150, 0.4, 150]} />
-      <meshStandardMaterial color="#111111" roughness={0.95} />
+      <meshStandardMaterial color="#7EC850" roughness={0.95} flatShading />
     </mesh>
-    <gridHelper args={[150, 60, '#222233', '#222233']} position={[0, 0.21, 0]} />
   </RigidBody>
 );
 
@@ -190,49 +189,49 @@ const LobbyParkour = () => (
   <group>
     <Ground />
 
-    {/* ── Giant LOBBY text on the ground ── */}
+    {/* ── Giant NOT ME text on the ground ── */}
     <Text
       position={[0, 0.05, -20]}
       rotation={[-Math.PI / 2, 0, 0]}
-      fontSize={16}
-      color="#ffffff"
+      fontSize={14}
+      color="#F5E6D0"
       anchorX="center"
       anchorY="middle"
       letterSpacing={0.3}
     >
-      LOBBY
+      NOT ME
     </Text>
 
-    {/* ── Spawn area ── */}
-    <Plat position={[0, 0.2, 0]} size={[20, 0.5, 20]} color="#00cc66" />
+    {/* ── Spawn area — village stone plaza ── */}
+    <Plat position={[0, 0.2, 0]} size={[20, 0.5, 20]} color="#C4A882" />
 
     {/* ══ Path A (right): easy stairs + bouncer ══ */}
-    <Plat position={[16, 1, 0]} size={[7, 0.5, 7]} color="#ff6633" />
-    <Plat position={[26, 2, 0]} size={[7, 0.5, 7]} color="#ffcc00" />
-    <Plat position={[36, 3, 0]} size={[7, 0.5, 7]} color="#33ccff" />
+    <Plat position={[16, 1, 0]} size={[7, 0.5, 7]} color="#E8734A" />
+    <Plat position={[26, 2, 0]} size={[7, 0.5, 7]} color="#D4A574" />
+    <Plat position={[36, 3, 0]} size={[7, 0.5, 7]} color="#F5E6D0" />
     <Bouncer position={[36, 3.2, 10]} size={[6, 0.3, 6]} />
-    <Plat position={[36, 8, 20]} size={[8, 0.5, 8]} color="#ff44aa" />
+    <Plat position={[36, 8, 20]} size={[8, 0.5, 8]} color="#8B6914" />
 
     {/* ══ Path B (left): ramp + slider ══ */}
-    <Ramp position={[-14, 1.2, 0]} rotation={[0, 0, -0.12]} size={[10, 0.4, 7]} color="#cc44ff" />
-    <Plat position={[-24, 2.5, 0]} size={[7, 0.5, 7]} color="#44ddaa" />
-    <Slider from={[-24, 2.8, 4]} to={[-24, 2.8, 28]} speed={0.4} color="#ff8844" />
-    <Plat position={[-24, 3, 32]} size={[7, 0.5, 7]} color="#66ff66" />
+    <Ramp position={[-14, 1.2, 0]} rotation={[0, 0, -0.12]} size={[10, 0.4, 7]} color="#4CAF50" />
+    <Plat position={[-24, 2.5, 0]} size={[7, 0.5, 7]} color="#5BBF5E" />
+    <Slider from={[-24, 2.8, 4]} to={[-24, 2.8, 28]} speed={0.4} color="#FF6B35" />
+    <Plat position={[-24, 3, 32]} size={[7, 0.5, 7]} color="#7EC850" />
     <Bouncer position={[-24, 3.2, 32]} size={[6, 0.3, 6]} />
-    <Plat position={[-16, 8, 32]} size={[8, 0.5, 8]} color="#ffdd44" />
+    <Plat position={[-16, 8, 32]} size={[8, 0.5, 8]} color="#FFD700" />
 
     {/* ══ Mid zone: sliders connect Path A & B to center platform ══ */}
-    <Slider from={[32, 8.5, 20]} to={[10, 8.5, 27]} speed={0.3} size={[6, 0.5, 6]} color="#ff55cc" />
-    <Slider from={[-12, 8.5, 32]} to={[2, 8.5, 28]} speed={0.3} size={[6, 0.5, 6]} color="#55ccff" />
-    <Plat position={[6, 9, 28]} size={[10, 0.5, 10]} color="#ff4444" />
+    <Slider from={[32, 8.5, 20]} to={[10, 8.5, 27]} speed={0.3} size={[6, 0.5, 6]} color="#E8734A" />
+    <Slider from={[-12, 8.5, 32]} to={[2, 8.5, 28]} speed={0.3} size={[6, 0.5, 6]} color="#4A9BD9" />
+    <Plat position={[6, 9, 28]} size={[10, 0.5, 10]} color="#C4A882" />
 
     {/* ── Spinner challenge ── */}
-    <Spinner position={[6, 9.4, 28]} speed={0.25} length={14} color="#ff8800" />
+    <Spinner position={[6, 9.4, 28]} speed={0.25} length={14} color="#8B6914" />
 
     {/* ══ Final climb ══ */}
-    <Plat position={[6, 10.5, 40]} size={[7, 0.5, 7]} color="#44ff88" />
-    <Plat position={[0, 12, 50]} size={[7, 0.5, 7]} color="#8844ff" />
-    <Plat position={[6, 13.5, 60]} size={[7, 0.5, 7]} color="#ff4488" />
+    <Plat position={[6, 10.5, 40]} size={[7, 0.5, 7]} color="#5BBF5E" />
+    <Plat position={[0, 12, 50]} size={[7, 0.5, 7]} color="#E8734A" />
+    <Plat position={[6, 13.5, 60]} size={[7, 0.5, 7]} color="#D4A574" />
     <Bouncer position={[6, 13.7, 60]} size={[6, 0.3, 6]} />
 
     {/* ── Trophy platform ── */}

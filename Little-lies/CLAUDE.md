@@ -1,4 +1,4 @@
-# Little Lies - Claude Code Configuration
+# Not Me - Claude Code Configuration
 
 ## Permissions
 
@@ -20,11 +20,11 @@ Claude Code is allowed to run the following without asking for confirmation:
 
 ## Project Overview
 
-Multiplayer social deduction game — Little Lies.
+Multiplayer social deduction game — Not Me.
 
 - **Stack**: React 18, React Three Fiber, PlayroomKit, Framer Motion, SASS
 - **Multiplayer**: PlayroomKit (JoinPlayroom) handles networking/lobby/rooms
-- **3D**: Three.js via R3F for cinematic animations (non-interactive, players don't control characters)
+- **3D**: Three.js via R3F — low-poly procedural village (flat-shaded, no external GLB for buildings)
 - **Language**: UI in French
 - **Remote**: https://github.com/Quentin-Leblanc/little-lies.git (branch: main)
 
@@ -34,7 +34,7 @@ Multiplayer social deduction game — Little Lies.
 - `src/hooks/useEvents.js` - Night action resolution, event system
 - `src/components/` - All UI components
 - `src/trad/roles.json` - Role definitions
-- `public/models/` - 3D assets (Character.gltf, map2.glb)
+- `public/models/` - Character animations only (Villager_*.glb)
 
 ## Conventions
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useMultiplayerState, me as prk_me } from 'playroomkit';
 import { useGameEngine } from '../../hooks/useGameEngine';
+import { playChatMessage } from '../../utils/AudioManager';
 
 import './chat.scss';
 
@@ -251,6 +252,7 @@ function Chat(props) {
       [myName]: [...recentTimestamps, now],
     });
     setInputValues('');
+    playChatMessage();
   };
 
   // --- State checks ---

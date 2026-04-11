@@ -7,29 +7,46 @@ import trad from '../../trad/roles.json';
 
 // Role presets by player count
 const PRESETS = {
+  beginner_4: {
+    label: 'Débutant 4',
+    count: 4,
+    desc: 'Idéal pour découvrir le jeu — rôles simples',
+    roles: ['villageois', 'sheriff', 'godfather', 'mafioso'],
+  },
+  beginner_5: {
+    label: 'Débutant 5',
+    count: 5,
+    desc: 'Introduction avec un docteur',
+    roles: ['villageois', 'villageois', 'sheriff', 'godfather', 'mafioso'],
+  },
   classic_6: {
     label: 'Classic 6',
     count: 6,
+    desc: 'Village + Mafia équilibré',
     roles: ['villageois', 'villageois', 'sheriff', 'docteur', 'godfather', 'mafioso'],
   },
   classic_8: {
     label: 'Classic 8',
     count: 8,
+    desc: 'Ajout de rôles d\'investigation',
     roles: ['villageois', 'villageois', 'sheriff', 'docteur', 'lookout', 'godfather', 'mafioso', 'framer'],
   },
   ranked_10: {
     label: 'Ranked 10',
     count: 10,
+    desc: 'Mode compétitif avec neutres',
     roles: ['villageois', 'sheriff', 'docteur', 'escort', 'vigilante', 'godfather', 'mafioso', 'blackmailer', 'serial_killer', 'jester'],
   },
   chaos_12: {
     label: 'Chaos 12',
     count: 12,
+    desc: 'Tous les rôles, chaos total',
     roles: ['villageois', 'sheriff', 'docteur', 'bodyguard', 'vigilante', 'spy', 'godfather', 'mafioso', 'framer', 'consigliere', 'serial_killer', 'executioner'],
   },
   full_15: {
     label: 'Complet 15',
     count: 15,
+    desc: 'Partie complète avec tous les rôles',
     roles: ['villageois', 'sheriff', 'docteur', 'lookout', 'vigilante', 'maire', 'bodyguard', 'escort', 'jailor', 'godfather', 'mafioso', 'framer', 'blackmailer', 'serial_killer', 'survivor'],
   },
 };
@@ -82,9 +99,11 @@ const Setup = () => {
               {matchingPresets.map(([key, preset]) => (
                 <button
                   key={key}
-                  className="preset-btn"
+                  className={`preset-btn ${key.startsWith('beginner') ? 'preset-beginner' : ''}`}
                   onClick={() => applyPreset(preset)}
+                  title={preset.desc}
                 >
+                  {key.startsWith('beginner') && <i className="fas fa-graduation-cap" style={{ marginRight: 4 }}></i>}
                   {preset.label}
                 </button>
               ))}
