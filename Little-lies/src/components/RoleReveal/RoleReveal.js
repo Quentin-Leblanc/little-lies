@@ -26,7 +26,7 @@ const LOADING_MESSAGES = [
 ];
 
 const RoleReveal = ({ onComplete }) => {
-  const { getMe, getPlayers } = useGameEngine();
+  const { getMe, getPlayers, game, markReady, readyPlayers } = useGameEngine();
   const me = getMe();
   const players = getPlayers();
   // loading -> waiting -> intro -> flip -> details -> done
@@ -88,7 +88,7 @@ const RoleReveal = ({ onComplete }) => {
         setRealLoaded(true);
         setTimeout(() => {
           setProgress(1);
-          setTimeout(() => setPhase('waiting'), 500);
+          setTimeout(() => setPhase('waiting-players'), 500);
         }, 300);
       }
     };
@@ -96,6 +96,21 @@ const RoleReveal = ({ onComplete }) => {
     loadAll();
     return () => { cancelled = true; };
   }, []);
+
+  // Mark this player as ready when assets are loaded
+  useEffect(() => {
+    if (realLoaded && me) {
+      markReady(me.id);
+    }
+  }, [realLoaded]);
+
+  // Start reveal sequence when all players are ready
+  useEffect(() => {
+    if (phase !== 'waiting-players') return;
+    if (!game.waitingForPlayers) {
+      setPhase('waiting');
+    }
+  }, [phase, game.waitingForPlayers]);
 
   // Role reveal sequence — starts once loading is done
   const sequenceStarted = useRef(false);
@@ -125,7 +140,7 @@ const RoleReveal = ({ onComplete }) => {
     : null;
 
   const isLoading = phase === 'loading';
-  const showContent = phase !== 'waiting' && phase !== 'loading';
+  const showContent = phase !== 'waiting' && phase !== 'loading' && phase !== 'waiting-players';
 
   return (
     <div className="role-reveal-overlay">
@@ -159,6 +174,30 @@ const RoleReveal = ({ onComplete }) => {
               />
             </div>
             <p className="loading-percent">{Math.round(progress * 100)}%</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Waiting for other players */}
+      <AnimatePresence>
+        {phase === 'waiting-players' && (
+          <motion.div
+            className="loading-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="loading-title">Not Me</p>
+            <p className="loading-text">
+              En attente des joueurs... ({readyPlayers.length}/{players.length})
+            </p>
+            <div className="loading-bar-track">
+              <div
+                className="loading-bar-fill"
+                style={{ width: `${players.length > 0 ? Math.round((readyPlayers.length / players.length) * 100) : 0}%` }}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

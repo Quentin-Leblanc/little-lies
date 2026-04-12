@@ -157,6 +157,8 @@ export const GameEngineProvider = ({ children }) => {
     votes: {},
   });
   const trial = _trial || { suspects: {}, votes: {} };
+  const [_readyPlayers, setReadyPlayers] = useMultiplayerState('readyPlayers', []);
+  const readyPlayers = _readyPlayers || [];
 
   const playroom_players = usePlayersList(true);
 
@@ -236,6 +238,12 @@ export const GameEngineProvider = ({ children }) => {
     );
   };
 
+  const markReady = (playerId) => {
+    if (!readyPlayers.includes(playerId)) {
+      setReadyPlayers([...readyPlayers, playerId]);
+    }
+  };
+
   const startGame = () => {
     const shuffledRoles = [...rolesSelected].sort(() => Math.random() - 0.5);
     const newPlayers = playroom_players
@@ -275,6 +283,7 @@ export const GameEngineProvider = ({ children }) => {
     });
 
     setPlayers(newPlayers);
+    setReadyPlayers([]);
 
     // Game starts at Day 1 (Discussion) — players have no info yet, can /skip to night
     setGame({
@@ -290,6 +299,7 @@ export const GameEngineProvider = ({ children }) => {
       accusedId: null,
       winner: null,
       skipVotes: [],
+      waitingForPlayers: true,
     });
 
     // Day 1 opening messages
@@ -599,6 +609,8 @@ export const GameEngineProvider = ({ children }) => {
     if (game.status === STATUS.ENDED) return;
     // Admin free-roam pauses the game
     if (game.adminFreeRoam) return;
+    // Wait for all players to load assets before ticking
+    if (game.waitingForPlayers) return;
 
     const tick = setTimeout(() => {
       // Re-check pause inside timeout (flag may have changed since setTimeout was set)
@@ -627,7 +639,25 @@ export const GameEngineProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(tick);
-  }, [game.timer, game.phase, game.status, game.adminFreeRoam, isHost(), trial]);
+  }, [game.timer, game.phase, game.status, game.adminFreeRoam, game.waitingForPlayers, isHost(), trial]);
+
+  // --- Wait for all players to load assets (host only) ---
+  useEffect(() => {
+    if (!isHost() || !game.isGameStarted || !game.waitingForPlayers) return;
+
+    const allReady = players.length > 0 && players.every(p => readyPlayers.includes(p.id));
+    if (allReady) {
+      setGame(prev => ({ ...prev, waitingForPlayers: false }));
+      return;
+    }
+
+    // Timeout: start anyway after 15s
+    const timeout = setTimeout(() => {
+      setGame(prev => ({ ...prev, waitingForPlayers: false }));
+    }, 15000);
+
+    return () => clearTimeout(timeout);
+  }, [readyPlayers.length, game.waitingForPlayers, game.isGameStarted]);
 
   // --- Skip day majority check (host only) ---
   const skipVoteCount = (game.skipVotes || []).length;
@@ -665,6 +695,8 @@ export const GameEngineProvider = ({ children }) => {
         checkWinCondition,
         voteSkip,
         addChatSystem,
+        readyPlayers,
+        markReady,
       }}
     >
       {children}
