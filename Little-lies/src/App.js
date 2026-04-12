@@ -17,6 +17,7 @@ import AdminPanel from './components/AdminPanel/AdminPanel';
 import RoleReveal from './components/RoleReveal/RoleReveal';
 import CustomLobby from './components/CustomLobby/CustomLobby';
 import StarryBackground from './utils/StarryBackground';
+import LagIndicator from './components/LagIndicator/LagIndicator';
 import './styles/global.scss';
 import './styles/App.scss';
 
@@ -165,6 +166,7 @@ function App() {
                     <div className="layout-chat">
                         <Chat night={isNight} highlight={phase === CONSTANTS.PHASE.DISCUSSION} />
                     </div>
+                    <LagIndicator />
                 </div>
             </GameComponent>}
         </div>
