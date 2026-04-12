@@ -384,6 +384,7 @@ function Chat(props) {
   };
 
   return (
+    <>
     <div
       className={`chat-container ${props.night ? 'chat-night' : ''} ${isDead ? 'chat-dead-mode' : ''} ${isVillagerNight ? 'chat-villager-night' : ''}`}
       ref={chatContainerRef}
@@ -444,8 +445,9 @@ function Chat(props) {
         })}
         <div ref={messagesEndRef}></div>
       </div>
+      </div>
       {inputVisible ? (
-        <div className="chat-input-container">
+        <div className="chat-input-outside">
           <span className="chat-input-name" style={{ color: myColor || '#ccc' }}>{myName}:</span>
           <input
             ref={inputRef}
@@ -462,11 +464,11 @@ function Chat(props) {
           {inputError && <div className="invalid-char-message">{inputError}</div>}
         </div>
       ) : (
-        <div className="chat-input-hint">
+        <div className="chat-input-hint-outside">
           Appuyez sur <kbd>Entrée</kbd> pour écrire
         </div>
       )}
-    </div>
+    </>
   );
 }
 

@@ -370,12 +370,6 @@ useGLTF.preload('/models/road.glb');
 
 const VillageCenter = () => (
   <group>
-    {/* Sol pavé — grille de road tiles couvrant la place centrale */}
-    {[-3, 0, 3].map(x =>
-      [-3, 0, 3].map(z => (
-        <KenneyModel key={`road-${x}-${z}`} path="/models/road.glb" position={[x * 3, 0.02, z * 3]} scale={3.5} />
-      ))
-    )}
     {/* Potence au centre de la place */}
     <LowPolyGallows position={[0, 0, 0]} scale={1.2} />
     {/* Fontaine derrière les maisons */}
@@ -2387,32 +2381,55 @@ const MainScene = () => {
           {/* Lighting */}
           <SceneLighting isDay={game.isDay} isSunset={isSunset} />
 
-          {/* Sky & atmosphere */}
-          {game.isDay ? (
-            <>
-              <color attach="background" args={['#87CEEB']} />
-              <fog attach="fog" args={['#87CEEB', 40, 80]} />
-              <Sky sunPosition={[100, 60, 100]} turbidity={8} rayleigh={2} />
-              <DayFireflies count={50} />
-              <FloatingDust count={80} isDay />
-              <GroundFog isDay />
-              <DayRabbits count={5} />
-            </>
-          ) : (
-            <>
-              <color attach="background" args={['#060818']} />
-              <fog attach="fog" args={['#060818', 25, 55]} />
-              <Stars radius={80} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
-              <Moon />
-              <Fireflies count={60} />
-              <FloatingDust count={60} isDay={false} />
-              <GroundFog isDay={false} />
-              <NightRain count={300} />
-              <NightLightning />
-              <NightCrows count={4} />
-              <NightDarkFog count={20} />
-            </>
-          )}
+          {/* Sky & atmosphere — weather varies by dayCount */}
+          {(() => {
+            // Deterministic weather based on dayCount (same for all players)
+            const seed = game.dayCount * 7 + 3;
+            // Day weather: 0=clear, 1=cloudy, 2=misty
+            const dayWeather = seed % 3;
+            // Night weather: 0=clear, 1=rainy+thunder, 2=foggy
+            const nightWeather = (seed * 13 + 5) % 3;
+
+            if (game.isDay) {
+              const isCloudy = dayWeather === 1;
+              const isMisty = dayWeather === 2;
+              const skyColor = isCloudy ? '#9ab8d4' : isMisty ? '#a8b8c8' : '#87CEEB';
+              return (
+                <>
+                  <color attach="background" args={[skyColor]} />
+                  <fog attach="fog" args={[skyColor, isMisty ? 25 : 40, isMisty ? 55 : 80]} />
+                  <Sky sunPosition={[100, isCloudy ? 30 : 60, 100]} turbidity={isCloudy ? 15 : 8} rayleigh={isCloudy ? 4 : 2} />
+                  <DayFireflies count={isCloudy ? 20 : 50} />
+                  <FloatingDust count={isMisty ? 120 : 80} isDay />
+                  <GroundFog isDay />
+                  {!isCloudy && <DayRabbits count={5} />}
+                  {isMisty && <GroundFog isDay />}{/* double fog when misty */}
+                </>
+              );
+            } else {
+              const isRainy = nightWeather === 1;
+              const isFoggy = nightWeather === 2;
+              return (
+                <>
+                  <color attach="background" args={['#060818']} />
+                  <fog attach="fog" args={['#060818', isRainy ? 15 : isFoggy ? 18 : 25, isRainy ? 40 : isFoggy ? 42 : 55]} />
+                  <Stars radius={80} depth={50} count={isRainy ? 500 : 3000} factor={4} saturation={0} fade speed={1} />
+                  <Moon />
+                  <Fireflies count={isRainy ? 15 : 60} />
+                  <FloatingDust count={60} isDay={false} />
+                  <GroundFog isDay={false} />
+                  <NightCrows count={4} />
+                  <NightDarkFog count={isFoggy ? 30 : 20} />
+                  {/* Rain + lightning only on rainy nights (1 in 3) */}
+                  {isRainy && <NightRain count={300} />}
+                  {isRainy && <NightLightning />}
+                  {/* Extra fog on foggy nights */}
+                  {isFoggy && <GroundFog isDay={false} />}
+                  {isFoggy && <NightDarkFog count={15} />}
+                </>
+              );
+            }
+          })()}
 
           <GroundPlane isDay={game.isDay} />
           <Village isDay={game.isDay} />

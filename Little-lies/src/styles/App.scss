@@ -12,7 +12,7 @@
 .game-layout {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  grid-template-columns: auto 1fr 450px;
+  grid-template-columns: auto 1fr 40vw;
   grid-template-areas:
     "players .       sidebar"
     ".       .       sidebar"

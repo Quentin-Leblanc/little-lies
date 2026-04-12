@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useMultiplayerState, getRoomCode } from 'playroomkit';
 import trad from '../../trad/roles.json';
 import Audio from '../../utils/AudioManager';
@@ -56,15 +57,16 @@ const Menu = () => {
           <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
         </button>
       </div>
-      {showMenu && (
+      {showMenu && ReactDOM.createPortal(
         <MenuDialog
           roomCode={roomCode}
           onClose={() => setShowMenu(false)}
           onQuit={handleQuitGame}
-        />
+        />,
+        document.body
       )}
-      {showLogs && <LogDialog messages={filteredLogs} onClose={() => setShowLogs(false)} />}
-      {showHelp && <HelpDialog onClose={() => setShowHelp(false)} />}
+      {showLogs && ReactDOM.createPortal(<LogDialog messages={filteredLogs} onClose={() => setShowLogs(false)} />, document.body)}
+      {showHelp && ReactDOM.createPortal(<HelpDialog onClose={() => setShowHelp(false)} />, document.body)}
     </div>
   );
 };
@@ -166,29 +168,53 @@ const HelpDialog = ({ onClose }) => {
     <div className="help-dialog-overlay" onClick={onClose}>
       <div className="help-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="help-dialog-header">
-          <h2>Aide du jeu</h2>
+          <h2>Guide du jeu</h2>
           <button className="close-button" onClick={onClose}>X</button>
         </div>
         <div className="help-dialog-content">
-          <h3>Déroulement d'une partie</h3>
+          <h3>Comment jouer ?</h3>
+          <p style={{color:'#bbb',fontSize:'13px',lineHeight:'1.6',marginBottom:'12px'}}>
+            Not Me est un jeu de déduction sociale. Chaque joueur reçoit un rôle secret.
+            Le <strong style={{color:'#78ff78'}}>Village</strong> doit identifier et éliminer les menaces.
+            La <strong style={{color:'#ff4444'}}>Mafia</strong> élimine les villageois la nuit en restant discrète.
+            Les <strong style={{color:'#9370db'}}>Neutres</strong> ont leurs propres objectifs.
+          </p>
+
+          <h3>Déroulement d'un tour</h3>
           <div className="help-phases">
-            <div className="help-phase"><strong>Nuit</strong> — Les joueurs utilisent leurs pouvoirs en secret.</div>
-            <div className="help-phase"><strong>Annonce des morts</strong> — Le village découvre qui est mort.</div>
-            <div className="help-phase"><strong>Discussion</strong> — Les joueurs parlent librement.</div>
-            <div className="help-phase"><strong>Vote</strong> — Votez pour accuser un suspect (majorité requise).</div>
-            <div className="help-phase"><strong>Défense</strong> — Seul l'accusé peut parler.</div>
-            <div className="help-phase"><strong>Jugement</strong> — Votez Coupable, Innocent ou Abstention.</div>
-            <div className="help-phase"><strong>Exécution</strong> — Si coupable, le joueur est éliminé.</div>
+            <div className="help-phase"><strong style={{color:'#8899cc'}}>Nuit</strong> — Chaque joueur utilise son pouvoir en secret. La Mafia choisit une cible à éliminer.</div>
+            <div className="help-phase"><strong style={{color:'#ffcc44'}}>Annonce</strong> — Le village découvre les victimes de la nuit.</div>
+            <div className="help-phase"><strong style={{color:'#78ff78'}}>Discussion</strong> — Débattez, accusez, défendez-vous. Utilisez le chat ou le vocal.</div>
+            <div className="help-phase"><strong style={{color:'#ffa502'}}>Vote</strong> — Votez contre un suspect. Une majorité est nécessaire pour accuser.</div>
+            <div className="help-phase"><strong style={{color:'#ff6666'}}>Défense</strong> — L'accusé a un dernier mot pour se défendre.</div>
+            <div className="help-phase"><strong style={{color:'#cc88ff'}}>Jugement</strong> — Votez Coupable ou Innocent. Si coupable, le joueur est exécuté.</div>
           </div>
 
-          <h3>Commandes chat</h3>
+          <h3>Conditions de victoire</h3>
+          <div className="help-phases">
+            <div className="help-phase"><strong style={{color:'#78ff78'}}>Village</strong> — Éliminer toute la Mafia et les menaces neutres.</div>
+            <div className="help-phase"><strong style={{color:'#ff4444'}}>Mafia</strong> — Être en majorité par rapport aux autres joueurs.</div>
+            <div className="help-phase"><strong style={{color:'#9370db'}}>Serial Killer</strong> — Être le dernier survivant.</div>
+            <div className="help-phase"><strong style={{color:'#ff69b4'}}>Jester</strong> — Se faire lyncher.</div>
+            <div className="help-phase"><strong style={{color:'#daa520'}}>Survivor</strong> — Rester en vie jusqu'à la fin.</div>
+            <div className="help-phase"><strong style={{color:'#808080'}}>Executioner</strong> — Faire lyncher sa cible.</div>
+          </div>
+
+          <h3>Commandes du chat</h3>
           <ul className="help-commands">
-            <li><code>-pm joueur message</code> — Chuchoter à un joueur</li>
-            <li><code>-name nouveau_nom</code> — Changer de nom (lobby uniquement)</li>
-            <li><code>-lw texte</code> — Mettre à jour votre testament</li>
+            <li><code>-pm joueur message</code> — Envoyer un message privé à un joueur</li>
+            <li><code>-lw texte</code> — Écrire votre testament (visible à votre mort)</li>
+            <li><code>-name pseudo</code> — Changer de pseudo (lobby uniquement)</li>
+            <li><code>-skip</code> — Voter pour passer la phase de discussion</li>
           </ul>
 
-          <h3 style={{ color: '#78ff78' }}>Village</h3>
+          <h3>Raccourcis</h3>
+          <ul className="help-commands">
+            <li><kbd>Entrée</kbd> — Ouvrir le chat / Envoyer un message</li>
+            <li><kbd>Échap</kbd> — Fermer le chat</li>
+          </ul>
+
+          <h3 style={{ color: '#78ff78' }}>Rôles du Village</h3>
           {rolesByTeam.town.map((role) => (
             <div key={role.key} className="help-role">
               <div className="help-role-header">
@@ -200,7 +226,7 @@ const HelpDialog = ({ onClose }) => {
             </div>
           ))}
 
-          <h3 style={{ color: '#ff0000' }}>Mafia</h3>
+          <h3 style={{ color: '#ff0000' }}>Rôles de la Mafia</h3>
           {rolesByTeam.mafia.map((role) => (
             <div key={role.key} className="help-role">
               <div className="help-role-header">
