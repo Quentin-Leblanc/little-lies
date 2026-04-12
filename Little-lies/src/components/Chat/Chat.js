@@ -386,7 +386,7 @@ function Chat(props) {
   return (
     <>
     <div
-      className={`chat-container ${props.night ? 'chat-night' : ''} ${isDead ? 'chat-dead-mode' : ''} ${isVillagerNight ? 'chat-villager-night' : ''}`}
+      className={`chat-container ${props.night ? 'chat-night' : ''} ${isDead ? 'chat-dead-mode' : ''} ${isVillagerNight ? 'chat-villager-night' : ''} ${props.highlight ? 'highlight-discussion' : ''}`}
       ref={chatContainerRef}
     >
       {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> Chat des morts</div>}
@@ -464,7 +464,7 @@ function Chat(props) {
           {inputError && <div className="invalid-char-message">{inputError}</div>}
         </div>
       ) : (
-        <div className="chat-input-hint-outside">
+        <div className={`chat-input-hint-outside ${props.night ? 'hint-night' : ''}`}>
           Appuyez sur <kbd>Entrée</kbd> pour écrire
         </div>
       )}

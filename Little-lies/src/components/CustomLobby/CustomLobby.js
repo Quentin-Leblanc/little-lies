@@ -110,7 +110,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             return (
               <CharacterController
                 key={player.id}
-                position={[spawnX, 1.5, spawnZ]}
+                position={[spawnX, 0.5, spawnZ]}
                 state={player}
                 isLocalPlayer={isLocal}
                 playerName={name}

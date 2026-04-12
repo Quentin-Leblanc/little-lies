@@ -12,7 +12,7 @@
 .game-layout {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  grid-template-columns: auto 1fr 40vw;
+  grid-template-columns: auto 1fr minmax(350px, 40vw);
   grid-template-areas:
     "players .       sidebar"
     ".       .       sidebar"
@@ -151,6 +151,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 350px;
+  max-width: 40vw;
 }
 
 // Bottom-left — Chat (large, wide)
@@ -163,15 +165,8 @@
   width: 40vw;
   max-width: 40vw;
   margin: 0 0 50px 0;
-  overflow: hidden;
-  transition: box-shadow 0.4s, border-color 0.4s;
+  overflow: visible;
   pointer-events: auto;
-
-  &.highlight-discussion {
-    box-shadow: 0 0 16px rgba(120, 255, 120, 0.2), inset 0 0 12px rgba(120, 255, 120, 0.03);
-    border: 1px solid rgba(120, 255, 120, 0.3);
-    border-radius: 4px;
-  }
 }
 
 // === PHASE BANNER ===

@@ -162,8 +162,8 @@ function App() {
                     </div>
 
                     {/* Bottom-left — Chat */}
-                    <div className={`layout-chat ${phase === CONSTANTS.PHASE.DISCUSSION ? 'highlight-discussion' : ''}`}>
-                        <Chat night={isNight} />
+                    <div className="layout-chat">
+                        <Chat night={isNight} highlight={phase === CONSTANTS.PHASE.DISCUSSION} />
                     </div>
                 </div>
             </GameComponent>}

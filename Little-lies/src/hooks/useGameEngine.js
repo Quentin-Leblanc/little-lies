@@ -296,6 +296,14 @@ export const GameEngineProvider = ({ children }) => {
     setChatMessages([
       {
         player: 'system',
+        color: '#78ff78',
+        content: 'Début de la partie — Bonne chance à tous.',
+        type: 'system',
+        dayCount: 1,
+        chat: 'default',
+      },
+      {
+        player: 'system',
         color: 'white',
         content: '--- Jour 1 ---',
         type: 'system',
