@@ -305,6 +305,15 @@
   }
 }
 
+.player-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  &.dot-online { background: #44cc44; box-shadow: 0 0 4px #44cc44; }
+  &.dot-offline { background: #cc2222; box-shadow: 0 0 4px #cc2222; }
+}
+
 .player-name-text {
   font-weight: bold;
 }

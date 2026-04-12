@@ -34,22 +34,45 @@ const RoleReveal = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
   const [msgIndex, setMsgIndex] = useState(0);
 
-  // Cycle messages every 1.5s independently of loading
+  const [realLoaded, setRealLoaded] = useState(false);
+
+  // Cycle messages every 1.8s
   useEffect(() => {
     if (phase !== 'loading') return;
     const interval = setInterval(() => {
       setMsgIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
-    }, 1500);
+    }, 1800);
     return () => clearInterval(interval);
   }, [phase]);
 
-  // Preload models one by one with visual progress
+  // Fake smooth progress bar — fills over ~4s, then waits for real load
+  useEffect(() => {
+    if (phase !== 'loading') return;
+    let cancelled = false;
+    const start = Date.now();
+    const fakeDuration = 4000; // 4 seconds to reach ~90%
+
+    const tick = () => {
+      if (cancelled) return;
+      const elapsed = Date.now() - start;
+      const fakeProgress = Math.min(elapsed / fakeDuration, 0.9); // caps at 90%
+      if (realLoaded) {
+        setProgress(1);
+      } else {
+        setProgress(fakeProgress);
+      }
+      if (fakeProgress < 0.9 || !realLoaded) {
+        requestAnimationFrame(tick);
+      }
+    };
+    requestAnimationFrame(tick);
+    return () => { cancelled = true; };
+  }, [phase, realLoaded]);
+
+  // Real model preloading in background
   useEffect(() => {
     const loader = new GLTFLoader();
-    const total = MODELS_TO_PRELOAD.length;
     let cancelled = false;
-
-    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
     const loadModel = (url) =>
       new Promise((resolve) => {
@@ -57,16 +80,16 @@ const RoleReveal = ({ onComplete }) => {
       });
 
     const loadAll = async () => {
-      for (let i = 0; i < total; i++) {
+      for (let i = 0; i < MODELS_TO_PRELOAD.length; i++) {
         if (cancelled) return;
         await loadModel(MODELS_TO_PRELOAD[i]);
-        // Small pause so UI can render each step visibly
-        await wait(120);
-        if (!cancelled) setProgress((i + 1) / total);
       }
       if (!cancelled) {
-        setProgress(1);
-        setTimeout(() => setPhase('waiting'), 400);
+        setRealLoaded(true);
+        setTimeout(() => {
+          setProgress(1);
+          setTimeout(() => setPhase('waiting'), 500);
+        }, 300);
       }
     };
 

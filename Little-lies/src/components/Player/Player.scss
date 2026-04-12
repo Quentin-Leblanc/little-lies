@@ -4,6 +4,7 @@
 .player-container {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   height: 100%;
   gap: 6px;
   padding-top: 8px;
@@ -12,11 +13,10 @@
 .role-team-row {
   display: flex;
   gap: 6px;
-  align-items: flex-start;
-  width: 100%;
+  align-items: stretch;
 
   .role-container { flex: 1; min-width: 0; }
-  .team-block { flex: 0 0 40%; min-width: 230px; }
+  .team-block { flex: 0 0 auto; min-width: 180px; }
 }
 
 .role-container {
@@ -155,8 +155,7 @@
 /* Actions block (between role info and last will) */
 .sidebar-actions-block {
   flex: none;
-  width: 70%;
-  margin-left: auto;
+  width: 80%;
   overflow-y: auto;
   padding: 10px;
   background: rgba(0, 0, 0, 0.8);
@@ -169,8 +168,7 @@
 .last-will-section {
   flex-shrink: 0;
   margin-top: auto;
-  margin-left: auto;
-  width: 60%;
+  width: 55%;
 }
 
 .last-will-trigger {

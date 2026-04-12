@@ -9,8 +9,7 @@
   padding: 8px 10px;
   overflow-y: auto;
   font-size: 14px;
-  margin-top: 4px;
-  align-self: stretch;
+  flex: 1;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(3px);
   border: 1px solid rgba(255, 255, 255, 0.08);

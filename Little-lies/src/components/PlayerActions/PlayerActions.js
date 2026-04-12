@@ -283,6 +283,7 @@ const PlayerActions = memo(function () {
             return (
               <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''} ${isNightTarget ? 'night-target' : ''}`}>
                 <span className="player-name-cell">
+                  <span className={`player-status-dot ${player.connected !== false ? 'dot-online' : 'dot-offline'}`}></span>
                   <span className="player-name-text" style={{ color: player.isAlive ? (player.profile?.color || '#ccc') : '#666' }}>
                     {player.profile.name}{player.id === me.id ? ' (toi)' : ''}
                   </span>

@@ -119,16 +119,17 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 480px;
+  max-width: 520px;
   max-height: 45vh;
   pointer-events: auto;
 
   // Graveyard + Roles on one row — spaced from menu
   .players-row {
     display: flex;
-    gap: 4px;
-    align-items: flex-start;
+    gap: 6px;
+    align-items: stretch;
     margin-top: 8px;
+    min-width: 400px;
   }
 }
 

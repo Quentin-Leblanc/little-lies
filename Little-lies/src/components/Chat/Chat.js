@@ -51,8 +51,9 @@ function Chat(props) {
       e.preventDefault();
       if (inputValues.trim()) {
         sendMessage();
+        setInputVisible(false);
       }
-      setInputVisible(false);
+      // If empty, keep input open
     }
     if (e.key === 'Escape') {
       setInputVisible(false);

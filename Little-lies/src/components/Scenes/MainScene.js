@@ -1489,7 +1489,6 @@ const PhaseEmote = ({ phase, isAccused, CONSTANTS }) => {
   let iconClass = null;
   let color = '#fff';
   if (isAccused) { iconClass = 'fa-exclamation-triangle'; color = '#ff4444'; }
-  else if (phase === CONSTANTS?.PHASE?.VOTING) { iconClass = 'fa-gavel'; color = '#ffa502'; }
   else if (phase === CONSTANTS?.PHASE?.JUDGMENT) { iconClass = 'fa-scale-balanced'; color = '#cc88ff'; }
   // Discussion icon removed — handled by ChatBubble on message
 
