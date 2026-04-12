@@ -366,9 +366,16 @@ const LowPolyMountain = ({ position, scale = 1, variant = 0 }) => (
 
 // Preload village center models
 useGLTF.preload('/models/fountain-round-detail.glb');
+useGLTF.preload('/models/road.glb');
 
 const VillageCenter = () => (
   <group>
+    {/* Sol pavé — grille de road tiles couvrant la place centrale */}
+    {[-3, 0, 3].map(x =>
+      [-3, 0, 3].map(z => (
+        <KenneyModel key={`road-${x}-${z}`} path="/models/road.glb" position={[x * 3, 0.02, z * 3]} scale={3.5} />
+      ))
+    )}
     {/* Potence au centre de la place */}
     <LowPolyGallows position={[0, 0, 0]} scale={1.2} />
     {/* Fontaine derrière les maisons */}

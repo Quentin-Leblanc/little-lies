@@ -12,7 +12,7 @@
 .game-layout {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  grid-template-columns: auto 1fr 380px;
+  grid-template-columns: auto 1fr 450px;
   grid-template-areas:
     "players .       sidebar"
     ".       .       sidebar"
@@ -123,11 +123,12 @@
   max-height: 45vh;
   pointer-events: auto;
 
-  // Graveyard + Roles on one row
+  // Graveyard + Roles on one row — spaced from menu
   .players-row {
     display: flex;
     gap: 4px;
     align-items: flex-start;
+    margin-top: 8px;
   }
 }
 

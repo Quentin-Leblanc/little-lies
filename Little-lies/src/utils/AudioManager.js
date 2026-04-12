@@ -41,7 +41,8 @@ export const toggleMute = () => {
 export const isMuted = () => _muted;
 
 // --- File-based audio playback ---
-const playFile = async (url, volume = 1) => {
+// trim: auto-detect silence start/end. maxDur: max seconds to play.
+const playFile = async (url, volume = 1, { trim = false, maxDur = 0 } = {}) => {
   try {
     const ctx = getCtx();
     let buffer = audioCache[url];
@@ -51,15 +52,36 @@ const playFile = async (url, volume = 1) => {
       buffer = await ctx.decodeAudioData(arrayBuffer);
       audioCache[url] = buffer;
     }
+
+    let startOffset = 0;
+    let duration = buffer.duration;
+
+    if (trim) {
+      // Find first and last non-silent sample (threshold 0.01)
+      const data = buffer.getChannelData(0);
+      const threshold = 0.01;
+      let first = 0, last = data.length - 1;
+      for (let i = 0; i < data.length; i++) {
+        if (Math.abs(data[i]) > threshold) { first = i; break; }
+      }
+      for (let i = data.length - 1; i >= 0; i--) {
+        if (Math.abs(data[i]) > threshold) { last = i; break; }
+      }
+      startOffset = Math.max(0, first / buffer.sampleRate - 0.01);
+      duration = (last - first) / buffer.sampleRate + 0.02;
+    }
+
+    if (maxDur > 0) duration = Math.min(duration, maxDur);
+
     const source = ctx.createBufferSource();
     const gain = ctx.createGain();
     gain.gain.value = volume;
     source.buffer = buffer;
     source.connect(gain);
     gain.connect(getGain());
-    source.start(0);
+    source.start(0, startOffset, duration);
   } catch (e) {
-    // Silently fail — don't block gameplay
+    // Silently fail
   }
 };
 
@@ -114,9 +136,9 @@ export const playActionSelect = () => {
   playFile('/sounds/click3.ogg', 0.5);
 };
 
-/** Chat message */
+/** Chat message — trimmed, short */
 export const playChatMessage = () => {
-  playFile('/sounds/click3.ogg', 0.3);
+  playFile('/sounds/chat.mp3', 0.4, { trim: true, maxDur: 0.5 });
 };
 
 /** Door close — night transition */

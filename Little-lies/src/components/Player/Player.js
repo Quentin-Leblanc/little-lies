@@ -55,6 +55,23 @@ const Player = () => {
 
     return (
         <div className="player-container">
+            {/* Role + Team side by side */}
+            <div className="role-team-row">
+            {/* Team block — left, for mafia */}
+            {me.character && me.character.team === 'mafia' && (
+                <div className="team-block">
+                    <h4 className="team-block-title">Mafia</h4>
+                    {players.filter(p => p.character?.team === 'mafia').map(p => (
+                        <div key={p.id} className="team-member" style={{ opacity: p.isAlive ? 1 : 0.4 }}>
+                            <span style={{ color: p.profile?.color || '#ccc' }}>{p.profile?.name}</span>
+                            <span className="team-member-role" style={{ color: p.character?.couleur || '#888' }}>
+                                {p.character?.label}
+                            </span>
+                            {!p.isAlive && <span className="team-member-dead">mort</span>}
+                        </div>
+                    ))}
+                </div>
+            )}
             {/* Role info */}
             <div className="role-container">
                 <div className="status-line">
@@ -122,6 +139,7 @@ const Player = () => {
                     </>
                 )}
             </div>
+            </div>{/* end role-team-row */}
 
             {/* Actions block */}
             <div className="sidebar-actions-block">

@@ -139,13 +139,6 @@ function App() {
                     <Time />
                 </div>
 
-                {/* Vote arrow */}
-                {phase === CONSTANTS.PHASE.VOTING && (
-                    <div className="vote-scene-arrow">
-                        <i className="fas fa-arrow-right"></i>
-                    </div>
-                )}
-
                 <div className="game-layout">
                     {/* Top-left — Menu + (Graveyard | Roles) */}
                     <div className="layout-players">
