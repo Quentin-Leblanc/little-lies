@@ -94,13 +94,6 @@ export const EventsProvider = ({ children }) => {
 
   const eventsState = { add, addBatch, get, hasDoneThisActionTonight, replaceAction, getMyActionTarget, getMyNotifications, addNotification };
 
-  const killPlayer = (playerIdToKill) =>
-    setPlayers(
-      players.map((player) =>
-        player.id === playerIdToKill ? { ...player, isAlive: false } : player
-      )
-    );
-
   const resolveNightActions = () => {
     // Night events were created with dayCount = N, but dayCount is now N+1
     // (incremented during NIGHT→DEATH_REPORT transition). Filter by N-1.

@@ -2601,12 +2601,12 @@ const MainScene = () => {
       {nightFade === 'from-black' && <div className="night-fade-from-black" />}
       {showNightText && (
         <div className="night-text-overlay">
-          <div className="night-text-content">Le village s'endort...</div>
+          <div className="night-text-content">{i18n.t('game:phases.NIGHT_TRANSITION')}</div>
         </div>
       )}
       {showDayText && (
         <div className="night-text-overlay">
-          <div className="night-text-content">Le village se lève...</div>
+          <div className="night-text-content">{i18n.t('game:phases.DEATH_REPORT')}</div>
         </div>
       )}
       {nightAmbianceMsg && (
@@ -2614,41 +2614,6 @@ const MainScene = () => {
           <div className="night-text-content night-text-ambiance">{nightAmbianceMsg}</div>
         </div>
       )}
-    </div>
-  );
-};
-
-// Night ambiance — 3 unique messages per night
-const NightAmbiance = () => {
-  const [message, setMessage] = useState('');
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    let timeout;
-    const shuffled = [...getNightAmbiance()].sort(() => Math.random() - 0.5);
-    const picks = shuffled.slice(0, 3);
-    let index = 0;
-
-    const showNext = () => {
-      if (index >= picks.length) return;
-      setMessage(picks[index]);
-      setVisible(true);
-      index++;
-      timeout = setTimeout(() => {
-        setVisible(false);
-        if (index < picks.length) {
-          timeout = setTimeout(showNext, 2500);
-        }
-      }, 7000);
-    };
-
-    timeout = setTimeout(showNext, 2000);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  return (
-    <div className={`night-ambiance ${visible ? 'visible' : ''}`}>
-      <div className="night-ambiance-text">{message}</div>
     </div>
   );
 };

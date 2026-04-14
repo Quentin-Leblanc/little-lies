@@ -46,8 +46,7 @@ const Setup = () => {
 
   // Find the host player name
   const hostPlayer = players.length > 0 ? players[0] : null;
-  const hostName = hostPlayer?.getState?.()?.profile?.name || 'H\u00f4te';
-  const currentPlayerName = myPlayer()?.getState?.()?.profile?.name;
+  const hostName = hostPlayer?.getState?.()?.profile?.name || 'Host';
 
   const findRole = (key) => {
     const allRoles = getRoles();

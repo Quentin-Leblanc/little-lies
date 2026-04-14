@@ -32,7 +32,7 @@ const getActionTooltip = (type) => i18n.t(`game:action_tooltips.${type}`, { defa
 
 const PlayerActions = memo(function () {
   const { t } = useTranslation(['game', 'common']);
-  const { getPlayers, getMe, game, CONSTANTS, trial, setTrial, setPlayers, setGame, addChatSystem } = useGameEngine();
+  const { getPlayers, getMe, game, CONSTANTS, trial, setTrial, setPlayers, addChatSystem } = useGameEngine();
   const Events = useEvents();
   const players = getPlayers();
   const me = getMe();

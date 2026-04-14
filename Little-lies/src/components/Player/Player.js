@@ -7,7 +7,7 @@ import './Player.scss';
 
 const Player = () => {
     const { t } = useTranslation(['game', 'common']);
-    const { getMe, getPlayers, game, setPlayers } = useGameEngine();
+    const { getMe, getPlayers, setPlayers } = useGameEngine();
     const { getMyNotifications } = useEvents();
     const me = getMe();
     const players = getPlayers();

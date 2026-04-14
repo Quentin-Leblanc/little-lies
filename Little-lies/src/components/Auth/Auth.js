@@ -212,7 +212,6 @@ export const ProfileBadge = ({ onClick }) => {
 
   const level = profile.level || 1;
   const xp = profile.xp || 0;
-  const nextLevelXP = level * 100;
   const progress = Math.min((xp % 100) / 100 * 100, 100);
 
   return (

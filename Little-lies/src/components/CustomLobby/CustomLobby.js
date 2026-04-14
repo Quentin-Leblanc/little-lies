@@ -19,7 +19,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const { t } = useTranslation(['setup', 'common']);
   const currentPlayer = myPlayer();
   const playroom_players = usePlayersList(true);
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [keys, setKeys] = useState({});
   const [roomCode, setRoomCode] = useState('');

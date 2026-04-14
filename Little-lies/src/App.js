@@ -9,7 +9,6 @@ import {
     Roles,
     Time,
 } from './components';
-import { TimeBar } from './components/time/Time';
 import { useGameEngine } from './hooks/useGameEngine';
 import GameComponent from './components/GameComponent/GameComponent';
 import GameOver from './components/GameOver/GameOver';
@@ -24,7 +23,7 @@ import './styles/global.scss';
 import './styles/App.scss';
 
 function App() {
-    const { game: { isGameStarted, isGameSetup, isDay, status, phase, dayCount }, CONSTANTS } = useGameEngine();
+    const { game: { isGameStarted, status, phase }, CONSTANTS } = useGameEngine();
     const isNight = phase === CONSTANTS.PHASE.NIGHT || phase === CONSTANTS.PHASE.NIGHT_TRANSITION;
     const [isSelectingRoles, setIsSelectingRoles] = useState(false);
     const [showRoleReveal, setShowRoleReveal] = useState(true);
