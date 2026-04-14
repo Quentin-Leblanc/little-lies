@@ -394,51 +394,6 @@ const LowPolyTree = ({ position, scale = 1, variant = 0 }) => (
 );
 
 // ============================================================
-// Low-poly Well — stone cylinder + wooden roof + bucket
-// ============================================================
-const LowPolyWell = ({ position, scale = 1 }) => (
-  <group position={position} scale={scale}>
-    {/* Stone base */}
-    <mesh position={[0, 0.4, 0]} castShadow>
-      <cylinderGeometry args={[0.5, 0.55, 0.8, 8]} />
-      <meshStandardMaterial color="#8a8a7a" roughness={0.9} />
-    </mesh>
-    {/* Inner dark hole */}
-    <mesh position={[0, 0.81, 0]}>
-      <cylinderGeometry args={[0.38, 0.38, 0.05, 8]} />
-      <meshStandardMaterial color="#1a1a2a" />
-    </mesh>
-    {/* Support posts */}
-    {[[-0.35, 0, 0], [0.35, 0, 0]].map((p, i) => (
-      <mesh key={i} position={[p[0], 1.1, p[2]]} castShadow>
-        <cylinderGeometry args={[0.04, 0.04, 1.4, 4]} />
-        <meshStandardMaterial color="#5a3a1a" />
-      </mesh>
-    ))}
-    {/* Cross beam */}
-    <mesh position={[0, 1.75, 0]} castShadow>
-      <boxGeometry args={[0.85, 0.06, 0.06]} />
-      <meshStandardMaterial color="#5a3a1a" />
-    </mesh>
-    {/* Roof */}
-    <mesh position={[0, 2.0, 0]} castShadow>
-      <coneGeometry args={[0.65, 0.5, 4]} />
-      <meshStandardMaterial color="#6b4226" />
-    </mesh>
-    {/* Rope */}
-    <mesh position={[0.1, 1.3, 0]}>
-      <cylinderGeometry args={[0.015, 0.015, 0.9, 4]} />
-      <meshStandardMaterial color="#8a7a5a" />
-    </mesh>
-    {/* Bucket */}
-    <mesh position={[0.1, 0.85, 0]} castShadow>
-      <cylinderGeometry args={[0.08, 0.1, 0.15, 6]} />
-      <meshStandardMaterial color="#5a4a2a" />
-    </mesh>
-  </group>
-);
-
-// ============================================================
 // Low-poly Cart — wooden cart with wheels
 // ============================================================
 const LowPolyCart = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
