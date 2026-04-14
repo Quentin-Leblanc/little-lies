@@ -8,11 +8,15 @@ import { Physics } from '@react-three/rapier';
 import { PerformanceMonitor } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { TEXT_LAYER } from '../../utils/constants';
+import AuthModal, { ProfileBadge } from '../Auth/Auth';
+import { useAuth } from '../Auth/Auth';
 import './CustomLobby.scss';
 
 const CustomLobby = ({ setIsSelectingRoles }) => {
   const currentPlayer = myPlayer();
   const playroom_players = usePlayersList(true);
+  const { user, profile } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
   const [keys, setKeys] = useState({});
   const [roomCode, setRoomCode] = useState('');
   const [copied, setCopied] = useState(false);
@@ -21,6 +25,20 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   );
   const localBodyRef = useRef();
   const localRotRef = useRef(0);
+
+  // Sync Supabase username to PlayroomKit on login
+  useEffect(() => {
+    if (profile?.username && currentPlayer) {
+      const current = currentPlayer.getState?.()?.profile?.name;
+      if (current !== profile.username) {
+        currentPlayer.setState('profile', {
+          ...currentPlayer.getState().profile,
+          name: profile.username,
+        });
+        setPlayerName(profile.username);
+      }
+    }
+  }, [profile?.username]);
 
   useEffect(() => {
     const isTyping = () => {
@@ -124,11 +142,19 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
         </Physics>
       </Canvas>
 
+      {/* Auth modal */}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+
       {/* UI Panel */}
       <div className="lobby-panel">
         <div className="lobby-panel-inner">
           <h1 className="lobby-title">NOT ME</h1>
           <p className="lobby-subtitle">Salon multijoueur</p>
+
+          {/* Profile badge / Login */}
+          <div className="lobby-section lobby-auth-section">
+            <ProfileBadge onClick={() => setShowAuth(true)} />
+          </div>
 
           <div className="lobby-section">
             <label className="lobby-label">Ton pseudo</label>

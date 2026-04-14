@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { GameEngineProvider } from './hooks/useGameEngine';
 import { EventsProvider } from './hooks/useEvents';
+import { AuthProvider } from './components/Auth/Auth';
 import './index.scss';
 
 // Liste d'avatars personnalisés
@@ -49,11 +50,13 @@ const Main = () => {
 
   return (
       <React.StrictMode>
-        <EventsProvider>
-          <GameEngineProvider>
-            <App roomCode={roomCode} /> {/* On passe le code de la salle en prop */}
-          </GameEngineProvider>
-        </EventsProvider>
+        <AuthProvider>
+          <EventsProvider>
+            <GameEngineProvider>
+              <App roomCode={roomCode} />
+            </GameEngineProvider>
+          </EventsProvider>
+        </AuthProvider>
       </React.StrictMode>
   );
 };
