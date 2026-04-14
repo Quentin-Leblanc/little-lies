@@ -495,6 +495,46 @@ export const GameEngineProvider = ({ children }) => {
     }
   };
 
+  // --- Reset for new game (same lobby, no page reload) ---
+  const [, setEvents] = useMultiplayerState('events', []);
+  const [, setNotifications] = useMultiplayerState('notifications', []);
+  const resetForNewGame = () => {
+    setChatMessages([]);
+    resetTrial();
+    setReadyPlayers([]);
+    setEvents([]);
+    setNotifications([]);
+    // Re-sync connected players (stripped of game data)
+    const connectedPlayers = playroom_players.map((pp) => {
+      const existing = players.find((p) => p.id === pp.id);
+      return {
+        id: pp.id,
+        profile: existing?.profile || {
+          ...pp.getState().profile,
+          name: pp.getState().profile?.name || 'Unnamed Player',
+        },
+      };
+    });
+    _setPlayers(connectedPlayers);
+    setRolesSelected([]);
+    setGame({
+      status: STATUS.ROLE_SELECTION,
+      phase: PHASE.NIGHT,
+      timer: DURATIONS.NIGHT,
+      isGameStarted: false,
+      isGameSetup: false,
+      isDay: false,
+      dayCount: 0,
+      trialsToday: 0,
+      accusedId: null,
+      winner: null,
+      skipVotes: [],
+      neutralWinners: [],
+      waitingForPlayers: false,
+      adminFreeRoam: false,
+    });
+  };
+
   // --- Skip day vote ---
   const voteSkip = (playerId) => {
     const currentSkips = game.skipVotes || [];
@@ -690,6 +730,7 @@ export const GameEngineProvider = ({ children }) => {
         ...gameState,
         startGame,
         moveToRoleSelection,
+        resetForNewGame,
         CONSTANTS,
         updatePlayerName,
         checkWinCondition,

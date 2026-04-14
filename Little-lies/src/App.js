@@ -31,6 +31,17 @@ function App() {
     const isGameOver = status === CONSTANTS.GAME_ENDED;
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
+    // Sync isSelectingRoles when game resets to ROLE_SELECTION (e.g. Rejouer)
+    useEffect(() => {
+        if (status === CONSTANTS.GAME_ROLE_SELECTION && !isGameStarted && !isGameOver) {
+            setIsSelectingRoles(true);
+            setShowRoleReveal(true);
+            setCurtainVisible(false);
+            setCurtainClosed(false);
+            setCurtainReady(false);
+        }
+    }, [status]);
+
     // ── Curtain managed at App level (persists across RoleReveal unmount) ──
     const [curtainVisible, setCurtainVisible] = useState(false);
     const [curtainClosed, setCurtainClosed] = useState(false);

@@ -321,6 +321,19 @@
   i { margin-right: 6px; }
 }
 
+.go-btn-replay {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.45);
+    transform: translateY(-1px);
+  }
+
+  i { margin-right: 6px; }
+}
+
 .go-btn-secondary {
   background: rgba(255, 255, 255, 0.06);
   color: #999;

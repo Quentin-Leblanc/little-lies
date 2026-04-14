@@ -51,7 +51,7 @@ const Particles = ({ type }) => {
 };
 
 const GameOver = () => {
-  const { game, getPlayers, getMe } = useGameEngine();
+  const { game, getPlayers, getMe, resetForNewGame } = useGameEngine();
   const [dismissed, setDismissed] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [showRecap, setShowRecap] = useState(false);
@@ -214,6 +214,9 @@ const GameOver = () => {
         <div className="go-buttons">
           <button className="go-btn go-btn-secondary" onClick={() => setDismissed(true)}>
             Fermer
+          </button>
+          <button className="go-btn go-btn-replay" onClick={() => resetForNewGame()}>
+            <i className="fas fa-redo"></i> Rejouer
           </button>
           <button
             className="go-btn go-btn-primary"
