@@ -1,0 +1,54 @@
+{
+  "title": "Configuration de la partie",
+  "multiplayer_lobby": "Salon multijoueur",
+  "your_username": "Ton pseudo",
+  "enter_username": "Entrer un pseudo...",
+  "room_code": "Code du salon",
+  "copy_link": "Copier le lien d'invitation",
+  "players_count": "Joueurs ({{count}})",
+  "controls": "ZQSD / Flèches = bouger · Espace = sauter",
+  "waiting_host": "En attente de {{host}}...",
+  "host_configuring": "{{host}} configure la partie...",
+  "presets": "Presets",
+  "presets_list": {
+    "beginner_4": { "label": "Débutant 4", "desc": "Idéal pour découvrir le jeu — rôles simples" },
+    "beginner_5": { "label": "Débutant 5", "desc": "Introduction avec un docteur" },
+    "classic_6": { "label": "Classic 6", "desc": "Village + Mafia équilibré" },
+    "classic_8": { "label": "Classic 8", "desc": "Ajout de rôles d'investigation" },
+    "ranked_10": { "label": "Ranked 10", "desc": "Mode compétitif avec neutres" },
+    "chaos_12": { "label": "Chaos 12", "desc": "Tous les rôles, chaos total" },
+    "full_15": { "label": "Complet 15", "desc": "Partie complète avec tous les rôles" }
+  },
+  "team_counter": {
+    "village": "Village: {{count}}",
+    "mafia": "Mafia: {{count}}",
+    "neutral": "Neutre: {{count}}",
+    "unbalanced": "Déséquilibré"
+  },
+  "roles_available": "Rôles disponibles",
+  "roles_selected": "Sélectionnés ({{current}}/{{total}})",
+  "config": {
+    "title": "Configuration de la partie",
+    "toggle_open": "Config",
+    "toggle_close": "Fermer",
+    "host_only": "Seul l'hôte peut modifier"
+  },
+  "reveal": {
+    "loading_title": "Among Liars",
+    "waiting_players": "En attente des joueurs...",
+    "intro_text": "La nuit tombe sur le village...",
+    "intro_sub": "Votre destin est scellé.",
+    "role_assigned": "Rôle assigné :",
+    "game_starting": "La partie commence..."
+  },
+  "loading_messages": [
+    "Ouverture des volets...",
+    "Allumage des lanternes...",
+    "Préparation de la forge...",
+    "Ouverture de la taverne...",
+    "Balayage de la place du village...",
+    "Sonnerie des cloches de l'église...",
+    "Les villageois se rassemblent...",
+    "Le village est prêt."
+  ]
+}

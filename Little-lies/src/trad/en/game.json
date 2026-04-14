@@ -1,0 +1,172 @@
+{
+  "phases": {
+    "NIGHT": "Night",
+    "NIGHT_TRANSITION": "Night falls...",
+    "DEATH_REPORT": "Death report",
+    "DISCUSSION": "Discussion",
+    "VOTING": "Voting",
+    "DEFENSE": "Defense",
+    "JUDGMENT": "Judgment",
+    "LAST_WORDS": "Last words",
+    "EXECUTION": "Execution",
+    "NO_LYNCH": "No lynch",
+    "SPARED": "Spared"
+  },
+  "phase_headers": {
+    "night_actions": "Night actions",
+    "voting_phase": "Voting phase",
+    "judgment": "Judgment",
+    "defense": "Defense",
+    "discussion": "Discussion"
+  },
+  "day_label": "Day {{count}}",
+  "night_label": "Night {{count}}",
+  "system": {
+    "game_start": "The game begins — Good luck everyone.",
+    "day_separator": "--- Day {{day}} ---",
+    "peaceful_night": "The night was peaceful. Nobody died.",
+    "judgment_guilty": "Guilty! ({{guilty}} vs {{innocent}})",
+    "judgment_acquitted": "Acquitted! ({{guilty}} vs {{innocent}})",
+    "vote_count": "Vote {{name}} ({{votes}}/{{total}})",
+    "skip_vote": "{{name}} wants to skip — Skip ({{count}}/{{total}})",
+    "mayor_reveal": "{{name}} revealed themselves as Mayor! Their votes count triple.",
+    "player_eliminated": "{{name}} was eliminated by the village. Their role was: {{role}}.",
+    "player_eliminated_will": "{{name}} was eliminated by the village. Their role was: {{role}}. | Last Will: \"{{will}}\"",
+    "player_disconnected": "{{name}} died under mysterious circumstances",
+    "name_changed": "{{oldName}} changed their name to {{newName}}",
+    "whisper_notice": "{{sender}} whispers to {{receiver}}",
+    "last_will_updated": "Last will updated.",
+    "admin_prefix": "[ADMIN]"
+  },
+  "notifications": {
+    "jailed": "You were jailed by the Jailor!",
+    "roleblocked": "Someone prevented you from acting tonight.",
+    "bodyguard_saved": "A bodyguard sacrificed themselves to protect you!",
+    "bodyguard_sacrifice": "You sacrificed yourself to protect your target.",
+    "protection_saved": "You were attacked but your protection saved you!",
+    "night_immune": "Someone tried to kill you, but you survived!",
+    "vigilante_guilt": "You killed an innocent... Guilt consumes you.",
+    "investigate_suspect": "Your target ({{name}}) is suspicious!",
+    "investigate_innocent": "Your target ({{name}}) seems innocent.",
+    "investigate_role": "Your target ({{name}}) is: {{role}}.",
+    "spy_mafia_visit": "The mafia visited {{name}} tonight.",
+    "spy_no_visit": "The mafia didn't visit anyone tonight.",
+    "lookout_visitors": "You saw {{visitors}} visit {{target}}.",
+    "lookout_no_visitors": "Nobody visited {{target}} tonight.",
+    "heal_failed": "You couldn't heal {{name}}.",
+    "executioner_to_jester": "Your target died... You are now a Jester. Get yourself lynched!",
+    "jail_protected": "You were in jail, you were protected.",
+    "blackmailed": "Silenced"
+  },
+  "death_messages": {
+    "mafia": [
+      "was found riddled with bullets at dawn.",
+      "was found lifeless in a dark alley... a clean execution.",
+      "was found dead at home. A professional job.",
+      "was found gunned down in front of their door.",
+      "didn't survive the night... the Mafia shows no mercy."
+    ],
+    "sk": [
+      "was found savagely stabbed.",
+      "was found in a pool of blood... the work of a psychopath.",
+      "was found lacerated behind the tavern.",
+      "was found mutilated... an act of pure madness."
+    ],
+    "vigilante": [
+      "was found shot dead... vigilante justice?",
+      "was found with a bullet in the heart... a vigilante struck."
+    ],
+    "jailor": [
+      "was executed in prison.",
+      "was found dead in their cell at dawn."
+    ],
+    "bodyguard": [
+      "died protecting someone."
+    ],
+    "unknown": "was found dead under mysterious circumstances.",
+    "vigilante_suicide": "{{name}} committed suicide from guilt. Their role was: Vigilante.",
+    "death_role_reveal": "{{name}} {{flavor}} Their role was: {{role}}.",
+    "death_with_will": "\n📜 Last Will: \"{{will}}\"",
+    "protection_success": "{{name}} was attacked, but was saved by the doctor."
+  },
+  "teams": {
+    "town": { "name": "The Town", "short": "Town" },
+    "mafia": { "name": "The Mafia", "short": "Mafia" },
+    "evil": { "name": "The Werewolves", "short": "Werewolves" },
+    "neutral": { "name": "Neutral", "short": "Neutral" },
+    "neutral_killing": { "name": "The Serial Killer", "short": "Serial Killer" }
+  },
+  "gameover": {
+    "won": "has won the game",
+    "victory": "Victory",
+    "defeat": "Defeat",
+    "neutral_also_won": "{{name}} also won as {{role}}",
+    "recap": "Recap",
+    "xp_hint": "Log in to save your XP",
+    "is_accused": "Is {{name}} guilty?",
+    "accused_defense": "{{name}} is accused! Time to defend yourself.",
+    "last_words": "{{name}} — Last words..."
+  },
+  "action_tooltips": {
+    "KILL": "Eliminate a player tonight",
+    "MAFIA_KILL": "The mafia eliminates a player tonight",
+    "VIGILANTE_KILL": "Eliminate a player (careful with innocents!)",
+    "SK_KILL": "Eliminate a player silently",
+    "HEAL": "Heal a player to protect them tonight",
+    "PROTECT": "Protect a player from an attack",
+    "BODYGUARD": "Protect a player at the risk of your life",
+    "VEST": "Wear a bulletproof vest (limited uses)",
+    "INVESTIGATE": "Find out if this player is suspicious or not",
+    "INVESTIGATE_ROLE": "Discover the exact role of a player",
+    "LOOKOUT": "Watch who visits this player tonight",
+    "SPY": "Spy on mafia activities",
+    "JAIL": "Jail a player for the night (blocks their actions)",
+    "JAILOR_EXECUTE": "Execute the prisoner (limited uses)",
+    "ROLEBLOCK": "Block a player's actions tonight",
+    "FRAME": "Make a player appear suspicious to investigators",
+    "BLACKMAIL": "Prevent a player from speaking the next day"
+  },
+  "chat": {
+    "placeholder": "Type a message...",
+    "placeholder_night": "Night falls on the village...",
+    "placeholder_dead": "Dead chat...",
+    "placeholder_blackmailed": "Silenced (max {{max}} chars)...",
+    "placeholder_muted": "Only the accused can speak...",
+    "placeholder_timeout": "You are timed out...",
+    "placeholder_mafia": "Mafia chat...",
+    "press_enter": "Press Enter to type",
+    "invalid_char": "Invalid character.",
+    "no_spam": "Don't spam.",
+    "dead_chat_banner": "Dead chat",
+    "prefix_dead": "[Dead]",
+    "prefix_mafia": "[Mafia]",
+    "whisper_to": "[PM → {{name}}]",
+    "whisper_from": "[PM ← {{name}}]",
+    "player_not_found": "Player \"{{name}}\" not found.",
+    "cannot_whisper_dead": "Cannot whisper to dead players.",
+    "dead_no_will": "Dead players can't write a will.",
+    "lw_usage": "Usage: -lw <your last will>",
+    "already_voted_skip": "You already voted to skip.",
+    "skip_only_day": "Skip only available during discussion or voting.",
+    "dead_no_vote": "Dead players can't vote."
+  },
+  "player_list": {
+    "title": "Living players ({{alive}}/{{total}})",
+    "mayor_revealed": "Mayor revealed — 3 votes"
+  },
+  "ambiance": [
+    "A black cat slowly crosses the village square...",
+    "Furtive footsteps echo in the alley...",
+    "A shadow slips between the houses...",
+    "The wind carries distant whispers...",
+    "The torches flicker in the darkness...",
+    "A light goes out in a distant house...",
+    "The gallows creak in the wind...",
+    "The moon disappears behind the clouds for a moment...",
+    "A shutter slams somewhere in the village...",
+    "The fog thickens around the village...",
+    "A crow caws in the distance...",
+    "The torch flames dance nervously...",
+    "The air is thick with tension tonight..."
+  ]
+}

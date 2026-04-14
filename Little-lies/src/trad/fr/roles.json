@@ -1,0 +1,149 @@
+{
+  "villageois": {
+    "label": "Villageois",
+    "description": "Tu es un simple villageois sans pouvoir spécial.",
+    "objectif": "Ton objectif : identifier et éliminer les membres de la mafia et les menaces neutres.",
+    "actions": {}
+  },
+  "sheriff": {
+    "label": "Sheriff",
+    "description": "Tu es le Sheriff. Chaque nuit, tu interroges un joueur pour savoir s'il est suspect.",
+    "objectif": "Ton objectif : découvrir les membres de la mafia et aider le village.",
+    "actions": {
+      "INVESTIGATE": { "label": "Interroger", "description": "Investigue un joueur pour découvrir s'il est suspect" }
+    }
+  },
+  "docteur": {
+    "label": "Docteur",
+    "description": "Tu es le Docteur. Chaque nuit, tu soignes un joueur pour le protéger.",
+    "objectif": "Ton objectif : protéger les villageois en empêchant leur élimination.",
+    "actions": {
+      "PROTECT": { "label": "Soigner", "description": "Protège un joueur d'une attaque cette nuit" }
+    }
+  },
+  "lookout": {
+    "label": "Lookout",
+    "description": "Tu es le Guetteur. Chaque nuit, tu surveilles un joueur pour voir qui lui rend visite.",
+    "objectif": "Ton objectif : identifier les visiteurs nocturnes pour aider le village.",
+    "actions": {
+      "LOOKOUT": { "label": "Surveiller", "description": "Observe un joueur pour voir qui le visite cette nuit" }
+    }
+  },
+  "vigilante": {
+    "label": "Vigilante",
+    "description": "Tu es le Vigilante. Tu peux tirer sur un joueur la nuit, mais tu te suicides si tu tues un innocent.",
+    "objectif": "Ton objectif : éliminer les menaces du village par la force.",
+    "actions": {
+      "VIGILANTE_KILL": { "label": "Tirer", "description": "Tire sur un joueur cette nuit (attention aux innocents !)" }
+    }
+  },
+  "maire": {
+    "label": "Maire",
+    "description": "Tu es le Maire. Tu peux te révéler pour obtenir 3 votes, mais tu ne pourras plus être soigné.",
+    "objectif": "Ton objectif : utiliser ton influence pour guider le village.",
+    "actions": {
+      "REVEAL": { "label": "Se révéler", "description": "Révèle votre rôle de Maire (3 votes, mais plus de soins possibles)" }
+    }
+  },
+  "escort": {
+    "label": "Escort",
+    "description": "Tu es l'Escort. Chaque nuit, tu bloques un joueur pour l'empêcher d'utiliser son pouvoir.",
+    "objectif": "Ton objectif : bloquer les pouvoirs ennemis pour protéger le village.",
+    "actions": {
+      "ROLEBLOCK": { "label": "Bloquer", "description": "Empêche un joueur d'agir cette nuit" }
+    }
+  },
+  "bodyguard": {
+    "label": "Bodyguard",
+    "description": "Tu es le Garde du corps. Tu protèges un joueur la nuit. Si ta cible est attaquée, tu tues l'attaquant mais tu meurs aussi.",
+    "objectif": "Ton objectif : protéger le village au prix de ta vie.",
+    "actions": {
+      "BODYGUARD": { "label": "Protéger", "description": "Se sacrifie pour protéger un joueur et tuer son attaquant" }
+    }
+  },
+  "spy": {
+    "label": "Spy",
+    "description": "Tu es l'Espion. Tu peux lire le chat mafia la nuit et voir qui la mafia visite.",
+    "objectif": "Ton objectif : infiltrer la mafia pour obtenir des informations cruciales.",
+    "actions": {
+      "SPY": { "label": "Espionner", "description": "Écoute le chat mafia et voit qui ils visitent" }
+    }
+  },
+  "jailor": {
+    "label": "Jailor",
+    "description": "Tu es le Geôlier. Tu choisis un joueur pendant le jour pour l'emprisonner la nuit. Tu peux l'exécuter (3 utilisations).",
+    "objectif": "Ton objectif : interroger et éliminer les suspects de manière contrôlée.",
+    "actions": {
+      "JAIL": { "label": "Emprisonner", "description": "Emprisonne un joueur cette nuit (choisi pendant le jour)" },
+      "JAILOR_EXECUTE": { "label": "Exécuter", "description": "Exécute le prisonnier cette nuit (3 utilisations max)" }
+    }
+  },
+  "godfather": {
+    "label": "Godfather",
+    "description": "Tu es le Parrain. Tu diriges la mafia et apparais non-suspect au Sheriff.",
+    "objectif": "Ton objectif : éliminer tous ceux qui s'opposent à la mafia.",
+    "actions": {
+      "KILL": { "label": "Tuer", "description": "Ordonne l'élimination d'un joueur cette nuit" }
+    }
+  },
+  "mafioso": {
+    "label": "Mafioso",
+    "description": "Tu es l'exécutant de la mafia. Tu exécutes les ordres du Parrain.",
+    "objectif": "Ton objectif : éliminer tous ceux qui s'opposent à la mafia.",
+    "actions": {
+      "KILL": { "label": "Tuer", "description": "Tue un joueur cette nuit sur ordre de la mafia" }
+    }
+  },
+  "framer": {
+    "label": "Framer",
+    "description": "Tu es le Piégeur. Tu peux faire apparaître un joueur comme suspect au Sheriff.",
+    "objectif": "Ton objectif : semer la confusion pour protéger la mafia.",
+    "actions": {
+      "FRAME": { "label": "Piéger", "description": "Fait apparaître un joueur comme suspect au Sheriff" }
+    }
+  },
+  "blackmailer": {
+    "label": "Blackmailer",
+    "description": "Tu es le Maître-chanteur. Tu peux empêcher un joueur de parler le jour suivant.",
+    "objectif": "Ton objectif : réduire au silence les menaces pour la mafia.",
+    "actions": {
+      "BLACKMAIL": { "label": "Bâillonner", "description": "Empêche un joueur de parler pendant le jour suivant" }
+    }
+  },
+  "consigliere": {
+    "label": "Consigliere",
+    "description": "Tu es le Consigliere. Tu peux découvrir le rôle exact d'un joueur.",
+    "objectif": "Ton objectif : fournir des informations précieuses à la mafia.",
+    "actions": {
+      "INVESTIGATE_ROLE": { "label": "Enquêter", "description": "Découvre le rôle exact d'un joueur" }
+    }
+  },
+  "serial_killer": {
+    "label": "Serial Killer",
+    "description": "Tu es le Serial Killer, un tueur solitaire. Tu élimines un joueur chaque nuit. Tu as l'immunité nocturne.",
+    "objectif": "Ton objectif : être le dernier survivant.",
+    "actions": {
+      "KILL": { "label": "Poignarder", "description": "Tue un joueur cette nuit" }
+    }
+  },
+  "jester": {
+    "label": "Jester",
+    "description": "Tu es le Bouffon. Tu veux te faire lyncher par le village. Tu n'as aucun pouvoir.",
+    "objectif": "Ton objectif : te faire lyncher par le village.",
+    "actions": {}
+  },
+  "survivor": {
+    "label": "Survivor",
+    "description": "Tu es le Survivant. Tu veux juste rester en vie. Tu possèdes un gilet pare-balles limité.",
+    "objectif": "Ton objectif : survivre jusqu'à la fin de la partie.",
+    "actions": {
+      "VEST": { "label": "Gilet", "description": "Enfile un gilet pare-balles pour cette nuit (limité)" }
+    }
+  },
+  "executioner": {
+    "label": "Executioner",
+    "description": "Tu es l'Exécuteur. Tu as une cible secrète du village que tu dois faire lyncher.",
+    "objectif": "Ton objectif : faire lyncher ta cible par le village.",
+    "actions": {}
+  }
+}

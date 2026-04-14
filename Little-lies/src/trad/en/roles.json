@@ -1,0 +1,149 @@
+{
+  "villageois": {
+    "label": "Villager",
+    "description": "You are a simple villager with no special powers.",
+    "objectif": "Your goal: identify and eliminate mafia members and neutral threats.",
+    "actions": {}
+  },
+  "sheriff": {
+    "label": "Sheriff",
+    "description": "You are the Sheriff. Each night, you interrogate a player to find out if they're suspicious.",
+    "objectif": "Your goal: discover mafia members and help the town.",
+    "actions": {
+      "INVESTIGATE": { "label": "Interrogate", "description": "Investigate a player to find out if they're suspicious" }
+    }
+  },
+  "docteur": {
+    "label": "Doctor",
+    "description": "You are the Doctor. Each night, you heal a player to protect them.",
+    "objectif": "Your goal: protect villagers by preventing their elimination.",
+    "actions": {
+      "PROTECT": { "label": "Heal", "description": "Protect a player from an attack tonight" }
+    }
+  },
+  "lookout": {
+    "label": "Lookout",
+    "description": "You are the Lookout. Each night, you watch a player to see who visits them.",
+    "objectif": "Your goal: identify night visitors to help the town.",
+    "actions": {
+      "LOOKOUT": { "label": "Watch", "description": "Watch a player to see who visits them tonight" }
+    }
+  },
+  "vigilante": {
+    "label": "Vigilante",
+    "description": "You are the Vigilante. You can shoot a player at night, but you'll die of guilt if you kill an innocent.",
+    "objectif": "Your goal: eliminate threats to the town by force.",
+    "actions": {
+      "VIGILANTE_KILL": { "label": "Shoot", "description": "Shoot a player tonight (careful with innocents!)" }
+    }
+  },
+  "maire": {
+    "label": "Mayor",
+    "description": "You are the Mayor. You can reveal yourself to gain 3 votes, but you can no longer be healed.",
+    "objectif": "Your goal: use your influence to guide the town.",
+    "actions": {
+      "REVEAL": { "label": "Reveal", "description": "Reveal your Mayor role (3 votes, but no more healing)" }
+    }
+  },
+  "escort": {
+    "label": "Escort",
+    "description": "You are the Escort. Each night, you block a player from using their power.",
+    "objectif": "Your goal: block enemy powers to protect the town.",
+    "actions": {
+      "ROLEBLOCK": { "label": "Block", "description": "Prevent a player from acting tonight" }
+    }
+  },
+  "bodyguard": {
+    "label": "Bodyguard",
+    "description": "You are the Bodyguard. You protect a player at night. If your target is attacked, you kill the attacker but die too.",
+    "objectif": "Your goal: protect the town at the cost of your life.",
+    "actions": {
+      "BODYGUARD": { "label": "Protect", "description": "Sacrifice yourself to protect a player and kill their attacker" }
+    }
+  },
+  "spy": {
+    "label": "Spy",
+    "description": "You are the Spy. You can read the mafia chat at night and see who the mafia visits.",
+    "objectif": "Your goal: infiltrate the mafia to obtain crucial information.",
+    "actions": {
+      "SPY": { "label": "Spy", "description": "Listen to mafia chat and see who they visit" }
+    }
+  },
+  "jailor": {
+    "label": "Jailor",
+    "description": "You are the Jailor. You choose a player during the day to jail them at night. You can execute them (3 uses).",
+    "objectif": "Your goal: interrogate and eliminate suspects in a controlled manner.",
+    "actions": {
+      "JAIL": { "label": "Jail", "description": "Jail a player tonight (chosen during the day)" },
+      "JAILOR_EXECUTE": { "label": "Execute", "description": "Execute the prisoner tonight (3 uses max)" }
+    }
+  },
+  "godfather": {
+    "label": "Godfather",
+    "description": "You are the Godfather. You lead the mafia and appear non-suspicious to the Sheriff.",
+    "objectif": "Your goal: eliminate everyone who opposes the mafia.",
+    "actions": {
+      "KILL": { "label": "Kill", "description": "Order the elimination of a player tonight" }
+    }
+  },
+  "mafioso": {
+    "label": "Mafioso",
+    "description": "You are the mafia's enforcer. You carry out the Godfather's orders.",
+    "objectif": "Your goal: eliminate everyone who opposes the mafia.",
+    "actions": {
+      "KILL": { "label": "Kill", "description": "Kill a player tonight on mafia's orders" }
+    }
+  },
+  "framer": {
+    "label": "Framer",
+    "description": "You are the Framer. You can make a player appear suspicious to the Sheriff.",
+    "objectif": "Your goal: sow confusion to protect the mafia.",
+    "actions": {
+      "FRAME": { "label": "Frame", "description": "Make a player appear suspicious to investigators" }
+    }
+  },
+  "blackmailer": {
+    "label": "Blackmailer",
+    "description": "You are the Blackmailer. You can prevent a player from speaking the next day.",
+    "objectif": "Your goal: silence threats to the mafia.",
+    "actions": {
+      "BLACKMAIL": { "label": "Blackmail", "description": "Prevent a player from speaking the next day" }
+    }
+  },
+  "consigliere": {
+    "label": "Consigliere",
+    "description": "You are the Consigliere. You can discover the exact role of a player.",
+    "objectif": "Your goal: provide valuable information to the mafia.",
+    "actions": {
+      "INVESTIGATE_ROLE": { "label": "Investigate", "description": "Discover the exact role of a player" }
+    }
+  },
+  "serial_killer": {
+    "label": "Serial Killer",
+    "description": "You are the Serial Killer, a lone killer. You eliminate a player each night. You have night immunity.",
+    "objectif": "Your goal: be the last one standing.",
+    "actions": {
+      "KILL": { "label": "Stab", "description": "Kill a player tonight" }
+    }
+  },
+  "jester": {
+    "label": "Jester",
+    "description": "You are the Jester. You want to get lynched by the town. You have no powers.",
+    "objectif": "Your goal: get yourself lynched by the town.",
+    "actions": {}
+  },
+  "survivor": {
+    "label": "Survivor",
+    "description": "You are the Survivor. You just want to stay alive. You have a limited bulletproof vest.",
+    "objectif": "Your goal: survive until the end of the game.",
+    "actions": {
+      "VEST": { "label": "Vest", "description": "Put on a bulletproof vest for tonight (limited)" }
+    }
+  },
+  "executioner": {
+    "label": "Executioner",
+    "description": "You are the Executioner. You have a secret town target that you must get lynched.",
+    "objectif": "Your goal: get your target lynched by the town.",
+    "actions": {}
+  }
+}

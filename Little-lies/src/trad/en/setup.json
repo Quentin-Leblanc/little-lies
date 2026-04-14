@@ -1,0 +1,54 @@
+{
+  "title": "Game configuration",
+  "multiplayer_lobby": "Multiplayer lobby",
+  "your_username": "Your username",
+  "enter_username": "Enter a username...",
+  "room_code": "Room code",
+  "copy_link": "Copy invite link",
+  "players_count": "Players ({{count}})",
+  "controls": "WASD / Arrows = move · Space = jump",
+  "waiting_host": "Waiting for {{host}}...",
+  "host_configuring": "{{host}} is configuring the game...",
+  "presets": "Presets",
+  "presets_list": {
+    "beginner_4": { "label": "Beginner 4", "desc": "Perfect to discover the game — simple roles" },
+    "beginner_5": { "label": "Beginner 5", "desc": "Introduction with a doctor" },
+    "classic_6": { "label": "Classic 6", "desc": "Town + Mafia balanced" },
+    "classic_8": { "label": "Classic 8", "desc": "Added investigation roles" },
+    "ranked_10": { "label": "Ranked 10", "desc": "Competitive mode with neutrals" },
+    "chaos_12": { "label": "Chaos 12", "desc": "All roles, total chaos" },
+    "full_15": { "label": "Full 15", "desc": "Complete game with all roles" }
+  },
+  "team_counter": {
+    "village": "Town: {{count}}",
+    "mafia": "Mafia: {{count}}",
+    "neutral": "Neutral: {{count}}",
+    "unbalanced": "Unbalanced"
+  },
+  "roles_available": "Available roles",
+  "roles_selected": "Selected ({{current}}/{{total}})",
+  "config": {
+    "title": "Game configuration",
+    "toggle_open": "Config",
+    "toggle_close": "Close",
+    "host_only": "Only the host can modify"
+  },
+  "reveal": {
+    "loading_title": "Among Liars",
+    "waiting_players": "Waiting for players...",
+    "intro_text": "Night falls on the village...",
+    "intro_sub": "Your fate is sealed.",
+    "role_assigned": "Role assigned:",
+    "game_starting": "The game begins..."
+  },
+  "loading_messages": [
+    "Opening the shutters...",
+    "Lighting the lanterns...",
+    "Preparing the forge...",
+    "Opening the tavern...",
+    "Sweeping the village square...",
+    "Ringing the church bells...",
+    "The villagers are gathering...",
+    "The village is ready."
+  ]
+}

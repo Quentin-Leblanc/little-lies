@@ -1,0 +1,37 @@
+{
+  "title": "Legal notice",
+  "copyright": {
+    "title": "Ownership",
+    "text": "© 2025 Quentin Leblanc — Among Liars",
+    "rights": "All rights reserved. Among Liars is an independent multiplayer social deduction game."
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "intro": "Among Liars collects the following data:",
+    "data_username": "Username — chosen by the player, used only in-game",
+    "data_stats": "Game statistics — match results, XP (stored in database if logged in, otherwise locally)",
+    "data_cookies": "Technical cookies — login session only, no advertising tracking",
+    "no_sale": "No data is sold or shared with third parties. Game data can be deleted upon request."
+  },
+  "terms": {
+    "title": "Terms of use",
+    "free": "The game is free and accessible to everyone.",
+    "behavior": "Toxic behavior, cheating or harassment may result in a ban.",
+    "fiction": "Game content is fictional. Any resemblance to real persons is coincidental."
+  },
+  "credits": {
+    "title": "Credits and technologies",
+    "react": "User interface",
+    "threejs": "3D rendering",
+    "playroom": "Real-time multiplayer",
+    "supabase": "Authentication and database",
+    "framer": "Animations",
+    "fontawesome": "Icons (Free license)",
+    "fonts": "Cinzel, Inter, Rajdhani (OFL/Apache license)"
+  },
+  "disclaimer": {
+    "title": "Disclaimer",
+    "text": "Among Liars is an independent project. It is not affiliated with Town of Salem, Mafia, or any other existing social deduction game."
+  },
+  "version": "Among Liars v0.1.0"
+}

@@ -1,0 +1,172 @@
+{
+  "phases": {
+    "NIGHT": "Nuit",
+    "NIGHT_TRANSITION": "La nuit tombe...",
+    "DEATH_REPORT": "Annonce des morts",
+    "DISCUSSION": "Discussion",
+    "VOTING": "Vote",
+    "DEFENSE": "Défense",
+    "JUDGMENT": "Jugement",
+    "LAST_WORDS": "Derniers mots",
+    "EXECUTION": "Exécution",
+    "NO_LYNCH": "Pas de lynchage",
+    "SPARED": "Épargné"
+  },
+  "phase_headers": {
+    "night_actions": "Actions de nuit",
+    "voting_phase": "Phase de vote",
+    "judgment": "Jugement",
+    "defense": "Défense",
+    "discussion": "Discussion"
+  },
+  "day_label": "Jour {{count}}",
+  "night_label": "Nuit {{count}}",
+  "system": {
+    "game_start": "Début de la partie — Bonne chance à tous.",
+    "day_separator": "--- Jour {{day}} ---",
+    "peaceful_night": "La nuit a été calme. Personne n'est mort.",
+    "judgment_guilty": "Coupable ! ({{guilty}} vs {{innocent}})",
+    "judgment_acquitted": "Acquitté ! ({{guilty}} vs {{innocent}})",
+    "vote_count": "Vote {{name}} ({{votes}}/{{total}})",
+    "skip_vote": "{{name}} veut passer — Skip ({{count}}/{{total}})",
+    "mayor_reveal": "{{name}} s'est révélé en tant que Maire ! Ses votes comptent triple.",
+    "player_eliminated": "{{name}} a été éliminé par le village. Son rôle était : {{role}}.",
+    "player_eliminated_will": "{{name}} a été éliminé par le village. Son rôle était : {{role}}. | Testament : \"{{will}}\"",
+    "player_disconnected": "{{name}} est mort de façon inconnue",
+    "name_changed": "{{oldName}} a changé son pseudo en {{newName}}",
+    "whisper_notice": "{{sender}} chuchote à {{receiver}}",
+    "last_will_updated": "Testament mis à jour.",
+    "admin_prefix": "[ADMIN]"
+  },
+  "notifications": {
+    "jailed": "Vous avez été emprisonné par le Jailor !",
+    "roleblocked": "Quelqu'un vous a empêché d'agir cette nuit.",
+    "bodyguard_saved": "Un bodyguard s'est sacrifié pour vous protéger !",
+    "bodyguard_sacrifice": "Vous vous êtes sacrifié pour protéger votre cible.",
+    "protection_saved": "Vous avez été attaqué mais votre protection vous a sauvé !",
+    "night_immune": "Quelqu'un a tenté de vous tuer, mais vous avez survécu !",
+    "vigilante_guilt": "Vous avez tué un innocent... La culpabilité vous ronge.",
+    "investigate_suspect": "Votre cible ({{name}}) est suspecte !",
+    "investigate_innocent": "Votre cible ({{name}}) semble innocente.",
+    "investigate_role": "Votre cible ({{name}}) est : {{role}}.",
+    "spy_mafia_visit": "La mafia a visité {{name}} cette nuit.",
+    "spy_no_visit": "La mafia n'a visité personne cette nuit.",
+    "lookout_visitors": "Vous avez vu {{visitors}} rendre visite à {{target}}.",
+    "lookout_no_visitors": "Personne n'a rendu visite à {{target}} cette nuit.",
+    "heal_failed": "Vous n'avez pas pu soigner {{name}}.",
+    "executioner_to_jester": "Votre cible est morte... Vous êtes maintenant un Jester. Faites-vous lyncher !",
+    "jail_protected": "Vous étiez en prison, vous étiez protégé.",
+    "blackmailed": "Bâillonné"
+  },
+  "death_messages": {
+    "mafia": [
+      "a été retrouvé(e) criblé(e) de balles à l'aube.",
+      "a été retrouvé(e) sans vie dans une ruelle sombre... une exécution propre.",
+      "a été retrouvé(e) mort(e) chez lui. Un travail de professionnel.",
+      "a été retrouvé(e) abattu(e) froidement devant sa porte.",
+      "n'a pas survécu à la nuit... la Mafia ne pardonne pas."
+    ],
+    "sk": [
+      "a été retrouvé(e) poignardé(e) sauvagement.",
+      "a été retrouvé(e) dans un bain de sang... l'œuvre d'un psychopathe.",
+      "a été retrouvé(e) lacéré(e) derrière la taverne.",
+      "a été retrouvé(e) mutilé(e)... un acte de pure folie."
+    ],
+    "vigilante": [
+      "a été retrouvé(e) abattu(e)... justice expéditive ?",
+      "a été retrouvé(e) avec une balle dans le cœur... un justicier a frappé."
+    ],
+    "jailor": [
+      "a été exécuté(e) en prison.",
+      "a été retrouvé(e) mort(e) dans sa cellule à l'aube."
+    ],
+    "bodyguard": [
+      "est mort(e) en protégeant quelqu'un."
+    ],
+    "unknown": "a été retrouvé(e) mort(e) dans des circonstances mystérieuses.",
+    "vigilante_suicide": "{{name}} s'est suicidé de culpabilité. Son rôle était : Vigilante.",
+    "death_role_reveal": "{{name}} {{flavor}} Son rôle était : {{role}}.",
+    "death_with_will": "\n📜 Testament : \"{{will}}\"",
+    "protection_success": "{{name}} a été attaqué, mais a été sauvé par le docteur."
+  },
+  "teams": {
+    "town": { "name": "Le Village", "short": "Village" },
+    "mafia": { "name": "La Mafia", "short": "Mafia" },
+    "evil": { "name": "Les Loups-Garous", "short": "Loups-Garous" },
+    "neutral": { "name": "Neutre", "short": "Neutre" },
+    "neutral_killing": { "name": "Le Serial Killer", "short": "Serial Killer" }
+  },
+  "gameover": {
+    "won": "a remporté la partie",
+    "victory": "Victoire",
+    "defeat": "Défaite",
+    "neutral_also_won": "{{name}} a aussi gagné en tant que {{role}}",
+    "recap": "Récapitulatif",
+    "xp_hint": "Connecte-toi pour sauvegarder ton XP",
+    "is_accused": "{{name}} est-il coupable ?",
+    "accused_defense": "{{name}} est accusé ! C'est le moment de se défendre.",
+    "last_words": "{{name}} — Derniers mots..."
+  },
+  "action_tooltips": {
+    "KILL": "Élimine un joueur cette nuit",
+    "MAFIA_KILL": "La mafia élimine un joueur cette nuit",
+    "VIGILANTE_KILL": "Élimine un joueur (attention aux innocents !)",
+    "SK_KILL": "Élimine un joueur en silence",
+    "HEAL": "Soigne un joueur pour le protéger cette nuit",
+    "PROTECT": "Protège un joueur d'une attaque",
+    "BODYGUARD": "Protège un joueur en risquant ta vie",
+    "VEST": "Porte un gilet pare-balles (nombre limité)",
+    "INVESTIGATE": "Découvre si ce joueur est suspect ou non",
+    "INVESTIGATE_ROLE": "Découvre le rôle exact d'un joueur",
+    "LOOKOUT": "Observe qui visite ce joueur cette nuit",
+    "SPY": "Espionne les activités de la mafia",
+    "JAIL": "Emprisonne un joueur pour la nuit (bloque ses actions)",
+    "JAILOR_EXECUTE": "Exécute le prisonnier (nombre limité)",
+    "ROLEBLOCK": "Bloque les actions d'un joueur cette nuit",
+    "FRAME": "Fait paraître un joueur suspect aux enquêteurs",
+    "BLACKMAIL": "Empêche un joueur de parler le jour suivant"
+  },
+  "chat": {
+    "placeholder": "Entrez un message...",
+    "placeholder_night": "La nuit tombe sur le village...",
+    "placeholder_dead": "Chat des morts...",
+    "placeholder_blackmailed": "Bâillonné (max {{max}} car.)...",
+    "placeholder_muted": "Seul l'accusé peut parler...",
+    "placeholder_timeout": "Vous êtes en timeout...",
+    "placeholder_mafia": "Chat mafia...",
+    "press_enter": "Appuyez sur Entrée pour écrire",
+    "invalid_char": "Caractère non permis.",
+    "no_spam": "Ne spammez pas.",
+    "dead_chat_banner": "Chat des morts",
+    "prefix_dead": "[Mort]",
+    "prefix_mafia": "[Mafia]",
+    "whisper_to": "[MP → {{name}}]",
+    "whisper_from": "[MP ← {{name}}]",
+    "player_not_found": "Joueur \"{{name}}\" introuvable.",
+    "cannot_whisper_dead": "Impossible de chuchoter aux morts.",
+    "dead_no_will": "Les morts ne peuvent pas écrire de testament.",
+    "lw_usage": "Usage : -lw <votre testament>",
+    "already_voted_skip": "Vous avez déjà voté pour skip.",
+    "skip_only_day": "Skip possible uniquement en discussion ou vote.",
+    "dead_no_vote": "Les morts ne peuvent pas voter."
+  },
+  "player_list": {
+    "title": "Joueurs vivants ({{alive}}/{{total}})",
+    "mayor_revealed": "Maire révélé — 3 votes"
+  },
+  "ambiance": [
+    "Un chat noir traverse lentement la place du village...",
+    "Des pas furtifs se font entendre dans la ruelle...",
+    "Une ombre se glisse entre les maisons...",
+    "Le vent souffle et emporte des murmures lointains...",
+    "Les torches vacillent dans l'obscurité...",
+    "Une lumière s'éteint dans une maison au loin...",
+    "Le bois de la potence grince sous le vent...",
+    "La lune disparaît un instant derrière les nuages...",
+    "Un volet claque quelque part dans le village...",
+    "La brume s'épaissit autour du village...",
+    "Un corbeau croasse au loin...",
+    "Les flammes des torches dansent nerveusement...",
+    "L'air est chargé de tension cette nuit..."
+  ]
+}

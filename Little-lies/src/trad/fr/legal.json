@@ -1,0 +1,37 @@
+{
+  "title": "Mentions légales",
+  "copyright": {
+    "title": "Propriété",
+    "text": "© 2025 Quentin Leblanc — Among Liars",
+    "rights": "Tous droits réservés. Among Liars est un jeu indépendant de déduction sociale multijoueur."
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "intro": "Among Liars collecte les données suivantes :",
+    "data_username": "Pseudo — choisi par le joueur, utilisé uniquement en jeu",
+    "data_stats": "Statistiques de jeu — résultats de parties, XP (stockés en base de données si connecté, sinon en local)",
+    "data_cookies": "Cookies techniques — session de connexion uniquement, aucun tracking publicitaire",
+    "no_sale": "Aucune donnée n'est vendue ou partagée avec des tiers. Les données de jeu peuvent être supprimées sur demande."
+  },
+  "terms": {
+    "title": "Conditions d'utilisation",
+    "free": "Le jeu est gratuit et accessible à tous.",
+    "behavior": "Tout comportement toxique, triche ou harcèlement peut entraîner un bannissement.",
+    "fiction": "Le contenu du jeu est fictif. Toute ressemblance avec des personnes réelles est fortuite."
+  },
+  "credits": {
+    "title": "Credits et technologies",
+    "react": "Interface utilisateur",
+    "threejs": "Rendu 3D",
+    "playroom": "Multijoueur temps réel",
+    "supabase": "Authentification et base de données",
+    "framer": "Animations",
+    "fontawesome": "Icônes (licence Free)",
+    "fonts": "Cinzel, Inter, Rajdhani (licence OFL/Apache)"
+  },
+  "disclaimer": {
+    "title": "Avertissement",
+    "text": "Among Liars est un projet indépendant. Il n'est pas affilié à Town of Salem, Mafia, ou tout autre jeu de déduction sociale existant."
+  },
+  "version": "Among Liars v0.1.0"
+}

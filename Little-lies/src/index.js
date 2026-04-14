@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { GameEngineProvider } from './hooks/useGameEngine';
 import { EventsProvider } from './hooks/useEvents';
 import { AuthProvider } from './components/Auth/Auth';
+import './trad/i18n'; // Initialize i18n
 import './index.scss';
 
 // Liste d'avatars personnalisés
