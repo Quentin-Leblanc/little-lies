@@ -1,5 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useMultiplayerState } from 'playroomkit';
 import { useGameEngine } from '../../hooks/useGameEngine';
+import { collectGameMetrics, saveMetrics } from '../../utils/GameMetrics';
 import './GameOver.scss';
 
 const TEAM_LABELS = {
@@ -52,9 +54,12 @@ const Particles = ({ type }) => {
 
 const GameOver = () => {
   const { game, getPlayers, getMe, resetForNewGame } = useGameEngine();
+  const [_events] = useMultiplayerState('events', []);
+  const events = _events || [];
   const [dismissed, setDismissed] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [showRecap, setShowRecap] = useState(false);
+  const metricsSaved = useRef(false);
   const winner = game.winner;
   const players = getPlayers();
   const mePlayer = getMe();
@@ -66,6 +71,15 @@ const GameOver = () => {
   const isTeamWinner = myTeam === winner;
   const isNeutralWinner = neutralWinners.some((nw) => nw.id === mePlayer?.id);
   const isWinner = isTeamWinner || isNeutralWinner;
+
+  // Save metrics once
+  useEffect(() => {
+    if (!metricsSaved.current && players.length > 0) {
+      metricsSaved.current = true;
+      const metrics = collectGameMetrics({ game, players, events });
+      saveMetrics(metrics);
+    }
+  }, []);
 
   // Stagger animations
   useEffect(() => {
