@@ -104,22 +104,85 @@
   margin: 0;
 }
 
+// Waiting player dots
+.waiting-players-dots {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 12px 0;
+  max-width: 400px;
+}
+
+.waiting-dot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.waiting-dot-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: all 0.4s ease;
+
+  .pending & {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+  }
+
+  .ready & {
+    background: #78ff78;
+    box-shadow: 0 0 8px rgba(120, 255, 120, 0.5);
+    animation: dot-pop 0.3s ease-out;
+  }
+}
+
+.waiting-dot-name {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.5px;
+
+  .ready & { color: rgba(120, 255, 120, 0.7); }
+}
+
+@keyframes dot-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
 // Intro text — positioned absolutely so it doesn't push the card
 .reveal-intro {
   position: absolute;
   text-align: center;
+}
 
-  p {
-    font-family: 'Cinzel', serif;
-    color: #99a;
-    font-size: 1.4rem;
-    margin: 8px 0;
-  }
+.typewriter-text {
+  font-family: 'Cinzel', serif;
+  color: #ccd;
+  font-size: 1.5rem;
+  margin: 8px 0;
+  letter-spacing: 1px;
+}
 
-  .reveal-sub {
-    font-size: 1rem;
-    color: #778;
-  }
+.typewriter-cursor {
+  color: #667;
+  animation: cursor-blink 0.7s steps(1) infinite;
+  font-weight: 100;
+}
+
+@keyframes cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.reveal-sub {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: #667;
+  margin: 4px 0;
 }
 
 // Card
@@ -234,6 +297,45 @@
   border-radius: 12px;
   font-size: 13px;
   color: #ddd;
+}
+
+// Card glow ring
+.card-glow-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 18px;
+  pointer-events: none;
+  z-index: 0;
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+// Card particles
+.card-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 10;
+}
+
+.card-particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: card-particle-float ease-in-out infinite;
+}
+
+@keyframes card-particle-float {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  25% { opacity: 0.8; }
+  50% { opacity: 0.4; transform: translateY(-20px) scale(1); }
+  75% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.3); }
 }
 
 .reveal-hint {
