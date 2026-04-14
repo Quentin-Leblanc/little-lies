@@ -207,10 +207,14 @@
 
 .chat-message {
   position: relative;
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 16px !important;
+  line-height: 1.45;
   width: 100%;
   color: #fff;
+
+  span, strong {
+    font-size: inherit !important;
+  }
 }
 
 .chat-day-separator {
