@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useMultiplayerState, getRoomCode } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../trad/i18n';
+import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import { getRoles } from '../../data/roles.js';
 import Audio from '../../utils/AudioManager';
 import Legal from '../Legal/Legal';
@@ -131,6 +133,21 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
                 onChange={handleVolumeChange}
                 className="volume-slider"
               />
+            </div>
+          </div>
+          <div className="language-section">
+            <span className="room-code-label"><i className="fas fa-globe"></i> Language</span>
+            <div className="language-buttons">
+              {AVAILABLE_LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  className={`lang-btn ${i18n.language === lang.code ? 'lang-active' : ''}`}
+                  onClick={() => i18n.changeLanguage(lang.code)}
+                >
+                  <span className="lang-flag">{lang.flag}</span>
+                  <span className="lang-label">{lang.label}</span>
+                </button>
+              ))}
             </div>
           </div>
           <button onClick={onShowLegal} className="legal-btn">

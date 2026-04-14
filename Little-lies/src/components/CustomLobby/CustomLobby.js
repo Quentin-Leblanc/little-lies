@@ -11,6 +11,8 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { TEXT_LAYER } from '../../utils/constants';
 import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
+import i18n from '../../trad/i18n';
+import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import './CustomLobby.scss';
 
 const CustomLobby = ({ setIsSelectingRoles }) => {
@@ -217,6 +219,19 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             <button className="lobby-btn lobby-btn-ghost" onClick={newLobby}>
               <i className="fas fa-plus"></i> {t('common:new_lobby')}
             </button>
+          </div>
+
+          {/* Language switcher */}
+          <div className="lobby-lang-row">
+            {AVAILABLE_LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                className={`lobby-lang-btn ${i18n.language === lang.code ? 'active' : ''}`}
+                onClick={() => i18n.changeLanguage(lang.code)}
+              >
+                {lang.flag}
+              </button>
+            ))}
           </div>
         </div>
       </div>
