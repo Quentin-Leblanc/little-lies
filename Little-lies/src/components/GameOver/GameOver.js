@@ -2,6 +2,9 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useMultiplayerState } from 'playroomkit';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { collectGameMetrics, saveMetrics } from '../../utils/GameMetrics';
+import { calculateGameXP } from '../../utils/xpSystem';
+import { useAuth } from '../Auth/Auth';
+import { addXP, incrementGamesPlayed } from '../../utils/supabase';
 import Survey from '../Survey/Survey';
 import './GameOver.scss';
 
@@ -55,11 +58,13 @@ const Particles = ({ type }) => {
 
 const GameOver = () => {
   const { game, getPlayers, getMe, resetForNewGame } = useGameEngine();
+  const { user, refreshProfile } = useAuth();
   const [_events] = useMultiplayerState('events', []);
   const events = _events || [];
   const [dismissed, setDismissed] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [showRecap, setShowRecap] = useState(false);
+  const [xpGained, setXpGained] = useState(null);
   const metricsSaved = useRef(false);
   const winner = game.winner;
   const players = getPlayers();
@@ -73,12 +78,29 @@ const GameOver = () => {
   const isNeutralWinner = neutralWinners.some((nw) => nw.id === mePlayer?.id);
   const isWinner = isTeamWinner || isNeutralWinner;
 
-  // Save metrics once
+  // Save metrics + XP once
   useEffect(() => {
     if (!metricsSaved.current && players.length > 0) {
       metricsSaved.current = true;
       const metrics = collectGameMetrics({ game, players, events });
       saveMetrics(metrics);
+
+      // Calculate and save XP (if logged in)
+      const xpResult = calculateGameXP({
+        isWinner: isTeamWinner,
+        isNeutralWinner,
+        daysSurvived: game.dayCount || 1,
+        isAlive: mePlayer?.isAlive,
+      });
+      setXpGained(xpResult);
+
+      if (user) {
+        const totalXP = xpResult.total;
+        addXP(user.id, totalXP, xpResult.gains.map(g => g.reason).join(', ')).then(() => {
+          incrementGamesPlayed(user.id, isWinner || isNeutralWinner);
+          refreshProfile();
+        });
+      }
     }
   }, []);
 
@@ -194,6 +216,21 @@ const GameOver = () => {
             </>
           )}
         </div>
+
+        {/* XP gained */}
+        {xpGained && (
+          <div className="go-xp-section">
+            <div className="go-xp-total">+{xpGained.total} XP</div>
+            <div className="go-xp-details">
+              {xpGained.gains.map((g, i) => (
+                <span key={i} className="go-xp-item">+{g.amount} {g.reason}</span>
+              ))}
+            </div>
+            {!user && (
+              <p className="go-xp-hint"><i className="fas fa-info-circle"></i> Connecte-toi pour sauvegarder ton XP</p>
+            )}
+          </div>
+        )}
 
         {/* Recap par equipe */}
         <div className={`go-recap ${showRecap ? 'go-recap-visible' : ''}`}>

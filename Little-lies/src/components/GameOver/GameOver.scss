@@ -187,6 +187,47 @@
   }
 }
 
+// XP section
+.go-xp-section {
+  text-align: center;
+  margin: 10px 0;
+  padding: 10px 14px;
+  background: rgba(47, 130, 255, 0.06);
+  border: 1px solid rgba(47, 130, 255, 0.15);
+  border-radius: 10px;
+  animation: go-fade-up 0.5s ease-out 1.1s both;
+}
+
+.go-xp-total {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #6bb5ff;
+  margin-bottom: 4px;
+}
+
+.go-xp-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.go-xp-item {
+  font-size: 0.7rem;
+  color: #88b0dd;
+  background: rgba(47, 130, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.go-xp-hint {
+  font-size: 0.7rem;
+  color: #666;
+  margin: 6px 0 0;
+  i { margin-right: 4px; }
+}
+
 .go-recap-title {
   font-family: 'Cinzel', serif;
   color: #777;
