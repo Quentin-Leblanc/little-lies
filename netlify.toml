@@ -1,0 +1,18 @@
+[build]
+  base = "Little-lies"
+  command = "npm run build"
+  publish = "build"
+
+# SPA fallback — all routes to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
