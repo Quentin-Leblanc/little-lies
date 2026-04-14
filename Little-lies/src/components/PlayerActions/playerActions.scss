@@ -5,6 +5,20 @@
   gap: 8px;
 }
 
+/* Phase context slot — fixed container to prevent layout shift */
+.phase-context-slot {
+  min-height: 0;
+
+  & > * {
+    animation: slot-fade-in 0.25s ease-out;
+  }
+}
+
+@keyframes slot-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 // Vote highlight wrapper
 .player-list-wrapper {
   transition: box-shadow 0.4s, border-color 0.4s;

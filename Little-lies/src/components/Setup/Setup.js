@@ -140,19 +140,23 @@ const Setup = () => {
           </div>
         )}
 
-        {/* Team counter */}
-        {rolesSelected.length > 0 && (
-          <div className="setup-team-counter">
-            <span style={{ color: '#78ff78' }}><i className="fas fa-users"></i> {t('setup:team_counter.village', { count: townCount })}</span>
-            <span style={{ color: '#ff4444' }}><i className="fas fa-user-secret"></i> {t('setup:team_counter.mafia', { count: mafiaCount })}</span>
-            <span style={{ color: '#9370db' }}><i className="fas fa-star"></i> {t('setup:team_counter.neutral', { count: neutralCount })}</span>
-            {isUnbalanced && (
-              <span className="setup-warning">
-                <i className="fas fa-exclamation-triangle"></i> {t('setup:team_counter.unbalanced')}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Team counter — always rendered, content fades in */}
+        <div className="setup-team-counter">
+          <span style={{ color: '#78ff78', opacity: rolesSelected.length > 0 ? 1 : 0.3 }}>
+            <i className="fas fa-users"></i> {t('setup:team_counter.village', { count: townCount })}
+          </span>
+          <span style={{ color: '#ff4444', opacity: rolesSelected.length > 0 ? 1 : 0.3 }}>
+            <i className="fas fa-user-secret"></i> {t('setup:team_counter.mafia', { count: mafiaCount })}
+          </span>
+          <span style={{ color: '#9370db', opacity: rolesSelected.length > 0 ? 1 : 0.3 }}>
+            <i className="fas fa-star"></i> {t('setup:team_counter.neutral', { count: neutralCount })}
+          </span>
+          {isUnbalanced && (
+            <span className="setup-warning">
+              <i className="fas fa-exclamation-triangle"></i> {t('setup:team_counter.unbalanced')}
+            </span>
+          )}
+        </div>
 
         {/* Roles dual box — visible to all, interactive for host only */}
         <div className="dualBox">

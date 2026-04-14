@@ -202,56 +202,59 @@ const PlayerActions = memo(function () {
           </div>
         )}
 
-        {/* Judgment phase */}
-        {isJudgmentPhase && accusedPlayer && me.id !== game.accusedId && me.isAlive && (
-          <div className="judgment-panel">
-            <p>{t('game:gameover.is_accused', { name: accusedPlayer.profile.name })}</p>
-            <div className="judgment-buttons">
-              <button
-                className={`primaryBtn judgment-guilty ${myJudgmentVote === 'guilty' ? 'active' : ''}`}
-                onClick={() => handleJudgmentVote('guilty')}
-                disabled={!!myJudgmentVote}
-              >
-                {t('common:guilty')}
-              </button>
-              <button
-                className={`primaryBtn judgment-innocent ${myJudgmentVote === 'innocent' ? 'active' : ''}`}
-                onClick={() => handleJudgmentVote('innocent')}
-                disabled={!!myJudgmentVote}
-              >
-                {t('common:innocent')}
-              </button>
-              <button
-                className={`primaryBtn judgment-abstain ${myJudgmentVote === 'abstain' ? 'active' : ''}`}
-                onClick={() => handleJudgmentVote('abstain')}
-                disabled={!!myJudgmentVote}
-              >
-                {t('common:abstain')}
-              </button>
+        {/* Phase context panel — fixed height container to prevent layout shift */}
+        <div className="phase-context-slot">
+          {/* Judgment phase */}
+          {isJudgmentPhase && accusedPlayer && me.id !== game.accusedId && me.isAlive && (
+            <div className="judgment-panel">
+              <p>{t('game:gameover.is_accused', { name: accusedPlayer.profile.name })}</p>
+              <div className="judgment-buttons">
+                <button
+                  className={`primaryBtn judgment-guilty ${myJudgmentVote === 'guilty' ? 'active' : ''}`}
+                  onClick={() => handleJudgmentVote('guilty')}
+                  disabled={!!myJudgmentVote}
+                >
+                  {t('common:guilty')}
+                </button>
+                <button
+                  className={`primaryBtn judgment-innocent ${myJudgmentVote === 'innocent' ? 'active' : ''}`}
+                  onClick={() => handleJudgmentVote('innocent')}
+                  disabled={!!myJudgmentVote}
+                >
+                  {t('common:innocent')}
+                </button>
+                <button
+                  className={`primaryBtn judgment-abstain ${myJudgmentVote === 'abstain' ? 'active' : ''}`}
+                  onClick={() => handleJudgmentVote('abstain')}
+                  disabled={!!myJudgmentVote}
+                >
+                  {t('common:abstain')}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Defense phase */}
-        {isDefensePhase && accusedPlayer && (
-          <div className="defense-panel">
-            <p>{t('game:gameover.accused_defense', { name: accusedPlayer.profile.name })}</p>
-          </div>
-        )}
+          {/* Defense phase */}
+          {isDefensePhase && accusedPlayer && (
+            <div className="defense-panel">
+              <p>{t('game:gameover.accused_defense', { name: accusedPlayer.profile.name })}</p>
+            </div>
+          )}
 
-        {/* Last words phase */}
-        {isLastWordsPhase && accusedPlayer && (
-          <div className="defense-panel">
-            <p>{t('game:gameover.last_words', { name: accusedPlayer.profile.name })}</p>
-          </div>
-        )}
+          {/* Last words phase */}
+          {isLastWordsPhase && accusedPlayer && (
+            <div className="defense-panel">
+              <p>{t('game:gameover.last_words', { name: accusedPlayer.profile.name })}</p>
+            </div>
+          )}
 
-        {/* Phase header */}
-        {phaseHeader && me.isAlive && (
-          <div className="phase-header" style={{ color: phaseHeader.color }}>
-            <i className={`fas ${phaseHeader.icon}`}></i> {phaseHeader.text}
-          </div>
-        )}
+          {/* Phase header */}
+          {phaseHeader && me.isAlive && (
+            <div className="phase-header" style={{ color: phaseHeader.color }}>
+              <i className={`fas ${phaseHeader.icon}`}></i> {phaseHeader.text}
+            </div>
+          )}
+        </div>
 
         {/* Player list */}
         <div className={`player-list-wrapper ${isVotingPhase ? 'highlight-vote' : ''} ${isNightPhase ? 'night-mode' : ''}`}>
