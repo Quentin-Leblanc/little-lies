@@ -18,6 +18,7 @@ import RoleReveal from './components/RoleReveal/RoleReveal';
 import CustomLobby from './components/CustomLobby/CustomLobby';
 import StarryBackground from './utils/StarryBackground';
 import LagIndicator from './components/LagIndicator/LagIndicator';
+import AmbientEffects from './utils/AmbientEffects';
 import './styles/global.scss';
 import './styles/App.scss';
 
@@ -179,6 +180,7 @@ function App() {
                     </div>
                     <LagIndicator />
                 </div>
+                <AmbientEffects />
             </GameComponent>}
         </div>
     );

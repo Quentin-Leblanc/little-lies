@@ -1,0 +1,148 @@
+// === Ambient visual effects ===
+
+.ambient-effects {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  overflow: hidden;
+}
+
+// Vignettes
+.ambient-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+}
+
+.ambient-vignette-night {
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 20, 0.5) 100%);
+  animation: vignette-breathe 6s ease-in-out infinite;
+}
+
+.ambient-vignette-execution {
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(180, 0, 0, 0.25) 100%);
+  animation: exec-pulse 0.8s ease-in-out 2;
+}
+
+.ambient-vignette-vote {
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(255, 165, 0, 0.1) 100%);
+  animation: vote-glow 2s ease-in-out infinite;
+}
+
+@keyframes vignette-breathe {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+@keyframes exec-pulse {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes vote-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+// Fireflies
+.ambient-fireflies {
+  position: absolute;
+  inset: 0;
+}
+
+.firefly {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFD700, #FF8C00);
+  box-shadow: 0 0 6px 2px rgba(255, 215, 0, 0.6);
+  opacity: 0;
+  animation: firefly-float ease-in-out infinite;
+}
+
+@keyframes firefly-float {
+  0% { opacity: 0; transform: translateY(0) translateX(0); }
+  15% { opacity: 0.8; }
+  30% { opacity: 0.3; }
+  50% { opacity: 0.9; transform: translateY(-30px) translateX(var(--drift, 20px)); }
+  70% { opacity: 0.2; }
+  85% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-60px) translateX(calc(var(--drift, 20px) * -1)); }
+}
+
+// Dust motes (day)
+.ambient-dust {
+  position: absolute;
+  inset: 0;
+}
+
+.dust-mote {
+  position: absolute;
+  bottom: 10%;
+  border-radius: 50%;
+  background: rgba(255, 215, 130, 0.4);
+  box-shadow: 0 0 3px rgba(255, 215, 130, 0.3);
+  opacity: 0;
+  animation: dust-rise linear infinite;
+}
+
+@keyframes dust-rise {
+  0% { opacity: 0; transform: translateY(0); }
+  20% { opacity: 0.5; }
+  50% { opacity: 0.3; }
+  80% { opacity: 0.4; }
+  100% { opacity: 0; transform: translateY(-80vh); }
+}
+
+// Night ambiance text
+.ambient-text {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(180, 180, 200, 0.35);
+  font-style: italic;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  animation: ambient-text-in 2s ease-out forwards;
+  pointer-events: none;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+
+  i {
+    margin-right: 6px;
+    font-size: 0.75rem;
+  }
+}
+
+@keyframes ambient-text-in {
+  0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-5px); }
+}
+
+// Sun ray (day)
+.ambient-sun-ray {
+  position: absolute;
+  top: -10%;
+  right: 10%;
+  width: 200px;
+  height: 500px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 230, 150, 0.08) 0%,
+    rgba(255, 230, 150, 0.03) 50%,
+    transparent 100%
+  );
+  transform: rotate(-15deg);
+  animation: sun-ray-shift 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sun-ray-shift {
+  0%, 100% { opacity: 0.6; transform: rotate(-15deg) translateX(0); }
+  50% { opacity: 0.9; transform: rotate(-15deg) translateX(20px); }
+}
