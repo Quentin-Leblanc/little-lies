@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useMultiplayerState } from 'playroomkit';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { collectGameMetrics, saveMetrics } from '../../utils/GameMetrics';
+import Survey from '../Survey/Survey';
 import './GameOver.scss';
 
 const TEAM_LABELS = {
@@ -223,6 +224,9 @@ const GameOver = () => {
             );
           })}
         </div>
+
+        {/* Survey */}
+        <Survey />
 
         {/* Boutons */}
         <div className="go-buttons">
