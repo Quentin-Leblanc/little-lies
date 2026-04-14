@@ -32,6 +32,58 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.setup-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setup-host-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  color: #ffd700;
+  font-weight: 600;
+
+  i { font-size: 0.7rem; }
+}
+
+.setup-host-notice {
+  text-align: center;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: rgba(255, 215, 0, 0.06);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 10px;
+  color: #daa520;
+  font-size: 0.85rem;
+
+  i { margin-right: 6px; }
+}
+
+.setup-waiting {
+  text-align: center;
+  padding: 12px;
+  color: #888;
+  font-size: 0.9rem;
+  font-style: italic;
+  animation: setup-blink 2s ease-in-out infinite;
+
+  i { margin-right: 6px; }
+}
+
+.config-readonly-hint {
+  color: #888;
+  font-size: 0.75rem;
+  font-style: italic;
+  margin: 0 0 8px 0;
+}
+
 // Team counter
 .setup-team-counter {
   display: flex;

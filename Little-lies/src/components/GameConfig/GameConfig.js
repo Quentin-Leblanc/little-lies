@@ -17,18 +17,18 @@ const DURATION_LABELS = {
   NIGHT: 'Nuit',
   DISCUSSION: 'Discussion',
   VOTING: 'Vote',
-  DEFENSE: 'Défense',
+  DEFENSE: 'D\u00e9fense',
   JUDGMENT: 'Jugement',
 };
 
 const GameConfig = ({ config, onConfigChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  if (!isHost()) return null;
+  const host = isHost();
 
   const durations = config?.durations || DEFAULT_DURATIONS;
 
   const handleDurationChange = (phase, value) => {
+    if (!host) return;
     const newDurations = { ...durations, [phase]: Math.max(5, Math.min(120, parseInt(value) || 5)) };
     onConfigChange({ ...config, durations: newDurations });
   };
@@ -42,6 +42,7 @@ const GameConfig = ({ config, onConfigChange }) => {
       {isOpen && (
         <div className="config-panel">
           <h3>Configuration de la partie</h3>
+          {!host && <p className="config-readonly-hint">Seul l'h\u00f4te peut modifier</p>}
           <div className="config-durations">
             {Object.entries(DURATION_LABELS).map(([key, label]) => (
               <div key={key} className="config-row">
@@ -53,6 +54,7 @@ const GameConfig = ({ config, onConfigChange }) => {
                     max={120}
                     value={durations[key]}
                     onChange={(e) => handleDurationChange(key, e.target.value)}
+                    disabled={!host}
                   />
                   <span>s</span>
                 </div>

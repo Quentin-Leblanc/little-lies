@@ -53,7 +53,6 @@ const PlayerActions = memo(function () {
   const me = getMe();
 
   const [isDead, setIsDead] = useState(false);
-  const [actionUsed, setActionUsed] = useState(null);
   const prevAliveRef = useRef(me?.isAlive ?? true);
 
   const phase = game.phase;
@@ -64,10 +63,6 @@ const PlayerActions = memo(function () {
   const isNightPhase = phase === CONSTANTS.PHASE.NIGHT;
   const isDiscussionPhase = phase === CONSTANTS.PHASE.DISCUSSION;
   const isDayPhase = game.isDay && phase !== CONSTANTS.PHASE.NIGHT_TRANSITION;
-
-  useEffect(() => {
-    setActionUsed(null);
-  }, [game.phase]);
 
   // Death flash
   useEffect(() => {
@@ -139,7 +134,6 @@ const PlayerActions = memo(function () {
         content: { target: targetPlayer.id, chatMessage: '', by: me.id },
         displayed: false,
       });
-      setActionUsed({ type: action.label, targetName: targetPlayer.profile.name });
     }
   };
 
@@ -181,7 +175,6 @@ const PlayerActions = memo(function () {
       content: { target: targetPlayer.id, chatMessage: '', by: me.id },
       displayed: false,
     });
-    setActionUsed({ type: action.label, targetName: targetPlayer.profile.name });
   };
 
   const myJudgmentVote = trial.votes?.[me.id];
@@ -265,13 +258,6 @@ const PlayerActions = memo(function () {
         {isLastWordsPhase && accusedPlayer && (
           <div className="defense-panel">
             <p><strong>{accusedPlayer.profile.name}</strong> \u2014 Derniers mots...</p>
-          </div>
-        )}
-
-        {/* Action used feedback */}
-        {actionUsed && (
-          <div className="action-feedback">
-            <i className="fas fa-check"></i> {actionUsed.type} \u2192 {actionUsed.targetName}
           </div>
         )}
 

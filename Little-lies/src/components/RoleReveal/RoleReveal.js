@@ -136,10 +136,13 @@ const RoleReveal = ({ onComplete }) => {
       }
       if (!cancelled) {
         setRealLoaded(true);
-        setTimeout(() => {
+        // Small delay before transitioning — use rAF to survive throttled tabs
+        requestAnimationFrame(() => {
           setProgress(1);
-          setTimeout(() => setPhase('waiting-players'), 500);
-        }, 300);
+          requestAnimationFrame(() => {
+            setTimeout(() => setPhase('waiting-players'), 400);
+          });
+        });
       }
     };
     loadAll();
@@ -157,22 +160,38 @@ const RoleReveal = ({ onComplete }) => {
     if (!game.waitingForPlayers) setPhase('waiting');
   }, [phase, game.waitingForPlayers]);
 
-  // Role reveal sequence
+  // Role reveal sequence — uses rAF-aware delays to survive tab throttling
   const sequenceStarted = useRef(false);
   const sequenceTimers = useRef([]);
+
+  // rAF-aware delay: pauses when tab is hidden, catches up on resume
+  const rafDelay = (callback, ms) => {
+    const start = performance.now();
+    let rafId;
+    const check = () => {
+      if (performance.now() - start >= ms) {
+        callback();
+      } else {
+        rafId = requestAnimationFrame(check);
+      }
+    };
+    rafId = requestAnimationFrame(check);
+    return () => cancelAnimationFrame(rafId);
+  };
+
   useEffect(() => {
     if (phase !== 'waiting' || sequenceStarted.current) return;
     sequenceStarted.current = true;
-    sequenceTimers.current = [
-      setTimeout(() => setPhase('intro'), 300),
-      setTimeout(() => setPhase('flip'), 2200),
-      setTimeout(() => setPhase('details'), 3000),
-      setTimeout(() => onComplete?.(), 6000),
-    ];
+    const cancels = [];
+    cancels.push(rafDelay(() => setPhase('intro'), 300));
+    cancels.push(rafDelay(() => setPhase('flip'), 2200));
+    cancels.push(rafDelay(() => setPhase('details'), 3000));
+    cancels.push(rafDelay(() => onComplete?.(), 6000));
+    sequenceTimers.current = cancels;
   }, [phase]);
 
   useEffect(() => {
-    return () => sequenceTimers.current.forEach(clearTimeout);
+    return () => sequenceTimers.current.forEach(cancel => cancel?.());
   }, []);
 
   if (!me?.character && phase !== 'loading') return null;
