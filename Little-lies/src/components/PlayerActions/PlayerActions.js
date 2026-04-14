@@ -285,6 +285,11 @@ const PlayerActions = memo(function () {
                       <i className="fas fa-comment-slash"></i>
                     </span>
                   )}
+                  {player.disconnectedAt && player.isAlive && (
+                    <span className="disconnecting-badge" title="Disconnecting...">
+                      <i className="fas fa-wifi"></i>
+                    </span>
+                  )}
                 </span>
 
                 <div className="vote-container">

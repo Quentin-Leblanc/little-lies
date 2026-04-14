@@ -33,6 +33,8 @@
     "player_eliminated": "{{name}} a été éliminé par le village. Son rôle était : {{role}}.",
     "player_eliminated_will": "{{name}} a été éliminé par le village. Son rôle était : {{role}}. | Testament : \"{{will}}\"",
     "player_disconnected": "{{name}} est mort de façon inconnue",
+    "player_disconnecting": "{{name}} s'est déconnecté — {{seconds}}s pour revenir",
+    "player_reconnected": "{{name}} s'est reconnecté !",
     "name_changed": "{{oldName}} a changé son pseudo en {{newName}}",
     "whisper_notice": "{{sender}} chuchote à {{receiver}}",
     "last_will_updated": "Testament mis à jour.",

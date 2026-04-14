@@ -380,6 +380,19 @@
   50% { opacity: 0.4; }
 }
 
+// Disconnecting badge
+.disconnecting-badge {
+  color: #ff8800;
+  font-size: 11px;
+  margin-left: 2px;
+  animation: dc-blink 1s ease-in-out infinite;
+}
+
+@keyframes dc-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
 // Night mode glow on wrapper
 .player-list-wrapper.night-mode {
   border: 1px solid rgba(100, 120, 200, 0.1);

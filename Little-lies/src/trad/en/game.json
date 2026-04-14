@@ -33,6 +33,8 @@
     "player_eliminated": "{{name}} was eliminated by the village. Their role was: {{role}}.",
     "player_eliminated_will": "{{name}} was eliminated by the village. Their role was: {{role}}. | Last Will: \"{{will}}\"",
     "player_disconnected": "{{name}} died under mysterious circumstances",
+    "player_disconnecting": "{{name}} disconnected — {{seconds}}s to reconnect",
+    "player_reconnected": "{{name}} reconnected!",
     "name_changed": "{{oldName}} changed their name to {{newName}}",
     "whisper_notice": "{{sender}} whispers to {{receiver}}",
     "last_will_updated": "Last will updated.",

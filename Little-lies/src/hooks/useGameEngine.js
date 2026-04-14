@@ -349,26 +349,68 @@ export const GameEngineProvider = ({ children }) => {
     ]);
   };
 
-  // --- Disconnect handling ---
+  // --- Disconnect handling with grace period ---
+  const DISCONNECT_GRACE_MS = 30000; // 30s to reconnect
+
+  // Continuous disconnect monitoring (runs every game tick via useEffect below)
   const handleDisconnectPlayers = () => {
+    if (!game.isGameStarted || game.status === STATUS.ENDED) return;
     const connectedIds = new Set(playroom_players.map((p) => p.id));
-    const disconnectEvents = [];
+    const now = Date.now();
+    let changed = false;
+    const newMessages = [];
+
     const updated = players.map((player) => {
-      if (!connectedIds.has(player.id) && player.connected && player.isAlive) {
-        disconnectEvents.push({
+      if (!player.isAlive) return player;
+
+      const isConnected = connectedIds.has(player.id);
+
+      // Player just disconnected — start grace period
+      if (!isConnected && player.connected !== false && !player.disconnectedAt) {
+        changed = true;
+        newMessages.push({
+          player: 'system',
+          color: '#ff8800',
+          content: i18n.t('game:system.player_disconnecting', { name: player.profile.name, seconds: Math.round(DISCONNECT_GRACE_MS / 1000) }),
+          type: 'system',
+          dayCount: game.dayCount,
+          chat: 'default',
+        });
+        return { ...player, disconnectedAt: now, connected: false };
+      }
+
+      // Player reconnected within grace period
+      if (isConnected && player.disconnectedAt) {
+        changed = true;
+        newMessages.push({
+          player: 'system',
+          color: '#78ff78',
+          content: i18n.t('game:system.player_reconnected', { name: player.profile.name }),
+          type: 'system',
+          dayCount: game.dayCount,
+          chat: 'default',
+        });
+        return { ...player, disconnectedAt: null, connected: true };
+      }
+
+      // Grace period expired — kill player
+      if (!isConnected && player.disconnectedAt && (now - player.disconnectedAt >= DISCONNECT_GRACE_MS)) {
+        changed = true;
+        Events.add({
           type: 'disconnect',
           content: { chatMessage: i18n.t('game:system.player_disconnected', { name: player.profile.name }) },
           displayed: false,
         });
-        return { ...player, connected: false, isAlive: false };
+        return { ...player, disconnectedAt: null, connected: false, isAlive: false };
       }
+
       return player;
     });
-    // Batch all disconnect events in a single state update
-    if (disconnectEvents.length > 0) {
-      Events.addBatch(disconnectEvents);
+
+    if (newMessages.length > 0) {
+      setChatMessages([...(chatMessages || []), ...newMessages]);
     }
-    if (updated.some((p, i) => p !== players[i])) {
+    if (changed) {
       setPlayers(updated);
     }
   };
@@ -586,7 +628,7 @@ export const GameEngineProvider = ({ children }) => {
 
     switch (currentPhase) {
       case PHASE.NIGHT:
-        handleDisconnectPlayers();
+        // Disconnects are now handled continuously (every 3s) — no need to check here
         nextGame = { ...nextGame, phase: PHASE.DEATH_REPORT, timer: dur('DEATH_REPORT'), isDay: true, dayCount: game.dayCount + 1, trialsToday: 0, accusedId: null, skipVotes: [] };
         break;
 
@@ -711,6 +753,15 @@ export const GameEngineProvider = ({ children }) => {
 
     return () => clearTimeout(tick);
   }, [game.timer, game.phase, game.status, game.adminFreeRoam, game.waitingForPlayers, isHost(), trial]);
+
+  // --- Continuous disconnect monitoring (host only, every 3s) ---
+  useEffect(() => {
+    if (!isHost() || !game.isGameStarted || game.status === STATUS.ENDED) return;
+    const interval = setInterval(() => {
+      handleDisconnectPlayers();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [game.isGameStarted, game.status, playroom_players.length, players]);
 
   // --- Wait for all players to load assets (host only) ---
   useEffect(() => {
