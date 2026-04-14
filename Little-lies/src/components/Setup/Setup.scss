@@ -32,6 +32,34 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+// Team counter
+.setup-team-counter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  i { margin-right: 4px; font-size: 0.75rem; }
+}
+
+.setup-warning {
+  color: #ff6666;
+  font-size: 0.75rem;
+  animation: setup-blink 2s ease-in-out infinite;
+
+  i { margin-right: 3px; }
+}
+
+@keyframes setup-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 .setup-title {
   font-family: 'Cinzel', serif;
   font-size: 1.4rem;

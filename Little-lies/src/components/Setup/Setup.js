@@ -75,6 +75,19 @@ const Setup = () => {
   };
 
   const allSlotsFilled = rolesSelected.length === players.length;
+  const MIN_PLAYERS = 4;
+  const canStart = allSlotsFilled && players.length >= MIN_PLAYERS;
+
+  // Team counter for selected roles
+  const teamCounts = rolesSelected.reduce((acc, role) => {
+    const team = role?.team || 'neutral';
+    acc[team] = (acc[team] || 0) + 1;
+    return acc;
+  }, {});
+  const townCount = teamCounts.town || 0;
+  const mafiaCount = teamCounts.mafia || 0;
+  const neutralCount = teamCounts.neutral || 0;
+  const isUnbalanced = rolesSelected.length > 0 && mafiaCount >= townCount;
 
   return (
     <div className="setup-screen">
@@ -85,6 +98,11 @@ const Setup = () => {
           <div className="setup-players-badge">
             <i className="fas fa-users"></i>
             <span>{players.length}</span> joueurs
+            {players.length < MIN_PLAYERS && (
+              <span style={{ color: '#ff6666', fontSize: '0.75rem', marginLeft: 6 }}>
+                (min {MIN_PLAYERS})
+              </span>
+            )}
           </div>
         </div>
 
@@ -111,6 +129,20 @@ const Setup = () => {
           </div>
         )}
 
+        {/* Team counter */}
+        {rolesSelected.length > 0 && (
+          <div className="setup-team-counter">
+            <span style={{ color: '#78ff78' }}><i className="fas fa-users"></i> Village: {townCount}</span>
+            <span style={{ color: '#ff4444' }}><i className="fas fa-user-secret"></i> Mafia: {mafiaCount}</span>
+            <span style={{ color: '#9370db' }}><i className="fas fa-star"></i> Neutre: {neutralCount}</span>
+            {isUnbalanced && (
+              <span className="setup-warning">
+                <i className="fas fa-exclamation-triangle"></i> D&eacute;s&eacute;quilibr&eacute;
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Roles dual box */}
         <div className="dualBox">
           <Roles />
@@ -120,14 +152,16 @@ const Setup = () => {
         {isHost() && (
           <div className="setup-footer">
             <button
-              className={`start-btn ${allSlotsFilled ? 'ready' : ''}`}
-              disabled={!allSlotsFilled}
+              className={`start-btn ${canStart ? 'ready' : ''}`}
+              disabled={!canStart}
               onClick={startGame}
             >
-              <i className={`fas ${allSlotsFilled ? 'fa-play' : 'fa-lock'}`}></i>
-              {allSlotsFilled
-                ? 'Lancer la partie'
-                : `${rolesSelected.length}/${players.length} rôles assignés`
+              <i className={`fas ${canStart ? 'fa-play' : 'fa-lock'}`}></i>
+              {!allSlotsFilled
+                ? `${rolesSelected.length}/${players.length} r\u00f4les assign\u00e9s`
+                : players.length < MIN_PLAYERS
+                ? `Minimum ${MIN_PLAYERS} joueurs requis`
+                : 'Lancer la partie'
               }
             </button>
           </div>
