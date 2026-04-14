@@ -286,6 +286,13 @@ export const EventsProvider = ({ children }) => {
       const target = players.find((p) => p.id === targetId);
       if (!target?.isAlive) return;
 
+      // Jail protection: jailed players can't be killed by anyone except the jailor
+      if (jailedPlayers[targetId] && type !== 'jailor_execute') {
+        survived[targetId] = true;
+        addNotif(targetId, 'Vous \u00e9tiez en prison, vous \u00e9tiez prot\u00e9g\u00e9.');
+        return;
+      }
+
       // Bodyguard intercept: if target is bodyguarded, bodyguard kills attacker and dies
       if (bodyguardTargets[targetId]) {
         const bgId = bodyguardTargets[targetId];

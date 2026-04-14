@@ -318,27 +318,84 @@
   font-weight: bold;
 }
 
+// Phase header
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 4px 0;
+  opacity: 0.8;
+
+  i { font-size: 10px; }
+}
+
+// Action feedback
+.action-feedback {
+  text-align: center;
+  padding: 6px 10px;
+  background: rgba(0, 185, 106, 0.12);
+  border: 1px solid rgba(0, 185, 106, 0.25);
+  border-radius: 4px;
+  color: #00b96a;
+  font-size: 13px;
+  font-weight: 600;
+  animation: feedback-in 0.3s ease-out;
+
+  i { margin-right: 4px; }
+}
+
+@keyframes feedback-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Blackmailed badge
+.blackmailed-badge {
+  color: #ff6666;
+  font-size: 11px;
+  margin-left: 2px;
+  animation: blink-slow 2s ease-in-out infinite;
+}
+
+@keyframes blink-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+// Night mode glow on wrapper
+.player-list-wrapper.night-mode {
+  border: 1px solid rgba(100, 120, 200, 0.1);
+  background: rgba(10, 10, 30, 0.2);
+  border-radius: 8px;
+}
+
 .action-btn {
-  padding: 6px 14px;
-  font-size: 14px;
+  padding: 5px 12px;
+  font-size: 13px;
   margin: 0;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s;
-  background: #555 !important;
+  background: var(--action-bg, rgba(100,100,100,0.7)) !important;
   color: #fff !important;
   border: 2px solid transparent;
   font-weight: bold;
 
   &:hover {
-    background: #444 !important;
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--action-hover, rgba(100,100,100,0.9)) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.03);
   }
 
   &.action-btn-active {
-    background: #111 !important;
-    border-color: #ff4444;
-    box-shadow: 0 0 0 1px #ff4444;
+    border-color: #fff;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4), 0 0 10px rgba(255, 255, 255, 0.15);
+    transform: scale(1.02);
   }
 }
 
