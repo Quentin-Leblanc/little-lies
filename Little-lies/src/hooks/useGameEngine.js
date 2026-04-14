@@ -315,6 +315,7 @@ export const GameEngineProvider = ({ children }) => {
       phase: PHASE.DISCUSSION,
       timer: 15000,
       phaseStartedAt: Date.now(),
+      gameStartedAt: Date.now(),
       isGameStarted: true,
       isGameSetup: false,
       isDay: true,

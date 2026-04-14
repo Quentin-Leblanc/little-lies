@@ -93,11 +93,15 @@ const GameOver = () => {
   const stats = useMemo(() => {
     const deadCount = players.filter(p => !p.isAlive).length;
     const aliveCount = players.filter(p => p.isAlive).length;
+    const durationMs = game.gameStartedAt ? Date.now() - game.gameStartedAt : 0;
+    const durationMin = Math.floor(durationMs / 60000);
+    const durationSec = Math.floor((durationMs % 60000) / 1000);
     return {
       days: game.dayCount || 1,
       dead: deadCount,
       alive: aliveCount,
       total: players.length,
+      duration: durationMs > 0 ? `${durationMin}m${durationSec.toString().padStart(2, '0')}s` : null,
     };
   }, [players, game.dayCount]);
 
@@ -180,6 +184,15 @@ const GameOver = () => {
             <span className="go-stat-value">{stats.alive}</span>
             <span className="go-stat-label">Survivants</span>
           </div>
+          {stats.duration && (
+            <>
+              <div className="go-stat-divider" />
+              <div className="go-stat">
+                <span className="go-stat-value">{stats.duration}</span>
+                <span className="go-stat-label">Dur&eacute;e</span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Recap par equipe */}

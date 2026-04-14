@@ -287,9 +287,11 @@ function Chat(props) {
   const isAccused = me?.id === game.accusedId;
   const isBlackmailed = me?.isBlackmailed && game.isDay;
   const isMutedByPhase = (isDefensePhase && !isAccused && !isDead) || isAnnouncementPhase;
+  const BLACKMAIL_MAX_CHARS = 10;
 
   // Dead players can always chat (in dead chat) unless it's a mute phase
-  const canChat = isDead ? true : !isMutedByPhase && !isBlackmailed && !isPlayerInTimeout;
+  // Blackmailed players CAN chat but with limited chars
+  const canChat = isDead ? true : !isMutedByPhase && !isPlayerInTimeout;
 
   // --- Message filtering ---
   const filterMessage = (message) => {
@@ -351,12 +353,13 @@ function Chat(props) {
   let placeholder = 'Entrez un message...';
   if (isVillagerNight) placeholder = 'La nuit tombe sur le village...';
   else if (isDead) placeholder = 'Chat des morts...';
-  else if (isBlackmailed) placeholder = 'Vous avez été bâillonné...';
-  else if (isMutedByPhase) placeholder = "Seul l'accusé peut parler...";
-  else if (isPlayerInTimeout) placeholder = 'Vous êtes en timeout...';
+  else if (isBlackmailed) placeholder = `B\u00e2illonn\u00e9 (max ${BLACKMAIL_MAX_CHARS} car.)...`;
+  else if (isMutedByPhase) placeholder = "Seul l'accus\u00e9 peut parler...";
+  else if (isPlayerInTimeout) placeholder = 'Vous \u00eates en timeout...';
   else if (isNight && myTeam === 'mafia') placeholder = 'Chat mafia...';
 
   const isDisabled = isVillagerNight || !canChat || (isMutedByPhase && !isDead);
+  const maxInputLength = isBlackmailed ? BLACKMAIL_MAX_CHARS : undefined;
 
   // Message CSS class
   const getMessageClass = (message) => {
@@ -452,14 +455,15 @@ function Chat(props) {
           <span className="chat-input-name" style={{ color: myColor || '#ccc' }}>{myName}:</span>
           <input
             ref={inputRef}
-            className={`chat-input ${inputError ? 'invalid-char' : ''}`}
+            className={`chat-input ${inputError ? 'invalid-char' : ''} ${isBlackmailed ? 'chat-blackmailed' : ''}`}
             type="text"
             value={inputValues}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onBlur={() => { if (!inputValues.trim()) setInputVisible(false); }}
-            placeholder="Tapez un message..."
+            placeholder={placeholder}
             disabled={isDisabled}
+            maxLength={maxInputLength}
             autoFocus
           />
           {inputError && <div className="invalid-char-message">{inputError}</div>}
