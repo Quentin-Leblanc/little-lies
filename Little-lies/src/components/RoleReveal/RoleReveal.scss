@@ -68,6 +68,16 @@
   text-transform: uppercase;
   margin: 0 0 8px 0;
   text-shadow: 0 0 20px rgba(100, 140, 220, 0.3);
+  animation: glitch 3s ease-in-out infinite;
+  position: relative;
+}
+
+@keyframes glitch {
+  0%, 90%, 100% { transform: none; opacity: 1; text-shadow: 0 0 20px rgba(100, 140, 220, 0.3); }
+  91% { transform: translateX(-3px) skewX(-2deg); text-shadow: -2px 0 #ff0040, 2px 0 #0ff; opacity: 0.9; }
+  92% { transform: translateX(3px) skewX(1deg); text-shadow: 2px 0 #ff0040, -2px 0 #0ff; }
+  93% { transform: translateX(-1px); text-shadow: -1px 0 #ff0040, 1px 0 #0ff; opacity: 0.95; }
+  94% { transform: none; text-shadow: 0 0 20px rgba(100, 140, 220, 0.3); opacity: 1; }
 }
 
 .loading-bar-track {

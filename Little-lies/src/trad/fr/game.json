@@ -163,6 +163,16 @@
   "last_will_placeholder": "Votre testament...",
   "last_will_placeholder_write": "Écrivez votre testament... Il sera révélé à votre mort.",
   "last_will_none": "Aucun testament laissé.",
+  "xp": {
+    "participation": "Participation",
+    "victory": "Victoire",
+    "neutral_victory": "Victoire neutre",
+    "survived_days": "{{count}}j survécu",
+    "tier_legend": "Légende",
+    "tier_veteran": "Vétéran",
+    "tier_confirmed": "Confirmé",
+    "tier_beginner": "Débutant"
+  },
   "ambiance": [
     "Un chat noir traverse lentement la place du village...",
     "Des pas furtifs se font entendre dans la ruelle...",

@@ -5,9 +5,10 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: center;
   height: 100%;
   gap: 6px;
-  padding-top: 8px;
+  padding-top: 0;
 }
 
 .role-team-row {
@@ -168,7 +169,7 @@
 .last-will-section {
   flex-shrink: 0;
   margin-top: auto;
-  width: 55%;
+  width: 45%;
 }
 
 .last-will-trigger {

@@ -2018,6 +2018,7 @@ const SceneLighting = ({ isDay, isSunset = false }) => {
 const MainScene = () => {
   const { game, getPlayers, getMe, CONSTANTS, trial, setTrial } = useGameEngine();
   const [chatMessages] = useMultiplayerState('chatMessages', []);
+  const [events] = useMultiplayerState('events', []);
   const players = getPlayers();
   const me = getMe();
   const phase = game.phase;
@@ -2466,13 +2467,11 @@ const MainScene = () => {
 
       {/* Blood effect — plays before death report text */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && showBloodEffect && (() => {
-        const hasDeaths = (chatMessages || []).some(
-          m => m.type === 'system' && m.dayCount === game.dayCount
-            && !m.content?.startsWith('--- Jour')
-            && !m.content?.startsWith('La nuit a été calme')
-            && (m.content?.includes('retrouvé') || m.content?.includes('mort') || m.content?.includes('survécu'))
+        // Language-agnostic: check events for kills, not chat text
+        const killEvents = (events || []).filter(
+          e => (e.type === 'KILL_RESULT' || e.type === 'disconnect') && e.dayCount === game.dayCount
         );
-        if (!hasDeaths) return null;
+        if (killEvents.length === 0) return null;
         return (
           <div className="blood-overlay">
             <div className="blood-overlay-inner">
@@ -2489,38 +2488,25 @@ const MainScene = () => {
 
       {/* Death report overlay */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && showDeathReport && (() => {
-        const killedMessages = (chatMessages || []).filter(
-          m => m.type === 'system' && m.dayCount === game.dayCount
-            && !m.content?.startsWith('--- Jour')
-            && !m.content?.startsWith('La nuit a été calme')
-            && (m.content?.includes('retrouvé') || m.content?.includes('mort') || m.content?.includes('survécu'))
+        // Language-agnostic: use events with chat messages as display text
+        const killEvents = (events || []).filter(
+          e => (e.type === 'KILL_RESULT' || e.type === 'disconnect') && e.dayCount === game.dayCount && e.content?.chatMessage
         );
-        // Extract name + flavor from messages like "Joueur a été retrouvé(e) criblé(e)... Son rôle était : X."
-        const killedEntries = killedMessages.map(m => {
-          const match = m.content?.match(/^(.+?) (a été retrouvé|n'a pas survécu|est mort)/);
-          if (!match) return null;
-          const name = match[1];
-          // Extract the flavor text (everything before "Son rôle")
-          const flavorMatch = m.content?.match(/^.+? (a été retrouvé.+?|n'a pas survécu.+?|est mort.+?)(?:\s*Son rôle|$)/);
-          const flavor = flavorMatch ? flavorMatch[1].replace(/\.$/, '') : 'a été retrouvé(e) sans vie';
-          return { name, flavor };
-        }).filter(Boolean);
-        const hasDead = killedEntries.length > 0;
+        const hasDead = killEvents.length > 0;
 
         return (
           <div className={`death-report-overlay ${hasDead ? 'has-dead' : 'no-dead'}`}>
             <div className="death-report-card">
               {hasDead ? (
                 <>
-                  {killedEntries.map((entry, i) => (
+                  {killEvents.map((entry, i) => (
                     <div key={i} className="death-report-name">
-                      <span className="death-name">{entry.name}</span>
-                      <span className="death-desc">{entry.flavor}</span>
+                      <span className="death-desc">{entry.content.chatMessage}</span>
                     </div>
                   ))}
                 </>
               ) : (
-                <div className="death-report-safe">La nuit a été calme... personne n'est mort.</div>
+                <div className="death-report-safe">{i18n.t('game:system.peaceful_night')}</div>
               )}
             </div>
           </div>

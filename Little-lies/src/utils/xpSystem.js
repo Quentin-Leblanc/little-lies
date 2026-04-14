@@ -1,8 +1,9 @@
 /**
- * XP System — calcul des gains, niveaux, couleurs de degradee
+ * XP System — level calculations, gains, gradient colors
  */
+import i18n from '../trad/i18n';
 
-// XP par action
+// XP per action
 const XP_REWARDS = {
   PARTICIPATION: 10,
   TEAM_WIN: 25,
@@ -22,21 +23,22 @@ export const getXPToNextLevel = (xp) => 100 - getXPProgress(xp);
  */
 export const calculateGameXP = ({ isWinner, isNeutralWinner, daysSurvived, isAlive }) => {
   const gains = [];
+  const t = i18n.t.bind(i18n);
 
   // Participation
-  gains.push({ amount: XP_REWARDS.PARTICIPATION, reason: 'Participation' });
+  gains.push({ amount: XP_REWARDS.PARTICIPATION, reason: t('game:xp.participation', { defaultValue: 'Participation' }) });
 
   // Win bonus
   if (isWinner) {
-    gains.push({ amount: XP_REWARDS.TEAM_WIN, reason: 'Victoire' });
+    gains.push({ amount: XP_REWARDS.TEAM_WIN, reason: t('game:xp.victory', { defaultValue: 'Victory' }) });
   } else if (isNeutralWinner) {
-    gains.push({ amount: XP_REWARDS.NEUTRAL_WIN, reason: 'Victoire neutre' });
+    gains.push({ amount: XP_REWARDS.NEUTRAL_WIN, reason: t('game:xp.neutral_victory', { defaultValue: 'Neutral win' }) });
   }
 
   // Days survived
   if (daysSurvived > 1) {
     const survivalXP = (daysSurvived - 1) * XP_REWARDS.PER_DAY_SURVIVED;
-    gains.push({ amount: survivalXP, reason: `${daysSurvived - 1}j surv\u00e9cu` });
+    gains.push({ amount: survivalXP, reason: t('game:xp.survived_days', { count: daysSurvived - 1, defaultValue: `${daysSurvived - 1}d survived` }) });
   }
 
   const total = gains.reduce((sum, g) => sum + g.amount, 0);
@@ -109,10 +111,11 @@ export const getPlayerNameStyle = (level, fallbackColor = '#ccc') => {
  * Get level tier name
  */
 export const getLevelTier = (level) => {
-  if (level >= 21) return { name: 'L\u00e9gende', color: '#ffd700', icon: 'fa-gem' };
-  if (level >= 11) return { name: 'V\u00e9t\u00e9ran', color: '#a855f7', icon: 'fa-star' };
-  if (level >= 6) return { name: 'Confirm\u00e9', color: '#3498db', icon: 'fa-shield' };
-  return { name: 'D\u00e9butant', color: '#888', icon: 'fa-seedling' };
+  const t = i18n.t.bind(i18n);
+  if (level >= 21) return { name: t('game:xp.tier_legend', { defaultValue: 'Legend' }), color: '#ffd700', icon: 'fa-gem' };
+  if (level >= 11) return { name: t('game:xp.tier_veteran', { defaultValue: 'Veteran' }), color: '#a855f7', icon: 'fa-star' };
+  if (level >= 6) return { name: t('game:xp.tier_confirmed', { defaultValue: 'Confirmed' }), color: '#3498db', icon: 'fa-shield' };
+  return { name: t('game:xp.tier_beginner', { defaultValue: 'Beginner' }), color: '#888', icon: 'fa-seedling' };
 };
 
 export { XP_REWARDS };

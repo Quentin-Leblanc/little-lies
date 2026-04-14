@@ -163,6 +163,16 @@
   "last_will_placeholder": "Your last will...",
   "last_will_placeholder_write": "Write your last will... It will be revealed upon your death.",
   "last_will_none": "No last will left.",
+  "xp": {
+    "participation": "Participation",
+    "victory": "Victory",
+    "neutral_victory": "Neutral win",
+    "survived_days": "{{count}}d survived",
+    "tier_legend": "Legend",
+    "tier_veteran": "Veteran",
+    "tier_confirmed": "Confirmed",
+    "tier_beginner": "Beginner"
+  },
   "ambiance": [
     "A black cat slowly crosses the village square...",
     "Furtive footsteps echo in the alley...",
