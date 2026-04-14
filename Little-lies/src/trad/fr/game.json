@@ -124,7 +124,8 @@
     "JAILOR_EXECUTE": "Exécute le prisonnier (nombre limité)",
     "ROLEBLOCK": "Bloque les actions d'un joueur cette nuit",
     "FRAME": "Fait paraître un joueur suspect aux enquêteurs",
-    "BLACKMAIL": "Empêche un joueur de parler le jour suivant"
+    "BLACKMAIL": "Empêche un joueur de parler le jour suivant",
+    "REVEAL": "Révèle votre rôle de Maire (3 votes, mais plus de soins possibles)"
   },
   "chat": {
     "placeholder": "Entrez un message...",

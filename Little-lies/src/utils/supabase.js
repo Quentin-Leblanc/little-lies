@@ -13,7 +13,7 @@ export const isSupabaseConfigured = () => !!supabase;
 // --- Auth helpers ---
 
 export const signUpWithEmail = async (email, password, username) => {
-  if (!supabase) return { error: { message: 'Supabase non configur\u00e9' } };
+  if (!supabase) return { error: { message: 'Supabase not configured' } };
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -23,13 +23,13 @@ export const signUpWithEmail = async (email, password, username) => {
 };
 
 export const signInWithEmail = async (email, password) => {
-  if (!supabase) return { error: { message: 'Supabase non configur\u00e9' } };
+  if (!supabase) return { error: { message: 'Supabase not configured' } };
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   return { data, error };
 };
 
 export const signInWithOAuth = async (provider) => {
-  if (!supabase) return { error: { message: 'Supabase non configur\u00e9' } };
+  if (!supabase) return { error: { message: 'Supabase not configured' } };
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: { redirectTo: window.location.origin },

@@ -46,7 +46,7 @@ const Main = () => {
 
   // Rendre l'application uniquement lorsque Playroom est prêt
   if (!isPlayroomReady) {
-    return <div>Chargement du jeu...</div>; // Affichage pendant le chargement de Playroom
+    return <div style={{color:'#666',display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Inter,sans-serif'}}>Loading...</div>;
   }
 
   return (

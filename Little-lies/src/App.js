@@ -19,6 +19,7 @@ import CustomLobby from './components/CustomLobby/CustomLobby';
 import StarryBackground from './utils/StarryBackground';
 import LagIndicator from './components/LagIndicator/LagIndicator';
 import AmbientEffects from './utils/AmbientEffects';
+import i18n from './trad/i18n';
 import './styles/global.scss';
 import './styles/App.scss';
 
@@ -80,11 +81,11 @@ function App() {
         if (!prev || prev === phase) return;
 
         const PHASE_BANNERS = {
-            [CONSTANTS.PHASE.NIGHT_TRANSITION]: { text: 'La nuit tombe...', icon: 'fa-moon', className: 'banner-night' },
-            [CONSTANTS.PHASE.VOTING]: { text: 'Vote', icon: 'fa-gavel', className: 'banner-vote' },
-            [CONSTANTS.PHASE.DEFENSE]: { text: 'D\u00e9fense', icon: 'fa-shield', className: 'banner-defense' },
-            [CONSTANTS.PHASE.JUDGMENT]: { text: 'Jugement', icon: 'fa-scale-balanced', className: 'banner-judgment' },
-            [CONSTANTS.PHASE.EXECUTION]: { text: 'Ex\u00e9cution', icon: 'fa-skull-crossbones', className: 'banner-execution' },
+            [CONSTANTS.PHASE.NIGHT_TRANSITION]: { text: i18n.t('game:phases.NIGHT_TRANSITION'), icon: 'fa-moon', className: 'banner-night' },
+            [CONSTANTS.PHASE.VOTING]: { text: i18n.t('game:phases.VOTING'), icon: 'fa-gavel', className: 'banner-vote' },
+            [CONSTANTS.PHASE.DEFENSE]: { text: i18n.t('game:phases.DEFENSE'), icon: 'fa-shield', className: 'banner-defense' },
+            [CONSTANTS.PHASE.JUDGMENT]: { text: i18n.t('game:phases.JUDGMENT'), icon: 'fa-scale-balanced', className: 'banner-judgment' },
+            [CONSTANTS.PHASE.EXECUTION]: { text: i18n.t('game:phases.EXECUTION'), icon: 'fa-skull-crossbones', className: 'banner-execution' },
         };
 
         const banner = PHASE_BANNERS[phase];

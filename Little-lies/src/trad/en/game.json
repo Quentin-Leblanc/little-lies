@@ -124,7 +124,8 @@
     "JAILOR_EXECUTE": "Execute the prisoner (limited uses)",
     "ROLEBLOCK": "Block a player's actions tonight",
     "FRAME": "Make a player appear suspicious to investigators",
-    "BLACKMAIL": "Prevent a player from speaking the next day"
+    "BLACKMAIL": "Prevent a player from speaking the next day",
+    "REVEAL": "Reveal your Mayor role (3 votes, but no more healing)"
   },
   "chat": {
     "placeholder": "Type a message...",

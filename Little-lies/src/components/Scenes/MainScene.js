@@ -6,41 +6,14 @@ import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { Character } from '../Character/Character';
+import i18n from '../../trad/i18n';
 import './MainScene.scss';
 
-// Ambient night messages
-const NIGHT_AMBIANCE = [
-  'Un chat noir traverse lentement la place du village...',
-  'Des pas furtifs se font entendre dans la ruelle...',
-  'Une ombre se glisse entre les maisons...',
-  'Le vent souffle et emporte des murmures lointains...',
-  'Quelqu\'un frappe à une porte... puis le silence.',
-  'Les torches vacillent dans l\'obscurité...',
-  'Une lumière s\'éteint dans une maison au loin...',
-  'Les étoiles semblent observer le village cette nuit.',
-  'Le bois de la potence grince sous le vent...',
-  'La lune disparaît un instant derrière les nuages...',
-  'Un volet claque quelque part dans le village...',
-  'Quelqu\'un chuchote derrière des volets clos...',
-  'Les chiens du village se sont tus... étrange.',
-  'Une bougie s\'allume puis s\'éteint dans une fenêtre...',
-  'On entend un craquement du côté de la forge...',
-  'Un villageois semble errer seul dans la pénombre...',
-  'Une porte grince doucement dans la nuit...',
-  'Quelque chose a bougé près de l\'église...',
-  'La brume s\'épaissit autour du village...',
-  'Un corbeau croasse au loin...',
-  'Le vent apporte une odeur de sang...',
-  'Les flammes des torches dansent nerveusement...',
-  'On jurerait avoir vu des yeux rouges dans l\'ombre...',
-  'Un hurlement résonne dans la vallée...',
-  'Les feuilles craquent sous des pas invisibles...',
-  'Le brouillard enveloppe la place du village...',
-  'Quelqu\'un a laissé sa porte entrouverte...',
-  'Une chaîne grince au puits du village...',
-  'L\'air est chargé de tension cette nuit...',
-  'Un loup hurle au loin dans les montagnes...',
-];
+// Get night ambiance texts from i18n
+const getNightAmbiance = () => {
+  const texts = i18n.t('game:ambiance', { returnObjects: true });
+  return Array.isArray(texts) ? texts : [];
+};
 
 // ============================================================
 // Ground with dirt path
@@ -2164,7 +2137,7 @@ const MainScene = () => {
       }, nightDuration - 1000));
 
       // Night ambiance messages — 3 messages during the night
-      const shuffled = [...NIGHT_AMBIANCE].sort(() => Math.random() - 0.5);
+      const shuffled = [...getNightAmbiance()].sort(() => Math.random() - 0.5);
       fadeTimers.current.push(setTimeout(() => {
         setNightAmbianceMsg(shuffled[0]);
         setTimeout(() => setNightAmbianceMsg(null), 6000);
@@ -2652,7 +2625,7 @@ const NightAmbiance = () => {
 
   useEffect(() => {
     let timeout;
-    const shuffled = [...NIGHT_AMBIANCE].sort(() => Math.random() - 0.5);
+    const shuffled = [...getNightAmbiance()].sort(() => Math.random() - 0.5);
     const picks = shuffled.slice(0, 3);
     let index = 0;
 
