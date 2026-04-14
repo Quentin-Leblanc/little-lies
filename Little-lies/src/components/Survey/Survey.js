@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getGameCount } from '../../utils/GameMetrics';
 import './Survey.scss';
 
 const SURVEY_STORAGE_KEY = 'amongliars_survey_responses';
 const SURVEY_FREQUENCY = 3; // Show every N games
 
-const RATINGS = [
-  { value: 1, label: 'Terrible', icon: 'fa-face-frown-open', color: '#ff4444' },
-  { value: 2, label: 'Bof', icon: 'fa-face-meh', color: '#ff8844' },
-  { value: 3, label: 'Ok', icon: 'fa-face-smile', color: '#ffa502' },
-  { value: 4, label: 'Bien', icon: 'fa-face-grin', color: '#78ff78' },
-  { value: 5, label: 'Top', icon: 'fa-face-grin-stars', color: '#ffd700' },
+const RATING_ICONS = [
+  { value: 1, labelKey: 'survey_terrible', icon: 'fa-face-frown-open', color: '#ff4444' },
+  { value: 2, labelKey: 'survey_meh', icon: 'fa-face-meh', color: '#ff8844' },
+  { value: 3, labelKey: 'survey_ok', icon: 'fa-face-smile', color: '#ffa502' },
+  { value: 4, labelKey: 'survey_good', icon: 'fa-face-grin', color: '#78ff78' },
+  { value: 5, labelKey: 'survey_great', icon: 'fa-face-grin-stars', color: '#ffd700' },
 ];
 
 const saveSurveyResponse = (response) => {
@@ -31,6 +32,7 @@ const shouldShowSurvey = () => {
 };
 
 const Survey = () => {
+  const { t } = useTranslation(['menu', 'common']);
   const [rating, setRating] = useState(null);
   const [comment, setComment] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -54,7 +56,7 @@ const Survey = () => {
   if (submitted) {
     return (
       <div className="survey-container survey-thanks">
-        <i className="fas fa-heart" style={{ color: '#ff69b4' }}></i> Merci !
+        <i className="fas fa-heart" style={{ color: '#ff69b4' }}></i> {t('menu:survey.thanks')}
       </div>
     );
   }
@@ -62,20 +64,20 @@ const Survey = () => {
   return (
     <div className="survey-container">
       <div className="survey-header">
-        <span className="survey-title">Comment \u00e9tait cette partie ?</span>
+        <span className="survey-title">{t('menu:survey.question')}</span>
         <button className="survey-close" onClick={handleSkip}>
           <i className="fas fa-times"></i>
         </button>
       </div>
 
       <div className="survey-ratings">
-        {RATINGS.map((r) => (
+        {RATING_ICONS.map((r) => (
           <button
             key={r.value}
             className={`survey-rating-btn ${rating === r.value ? 'selected' : ''}`}
             onClick={() => setRating(r.value)}
             style={{ '--rating-color': r.color }}
-            title={r.label}
+            title={t(`common:${r.labelKey}`)}
           >
             <i className={`fas ${r.icon}`}></i>
           </button>
@@ -85,16 +87,16 @@ const Survey = () => {
       <input
         type="text"
         className="survey-comment"
-        placeholder="Un commentaire ? (optionnel)"
+        placeholder={t('menu:survey.comment_placeholder')}
         value={comment}
         onChange={(e) => setComment(e.target.value.slice(0, 200))}
         maxLength={200}
       />
 
       <div className="survey-actions">
-        <button className="survey-skip" onClick={handleSkip}>Passer</button>
+        <button className="survey-skip" onClick={handleSkip}>{t('menu:survey.skip')}</button>
         <button className="survey-submit" onClick={handleSubmit} disabled={!rating}>
-          Envoyer
+          {t('menu:survey.submit')}
         </button>
       </div>
     </div>

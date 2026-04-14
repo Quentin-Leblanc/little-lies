@@ -1,4 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   supabase,
   isSupabaseConfigured,
@@ -71,6 +72,7 @@ export const useAuth = () => {
 
 // Login/Register modal
 const AuthModal = ({ onClose }) => {
+  const { t } = useTranslation('common');
   const [mode, setMode] = useState('login'); // login | register
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -84,9 +86,9 @@ const AuthModal = ({ onClose }) => {
       <div className="auth-overlay" onClick={onClose}>
         <div className="auth-dialog" onClick={(e) => e.stopPropagation()}>
           <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>
-            Connexion non disponible pour le moment.
+            {t('auth_unavailable')}
           </p>
-          <button className="auth-btn-guest" onClick={onClose}>Fermer</button>
+          <button className="auth-btn-guest" onClick={onClose}>{t('close')}</button>
         </div>
       </div>
     );
@@ -99,11 +101,11 @@ const AuthModal = ({ onClose }) => {
     setSubmitting(true);
 
     if (mode === 'register') {
-      if (!username.trim()) { setError('Pseudo requis'); setSubmitting(false); return; }
-      if (password.length < 6) { setError('Mot de passe : 6 caract\u00e8res minimum'); setSubmitting(false); return; }
+      if (!username.trim()) { setError(t('username_required')); setSubmitting(false); return; }
+      if (password.length < 6) { setError(t('password_min')); setSubmitting(false); return; }
       const { error } = await signUpWithEmail(email, password, username.trim());
       if (error) setError(error.message);
-      else { setSuccess('Compte cr\u00e9\u00e9 ! V\u00e9rifie ton email.'); setTimeout(onClose, 2000); }
+      else { setSuccess(t('account_created')); setTimeout(onClose, 2000); }
     } else {
       const { error } = await signInWithEmail(email, password);
       if (error) setError(error.message);
@@ -123,7 +125,7 @@ const AuthModal = ({ onClose }) => {
     <div className="auth-overlay" onClick={onClose}>
       <div className="auth-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="auth-header">
-          <h2>{mode === 'login' ? 'Connexion' : 'Cr\u00e9er un compte'}</h2>
+          <h2>{mode === 'login' ? t('login') : t('create_account')}</h2>
           <button className="close-button" onClick={onClose}>X</button>
         </div>
 
@@ -137,14 +139,14 @@ const AuthModal = ({ onClose }) => {
           </button>
         </div>
 
-        <div className="auth-divider"><span>ou</span></div>
+        <div className="auth-divider"><span>{t('or')}</span></div>
 
         {/* Email form */}
         <form onSubmit={handleSubmit} className="auth-form">
           {mode === 'register' && (
             <input
               type="text"
-              placeholder="Pseudo"
+              placeholder={t('username')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               maxLength={20}
@@ -153,7 +155,7 @@ const AuthModal = ({ onClose }) => {
           )}
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t('email')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -161,7 +163,7 @@ const AuthModal = ({ onClose }) => {
           />
           <input
             type="password"
-            placeholder="Mot de passe"
+            placeholder={t('password')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -173,22 +175,22 @@ const AuthModal = ({ onClose }) => {
           {success && <p className="auth-success"><i className="fas fa-check-circle"></i> {success}</p>}
 
           <button type="submit" className="auth-btn-submit" disabled={submitting}>
-            {submitting ? '...' : mode === 'login' ? 'Se connecter' : 'Cr\u00e9er le compte'}
+            {submitting ? '...' : mode === 'login' ? t('sign_in') : t('create_account_btn')}
           </button>
         </form>
 
         {/* Toggle login/register */}
         <p className="auth-toggle">
           {mode === 'login' ? (
-            <>Pas de compte ? <button onClick={() => { setMode('register'); setError(''); }}>Cr\u00e9er un compte</button></>
+            <>{t('no_account')} <button onClick={() => { setMode('register'); setError(''); }}>{t('create_account')}</button></>
           ) : (
-            <>D\u00e9j\u00e0 un compte ? <button onClick={() => { setMode('login'); setError(''); }}>Se connecter</button></>
+            <>{t('has_account')} <button onClick={() => { setMode('login'); setError(''); }}>{t('sign_in')}</button></>
           )}
         </p>
 
         {/* Guest mode */}
         <button className="auth-btn-guest" onClick={onClose}>
-          <i className="fas fa-user-slash"></i> Jouer sans compte
+          <i className="fas fa-user-slash"></i> {t('play_as_guest')}
         </button>
       </div>
     </div>
@@ -197,12 +199,13 @@ const AuthModal = ({ onClose }) => {
 
 // Profile badge (small, for lobby/in-game)
 export const ProfileBadge = ({ onClick }) => {
+  const { t } = useTranslation('common');
   const { user, profile } = useAuth();
 
   if (!user || !profile) {
     return (
       <button className="profile-badge profile-badge-guest" onClick={onClick}>
-        <i className="fas fa-user-plus"></i> Connexion
+        <i className="fas fa-user-plus"></i> {t('login')}
       </button>
     );
   }
@@ -216,7 +219,7 @@ export const ProfileBadge = ({ onClick }) => {
     <div className="profile-badge profile-badge-logged" onClick={onClick}>
       <div className="profile-badge-info">
         <span className="profile-badge-name">{profile.username}</span>
-        <span className="profile-badge-level">Niv. {level}</span>
+        <span className="profile-badge-level">{t('level')} {level}</span>
       </div>
       <div className="profile-badge-xp-bar">
         <div className="profile-badge-xp-fill" style={{ width: `${progress}%` }} />

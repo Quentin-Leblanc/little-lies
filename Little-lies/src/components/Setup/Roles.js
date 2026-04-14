@@ -1,4 +1,5 @@
 import { isHost, usePlayersList } from 'playroomkit';
+import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 
 const TEAM_COLORS = {
@@ -7,13 +8,8 @@ const TEAM_COLORS = {
   neutral: '#9370db',
 };
 
-const TEAM_LABELS = {
-  town: 'Village',
-  mafia: 'Mafia',
-  neutral: 'Neutre',
-};
-
 const Roles = () => {
+  const { t } = useTranslation(['setup', 'game']);
   const { rolesAvailable, setRolesSelected, rolesSelected } = useGameEngine();
   const { length: nbPlayers } = usePlayersList(true);
 
@@ -40,11 +36,11 @@ const Roles = () => {
     <>
       <div className="rolesAvailable">
         <div className="rolesSelection">
-          <h2>Rôles disponibles</h2>
+          <h2>{t('setup:roles_available')}</h2>
           {Object.entries(rolesByTeam).map(([team, roles]) => (
             <div key={team} className="role-team-group">
               <h3 style={{ color: TEAM_COLORS[team] }}>
-                {TEAM_LABELS[team]}
+                {t(`game:teams.${team}.short`)}
               </h3>
               <div className="_buttons">
                 {roles.map((role, index) => (
@@ -69,7 +65,7 @@ const Roles = () => {
         <i className="fas fa-angle-right"></i>
       </div>
       <div className="rolesSelected">
-        <h2>Sélectionnés ({rolesSelected.length}/{nbPlayers})</h2>
+        <h2>{t('setup:roles_selected', { current: rolesSelected.length, total: nbPlayers })}</h2>
         <div className="_buttons selected">
           {rolesSelected.map((role, index) => (
             <button

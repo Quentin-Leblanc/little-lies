@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useMultiplayerState, me as prk_me } from 'playroomkit';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../trad/i18n';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { playChatMessage } from '../../utils/AudioManager';
 
@@ -10,6 +12,7 @@ const TIME_FRAME = 5000;
 const TIMEOUT_DURATION = 10000;
 
 function Chat(props) {
+  const { t } = useTranslation(['game', 'common']);
   const { game, getMe, getPlayers, updatePlayerName, setPlayers, CONSTANTS, voteSkip } = useGameEngine();
   const me = getMe();
   const players = getPlayers();
@@ -63,11 +66,11 @@ function Chat(props) {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    const regex = /^[a-zA-Z0-9\sÀ-ÖØ-öø-ÿ.,?!'"\-()/:@]+$/;
+    const regex = /^[a-zA-Z0-9\s\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF.,?!'"\-()/:@]+$/;
     if (value === '' || regex.test(value)) {
       setInputError('');
     } else {
-      setInputError('Caractère non permis.');
+      setInputError(t('game:chat.invalid_char'));
     }
     setInputValues(value);
   };
@@ -83,7 +86,7 @@ function Chat(props) {
         {
           player: 'system',
           color: 'white',
-          content: `${prk_me().state.profile.name} a changé son pseudo en ${newName}`,
+          content: i18n.t('game:system.name_changed', { oldName: prk_me().state.profile.name, newName }),
           type: 'system',
           dayCount: game.dayCount,
           chat: 'default',
@@ -103,13 +106,13 @@ function Chat(props) {
       );
 
       if (!targetPlayer) {
-        setInputError(`Joueur "${targetName}" introuvable.`);
+        setInputError(t('game:chat.player_not_found', { name: targetName }));
         setTimeout(() => setInputError(''), 3000);
         return true;
       }
 
       if (!targetPlayer.isAlive) {
-        setInputError('Impossible de chuchoter aux morts.');
+        setInputError(t('game:chat.cannot_whisper_dead'));
         setTimeout(() => setInputError(''), 3000);
         return true;
       }
@@ -118,7 +121,7 @@ function Chat(props) {
       const whisperNotice = {
         player: 'system',
         color: '#aaa',
-        content: `${myName} chuchote à ${targetPlayer.profile.name}`,
+        content: i18n.t('game:system.whisper_notice', { sender: myName, receiver: targetPlayer.profile.name }),
         type: 'whisper_notice',
         dayCount: game.dayCount,
         chat: 'default',
@@ -144,13 +147,13 @@ function Chat(props) {
     // Last will: /lw <message>
     if (command === 'lw' || command === 'lastwill') {
       if (!me?.isAlive) {
-        setInputError('Les morts ne peuvent pas écrire de testament.');
+        setInputError(t('game:chat.dead_no_will'));
         setTimeout(() => setInputError(''), 3000);
         return true;
       }
       const lwContent = args.join(' ');
       if (lwContent.length === 0) {
-        setInputError('Usage : -lw <votre testament>');
+        setInputError(t('game:chat.lw_usage'));
         setTimeout(() => setInputError(''), 3000);
         return true;
       }
@@ -165,7 +168,7 @@ function Chat(props) {
         {
           player: 'system',
           color: '#daa520',
-          content: `Testament mis à jour.`,
+          content: i18n.t('game:system.last_will_updated'),
           type: 'system',
           dayCount: game.dayCount,
           chat: 'self',
@@ -178,19 +181,19 @@ function Chat(props) {
     // Skip day: /skip
     if (command === 'skip') {
       if (!me?.isAlive) {
-        setInputError('Les morts ne peuvent pas voter.');
+        setInputError(t('game:chat.dead_no_vote'));
         setTimeout(() => setInputError(''), 3000);
         return true;
       }
       if (!game.isDay || (game.phase !== CONSTANTS.PHASE.DISCUSSION && game.phase !== CONSTANTS.PHASE.VOTING)) {
-        setInputError('Skip possible uniquement en discussion ou vote.');
+        setInputError(t('game:chat.skip_only_day'));
         setTimeout(() => setInputError(''), 3000);
         return true;
       }
 
       const result = voteSkip(me.id);
       if (!result.success) {
-        setInputError('Vous avez déjà voté pour skip.');
+        setInputError(t('game:chat.already_voted_skip'));
         setTimeout(() => setInputError(''), 3000);
         return true;
       }
@@ -201,7 +204,7 @@ function Chat(props) {
           id: `skip-${Date.now()}`,
           player: 'system',
           color: '#aaa',
-          content: `${myName} veut passer — Skip (${result.count}/${result.total})`,
+          content: i18n.t('game:system.skip_vote', { name: myName, count: result.count, total: result.total }),
           type: 'system',
           dayCount: game.dayCount,
           chat: 'default',
@@ -234,7 +237,7 @@ function Chat(props) {
 
     if (recentTimestamps.length >= MESSAGE_LIMIT) {
       setTimeouts({ ...timeouts, [myName]: now + TIMEOUT_DURATION });
-      setInputError('Ne spammez pas.');
+      setInputError(t('game:chat.no_spam'));
       setTimeout(() => {
         setTimeouts((prev) => {
           const { [myName]: _, ...rest } = prev;
@@ -339,7 +342,7 @@ function Chat(props) {
   let lastSeparatorIndex = -1;
   for (let i = filteredMessages.length - 1; i >= 0; i--) {
     const c = filteredMessages[i].content;
-    if (filteredMessages[i].type === 'system' && c?.startsWith('--- Jour')) {
+    if (filteredMessages[i].type === 'system' && c?.startsWith('---')) {
       lastSeparatorIndex = i;
       break;
     }
@@ -350,13 +353,13 @@ function Chat(props) {
   const isVillagerNight = props.night && myTeam !== 'mafia' && !isSpy && !isDead;
 
   // Placeholder text
-  let placeholder = 'Entrez un message...';
-  if (isVillagerNight) placeholder = 'La nuit tombe sur le village...';
-  else if (isDead) placeholder = 'Chat des morts...';
-  else if (isBlackmailed) placeholder = `B\u00e2illonn\u00e9 (max ${BLACKMAIL_MAX_CHARS} car.)...`;
-  else if (isMutedByPhase) placeholder = "Seul l'accus\u00e9 peut parler...";
-  else if (isPlayerInTimeout) placeholder = 'Vous \u00eates en timeout...';
-  else if (isNight && myTeam === 'mafia') placeholder = 'Chat mafia...';
+  let placeholder = t('game:chat.placeholder');
+  if (isVillagerNight) placeholder = t('game:chat.placeholder_night');
+  else if (isDead) placeholder = t('game:chat.placeholder_dead');
+  else if (isBlackmailed) placeholder = t('game:chat.placeholder_blackmailed', { max: BLACKMAIL_MAX_CHARS });
+  else if (isMutedByPhase) placeholder = t('game:chat.placeholder_muted');
+  else if (isPlayerInTimeout) placeholder = t('game:chat.placeholder_timeout');
+  else if (isNight && myTeam === 'mafia') placeholder = t('game:chat.placeholder_mafia');
 
   const isDisabled = isVillagerNight || !canChat || (isMutedByPhase && !isDead);
   const maxInputLength = isBlackmailed ? BLACKMAIL_MAX_CHARS : undefined;
@@ -378,12 +381,12 @@ function Chat(props) {
     if (message.type === 'whisper_notice') return null;
     if (message.chat === 'whisper') {
       if (message.senderId === me?.id) {
-        return <span className="whisper-prefix">{'[MP → ' + message.receiverName + ']'}</span>;
+        return <span className="whisper-prefix">{t('game:chat.whisper_to', { name: message.receiverName })}</span>;
       }
-      return <span className="whisper-prefix">{'[MP ← ' + message.player + ']'}</span>;
+      return <span className="whisper-prefix">{t('game:chat.whisper_from', { name: message.player })}</span>;
     }
-    if (message.chat === 'dead') return <span className="dead-prefix">[Mort]</span>;
-    if (message.chat === 'mafia') return <span className="mafia-prefix">[Mafia]</span>;
+    if (message.chat === 'dead') return <span className="dead-prefix">{t('game:chat.prefix_dead')}</span>;
+    if (message.chat === 'mafia') return <span className="mafia-prefix">{t('game:chat.prefix_mafia')}</span>;
     return null;
   };
 
@@ -393,7 +396,7 @@ function Chat(props) {
       className={`chat-container ${props.night ? 'chat-night' : ''} ${isDead ? 'chat-dead-mode' : ''} ${isVillagerNight ? 'chat-villager-night' : ''} ${props.highlight ? 'highlight-discussion' : ''}`}
       ref={chatContainerRef}
     >
-      {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> Chat des morts</div>}
+      {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> {t('game:chat.dead_chat_banner')}</div>}
       <div className="chat-messages">
         {filteredMessages.map((message, index) => {
           // Admin messages are never grayed
@@ -470,7 +473,7 @@ function Chat(props) {
         </div>
       ) : (
         <div className={`chat-input-hint-outside ${props.night ? 'hint-night' : ''}`}>
-          Appuyez sur <kbd>Entrée</kbd> pour écrire
+          {t('game:chat.press_enter')}
         </div>
       )}
     </>

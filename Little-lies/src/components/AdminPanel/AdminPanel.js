@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useMultiplayerState } from 'playroomkit';
+import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useAuth } from '../Auth/Auth';
 import { isAdmin as checkIsAdmin } from '../../utils/supabase';
 import './AdminPanel.scss';
 
 const AdminPanel = () => {
+  const { t } = useTranslation('common');
   const { game, setGame, setPlayers, getPlayers, addChatSystem, CONSTANTS } = useGameEngine();
   const { user } = useAuth();
   const [adminCharScale, setAdminCharScale] = useMultiplayerState('adminCharScale', 0.8);
@@ -24,7 +26,7 @@ const AdminPanel = () => {
     }
   }, [user?.id]);
 
-  // Not admin → render nothing
+  // Not admin -> render nothing
   if (!isAdminUser) return null;
 
   // Admin icon (collapsed)
@@ -39,7 +41,7 @@ const AdminPanel = () => {
   // Admin actions
   const skipToNextPhase = () => {
     setGame(prev => ({ ...prev, timer: 0 }));
-    addChatSystem('[ADMIN] Phase suivante', '#ff4444');
+    addChatSystem(`[ADMIN] ${t('admin_next_phase')}`, '#ff4444');
   };
 
   const kickToLobby = () => {
@@ -53,13 +55,13 @@ const AdminPanel = () => {
       timer: 0,
     }));
     setPlayers(getPlayers().map(p => ({ ...p, isAlive: true, character: null })));
-    addChatSystem('[ADMIN] Retour au lobby', '#ff4444');
+    addChatSystem(`[ADMIN] ${t('admin_kick_lobby')}`, '#ff4444');
   };
 
   const toggleFreeRoam = () => {
     const entering = !game.adminFreeRoam;
     setGame(prev => ({ ...prev, adminFreeRoam: entering }));
-    addChatSystem(entering ? '[ADMIN] Mode libre activ\u00e9 \u2014 jeu en pause' : '[ADMIN] Reprise du jeu', '#ff4444');
+    addChatSystem(entering ? `[ADMIN] ${t('admin_free_roam')}` : `[ADMIN] ${t('admin_resume')}`, '#ff4444');
   };
 
   const updateCharScale = (val) => setAdminCharScale(parseFloat(val));
@@ -94,7 +96,7 @@ const AdminPanel = () => {
       </div>
 
       <div className="admin-section">
-        <label className="admin-label">Joueurs ({players.filter(p => p.isAlive).length}/{players.length})</label>
+        <label className="admin-label">{t('players')} ({players.filter(p => p.isAlive).length}/{players.length})</label>
         <div className="admin-player-list">
           {players.map(p => (
             <div key={p.id} className={`admin-player-item ${!p.isAlive ? 'admin-player-dead' : ''}`}>
@@ -107,7 +109,7 @@ const AdminPanel = () => {
                   <i className="fas fa-skull"></i>
                 </button>
               )}
-              {!p.isAlive && <span className="admin-dead-tag">mort</span>}
+              {!p.isAlive && <span className="admin-dead-tag">{t('dead').toLowerCase()}</span>}
             </div>
           ))}
         </div>
@@ -115,41 +117,41 @@ const AdminPanel = () => {
 
       <div className="admin-section">
         <button className="admin-action-btn" onClick={skipToNextPhase}>
-          <i className="fas fa-forward"></i> Phase suivante
+          <i className="fas fa-forward"></i> {t('admin_next_phase')}
         </button>
         <button className="admin-action-btn admin-danger" onClick={kickToLobby}>
-          <i className="fas fa-sign-out-alt"></i> Kick tous \u2192 Lobby
+          <i className="fas fa-sign-out-alt"></i> {t('admin_kick_lobby')}
         </button>
         <button className={`admin-action-btn ${game.adminFreeRoam ? 'admin-active' : ''}`} onClick={toggleFreeRoam}>
           <i className={`fas ${game.adminFreeRoam ? 'fa-play' : 'fa-video'}`}></i>
-          {game.adminFreeRoam ? ' Reprendre le jeu' : ' Mode libre (pause)'}
+          {game.adminFreeRoam ? ` ${t('admin_resume')}` : ` ${t('admin_free_roam')}`}
         </button>
       </div>
 
       <div className="admin-section">
         <div className="admin-input-row">
-          <label className="admin-label" style={{ flex: 1 }}>Taille personnages: {charScale.toFixed(1)}</label>
-          <button onClick={resetCharScale} className="admin-send">Reset</button>
+          <label className="admin-label" style={{ flex: 1 }}>{t('admin_char_size')}: {charScale.toFixed(1)}</label>
+          <button onClick={resetCharScale} className="admin-send">{t('admin_reset')}</button>
         </div>
         <input type="range" min="0.3" max="2.0" step="0.1" value={charScale}
           onChange={e => updateCharScale(e.target.value)} className="admin-slider" />
       </div>
 
       <div className="admin-section">
-        <label className="admin-label">Annonce sc\u00e8ne 3D</label>
+        <label className="admin-label">{t('admin_3d_announce')}</label>
         <div className="admin-input-row">
           <input value={announcement} onChange={e => setAnnouncement(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendAnnouncement()} placeholder="Message..." className="admin-input" />
-          <button onClick={sendAnnouncement} className="admin-send">Envoyer</button>
+          <button onClick={sendAnnouncement} className="admin-send">{t('send')}</button>
         </div>
       </div>
 
       <div className="admin-section">
-        <label className="admin-label">Message admin chat</label>
+        <label className="admin-label">{t('admin_chat_msg')}</label>
         <div className="admin-input-row">
           <input value={chatMsg} onChange={e => setChatMsg(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendAdminChat()} placeholder="Message chat..." className="admin-input" />
-          <button onClick={sendAdminChat} className="admin-send">Envoyer</button>
+          <button onClick={sendAdminChat} className="admin-send">{t('send')}</button>
         </div>
       </div>
     </div>

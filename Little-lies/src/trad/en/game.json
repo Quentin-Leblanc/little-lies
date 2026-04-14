@@ -154,6 +154,14 @@
     "title": "Living players ({{alive}}/{{total}})",
     "mayor_revealed": "Mayor revealed — 3 votes"
   },
+  "graveyard": {
+    "title": "Graveyard",
+    "empty": "No deaths yet."
+  },
+  "no_ability": "No special ability",
+  "last_will_placeholder": "Your last will...",
+  "last_will_placeholder_write": "Write your last will... It will be revealed upon your death.",
+  "last_will_none": "No last will left.",
   "ambiance": [
     "A black cat slowly crosses the village square...",
     "Furtive footsteps echo in the alley...",

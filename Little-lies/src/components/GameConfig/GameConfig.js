@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { isHost } from 'playroomkit';
+import { useTranslation } from 'react-i18next';
 import './GameConfig.scss';
 
 const DEFAULT_DURATIONS = {
@@ -13,15 +14,10 @@ const DEFAULT_DURATIONS = {
   EXECUTION: 3,
 };
 
-const DURATION_LABELS = {
-  NIGHT: 'Nuit',
-  DISCUSSION: 'Discussion',
-  VOTING: 'Vote',
-  DEFENSE: 'D\u00e9fense',
-  JUDGMENT: 'Jugement',
-};
+const CONFIGURABLE_PHASES = ['NIGHT', 'DISCUSSION', 'VOTING', 'DEFENSE', 'JUDGMENT'];
 
 const GameConfig = ({ config, onConfigChange }) => {
+  const { t } = useTranslation(['setup', 'game']);
   const [isOpen, setIsOpen] = useState(false);
   const host = isHost();
 
@@ -36,17 +32,17 @@ const GameConfig = ({ config, onConfigChange }) => {
   return (
     <div className="game-config">
       <button className="config-toggle" onClick={() => setIsOpen(!isOpen)}>
-        <i className="fas fa-cog"></i> {isOpen ? 'Fermer' : 'Config'}
+        <i className="fas fa-cog"></i> {isOpen ? t('setup:config.toggle_close') : t('setup:config.toggle_open')}
       </button>
 
       {isOpen && (
         <div className="config-panel">
-          <h3>Configuration de la partie</h3>
-          {!host && <p className="config-readonly-hint">Seul l'h\u00f4te peut modifier</p>}
+          <h3>{t('setup:config.title')}</h3>
+          {!host && <p className="config-readonly-hint">{t('setup:config.host_only')}</p>}
           <div className="config-durations">
-            {Object.entries(DURATION_LABELS).map(([key, label]) => (
+            {CONFIGURABLE_PHASES.map((key) => (
               <div key={key} className="config-row">
-                <label>{label}</label>
+                <label>{t(`game:phases.${key}`)}</label>
                 <div className="config-input-group">
                   <input
                     type="number"

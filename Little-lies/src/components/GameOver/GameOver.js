@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useMultiplayerState } from 'playroomkit';
+import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { collectGameMetrics, saveMetrics } from '../../utils/GameMetrics';
 import { calculateGameXP } from '../../utils/xpSystem';
@@ -8,21 +9,15 @@ import { addXP, incrementGamesPlayed } from '../../utils/supabase';
 import Survey from '../Survey/Survey';
 import './GameOver.scss';
 
-const TEAM_LABELS = {
-  town: { name: 'Le Village', color: '#78ff78', icon: 'fa-users', bg: 'rgba(120,255,120,0.08)' },
-  mafia: { name: 'La Mafia', color: '#ff4444', icon: 'fa-user-secret', bg: 'rgba(255,68,68,0.08)' },
-  evil: { name: 'Les Loups-Garous', color: '#ff4444', icon: 'fa-paw', bg: 'rgba(255,68,68,0.08)' },
-  neutral: { name: 'Neutre', color: '#9370db', icon: 'fa-star', bg: 'rgba(147,112,219,0.08)' },
-  neutral_killing: { name: 'Le Serial Killer', color: '#9370db', icon: 'fa-skull', bg: 'rgba(147,112,219,0.08)' },
+const TEAM_STYLES = {
+  town: { color: '#78ff78', icon: 'fa-users', bg: 'rgba(120,255,120,0.08)' },
+  mafia: { color: '#ff4444', icon: 'fa-user-secret', bg: 'rgba(255,68,68,0.08)' },
+  evil: { color: '#ff4444', icon: 'fa-paw', bg: 'rgba(255,68,68,0.08)' },
+  neutral: { color: '#9370db', icon: 'fa-star', bg: 'rgba(147,112,219,0.08)' },
+  neutral_killing: { color: '#9370db', icon: 'fa-skull', bg: 'rgba(147,112,219,0.08)' },
 };
 
 const TEAM_ORDER = ['town', 'mafia', 'evil', 'neutral'];
-const TEAM_DISPLAY = {
-  town: { label: 'Village', color: '#78ff78' },
-  mafia: { label: 'Mafia', color: '#ff4444' },
-  evil: { label: 'Loups-Garous', color: '#ff4444' },
-  neutral: { label: 'Neutre', color: '#9370db' },
-};
 
 // Particules flottantes selon victoire/defaite
 const Particles = ({ type }) => {
@@ -57,6 +52,7 @@ const Particles = ({ type }) => {
 };
 
 const GameOver = () => {
+  const { t } = useTranslation(['game', 'common']);
   const { game, getPlayers, getMe, resetForNewGame } = useGameEngine();
   const { user, refreshProfile } = useAuth();
   const [_events] = useMultiplayerState('events', []);
@@ -71,7 +67,8 @@ const GameOver = () => {
   const mePlayer = getMe();
   const neutralWinners = game.neutralWinners || [];
 
-  const teamInfo = TEAM_LABELS[winner] || TEAM_LABELS.town;
+  const teamStyle = TEAM_STYLES[winner] || TEAM_STYLES.town;
+  const teamName = t(`game:teams.${winner}.name`);
   const myTeam = mePlayer?.character?.team;
 
   const isTeamWinner = myTeam === winner;
@@ -157,22 +154,22 @@ const GameOver = () => {
       <Particles type={particleType} />
 
       {/* Halo de fond */}
-      <div className="go-halo" style={{ '--halo-color': teamInfo.color }} />
+      <div className="go-halo" style={{ '--halo-color': teamStyle.color }} />
 
       <div className={`go-container ${showContent ? 'go-visible' : ''}`}>
         {/* Header : equipe gagnante */}
         <div className="go-header">
-          <div className="go-icon-ring" style={{ '--ring-color': teamInfo.color }}>
-            <i className={`fas ${teamInfo.icon}`} style={{ color: teamInfo.color }}></i>
+          <div className="go-icon-ring" style={{ '--ring-color': teamStyle.color }}>
+            <i className={`fas ${teamStyle.icon}`} style={{ color: teamStyle.color }}></i>
           </div>
-          <h1 className="go-title" style={{ color: teamInfo.color }}>{teamInfo.name}</h1>
-          <p className="go-subtitle">a remport&eacute; la partie</p>
+          <h1 className="go-title" style={{ color: teamStyle.color }}>{teamName}</h1>
+          <p className="go-subtitle">{t('game:gameover.won')}</p>
         </div>
 
         {/* Victoire/Defaite personnelle */}
         <div className={`go-personal ${isWinner ? 'go-win' : 'go-loss'}`}>
           <i className={`fas ${isWinner ? 'fa-crown' : 'fa-skull-crossbones'}`}></i>
-          <span>{isWinner ? 'Victoire' : 'D\u00e9faite'}</span>
+          <span>{isWinner ? t('game:gameover.victory') : t('game:gameover.defeat')}</span>
         </div>
 
         {/* Gagnants neutres */}
@@ -183,7 +180,7 @@ const GameOver = () => {
               return (
                 <div key={i} className="go-neutral-item">
                   <i className="fas fa-star"></i>
-                  <span>{p?.profile?.name}</span> a aussi gagn&eacute; en tant que <strong>{nw.role}</strong>
+                  <span>{t('game:gameover.neutral_also_won', { name: p?.profile?.name, role: nw.role })}</span>
                 </div>
               );
             })}
@@ -194,24 +191,24 @@ const GameOver = () => {
         <div className="go-stats">
           <div className="go-stat">
             <span className="go-stat-value">{stats.days}</span>
-            <span className="go-stat-label">{stats.days > 1 ? 'Jours' : 'Jour'}</span>
+            <span className="go-stat-label">{stats.days > 1 ? t('common:days') : t('common:day')}</span>
           </div>
           <div className="go-stat-divider" />
           <div className="go-stat">
             <span className="go-stat-value">{stats.dead}</span>
-            <span className="go-stat-label">Morts</span>
+            <span className="go-stat-label">{t('common:deaths')}</span>
           </div>
           <div className="go-stat-divider" />
           <div className="go-stat">
             <span className="go-stat-value">{stats.alive}</span>
-            <span className="go-stat-label">Survivants</span>
+            <span className="go-stat-label">{t('common:survivors')}</span>
           </div>
           {stats.duration && (
             <>
               <div className="go-stat-divider" />
               <div className="go-stat">
                 <span className="go-stat-value">{stats.duration}</span>
-                <span className="go-stat-label">Dur&eacute;e</span>
+                <span className="go-stat-label">{t('common:duration')}</span>
               </div>
             </>
           )}
@@ -227,21 +224,22 @@ const GameOver = () => {
               ))}
             </div>
             {!user && (
-              <p className="go-xp-hint"><i className="fas fa-info-circle"></i> Connecte-toi pour sauvegarder ton XP</p>
+              <p className="go-xp-hint"><i className="fas fa-info-circle"></i> {t('game:gameover.xp_hint')}</p>
             )}
           </div>
         )}
 
         {/* Recap par equipe */}
         <div className={`go-recap ${showRecap ? 'go-recap-visible' : ''}`}>
-          <h3 className="go-recap-title">R&eacute;capitulatif</h3>
+          <h3 className="go-recap-title">{t('game:gameover.recap')}</h3>
           {playersByTeam.map(({ team, players: teamPlayers }) => {
-            const teamDisplay = TEAM_DISPLAY[team] || { label: team, color: '#aaa' };
+            const teamDisplayColor = TEAM_STYLES[team]?.color || '#aaa';
+            const teamDisplayLabel = t(`game:teams.${team}.short`);
             const isWinningTeam = team === winner;
             return (
               <div key={team} className={`go-team-group ${isWinningTeam ? 'go-team-winner' : ''}`}>
-                <div className="go-team-header" style={{ borderColor: teamDisplay.color }}>
-                  <span style={{ color: teamDisplay.color }}>{teamDisplay.label}</span>
+                <div className="go-team-header" style={{ borderColor: teamDisplayColor }}>
+                  <span style={{ color: teamDisplayColor }}>{teamDisplayLabel}</span>
                   {isWinningTeam && <i className="fas fa-trophy" style={{ color: '#daa520' }}></i>}
                 </div>
                 {teamPlayers.map((player, idx) => {
@@ -255,16 +253,16 @@ const GameOver = () => {
                       <span className="go-player-name" style={{ color: player.profile?.color || '#ccc' }}>
                         {player.character?.icon && <i className={`fas ${player.character.icon}`} style={{ color: player.character.couleur }}></i>}
                         {player.profile.name}
-                        {player.id === mePlayer?.id && <span className="go-me-badge">toi</span>}
+                        {player.id === mePlayer?.id && <span className="go-me-badge">{t('common:you')}</span>}
                       </span>
                       <span className="go-player-role" style={{ color: player.character?.couleur || '#888' }}>
                         {player.character?.label}
                       </span>
                       <span className={`go-player-status ${player.isAlive ? 'alive' : 'dead'}`}>
                         {player.isAlive ? (
-                          <><i className="fas fa-heart"></i> Vivant</>
+                          <><i className="fas fa-heart"></i> {t('common:alive')}</>
                         ) : (
-                          <><i className="fas fa-skull"></i> Mort</>
+                          <><i className="fas fa-skull"></i> {t('common:dead')}</>
                         )}
                       </span>
                     </div>
@@ -281,10 +279,10 @@ const GameOver = () => {
         {/* Boutons */}
         <div className="go-buttons">
           <button className="go-btn go-btn-secondary" onClick={() => setDismissed(true)}>
-            Fermer
+            {t('common:close')}
           </button>
           <button className="go-btn go-btn-replay" onClick={() => resetForNewGame()}>
-            <i className="fas fa-redo"></i> Rejouer
+            <i className="fas fa-redo"></i> {t('common:replay')}
           </button>
           <button
             className="go-btn go-btn-primary"
@@ -294,7 +292,7 @@ const GameOver = () => {
               window.location.href = url.toString();
             }}
           >
-            <i className="fas fa-plus"></i> Nouveau salon
+            <i className="fas fa-plus"></i> {t('common:new_lobby')}
           </button>
         </div>
       </div>

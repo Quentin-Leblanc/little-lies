@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useMultiplayerState, getRoomCode } from 'playroomkit';
-import trad from '../../trad/roles.json';
+import { useTranslation } from 'react-i18next';
+import { getRoles } from '../../data/roles.js';
 import Audio from '../../utils/AudioManager';
 import Legal from '../Legal/Legal';
 
 import './Menu.scss';
 
 const Menu = () => {
+  const { t } = useTranslation(['menu', 'common']);
   const [showLogs, setShowLogs] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -42,20 +44,20 @@ const Menu = () => {
     <div className="menu-wrapper">
       <div className="menu-bar">
         <h1 className="menu-game-title">Among Liars</h1>
-        <div className="menu-lobby-code" onClick={copyCode} title="Cliquer pour copier">
+        <div className="menu-lobby-code" onClick={copyCode} title={t('menu:copy_tooltip')}>
           <span className="menu-code-value">{roomCode || '...'}</span>
           <i className="fas fa-copy menu-code-copy"></i>
         </div>
-        <button className="menu-btn-icon" onClick={() => setShowMenu(true)} title="Menu">
+        <button className="menu-btn-icon" onClick={() => setShowMenu(true)} title={t('menu:menu')}>
           <i className="fas fa-bars"></i>
         </button>
-        <button className="menu-btn-icon" onClick={() => setShowHelp(true)} title="Aide">
+        <button className="menu-btn-icon" onClick={() => setShowHelp(true)} title={t('menu:help')}>
           <i className="fas fa-book"></i>
         </button>
-        <button className="menu-btn-icon" onClick={() => setShowLogs(true)} title="Logs">
+        <button className="menu-btn-icon" onClick={() => setShowLogs(true)} title={t('menu:logs')}>
           <i className="fas fa-scroll"></i>
         </button>
-        <button className="menu-btn-icon" onClick={() => { const m = Audio.toggleMute(); setMuted(m); }} title={muted ? 'Activer le son' : 'Couper le son'}>
+        <button className="menu-btn-icon" onClick={() => { const m = Audio.toggleMute(); setMuted(m); }} title={muted ? t('menu:unmute') : t('menu:mute')}>
           <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
         </button>
       </div>
@@ -76,6 +78,7 @@ const Menu = () => {
 };
 
 const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
+  const { t } = useTranslation(['menu', 'common']);
   const [copied, setCopied] = useState(false);
   const [volume, setVolume] = useState(Audio.getVolume());
   const [muted, setMuted] = useState(Audio.isMuted());
@@ -101,20 +104,20 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
     <div className="quit-dialog-overlay" onClick={onClose}>
       <div className="quit-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="quit-dialog-header">
-          <h2>Menu</h2>
+          <h2>{t('menu:menu')}</h2>
           <button className="close-button" onClick={onClose}>X</button>
         </div>
         <div className="quit-dialog-content">
           <div className="room-code-section">
-            <span className="room-code-label">Code du lobby</span>
+            <span className="room-code-label">{t('menu:lobby_code')}</span>
             <div className="room-code-display" onClick={copyCode}>
               <span className="room-code-value">{roomCode || '...'}</span>
               <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`}></i>
             </div>
-            {copied && <span className="copied-feedback">Copié !</span>}
+            {copied && <span className="copied-feedback">{t('common:copied')}</span>}
           </div>
           <div className="volume-section">
-            <span className="room-code-label">Volume</span>
+            <span className="room-code-label">{t('menu:volume')}</span>
             <div className="volume-controls">
               <button className="volume-mute-btn" onClick={handleToggleMute}>
                 <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
@@ -131,10 +134,10 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
             </div>
           </div>
           <button onClick={onShowLegal} className="legal-btn">
-            <i className="fas fa-scale-balanced"></i> Mentions l&eacute;gales
+            <i className="fas fa-scale-balanced"></i> {t('menu:legal')}
           </button>
           <button onClick={onQuit} className="quit-game-btn">
-            <i className="fas fa-sign-out-alt"></i> Quitter la partie
+            <i className="fas fa-sign-out-alt"></i> {t('common:quit_game')}
           </button>
         </div>
       </div>
@@ -142,86 +145,89 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
   );
 };
 
-const LogDialog = ({ messages, onClose }) => (
-  <div className="log-dialog-overlay" onClick={onClose}>
-    <div className="log-dialog" onClick={(e) => e.stopPropagation()}>
-      <div className="log-dialog-header">
-        <h2>Logs</h2>
-        <button className="close-button" onClick={onClose}>X</button>
-      </div>
-      <div className="log-dialog-content">
-        {messages.length > 0 ? (
-          messages.map((log, index) => (
-            <div key={index} className="log-message">
-              <strong style={{ color: log.color }}>{log.player}</strong>: {log.content}
-            </div>
-          ))
-        ) : (
-          <p className="log-empty">Aucun message.</p>
-        )}
+const LogDialog = ({ messages, onClose }) => {
+  const { t } = useTranslation('menu');
+
+  return (
+    <div className="log-dialog-overlay" onClick={onClose}>
+      <div className="log-dialog" onClick={(e) => e.stopPropagation()}>
+        <div className="log-dialog-header">
+          <h2>{t('logs')}</h2>
+          <button className="close-button" onClick={onClose}>X</button>
+        </div>
+        <div className="log-dialog-content">
+          {messages.length > 0 ? (
+            messages.map((log, index) => (
+              <div key={index} className="log-message">
+                <strong style={{ color: log.color }}>{log.player}</strong>: {log.content}
+              </div>
+            ))
+          ) : (
+            <p className="log-empty">{t('no_messages')}</p>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const HelpDialog = ({ onClose }) => {
+  const { t } = useTranslation(['menu', 'game']);
+  const allRoles = getRoles();
   const rolesByTeam = {
-    town: trad.roles.filter((r) => r.team === 'town'),
-    mafia: trad.roles.filter((r) => r.team === 'mafia'),
-    neutral: trad.roles.filter((r) => r.team === 'neutral'),
+    town: allRoles.filter((r) => r.team === 'town'),
+    mafia: allRoles.filter((r) => r.team === 'mafia'),
+    neutral: allRoles.filter((r) => r.team === 'neutral'),
   };
 
   return (
     <div className="help-dialog-overlay" onClick={onClose}>
       <div className="help-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="help-dialog-header">
-          <h2>Guide du jeu</h2>
+          <h2>{t('menu:help_dialog.title')}</h2>
           <button className="close-button" onClick={onClose}>X</button>
         </div>
         <div className="help-dialog-content">
-          <h3>Comment jouer ?</h3>
+          <h3>{t('menu:help_dialog.how_to_play')}</h3>
           <p style={{color:'#bbb',fontSize:'13px',lineHeight:'1.6',marginBottom:'12px'}}>
-            Among Liars est un jeu de déduction sociale. Chaque joueur reçoit un rôle secret.
-            Le <strong style={{color:'#78ff78'}}>Village</strong> doit identifier et éliminer les menaces.
-            La <strong style={{color:'#ff4444'}}>Mafia</strong> élimine les villageois la nuit en restant discrète.
-            Les <strong style={{color:'#9370db'}}>Neutres</strong> ont leurs propres objectifs.
+            {t('menu:help_dialog.intro')}
           </p>
 
-          <h3>Déroulement d'un tour</h3>
+          <h3>{t('menu:help_dialog.turn_flow')}</h3>
           <div className="help-phases">
-            <div className="help-phase"><strong style={{color:'#8899cc'}}>Nuit</strong> — Chaque joueur utilise son pouvoir en secret. La Mafia choisit une cible à éliminer.</div>
-            <div className="help-phase"><strong style={{color:'#ffcc44'}}>Annonce</strong> — Le village découvre les victimes de la nuit.</div>
-            <div className="help-phase"><strong style={{color:'#78ff78'}}>Discussion</strong> — Débattez, accusez, défendez-vous. Utilisez le chat ou le vocal.</div>
-            <div className="help-phase"><strong style={{color:'#ffa502'}}>Vote</strong> — Votez contre un suspect. Une majorité est nécessaire pour accuser.</div>
-            <div className="help-phase"><strong style={{color:'#ff6666'}}>Défense</strong> — L'accusé a un dernier mot pour se défendre.</div>
-            <div className="help-phase"><strong style={{color:'#cc88ff'}}>Jugement</strong> — Votez Coupable ou Innocent. Si coupable, le joueur est exécuté.</div>
+            <div className="help-phase"><strong style={{color:'#8899cc'}}>{t('menu:help_dialog.phase_night')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#ffcc44'}}>{t('menu:help_dialog.phase_report')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#78ff78'}}>{t('menu:help_dialog.phase_discussion')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#ffa502'}}>{t('menu:help_dialog.phase_vote')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#ff6666'}}>{t('menu:help_dialog.phase_defense')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#cc88ff'}}>{t('menu:help_dialog.phase_judgment')}</strong></div>
           </div>
 
-          <h3>Conditions de victoire</h3>
+          <h3>{t('menu:help_dialog.win_conditions')}</h3>
           <div className="help-phases">
-            <div className="help-phase"><strong style={{color:'#78ff78'}}>Village</strong> — Éliminer toute la Mafia et les menaces neutres.</div>
-            <div className="help-phase"><strong style={{color:'#ff4444'}}>Mafia</strong> — Être en majorité par rapport aux autres joueurs.</div>
-            <div className="help-phase"><strong style={{color:'#9370db'}}>Serial Killer</strong> — Être le dernier survivant.</div>
-            <div className="help-phase"><strong style={{color:'#ff69b4'}}>Jester</strong> — Se faire lyncher.</div>
-            <div className="help-phase"><strong style={{color:'#daa520'}}>Survivor</strong> — Rester en vie jusqu'à la fin.</div>
-            <div className="help-phase"><strong style={{color:'#808080'}}>Executioner</strong> — Faire lyncher sa cible.</div>
+            <div className="help-phase"><strong style={{color:'#78ff78'}}>{t('menu:help_dialog.win_town')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#ff4444'}}>{t('menu:help_dialog.win_mafia')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#9370db'}}>{t('menu:help_dialog.win_sk')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#ff69b4'}}>{t('menu:help_dialog.win_jester')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#daa520'}}>{t('menu:help_dialog.win_survivor')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#808080'}}>{t('menu:help_dialog.win_executioner')}</strong></div>
           </div>
 
-          <h3>Commandes du chat</h3>
+          <h3>{t('menu:help_dialog.chat_commands')}</h3>
           <ul className="help-commands">
-            <li><code>-pm joueur message</code> — Envoyer un message privé à un joueur</li>
-            <li><code>-lw texte</code> — Écrire votre testament (visible à votre mort)</li>
-            <li><code>-name pseudo</code> — Changer de pseudo (lobby uniquement)</li>
-            <li><code>-skip</code> — Voter pour passer la phase de discussion</li>
+            <li><code>-pm</code> {t('menu:help_dialog.cmd_pm')}</li>
+            <li><code>-lw</code> {t('menu:help_dialog.cmd_lw')}</li>
+            <li><code>-name</code> {t('menu:help_dialog.cmd_name')}</li>
+            <li><code>-skip</code> {t('menu:help_dialog.cmd_skip')}</li>
           </ul>
 
-          <h3>Raccourcis</h3>
+          <h3>{t('menu:help_dialog.shortcuts')}</h3>
           <ul className="help-commands">
-            <li><kbd>Entrée</kbd> — Ouvrir le chat / Envoyer un message</li>
-            <li><kbd>Échap</kbd> — Fermer le chat</li>
+            <li>{t('menu:help_dialog.key_enter')}</li>
+            <li>{t('menu:help_dialog.key_escape')}</li>
           </ul>
 
-          <h3 style={{ color: '#78ff78' }}>Rôles du Village</h3>
+          <h3 style={{ color: '#78ff78' }}>{t('menu:help_dialog.roles_town')}</h3>
           {rolesByTeam.town.map((role) => (
             <div key={role.key} className="help-role">
               <div className="help-role-header">
@@ -233,7 +239,7 @@ const HelpDialog = ({ onClose }) => {
             </div>
           ))}
 
-          <h3 style={{ color: '#ff0000' }}>Rôles de la Mafia</h3>
+          <h3 style={{ color: '#ff0000' }}>{t('menu:help_dialog.roles_mafia')}</h3>
           {rolesByTeam.mafia.map((role) => (
             <div key={role.key} className="help-role">
               <div className="help-role-header">
@@ -245,7 +251,7 @@ const HelpDialog = ({ onClose }) => {
             </div>
           ))}
 
-          <h3 style={{ color: '#9370db' }}>Neutres</h3>
+          <h3 style={{ color: '#9370db' }}>{t('menu:help_dialog.roles_neutral')}</h3>
           {rolesByTeam.neutral.map((role) => (
             <div key={role.key} className="help-role">
               <div className="help-role-header">
@@ -256,16 +262,6 @@ const HelpDialog = ({ onClose }) => {
               <span className="help-objective">{role.objectif}</span>
             </div>
           ))}
-
-          <h3>Conditions de victoire</h3>
-          <ul>
-            <li><strong style={{ color: '#78ff78' }}>Village</strong> : Éliminer toute la mafia et les menaces neutres.</li>
-            <li><strong style={{ color: '#ff0000' }}>Mafia</strong> : Être en majorité par rapport aux autres joueurs.</li>
-            <li><strong style={{ color: '#9370db' }}>Serial Killer</strong> : Être le dernier survivant.</li>
-            <li><strong style={{ color: '#ff69b4' }}>Jester</strong> : Se faire lyncher.</li>
-            <li><strong style={{ color: '#daa520' }}>Survivor</strong> : Survivre jusqu'à la fin.</li>
-            <li><strong style={{ color: '#808080' }}>Executioner</strong> : Faire lyncher sa cible.</li>
-          </ul>
         </div>
       </div>
     </div>

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { isHost, useMultiplayerState, me } from 'playroomkit';
+import i18n from '../trad/i18n';
+import { getRole } from '../data/roles.js';
 
 const EventsContext = React.createContext();
 
@@ -134,7 +136,7 @@ export const EventsProvider = ({ children }) => {
       .forEach((e) => {
         jailedPlayers[e.content.target] = e.content.by;
         roleblockedPlayers[e.content.target] = true;
-        addNotif(e.content.target, 'Vous avez été emprisonné par le Jailor !');
+        addNotif(e.content.target, i18n.t('game:notifications.jailed'));
       });
 
     // === Jailor Execute (unstoppable attack on jailed target) ===
@@ -170,7 +172,7 @@ export const EventsProvider = ({ children }) => {
           });
         } else {
           roleblockedPlayers[e.content.target] = true;
-          addNotif(e.content.target, 'Quelqu\'un vous a empêché d\'agir cette nuit.');
+          addNotif(e.content.target, i18n.t('game:notifications.roleblocked'));
         }
         trackVisitor(visitorsMap, e.content.target, e.content.by);
       });
@@ -202,7 +204,7 @@ export const EventsProvider = ({ children }) => {
         const target = players.find((p) => p.id === e.content.target);
         // Mayor who revealed can't be healed
         if (target?.canBeHealed === false) {
-          addNotif(e.content.by, `Vous n'avez pas pu soigner ${target.profile.name}.`);
+          addNotif(e.content.by, i18n.t('game:notifications.heal_failed', { name: target.profile.name }));
         } else {
           defenseBonus[e.content.target] = (defenseBonus[e.content.target] || 0) + 1;
         }
@@ -289,7 +291,7 @@ export const EventsProvider = ({ children }) => {
       // Jail protection: jailed players can't be killed by anyone except the jailor
       if (jailedPlayers[targetId] && type !== 'jailor_execute') {
         survived[targetId] = true;
-        addNotif(targetId, 'Vous \u00e9tiez en prison, vous \u00e9tiez prot\u00e9g\u00e9.');
+        addNotif(targetId, i18n.t('game:notifications.jail_protected'));
         return;
       }
 
@@ -304,8 +306,8 @@ export const EventsProvider = ({ children }) => {
           killed[attackerId] = { attackerId: bgId, type: 'bodyguard_kill' };
           // Target survives
           survived[targetId] = true;
-          addNotif(targetId, 'Un bodyguard s\'est sacrifié pour vous protéger !');
-          addNotif(bgId, 'Vous vous êtes sacrifié pour protéger votre cible.');
+          addNotif(targetId, i18n.t('game:notifications.bodyguard_saved'));
+          addNotif(bgId, i18n.t('game:notifications.bodyguard_sacrifice'));
           return;
         }
       }
@@ -330,15 +332,15 @@ export const EventsProvider = ({ children }) => {
               type: 'PROTECTION_SUCCESS',
               content: {
                 target: targetId,
-                chatMessage: `${target.profile.name} a été attaqué, mais a été sauvé par le docteur.`,
+                chatMessage: i18n.t('game:death_messages.protection_success', { name: target.profile.name }),
               },
               displayed: false,
             });
           }
-          addNotif(targetId, 'Vous avez été attaqué mais votre protection vous a sauvé !');
+          addNotif(targetId, i18n.t('game:notifications.protection_saved'));
         } else {
           // Night immunity
-          addNotif(targetId, 'Quelqu\'un a tenté de vous tuer, mais vous avez survécu !');
+          addNotif(targetId, i18n.t('game:notifications.night_immune'));
         }
       }
     });
@@ -347,40 +349,17 @@ export const EventsProvider = ({ children }) => {
     const killedIds = Object.keys(killed);
     const allKilledIds = new Set(killedIds);
 
-    // Death flavor messages by kill type
-    const MAFIA_DEATH_MSGS = [
-      'a été retrouvé(e) criblé(e) de balles à l\'aube.',
-      'a été retrouvé(e) sans vie dans une ruelle sombre... une exécution propre.',
-      'a été retrouvé(e) mort(e) chez lui. Un travail de professionnel.',
-      'a été retrouvé(e) abattu(e) froidement devant sa porte.',
-      'n\'a pas survécu à la nuit... la Mafia ne pardonne pas.',
-    ];
-    const SK_DEATH_MSGS = [
-      'a été retrouvé(e) poignardé(e) sauvagement.',
-      'a été retrouvé(e) dans un bain de sang... l\'œuvre d\'un psychopathe.',
-      'a été retrouvé(e) lacéré(e) derrière la taverne.',
-      'a été retrouvé(e) mutilé(e)... un acte de pure folie.',
-    ];
-    const VIGILANTE_DEATH_MSGS = [
-      'a été retrouvé(e) abattu(e)... justice expéditive ?',
-      'a été retrouvé(e) avec une balle dans le cœur... un justicier a frappé.',
-    ];
-    const JAILOR_DEATH_MSGS = [
-      'a été exécuté(e) en prison.',
-      'a été retrouvé(e) mort(e) dans sa cellule à l\'aube.',
-    ];
-    const BODYGUARD_DEATH_MSGS = [
-      'est mort(e) en protégeant quelqu\'un.',
-    ];
+    // Death flavor messages by kill type (from i18n)
+    const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
     const getDeathFlavor = (killType) => {
-      if (killType === 'mafia') return MAFIA_DEATH_MSGS[Math.floor(Math.random() * MAFIA_DEATH_MSGS.length)];
-      if (killType === 'neutral') return SK_DEATH_MSGS[Math.floor(Math.random() * SK_DEATH_MSGS.length)];
-      if (killType === 'vigilante') return VIGILANTE_DEATH_MSGS[Math.floor(Math.random() * VIGILANTE_DEATH_MSGS.length)];
-      if (killType === 'sk_retaliation') return SK_DEATH_MSGS[Math.floor(Math.random() * SK_DEATH_MSGS.length)];
-      if (killType === 'jailor_execute') return JAILOR_DEATH_MSGS[Math.floor(Math.random() * JAILOR_DEATH_MSGS.length)];
-      if (killType === 'bodyguard_sacrifice' || killType === 'bodyguard_kill') return BODYGUARD_DEATH_MSGS[0];
-      return 'a été retrouvé(e) mort(e) dans des circonstances mystérieuses.';
+      if (killType === 'mafia') return pickRandom(i18n.t('game:death_messages.mafia', { returnObjects: true }));
+      if (killType === 'neutral') return pickRandom(i18n.t('game:death_messages.sk', { returnObjects: true }));
+      if (killType === 'vigilante') return pickRandom(i18n.t('game:death_messages.vigilante', { returnObjects: true }));
+      if (killType === 'sk_retaliation') return pickRandom(i18n.t('game:death_messages.sk', { returnObjects: true }));
+      if (killType === 'jailor_execute') return pickRandom(i18n.t('game:death_messages.jailor', { returnObjects: true }));
+      if (killType === 'bodyguard_sacrifice' || killType === 'bodyguard_kill') return i18n.t('game:death_messages.bodyguard', { returnObjects: true })[0];
+      return i18n.t('game:death_messages.unknown');
     };
 
     // Build chat messages for kills
@@ -388,9 +367,9 @@ export const EventsProvider = ({ children }) => {
       const target = players.find((p) => p.id === targetId);
       const killInfo = killed[targetId];
       const flavor = getDeathFlavor(killInfo.type);
-      let deathMsg = `${target?.profile?.name} ${flavor} Son rôle était : ${target?.character?.label}.`;
+      let deathMsg = i18n.t('game:death_messages.death_role_reveal', { name: target?.profile?.name, flavor, role: target?.character?.label });
       if (target?.lastWill) {
-        deathMsg += `\n📜 Testament : "${target.lastWill}"`;
+        deathMsg += i18n.t('game:death_messages.death_with_will', { will: target.lastWill });
       }
       addEvent({
         type: 'KILL_RESULT',
@@ -408,7 +387,7 @@ export const EventsProvider = ({ children }) => {
           content: { target: vigilanteId, chatMessage: '' },
           displayed: true,
         });
-        addNotif(vigilanteId, 'Vous avez tué un innocent... La culpabilité vous ronge.');
+        addNotif(vigilanteId, i18n.t('game:notifications.vigilante_guilt'));
       }
     });
 
@@ -424,7 +403,7 @@ export const EventsProvider = ({ children }) => {
           type: 'KILL_RESULT',
           content: {
             target: e.content.target,
-            chatMessage: `${vigilante.profile.name} s'est suicidé de culpabilité. Son rôle était : Vigilante.`,
+            chatMessage: i18n.t('game:death_messages.vigilante_suicide', { name: vigilante.profile.name }),
           },
           displayed: false,
         });
@@ -442,8 +421,8 @@ export const EventsProvider = ({ children }) => {
           addNotif(
             e.content.by,
             detectResult === 'suspect'
-              ? `Votre cible (${target.profile.name}) est suspecte !`
-              : `Votre cible (${target.profile.name}) semble innocente.`
+              ? i18n.t('game:notifications.investigate_suspect', { name: target.profile.name })
+              : i18n.t('game:notifications.investigate_innocent', { name: target.profile.name })
           );
         }
       });
@@ -455,7 +434,7 @@ export const EventsProvider = ({ children }) => {
         if (target?.isAlive) {
           addNotif(
             e.content.by,
-            `Votre cible (${target.profile.name}) est : ${target.character?.label}.`
+            i18n.t('game:notifications.investigate_role', { name: target.profile.name, role: target.character?.label })
           );
         }
       });
@@ -466,9 +445,9 @@ export const EventsProvider = ({ children }) => {
       .forEach((e) => {
         if (mafiaKillTarget) {
           const mafiaTarget = players.find((p) => p.id === mafiaKillTarget.content.target);
-          addNotif(e.content.by, `La mafia a visité ${mafiaTarget?.profile?.name} cette nuit.`);
+          addNotif(e.content.by, i18n.t('game:notifications.spy_mafia_visit', { name: mafiaTarget?.profile?.name }));
         } else {
-          addNotif(e.content.by, 'La mafia n\'a visité personne cette nuit.');
+          addNotif(e.content.by, i18n.t('game:notifications.spy_no_visit'));
         }
       });
 
@@ -487,20 +466,13 @@ export const EventsProvider = ({ children }) => {
         addNotif(
           e.content.by,
           visitors.length > 0
-            ? `Vous avez vu ${visitors.join(', ')} rendre visite à ${target?.profile?.name}.`
-            : `Personne n'a rendu visite à ${target?.profile?.name} cette nuit.`
+            ? i18n.t('game:notifications.lookout_visitors', { visitors: visitors.join(', '), target: target?.profile?.name })
+            : i18n.t('game:notifications.lookout_no_visitors', { target: target?.profile?.name })
         );
       });
 
     // === SINGLE ATOMIC setPlayers: kills + blackmail + Executioner→Jester ===
-    const jesterRole = {
-      label: 'Jester', key: 'jester', team: 'neutral', category: 'neutral_benign',
-      description: 'Votre cible est morte. Vous êtes maintenant un Jester.',
-      couleur: '#ff69b4', icon: 'fa-face-grin-tears', actions: [],
-      objectif: 'Se faire lyncher par le village.',
-      nightImmune: false, detectResult: 'non-suspect',
-      attackLevel: 0, defenseLevel: 0, winCondition: 'getLynched',
-    };
+    const jesterRole = getRole('jester');
 
     setPlayers(
       players.map((p) => {
@@ -513,7 +485,7 @@ export const EventsProvider = ({ children }) => {
         updated.isBlackmailed = !!blackmailedPlayers[p.id];
         // Convert Executioner → Jester if their target died
         if (killedIds.length > 0 && p.character?.winCondition === 'getTargetLynched' && killedIds.includes(p.executionerTarget) && p.isAlive) {
-          addNotif(p.id, 'Votre cible est morte... Vous êtes maintenant un Jester. Faites-vous lyncher !');
+          addNotif(p.id, i18n.t('game:notifications.executioner_to_jester'));
           updated.character = jesterRole;
           updated.executionerTarget = null;
         }
@@ -533,7 +505,7 @@ export const EventsProvider = ({ children }) => {
     newMessages.push({
       player: 'system',
       color: 'white',
-      content: `--- Jour ${game.dayCount} ---`,
+      content: i18n.t('game:system.day_separator', { day: game.dayCount }),
       type: 'system',
       dayCount: game.dayCount,
       chat: 'default',
@@ -550,7 +522,7 @@ export const EventsProvider = ({ children }) => {
       newMessages.push({
         player: 'system',
         color: '#78ff78',
-        content: 'La nuit a été calme. Personne n\'est mort.',
+        content: i18n.t('game:system.peaceful_night'),
         type: 'system',
         dayCount: game.dayCount,
         chat: 'default',

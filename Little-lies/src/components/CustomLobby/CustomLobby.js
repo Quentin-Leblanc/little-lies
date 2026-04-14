@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { usePlayersList, isHost, getRoomCode, myPlayer } from 'playroomkit';
+import { useTranslation } from 'react-i18next';
 import { CharacterController } from '../CharacterController/CharacterController';
 import LobbyParkour from '../LobbyParkour/LobbyParkour';
 import CameraFollow from './CameraFollow';
@@ -13,6 +14,7 @@ import { useAuth } from '../Auth/Auth';
 import './CustomLobby.scss';
 
 const CustomLobby = ({ setIsSelectingRoles }) => {
+  const { t } = useTranslation(['setup', 'common']);
   const currentPlayer = myPlayer();
   const playroom_players = usePlayersList(true);
   const { user, profile } = useAuth();
@@ -149,7 +151,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
       <div className="lobby-panel">
         <div className="lobby-panel-inner">
           <h1 className="lobby-title">AMONG LIARS</h1>
-          <p className="lobby-subtitle">Salon multijoueur</p>
+          <p className="lobby-subtitle">{t('setup:multiplayer_lobby')}</p>
 
           {/* Profile badge / Login */}
           <div className="lobby-section lobby-auth-section">
@@ -157,19 +159,19 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           </div>
 
           <div className="lobby-section">
-            <label className="lobby-label">Ton pseudo</label>
+            <label className="lobby-label">{t('setup:your_username')}</label>
             <input
               type="text" className="lobby-input"
               value={playerName} onChange={handleNameChange}
-              placeholder="Entrer un pseudo..." maxLength={20}
+              placeholder={t('setup:enter_username')} maxLength={20}
             />
           </div>
 
           <div className="lobby-section">
-            <label className="lobby-label">Code du salon</label>
+            <label className="lobby-label">{t('setup:room_code')}</label>
             <div className="room-code-row">
               <span className="room-code">{roomCode || '...'}</span>
-              <button className="lobby-btn-icon" onClick={copyCode} title="Copier le code">
+              <button className="lobby-btn-icon" onClick={copyCode} title={t('setup:room_code')}>
                 <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`}></i>
               </button>
             </div>
@@ -177,11 +179,11 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
 
           <button className="lobby-btn lobby-btn-secondary" onClick={copyLink}>
             <i className="fas fa-link"></i>
-            {copied ? 'Copié !' : 'Copier le lien d\'invitation'}
+            {copied ? t('common:copied') : t('setup:copy_link')}
           </button>
 
           <div className="lobby-section">
-            <label className="lobby-label">Joueurs ({playroom_players.length})</label>
+            <label className="lobby-label">{t('setup:players_count', { count: playroom_players.length })}</label>
             <div className="player-list">
               {playroom_players.map((p) => {
                 const n = p.getState?.()?.profile?.name || 'Joueur';
@@ -191,8 +193,8 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
                   <div key={p.id} className={`player-list-item ${isMe ? 'is-me' : ''}`}>
                     <span className="player-dot" style={{ background: p.getState?.()?.profile?.color || '#888' }} />
                     <span className="player-list-name">{n}</span>
-                    {isH && <span className="player-badge host">HOST</span>}
-                    {isMe && <span className="player-badge me">TOI</span>}
+                    {isH && <span className="player-badge host">{t('common:host')}</span>}
+                    {isMe && <span className="player-badge me">{t('common:me')}</span>}
                   </div>
                 );
               })}
@@ -200,20 +202,20 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           </div>
 
           <div className="lobby-instructions">
-            <i className="fas fa-keyboard"></i> ZQSD / Flèches = bouger &middot; Espace = sauter
+            <i className="fas fa-keyboard"></i> {t('setup:controls')}
           </div>
 
           <div className="lobby-actions">
             {/* isHost() re-evaluated on each render triggered by usePlayersList changes */}
             {playroom_players.length > 0 && isHost() ? (
               <button className="lobby-btn lobby-btn-primary" onClick={() => setIsSelectingRoles(true)}>
-                <i className="fas fa-play"></i> Lancer la partie
+                <i className="fas fa-play"></i> {t('common:start_game')}
               </button>
             ) : (
-              <p className="lobby-waiting"><i className="fas fa-hourglass-half"></i> En attente de l'hote...</p>
+              <p className="lobby-waiting"><i className="fas fa-hourglass-half"></i> {t('setup:waiting_host', { host: '...' })}</p>
             )}
             <button className="lobby-btn lobby-btn-ghost" onClick={newLobby}>
-              <i className="fas fa-plus"></i> Nouveau salon
+              <i className="fas fa-plus"></i> {t('common:new_lobby')}
             </button>
           </div>
         </div>

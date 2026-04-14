@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import './Roles.scss';
 
 const RolesList = () => {
+  const { t } = useTranslation('game');
   const { rolesSelected } = useGameEngine();
   const [selectedRole, setSelectedRole] = useState(null);
 
@@ -33,9 +35,9 @@ const RolesList = () => {
 
   return (
     <div className="roles-list-box">
-      <h3><i className="fas fa-theater-masks"></i> Rôles en jeu</h3>
+      <h3><i className="fas fa-theater-masks"></i> Roles</h3>
       {uniqueRoles.length === 0 ? (
-        <p className="roles-empty">Aucun rôle sélectionné.</p>
+        <p className="roles-empty">-</p>
       ) : (
         <>
           <div className="roles-chips">
@@ -57,13 +59,13 @@ const RolesList = () => {
               <button className="close-button" onClick={() => setSelectedRole(null)}>X</button>
             </div>
             <div className="role-detail-team" style={{ color: selectedRole.team === 'town' ? '#78ff78' : '#ff4444' }}>
-              {selectedRole.team === 'town' ? 'Village' : selectedRole.team === 'mafia' ? 'Mafia' : 'Neutre'}
+              {t(`teams.${selectedRole.team}.short`)}
             </div>
             <p className="role-detail-desc">{selectedRole.description}</p>
             <p className="role-detail-obj">{selectedRole.objectif}</p>
             {selectedRole.actions?.length > 0 && (
               <div className="role-detail-abilities">
-                <strong>Capacités :</strong>
+                <strong>Abilities:</strong>
                 <ul>
                   {selectedRole.actions.map((a, i) => (
                     <li key={i}><strong>{a.label}</strong> — {a.description}</li>

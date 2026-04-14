@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
 import PlayerActions from '../PlayerActions/PlayerActions';
 import './Player.scss';
 
 const Player = () => {
+    const { t } = useTranslation(['game', 'common']);
     const { getMe, getPlayers, game, setPlayers } = useGameEngine();
     const { getMyNotifications } = useEvents();
     const me = getMe();
@@ -40,14 +42,14 @@ const Player = () => {
     }, [me?.id]);
 
     if (!me) {
-        return <div className="player-container"><p style={{color:'#666',fontStyle:'italic'}}>Connexion en cours...</p></div>;
+        return <div className="player-container"><p style={{color:'#666',fontStyle:'italic'}}>{t('common:loading')}</p></div>;
     }
     if (!me.character) {
         return (
             <div className="player-container">
                 <div className="role-container">
                     <p style={{color:'#aaa'}}>{me.profile?.name || 'Joueur'}</p>
-                    <p style={{color:'#666',fontStyle:'italic'}}>En attente de l'attribution des rôles...</p>
+                    <p style={{color:'#666',fontStyle:'italic'}}>{t('common:waiting')}</p>
                 </div>
             </div>
         );
@@ -60,14 +62,14 @@ const Player = () => {
             {/* Team block — left, for mafia */}
             {me.character && me.character.team === 'mafia' && (
                 <div className="team-block">
-                    <h4 className="team-block-title">Mafia</h4>
+                    <h4 className="team-block-title">{t('game:teams.mafia.short')}</h4>
                     {players.filter(p => p.character?.team === 'mafia').map(p => (
                         <div key={p.id} className="team-member" style={{ opacity: p.isAlive ? 1 : 0.4 }}>
                             <span style={{ color: p.profile?.color || '#ccc' }}>{p.profile?.name}</span>
                             <span className="team-member-role" style={{ color: p.character?.couleur || '#888' }}>
                                 {p.character?.label}
                             </span>
-                            {!p.isAlive && <span className="team-member-dead">mort</span>}
+                            {!p.isAlive && <span className="team-member-dead">{t('common:dead').toLowerCase()}</span>}
                         </div>
                     ))}
                 </div>
@@ -76,14 +78,14 @@ const Player = () => {
             <div className="role-container">
                 <div className="status-line">
                     <span className="status-name" style={{ color: me.profile?.color || '#fff' }}>{me.profile?.name || 'Joueur'}</span>
-                    <span className="status-separator">—</span>
+                    <span className="status-separator">&mdash;</span>
                     <span className="status-team" style={{ color: { town: '#78ff78', mafia: '#ff4444', neutral: '#9370db' }[me.character?.team] || '#aaa' }}>
-                        {{ town: 'Village', mafia: 'Mafia', neutral: 'Neutre' }[me.character?.team] || me.character?.team}
+                        {t(`game:teams.${me.character?.team}.short`)}
                     </span>
-                    {!me.isAlive && <span className="status-dead">mort</span>}
+                    {!me.isAlive && <span className="status-dead">{t('common:dead').toLowerCase()}</span>}
                     {me.isBlackmailed && (
                         <span className="status-blackmailed">
-                            <i className="fas fa-comment-slash"></i> Bâillonné
+                            <i className="fas fa-comment-slash"></i> {t('game:notifications.blackmailed')}
                         </span>
                     )}
                 </div>
@@ -119,7 +121,7 @@ const Player = () => {
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="no-ability">Aucune capacité spéciale</p>
+                                <p className="no-ability">{t('game:no_ability')}</p>
                             )}
                         </div>
 
@@ -153,7 +155,7 @@ const Player = () => {
                         <i className="fas fa-scroll"></i> Last Will
                     </span>
                     <span className="lw-preview">
-                        {lastWill ? lastWill.substring(0, 30) + (lastWill.length > 30 ? '...' : '') : 'Votre testament...'}
+                        {lastWill ? lastWill.substring(0, 30) + (lastWill.length > 30 ? '...' : '') : t('game:last_will_placeholder')}
                     </span>
                 </div>
             </div>
@@ -172,7 +174,7 @@ const Player = () => {
                                     className="last-will-input"
                                     value={lastWill}
                                     onChange={(e) => setLastWill(e.target.value)}
-                                    placeholder="Écrivez votre testament... Il sera révélé à votre mort."
+                                    placeholder={t('game:last_will_placeholder_write')}
                                     maxLength={300}
                                     autoFocus
                                 />
@@ -182,7 +184,7 @@ const Player = () => {
                             </>
                         ) : (
                             <div className="last-will-display">
-                                {lastWill || 'Aucun testament laissé.'}
+                                {lastWill || t('game:last_will_none')}
                             </div>
                         )}
                     </div>

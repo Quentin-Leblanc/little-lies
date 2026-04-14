@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { isHost, useMultiplayerState, usePlayersList, me } from 'playroomkit';
 import { useEvents } from './useEvents';
-import trad from '../trad/roles.json';
+import { getRoles } from '../data/roles.js';
+import i18n from '../trad/i18n';
 
 const GameEngineContext = React.createContext();
 
@@ -168,7 +169,7 @@ export const GameEngineProvider = ({ children }) => {
       _setPlayers(valueOrFn);
     }
   };
-  const [_rolesAvailable] = useMultiplayerState('rolesAvailable', trad.roles);
+  const [_rolesAvailable] = useMultiplayerState('rolesAvailable', getRoles());
   const rolesAvailable = _rolesAvailable || [];
   const [_rolesSelected, setRolesSelected] = useMultiplayerState('rolesSelected', []);
   const rolesSelected = _rolesSelected || [];
@@ -332,7 +333,7 @@ export const GameEngineProvider = ({ children }) => {
       {
         player: 'system',
         color: '#78ff78',
-        content: 'Début de la partie — Bonne chance à tous.',
+        content: i18n.t('game:system.game_start'),
         type: 'system',
         dayCount: 1,
         chat: 'default',
@@ -340,7 +341,7 @@ export const GameEngineProvider = ({ children }) => {
       {
         player: 'system',
         color: 'white',
-        content: '--- Jour 1 ---',
+        content: i18n.t('game:system.day_separator', { day: 1 }),
         type: 'system',
         dayCount: 1,
         chat: 'default',
@@ -356,7 +357,7 @@ export const GameEngineProvider = ({ children }) => {
       if (!connectedIds.has(player.id) && player.connected && player.isAlive) {
         disconnectEvents.push({
           type: 'disconnect',
-          content: { chatMessage: `${player.profile.name} est mort de façon inconnue` },
+          content: { chatMessage: i18n.t('game:system.player_disconnected', { name: player.profile.name }) },
           displayed: false,
         });
         return { ...player, connected: false, isAlive: false };
@@ -483,9 +484,11 @@ export const GameEngineProvider = ({ children }) => {
           p.id === accusedId ? { ...p, isAlive: false } : p
         )
       );
-      let elimMsg = `${accused.profile.name} a été éliminé par le village. Son rôle était : ${accused.character?.label}.`;
+      let elimMsg;
       if (accused.lastWill) {
-        elimMsg += ` | Testament : "${accused.lastWill}"`;
+        elimMsg = i18n.t('game:system.player_eliminated_will', { name: accused.profile.name, role: accused.character?.label, will: accused.lastWill });
+      } else {
+        elimMsg = i18n.t('game:system.player_eliminated', { name: accused.profile.name, role: accused.character?.label });
       }
 
       // Write to chat immediately (not deferred to morning)
@@ -630,8 +633,8 @@ export const GameEngineProvider = ({ children }) => {
         const totalVotes = guiltyCount + innocentCount;
         const isGuilty = totalVotes === 0 ? false : guiltyCount > innocentCount;
         const resultMsg = isGuilty
-          ? `Coupable ! (${guiltyCount} vs ${innocentCount})`
-          : `Acquitté ! (${guiltyCount} vs ${innocentCount})`;
+          ? i18n.t('game:system.judgment_guilty', { guilty: guiltyCount, innocent: innocentCount })
+          : i18n.t('game:system.judgment_acquitted', { guilty: guiltyCount, innocent: innocentCount });
         addChatSystem(resultMsg, isGuilty ? '#ff4444' : '#78ff78');
         Events.add({ type: 'JUDGMENT_RESULT', content: { chatMessage: resultMsg }, displayed: true });
 

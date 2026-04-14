@@ -1,59 +1,45 @@
 import { isHost, usePlayersList, myPlayer } from 'playroomkit';
+import { useTranslation } from 'react-i18next';
 import './Setup.scss';
 import Roles from './Roles';
 import GameConfig from '../GameConfig/GameConfig';
 import { useGameEngine } from '../../hooks/useGameEngine';
-import trad from '../../trad/roles.json';
+import { getRoles } from '../../data/roles.js';
 
-// Role presets by player count
+// Role presets by player count — keys map to setup:presets_list translations
 const PRESETS = {
   beginner_4: {
-    label: 'D\u00e9butant 4',
     count: 4,
-    desc: 'Id\u00e9al pour d\u00e9couvrir le jeu \u2014 r\u00f4les simples',
     roles: ['villageois', 'sheriff', 'godfather', 'mafioso'],
   },
   beginner_5: {
-    label: 'D\u00e9butant 5',
     count: 5,
-    desc: 'Introduction avec un docteur',
     roles: ['villageois', 'villageois', 'sheriff', 'godfather', 'mafioso'],
   },
   classic_6: {
-    label: 'Classic 6',
     count: 6,
-    desc: 'Village + Mafia \u00e9quilibr\u00e9',
     roles: ['villageois', 'villageois', 'sheriff', 'docteur', 'godfather', 'mafioso'],
   },
   classic_8: {
-    label: 'Classic 8',
     count: 8,
-    desc: 'Ajout de r\u00f4les d\'investigation',
     roles: ['villageois', 'villageois', 'sheriff', 'docteur', 'lookout', 'godfather', 'mafioso', 'framer'],
   },
   ranked_10: {
-    label: 'Ranked 10',
     count: 10,
-    desc: 'Mode comp\u00e9titif avec neutres',
     roles: ['villageois', 'sheriff', 'docteur', 'escort', 'vigilante', 'godfather', 'mafioso', 'blackmailer', 'serial_killer', 'jester'],
   },
   chaos_12: {
-    label: 'Chaos 12',
     count: 12,
-    desc: 'Tous les r\u00f4les, chaos total',
     roles: ['villageois', 'sheriff', 'docteur', 'bodyguard', 'vigilante', 'spy', 'godfather', 'mafioso', 'framer', 'consigliere', 'serial_killer', 'executioner'],
   },
   full_15: {
-    label: 'Complet 15',
     count: 15,
-    desc: 'Partie compl\u00e8te avec tous les r\u00f4les',
     roles: ['villageois', 'sheriff', 'docteur', 'lookout', 'vigilante', 'maire', 'bodyguard', 'escort', 'jailor', 'godfather', 'mafioso', 'framer', 'blackmailer', 'serial_killer', 'survivor'],
   },
 };
 
-const findRole = (key) => trad.roles.find((r) => r.key === key);
-
 const Setup = () => {
+  const { t } = useTranslation(['setup', 'common']);
   const { startGame, rolesSelected, setRolesSelected, game, setGame } = useGameEngine();
   const players = usePlayersList(true);
   const host = isHost();
@@ -62,6 +48,11 @@ const Setup = () => {
   const hostPlayer = players.length > 0 ? players[0] : null;
   const hostName = hostPlayer?.getState?.()?.profile?.name || 'H\u00f4te';
   const currentPlayerName = myPlayer()?.getState?.()?.profile?.name;
+
+  const findRole = (key) => {
+    const allRoles = getRoles();
+    return allRoles.find((r) => r.key === key);
+  };
 
   const applyPreset = (preset) => {
     if (!host) return;
@@ -101,7 +92,7 @@ const Setup = () => {
       <div className="setup-card">
         {/* Header */}
         <div className="setup-header">
-          <h1 className="setup-title">Configuration de la partie</h1>
+          <h1 className="setup-title">{t('setup:title')}</h1>
           <div className="setup-header-right">
             <div className="setup-host-badge">
               <i className="fas fa-crown"></i>
@@ -109,10 +100,10 @@ const Setup = () => {
             </div>
             <div className="setup-players-badge">
               <i className="fas fa-users"></i>
-              <span>{players.length}</span> joueurs
+              <span>{players.length}</span> {t('common:players')}
               {players.length < MIN_PLAYERS && (
                 <span style={{ color: '#ff6666', fontSize: '0.75rem', marginLeft: 6 }}>
-                  (min {MIN_PLAYERS})
+                  ({t('common:min_players', { count: MIN_PLAYERS })})
                 </span>
               )}
             </div>
@@ -122,7 +113,7 @@ const Setup = () => {
         {/* Host indicator for non-host */}
         {!host && (
           <div className="setup-host-notice">
-            <i className="fas fa-crown"></i> {hostName} configure la partie...
+            <i className="fas fa-crown"></i> {t('setup:host_configuring', { host: hostName })}
           </div>
         )}
 
@@ -132,18 +123,18 @@ const Setup = () => {
         {/* Presets — visible to all, clickable by host only */}
         {matchingPresets.length > 0 && (
           <div className="setup-presets">
-            <span className="presets-label">Presets</span>
+            <span className="presets-label">{t('setup:presets')}</span>
             <div className="presets-list">
               {matchingPresets.map(([key, preset]) => (
                 <button
                   key={key}
                   className={`preset-btn ${key.startsWith('beginner') ? 'preset-beginner' : ''}`}
                   onClick={() => applyPreset(preset)}
-                  title={preset.desc}
+                  title={t(`setup:presets_list.${key}.desc`)}
                   disabled={!host}
                 >
                   {key.startsWith('beginner') && <i className="fas fa-graduation-cap" style={{ marginRight: 4 }}></i>}
-                  {preset.label}
+                  {t(`setup:presets_list.${key}.label`)}
                 </button>
               ))}
             </div>
@@ -153,12 +144,12 @@ const Setup = () => {
         {/* Team counter */}
         {rolesSelected.length > 0 && (
           <div className="setup-team-counter">
-            <span style={{ color: '#78ff78' }}><i className="fas fa-users"></i> Village: {townCount}</span>
-            <span style={{ color: '#ff4444' }}><i className="fas fa-user-secret"></i> Mafia: {mafiaCount}</span>
-            <span style={{ color: '#9370db' }}><i className="fas fa-star"></i> Neutre: {neutralCount}</span>
+            <span style={{ color: '#78ff78' }}><i className="fas fa-users"></i> {t('setup:team_counter.village', { count: townCount })}</span>
+            <span style={{ color: '#ff4444' }}><i className="fas fa-user-secret"></i> {t('setup:team_counter.mafia', { count: mafiaCount })}</span>
+            <span style={{ color: '#9370db' }}><i className="fas fa-star"></i> {t('setup:team_counter.neutral', { count: neutralCount })}</span>
             {isUnbalanced && (
               <span className="setup-warning">
-                <i className="fas fa-exclamation-triangle"></i> D\u00e9s\u00e9quilibr\u00e9
+                <i className="fas fa-exclamation-triangle"></i> {t('setup:team_counter.unbalanced')}
               </span>
             )}
           </div>
@@ -179,15 +170,15 @@ const Setup = () => {
             >
               <i className={`fas ${canStart ? 'fa-play' : 'fa-lock'}`}></i>
               {!allSlotsFilled
-                ? `${rolesSelected.length}/${players.length} r\u00f4les assign\u00e9s`
+                ? t('common:roles_assigned', { current: rolesSelected.length, total: players.length })
                 : players.length < MIN_PLAYERS
-                ? `Minimum ${MIN_PLAYERS} joueurs requis`
-                : 'Lancer la partie'
+                ? t('common:min_players_required', { count: MIN_PLAYERS })
+                : t('common:start_game')
               }
             </button>
           ) : (
             <div className="setup-waiting">
-              <i className="fas fa-hourglass-half"></i> En attente de {hostName}...
+              <i className="fas fa-hourglass-half"></i> {t('setup:waiting_host', { host: hostName })}
             </div>
           )}
         </div>

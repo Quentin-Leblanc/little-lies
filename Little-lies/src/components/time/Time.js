@@ -1,9 +1,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import './Time.scss';
 import { useEffect, useState } from 'react';
 
 const Time = () => {
+  const { t } = useTranslation(['game', 'common']);
   const {
     game: { isDay, timer, dayCount, phase, adminFreeRoam, phaseStartedAt },
     CONSTANTS,
@@ -12,7 +14,7 @@ const Time = () => {
   const isInfoPhase = CONSTANTS.INFO_PHASES?.includes(phase) || false;
   const isPaused = !!adminFreeRoam;
   const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
-  const phaseLabel = CONSTANTS.PHASE_LABELS[phase] || phase;
+  const phaseLabel = t(`game:phases.${phase}`, { defaultValue: phase });
   const phaseIcon = CONSTANTS.PHASE_ICONS?.[phase] || (isDay ? 'fa-sun' : 'fa-moon');
 
   // Use phaseStartedAt for sync if available, fallback to timer
@@ -45,7 +47,7 @@ const Time = () => {
   else if (progressPercentage <= 55) barColor = '#ffa502';
   else barColor = '#44cc44';
 
-  const dayNightLabel = `${isDay ? 'Jour' : 'Nuit'} ${dayCount}`;
+  const dayNightLabel = `${isDay ? t('common:day') : t('common:night')} ${dayCount}`;
   const isFirstDayDiscussion = dayCount === 1 && phase === 'DISCUSSION';
   const showCountdown = !isInfoPhase && !isFirstDayDiscussion;
 

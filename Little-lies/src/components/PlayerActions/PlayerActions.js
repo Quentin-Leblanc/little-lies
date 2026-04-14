@@ -1,5 +1,7 @@
 import React, { memo, useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../trad/i18n';
 
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
@@ -26,27 +28,10 @@ const ACTION_COLORS = {
 };
 const getActionStyle = (type) => ACTION_COLORS[type] || { bg: 'rgba(100,100,100,0.7)', hover: 'rgba(100,100,100,0.9)', color: '#fff' };
 
-const ACTION_TOOLTIPS = {
-  KILL: '\u00c9limine un joueur cette nuit',
-  MAFIA_KILL: 'La mafia \u00e9limine un joueur cette nuit',
-  VIGILANTE_KILL: '\u00c9limine un joueur (attention aux innocents !)',
-  SK_KILL: '\u00c9limine un joueur en silence',
-  HEAL: 'Soigne un joueur pour le prot\u00e9ger cette nuit',
-  PROTECT: 'Prot\u00e8ge un joueur d\'une attaque',
-  BODYGUARD: 'Prot\u00e8ge un joueur en risquant ta vie',
-  VEST: 'Porte un gilet pare-balles (nombre limit\u00e9)',
-  INVESTIGATE: 'D\u00e9couvre si ce joueur est suspect ou non',
-  INVESTIGATE_ROLE: 'D\u00e9couvre le r\u00f4le exact d\'un joueur',
-  LOOKOUT: 'Observe qui visite ce joueur cette nuit',
-  SPY: 'Espionne les activit\u00e9s de la mafia',
-  JAIL: 'Emprisonne un joueur pour la nuit (bloque ses actions)',
-  JAILOR_EXECUTE: 'Ex\u00e9cute le prisonnier (nombre limit\u00e9)',
-  ROLEBLOCK: 'Bloque les actions d\'un joueur cette nuit',
-  FRAME: 'Fait para\u00eetre un joueur suspect aux enqu\u00eateurs',
-  BLACKMAIL: 'Emp\u00eache un joueur de parler le jour suivant',
-};
+const getActionTooltip = (type) => i18n.t(`game:action_tooltips.${type}`, { defaultValue: '' });
 
 const PlayerActions = memo(function () {
+  const { t } = useTranslation(['game', 'common']);
   const { getPlayers, getMe, game, CONSTANTS, trial, setTrial, setPlayers, setGame, addChatSystem } = useGameEngine();
   const Events = useEvents();
   const players = getPlayers();
@@ -89,7 +74,7 @@ const PlayerActions = memo(function () {
       )
     );
     // Immediate chat message for reveal
-    addChatSystem(`${me.profile.name} s'est r\u00e9v\u00e9l\u00e9 en tant que Maire ! Ses votes comptent triple.`, '#ffd700');
+    addChatSystem(i18n.t('game:system.mayor_reveal', { name: me.profile.name }), '#ffd700');
   };
 
   // --- Vote handlers ---
@@ -186,11 +171,11 @@ const PlayerActions = memo(function () {
 
   // Phase header text
   const getPhaseHeader = () => {
-    if (isNightPhase) return { text: 'Actions de nuit', icon: 'fa-moon', color: '#8899cc' };
-    if (isVotingPhase) return { text: 'Phase de vote', icon: 'fa-gavel', color: '#ffa502' };
-    if (isJudgmentPhase) return { text: 'Jugement', icon: 'fa-scale-balanced', color: '#cc88ff' };
-    if (isDefensePhase) return { text: 'D\u00e9fense', icon: 'fa-shield', color: '#ff6666' };
-    if (isDiscussionPhase) return { text: 'Discussion', icon: 'fa-comments', color: '#78ff78' };
+    if (isNightPhase) return { text: t('game:phase_headers.night_actions'), icon: 'fa-moon', color: '#8899cc' };
+    if (isVotingPhase) return { text: t('game:phase_headers.voting_phase'), icon: 'fa-gavel', color: '#ffa502' };
+    if (isJudgmentPhase) return { text: t('game:phase_headers.judgment'), icon: 'fa-scale-balanced', color: '#cc88ff' };
+    if (isDefensePhase) return { text: t('game:phase_headers.defense'), icon: 'fa-shield', color: '#ff6666' };
+    if (isDiscussionPhase) return { text: t('game:phase_headers.discussion'), icon: 'fa-comments', color: '#78ff78' };
     return null;
   };
   const phaseHeader = getPhaseHeader();
@@ -213,35 +198,35 @@ const PlayerActions = memo(function () {
         {/* Revealed Mayor indicator */}
         {me.isRevealed && me.character?.key === 'maire' && (
           <div className="revealed-banner">
-            <i className="fas fa-landmark"></i> Maire r\u00e9v\u00e9l\u00e9 \u2014 3 votes
+            <i className="fas fa-landmark"></i> {t('game:player_list.mayor_revealed')}
           </div>
         )}
 
         {/* Judgment phase */}
         {isJudgmentPhase && accusedPlayer && me.id !== game.accusedId && me.isAlive && (
           <div className="judgment-panel">
-            <p>{accusedPlayer.profile.name} est-il coupable ?</p>
+            <p>{t('game:gameover.is_accused', { name: accusedPlayer.profile.name })}</p>
             <div className="judgment-buttons">
               <button
                 className={`primaryBtn judgment-guilty ${myJudgmentVote === 'guilty' ? 'active' : ''}`}
                 onClick={() => handleJudgmentVote('guilty')}
                 disabled={!!myJudgmentVote}
               >
-                Coupable
+                {t('common:guilty')}
               </button>
               <button
                 className={`primaryBtn judgment-innocent ${myJudgmentVote === 'innocent' ? 'active' : ''}`}
                 onClick={() => handleJudgmentVote('innocent')}
                 disabled={!!myJudgmentVote}
               >
-                Innocent
+                {t('common:innocent')}
               </button>
               <button
                 className={`primaryBtn judgment-abstain ${myJudgmentVote === 'abstain' ? 'active' : ''}`}
                 onClick={() => handleJudgmentVote('abstain')}
                 disabled={!!myJudgmentVote}
               >
-                Abstention
+                {t('common:abstain')}
               </button>
             </div>
           </div>
@@ -250,14 +235,14 @@ const PlayerActions = memo(function () {
         {/* Defense phase */}
         {isDefensePhase && accusedPlayer && (
           <div className="defense-panel">
-            <p><strong>{accusedPlayer.profile.name}</strong> est accus\u00e9 ! C'est le moment de se d\u00e9fendre.</p>
+            <p>{t('game:gameover.accused_defense', { name: accusedPlayer.profile.name })}</p>
           </div>
         )}
 
         {/* Last words phase */}
         {isLastWordsPhase && accusedPlayer && (
           <div className="defense-panel">
-            <p><strong>{accusedPlayer.profile.name}</strong> \u2014 Derniers mots...</p>
+            <p>{t('game:gameover.last_words', { name: accusedPlayer.profile.name })}</p>
           </div>
         )}
 
@@ -270,7 +255,7 @@ const PlayerActions = memo(function () {
 
         {/* Player list */}
         <div className={`player-list-wrapper ${isVotingPhase ? 'highlight-vote' : ''} ${isNightPhase ? 'night-mode' : ''}`}>
-        <h4 className="player-list-title"><i className="fas fa-users"></i> Joueurs vivants ({players.filter(p => p.isAlive).length}/{players.length})</h4>
+        <h4 className="player-list-title"><i className="fas fa-users"></i> {t('game:player_list.title', { alive: players.filter(p => p.isAlive).length, total: players.length })}</h4>
         <ul className="player-list">
           {players.map((player) => {
             const isNightTarget = isNightPhase && me.isAlive && me.character?.actions?.some(
@@ -285,15 +270,15 @@ const PlayerActions = memo(function () {
                 <span className="player-name-cell">
                   <span className={`player-status-dot ${player.connected !== false ? 'dot-online' : 'dot-offline'}`}></span>
                   <span className="player-name-text" style={{ color: player.isAlive ? (player.profile?.color || '#ccc') : '#666' }}>
-                    {player.profile.name}{player.id === me.id ? ' (toi)' : ''}
+                    {player.profile.name}{player.id === me.id ? ` (${t('common:you')})` : ''}
                   </span>
                   {player.isRevealed && (
-                    <span className="revealed-badge" title="Maire r\u00e9v\u00e9l\u00e9">
+                    <span className="revealed-badge" title={t('game:player_list.mayor_revealed')}>
                       <i className="fas fa-landmark"></i>
                     </span>
                   )}
                   {isBlackmailed && (
-                    <span className="blackmailed-badge" title="B\u00e2illonn\u00e9">
+                    <span className="blackmailed-badge" title={t('game:notifications.blackmailed')}>
                       <i className="fas fa-comment-slash"></i>
                     </span>
                   )}
@@ -331,7 +316,7 @@ const PlayerActions = memo(function () {
                             style={{ '--action-bg': style.bg, '--action-hover': style.hover }}
                             onClick={() => handleDayAction(action, player)}
                             key={action.type}
-                            title={ACTION_TOOLTIPS[action.type] || action.description || ''}
+                            title={getActionTooltip(action.type) || action.description || ''}
                           >
                             {action.label}
                           </button>
@@ -363,7 +348,7 @@ const PlayerActions = memo(function () {
                             style={{ '--action-bg': style.bg, '--action-hover': style.hover }}
                             onClick={() => handleNightAction(action, player)}
                             key={action.type}
-                            title={ACTION_TOOLTIPS[action.type] || action.description || ''}
+                            title={getActionTooltip(action.type) || action.description || ''}
                           >
                             {action.label}
                           </button>
@@ -371,7 +356,7 @@ const PlayerActions = memo(function () {
                       })}
                     </>
                   ) : (
-                    <span className="dead-label">mort</span>
+                    <span className="dead-label">{t('common:dead').toLowerCase()}</span>
                   )}
                 </div>
               </li>

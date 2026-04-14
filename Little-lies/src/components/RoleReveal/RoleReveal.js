@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import './RoleReveal.scss';
@@ -10,17 +11,6 @@ const MODELS_TO_PRELOAD = [
   '/models/Villager_Run.glb',
   '/models/Villager_Jump.glb',
   '/models/Villager_Dead.glb',
-];
-
-const LOADING_MESSAGES = [
-  'Ouverture des volets...',
-  'Allumage des lanternes...',
-  'Pr\u00e9paration de la forge...',
-  'Ouverture de la taverne...',
-  'Balayage de la place du village...',
-  'Sonnerie des cloches de l\'\u00e9glise...',
-  'Les villageois se rassemblent...',
-  'Le village est pr\u00eat.',
 ];
 
 // Typewriter effect hook
@@ -80,6 +70,7 @@ const CardParticles = ({ color }) => {
 };
 
 const RoleReveal = ({ onComplete }) => {
+  const { t } = useTranslation(['setup', 'game']);
   const { getMe, getPlayers, game, markReady, readyPlayers } = useGameEngine();
   const me = getMe();
   const players = getPlayers();
@@ -88,8 +79,10 @@ const RoleReveal = ({ onComplete }) => {
   const [msgIndex, setMsgIndex] = useState(0);
   const [realLoaded, setRealLoaded] = useState(false);
 
+  const loadingMessages = t('setup:loading_messages', { returnObjects: true }) || [];
+
   const introText = useTypewriter(
-    'La nuit tombe sur le village...',
+    t('setup:reveal.intro_text'),
     45,
     phase === 'intro' ? 200 : 99999
   );
@@ -98,10 +91,10 @@ const RoleReveal = ({ onComplete }) => {
   useEffect(() => {
     if (phase !== 'loading') return;
     const interval = setInterval(() => {
-      setMsgIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+      setMsgIndex((prev) => (prev + 1) % loadingMessages.length);
     }, 1800);
     return () => clearInterval(interval);
-  }, [phase]);
+  }, [phase, loadingMessages.length]);
 
   // Fake smooth progress bar
   useEffect(() => {
@@ -197,7 +190,7 @@ const RoleReveal = ({ onComplete }) => {
   if (!me?.character && phase !== 'loading') return null;
 
   const role = me?.character;
-  const teamLabel = role ? ({ town: 'Village', mafia: 'Mafia', neutral: 'Neutre' }[role.team] || role.team) : '';
+  const teamLabel = role ? t(`game:teams.${role.team}.short`) : '';
   const execTarget = me?.executionerTarget
     ? players.find((p) => p.id === me.executionerTarget)
     : null;
@@ -225,13 +218,13 @@ const RoleReveal = ({ onComplete }) => {
             <AnimatePresence mode="wait">
               <motion.p
                 className="loading-text"
-                key={LOADING_MESSAGES[msgIndex]}
+                key={loadingMessages[msgIndex]}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.35 }}
               >
-                {LOADING_MESSAGES[msgIndex]}
+                {loadingMessages[msgIndex]}
               </motion.p>
             </AnimatePresence>
             <div className="loading-bar-track">
@@ -253,7 +246,7 @@ const RoleReveal = ({ onComplete }) => {
             transition={{ duration: 0.5 }}
           >
             <p className="loading-title">Among Liars</p>
-            <p className="loading-text">En attente des joueurs...</p>
+            <p className="loading-text">{t('setup:reveal.waiting_players')}</p>
             {/* Player dots */}
             <div className="waiting-players-dots">
               {players.map((p) => {
@@ -294,7 +287,7 @@ const RoleReveal = ({ onComplete }) => {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2, duration: 0.6 }}
             >
-              Votre destin est scell&eacute;.
+              {t('setup:reveal.intro_sub')}
             </motion.p>
           </motion.div>
         )}
@@ -323,7 +316,7 @@ const RoleReveal = ({ onComplete }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <div className="card-assigned-label">R&ocirc;le assign&eacute; :</div>
+              <div className="card-assigned-label">{t('setup:reveal.role_assigned')}</div>
               <div className="card-name" style={{ color: role.couleur }}>
                 {role.label}
               </div>
@@ -356,7 +349,7 @@ const RoleReveal = ({ onComplete }) => {
           animate={{ opacity: 0.5 }}
           transition={{ delay: 0.5, duration: 0.5 }}
         >
-          La partie commence...
+          {t('setup:reveal.game_starting')}
         </motion.p>
       )}
     </div>

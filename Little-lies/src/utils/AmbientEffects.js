@@ -1,23 +1,7 @@
 import React, { useMemo } from 'react';
+import i18n from '../trad/i18n';
 import { useGameEngine } from '../hooks/useGameEngine';
 import './AmbientEffects.scss';
-
-// Night ambiance texts — displayed as subtle overlay
-const NIGHT_TEXTS = [
-  'Un chat noir traverse lentement la place du village...',
-  'Des pas furtifs se font entendre dans la ruelle...',
-  'Une ombre se glisse entre les maisons...',
-  'Le vent souffle et emporte des murmures lointains...',
-  'Les torches vacillent dans l\'obscurit\u00e9...',
-  'Une lumi\u00e8re s\'\u00e9teint dans une maison au loin...',
-  'Le bois de la potence grince sous le vent...',
-  'La lune dispara\u00eet un instant derri\u00e8re les nuages...',
-  'Un volet claque quelque part dans le village...',
-  'La brume s\'\u00e9paissit autour du village...',
-  'Un corbeau croasse au loin...',
-  'Les flammes des torches dansent nerveusement...',
-  'L\'air est charg\u00e9 de tension cette nuit...',
-];
 
 const AmbientEffects = () => {
   const { game, CONSTANTS } = useGameEngine();
@@ -29,7 +13,9 @@ const AmbientEffects = () => {
 
   // Pick a random night text per night cycle
   const nightText = useMemo(() => {
-    return NIGHT_TEXTS[Math.floor(Math.random() * NIGHT_TEXTS.length)];
+    const texts = i18n.t('game:ambiance', { returnObjects: true }) || [];
+    if (!Array.isArray(texts) || texts.length === 0) return '';
+    return texts[Math.floor(Math.random() * texts.length)];
   }, [game.dayCount, isNight]);
 
   // Firefly particles (night only)
