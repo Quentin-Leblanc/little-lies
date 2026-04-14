@@ -204,15 +204,16 @@ const RoleReveal = ({ onComplete }) => {
 
   return (
     <div className="role-reveal-overlay">
-      {/* Loading screen */}
-      <AnimatePresence>
+      {/* Loading / Waiting — single AnimatePresence, waits for exit before enter */}
+      <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div
+            key="loading"
             className="loading-container"
-            initial={{ opacity: 1 }}
+            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
           >
             <p className="loading-title" data-text="Among Liars">Among Liars</p>
             <AnimatePresence mode="wait">
@@ -233,21 +234,18 @@ const RoleReveal = ({ onComplete }) => {
             <p className="loading-percent">{Math.round(progress * 100)}%</p>
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {/* Waiting for other players */}
-      <AnimatePresence>
         {phase === 'waiting-players' && (
           <motion.div
+            key="waiting"
             className="loading-container"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
           >
             <p className="loading-title" data-text="Among Liars">Among Liars</p>
             <p className="loading-text">{t('setup:reveal.waiting_players')}</p>
-            {/* Player dots */}
             <div className="waiting-players-dots">
               {players.map((p) => {
                 const isReady = readyPlayers.includes(p.id);
