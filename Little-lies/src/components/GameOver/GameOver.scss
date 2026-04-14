@@ -1,198 +1,457 @@
-.gameover-overlay {
+// === GAME OVER — Premium cinematic screen ===
+
+.go-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeIn 0.8s ease-in;
-  backdrop-filter: blur(4px);
-}
-
-.gameover-container {
-  text-align: center;
-  max-width: 500px;
-  width: 90%;
-  background: rgba(10, 10, 20, 0.92);
-  border-radius: 16px;
-  padding: 2rem 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-}
-
-.gameover-result {
-  margin-bottom: 1rem;
-
-  i {
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-    display: block;
-    animation: pulseGlow 2s ease-in-out infinite;
-  }
-
-  h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 2rem;
-    margin: 0;
-  }
-}
-
-.victory {
-  color: #78ff78;
-  font-family: 'Cinzel', serif;
-  font-size: 1.5rem;
-}
-
-.defeat {
-  color: #ff4757;
-  font-family: 'Cinzel', serif;
-  font-size: 1.5rem;
-}
-
-.gameover-players {
-  margin: 1.5rem 0;
-  text-align: left;
-
-  h3 {
-    font-family: 'Cinzel', serif;
-    color: white;
-    margin-bottom: 0.5rem;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-
-    &.dead {
-      opacity: 0.5;
-    }
-  }
-
-  .player-name {
-    font-weight: bold;
-    flex: 1;
-  }
-
-  .player-role {
-    color: #aaa;
-    flex: 1;
-    text-align: center;
-  }
-
-  .player-team {
-    flex: 0.5;
-    text-align: center;
-    font-size: 0.8rem;
-    color: #666;
-    text-transform: capitalize;
-  }
-
-  .player-status {
-    flex: 0.5;
-    text-align: right;
-    font-size: 0.85rem;
-    color: #888;
-  }
-
-  .player-name i {
-    margin-right: 4px;
-    font-size: 0.8rem;
-  }
-}
-
-.neutral-winners {
-  margin: 1rem 0;
-  padding: 10px;
-  background: rgba(218, 165, 32, 0.1);
-  border-radius: 5px;
-  border: 1px solid rgba(218, 165, 32, 0.3);
-
-  .neutral-winner-item {
-    color: #daa520;
-    font-size: 0.9rem;
-    padding: 4px 0;
-  }
-}
-
-.gameover-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.gameover-btn {
-  font-size: 1rem;
-  padding: 0.65rem 1.5rem;
-}
-
-.gameover-close-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ccc;
-  font-size: 0.9rem;
-  padding: 0.65rem 1.5rem;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
-}
-
-// Confetti
-.confetti-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1001;
+  animation: go-fade-in 0.8s ease-out;
+  backdrop-filter: blur(8px);
   overflow: hidden;
 }
 
-.confetti-piece {
+// Halo lumineux derriere le container
+.go-halo {
   position: absolute;
-  top: -20px;
-  width: 10px;
-  height: 10px;
-  opacity: 0.8;
-  animation: confettiFall linear forwards;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--halo-color, #fff) 0%, transparent 70%);
+  opacity: 0.06;
+  animation: go-halo-pulse 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes confettiFall {
-  0% {
-    transform: translateY(0) rotate(0deg);
+// Container principal
+.go-container {
+  text-align: center;
+  max-width: 560px;
+  width: 92%;
+  background: rgba(8, 8, 18, 0.95);
+  border-radius: 20px;
+  padding: 2rem 2rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 0, 0, 0.4);
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transform: scale(0.92) translateY(10px);
+  filter: blur(6px);
+  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &.go-visible {
     opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(720deg);
-    opacity: 0;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
   }
 }
 
-@keyframes fadeIn {
+// Header — equipe gagnante
+.go-header {
+  margin-bottom: 1.2rem;
+}
+
+.go-icon-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--ring-color, #fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  animation: go-ring-pulse 2.5s ease-in-out infinite;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--ring-color, #fff) 30%, transparent);
+
+  i { font-size: 28px; }
+}
+
+.go-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  margin: 0;
+  letter-spacing: 2px;
+  animation: go-title-in 0.8s ease-out 0.4s both;
+}
+
+.go-subtitle {
+  color: #888;
+  font-size: 0.95rem;
+  margin: 4px 0 0;
+  animation: go-fade-up 0.6s ease-out 0.6s both;
+}
+
+// Victoire / Defaite perso
+.go-personal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  border-radius: 30px;
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin: 0.8rem 0;
+  animation: go-fade-up 0.5s ease-out 0.8s both;
+
+  &.go-win {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    i { color: #ffd700; }
+  }
+
+  &.go-loss {
+    color: #ff4757;
+    background: rgba(255, 71, 87, 0.08);
+    border: 1px solid rgba(255, 71, 87, 0.15);
+    i { color: #ff4757; }
+  }
+}
+
+// Stats rapides
+.go-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 1rem 0;
+  animation: go-fade-up 0.5s ease-out 1s both;
+}
+
+.go-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.go-stat-value {
+  font-family: 'Cinzel', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.go-stat-label {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.go-stat-divider {
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+// Gagnants neutres
+.go-neutrals {
+  margin: 0.8rem 0;
+  padding: 10px 14px;
+  background: rgba(218, 165, 32, 0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(218, 165, 32, 0.2);
+  animation: go-fade-up 0.5s ease-out 0.9s both;
+}
+
+.go-neutral-item {
+  color: #daa520;
+  font-size: 0.85rem;
+  padding: 3px 0;
+  i { margin-right: 6px; }
+  strong { color: #f0c040; }
+}
+
+// Recap par equipe
+.go-recap {
+  text-align: left;
+  margin: 1rem 0;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s ease-out;
+
+  &.go-recap-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.go-recap-title {
+  font-family: 'Cinzel', serif;
+  color: #777;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 10px;
+}
+
+.go-team-group {
+  margin-bottom: 10px;
+
+  &.go-team-winner {
+    .go-team-header {
+      background: rgba(255, 255, 255, 0.03);
+    }
+  }
+}
+
+.go-team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  border-left: 3px solid;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+
+  .fa-trophy { font-size: 0.75rem; }
+}
+
+.go-player-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  animation: go-row-in 0.3s ease-out both;
+
+  &.go-player-dead {
+    opacity: 0.45;
+  }
+
+  &.go-player-neutral-win {
+    background: rgba(218, 165, 32, 0.05);
+  }
+}
+
+.go-player-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  i { font-size: 0.75rem; }
+}
+
+.go-me-badge {
+  font-size: 0.6rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #aaa;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.go-player-role {
+  flex: 0.8;
+  text-align: center;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.go-player-status {
+  flex: 0.6;
+  text-align: right;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+
+  &.alive {
+    color: #78ff78;
+    i { font-size: 0.6rem; }
+  }
+
+  &.dead {
+    color: #666;
+    i { font-size: 0.6rem; }
+  }
+}
+
+// Boutons
+.go-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 1.2rem;
+  animation: go-fade-up 0.5s ease-out 1.5s both;
+}
+
+.go-btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+
+  &:active { transform: scale(0.97); }
+}
+
+.go-btn-primary {
+  background: linear-gradient(135deg, #2f82ff 0%, #0d5fcc 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(47, 130, 255, 0.3);
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(47, 130, 255, 0.45);
+    transform: translateY(-1px);
+  }
+
+  i { margin-right: 6px; }
+}
+
+.go-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #999;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+  }
+}
+
+// === PARTICLES ===
+.go-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.go-particle {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: go-particle-rise linear infinite;
+}
+
+.go-particles-victory .go-particle {
+  background: radial-gradient(circle, #ffd700, #ff8c00);
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
+}
+
+.go-particles-defeat .go-particle {
+  background: radial-gradient(circle, #ff4444, #8b0000);
+  box-shadow: 0 0 4px rgba(255, 0, 0, 0.3);
+  animation-name: go-particle-fall;
+  top: -10px;
+  bottom: auto;
+}
+
+.go-particles-neutral .go-particle {
+  background: radial-gradient(circle, #9370db, #6a0dad);
+  box-shadow: 0 0 6px rgba(147, 112, 219, 0.4);
+  animation-name: go-particle-float;
+}
+
+// === KEYFRAMES ===
+@keyframes go-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes pulseGlow {
-  0%, 100% { filter: drop-shadow(0 0 8px currentColor); }
-  50% { filter: drop-shadow(0 0 20px currentColor); }
+@keyframes go-halo-pulse {
+  0%, 100% { opacity: 0.06; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes go-ring-pulse {
+  0%, 100% { box-shadow: 0 0 20px color-mix(in srgb, var(--ring-color, #fff) 30%, transparent); }
+  50% { box-shadow: 0 0 35px color-mix(in srgb, var(--ring-color, #fff) 50%, transparent); }
+}
+
+@keyframes go-title-in {
+  from { opacity: 0; transform: scale(0.8); filter: blur(4px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes go-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes go-row-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes go-particle-rise {
+  0% { opacity: 0; transform: translateY(0) translateX(0); }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.3; }
+  100% { opacity: 0; transform: translateY(-100vh) translateX(var(--drift, 0px)); }
+}
+
+@keyframes go-particle-fall {
+  0% { opacity: 0; transform: translateY(0) translateX(0) rotate(0deg); }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.15; }
+  100% { opacity: 0; transform: translateY(100vh) translateX(var(--drift, 0px)) rotate(180deg); }
+}
+
+@keyframes go-particle-float {
+  0% { opacity: 0; transform: translateY(0) translateX(0); }
+  25% { opacity: 0.6; transform: translateY(-25vh) translateX(calc(var(--drift, 0px) * 0.5)); }
+  50% { opacity: 0.4; transform: translateY(-50vh) translateX(var(--drift, 0px)); }
+  75% { opacity: 0.3; transform: translateY(-75vh) translateX(calc(var(--drift, 0px) * 0.5)); }
+  100% { opacity: 0; transform: translateY(-100vh) translateX(0); }
+}
+
+// === RESPONSIVE ===
+@media (max-width: 768px) {
+  .go-container {
+    padding: 1.5rem 1.2rem;
+    max-width: 95%;
+  }
+
+  .go-title {
+    font-size: 1.5rem;
+  }
+
+  .go-icon-ring {
+    width: 56px;
+    height: 56px;
+    i { font-size: 22px; }
+  }
+
+  .go-stats {
+    gap: 0;
+  }
+
+  .go-stat { padding: 0 14px; }
+
+  .go-stat-value { font-size: 1.3rem; }
+
+  .go-player-row {
+    padding: 5px 6px;
+  }
+
+  .go-buttons {
+    flex-direction: column;
+    .go-btn { width: 100%; }
+  }
 }
