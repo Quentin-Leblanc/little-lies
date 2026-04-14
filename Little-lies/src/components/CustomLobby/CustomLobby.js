@@ -148,7 +148,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
       {/* UI Panel */}
       <div className="lobby-panel">
         <div className="lobby-panel-inner">
-          <h1 className="lobby-title">NOT ME</h1>
+          <h1 className="lobby-title">AMONG LIARS</h1>
           <p className="lobby-subtitle">Salon multijoueur</p>
 
           {/* Profile badge / Login */}

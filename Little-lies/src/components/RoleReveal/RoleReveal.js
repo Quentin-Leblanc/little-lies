@@ -221,7 +221,7 @@ const RoleReveal = ({ onComplete }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="loading-title">Not Me</p>
+            <p className="loading-title">Among Liars</p>
             <AnimatePresence mode="wait">
               <motion.p
                 className="loading-text"
@@ -252,7 +252,7 @@ const RoleReveal = ({ onComplete }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="loading-title">Not Me</p>
+            <p className="loading-title">Among Liars</p>
             <p className="loading-text">En attente des joueurs...</p>
             {/* Player dots */}
             <div className="waiting-players-dots">

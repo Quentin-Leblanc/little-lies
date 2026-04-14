@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { getGameCount } from '../../utils/GameMetrics';
 import './Survey.scss';
 
-const SURVEY_STORAGE_KEY = 'notme_survey_responses';
+const SURVEY_STORAGE_KEY = 'amongliars_survey_responses';
 const SURVEY_FREQUENCY = 3; // Show every N games
 
 const RATINGS = [

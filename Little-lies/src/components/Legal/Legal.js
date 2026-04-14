@@ -13,13 +13,13 @@ const Legal = ({ onClose }) => {
 
           <section>
             <h3><i className="fas fa-copyright"></i> Propri&eacute;t&eacute;</h3>
-            <p>&copy; 2025 Quentin Leblanc &mdash; Not Me</p>
-            <p>Tous droits r&eacute;serv&eacute;s. Not Me est un jeu ind&eacute;pendant de d&eacute;duction sociale multijoueur.</p>
+            <p>&copy; 2025 Quentin Leblanc &mdash; Among Liars</p>
+            <p>Tous droits r&eacute;serv&eacute;s. Among Liars est un jeu ind&eacute;pendant de d&eacute;duction sociale multijoueur.</p>
           </section>
 
           <section>
             <h3><i className="fas fa-shield-halved"></i> Politique de confidentialit&eacute;</h3>
-            <p>Not Me collecte les donn&eacute;es suivantes :</p>
+            <p>Among Liars collecte les donn&eacute;es suivantes :</p>
             <ul>
               <li><strong>Pseudo</strong> &mdash; choisi par le joueur, utilis&eacute; uniquement en jeu</li>
               <li><strong>Statistiques de jeu</strong> &mdash; r&eacute;sultats de parties, XP (stock&eacute;s en base de donn&eacute;es si connect&eacute;, sinon en local)</li>
@@ -66,10 +66,10 @@ const Legal = ({ onClose }) => {
 
           <section>
             <h3><i className="fas fa-info-circle"></i> Avertissement</h3>
-            <p>Not Me est un projet ind&eacute;pendant. Il n'est pas affili&eacute; &agrave; Town of Salem, Mafia, ou tout autre jeu de d&eacute;duction sociale existant.</p>
+            <p>Among Liars est un projet ind&eacute;pendant. Il n'est pas affili&eacute; &agrave; Town of Salem, Mafia, ou tout autre jeu de d&eacute;duction sociale existant.</p>
           </section>
 
-          <p className="legal-version">Not Me v0.1.0</p>
+          <p className="legal-version">Among Liars v0.1.0</p>
         </div>
       </div>
     </div>

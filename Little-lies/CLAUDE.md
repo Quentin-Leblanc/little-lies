@@ -1,4 +1,4 @@
-# Not Me - Claude Code Configuration
+# Among Liars - Claude Code Configuration
 
 ## Permissions
 
@@ -20,7 +20,7 @@ Claude Code is allowed to run the following without asking for confirmation:
 
 ## Project Overview
 
-Multiplayer social deduction game — Not Me.
+Multiplayer social deduction game — Among Liars.
 
 - **Stack**: React 18, React Three Fiber, PlayroomKit, Framer Motion, SASS
 - **Multiplayer**: PlayroomKit (JoinPlayroom) handles networking/lobby/rooms

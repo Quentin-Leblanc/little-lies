@@ -41,7 +41,7 @@ const Menu = () => {
   return (
     <div className="menu-wrapper">
       <div className="menu-bar">
-        <h1 className="menu-game-title">Not Me</h1>
+        <h1 className="menu-game-title">Among Liars</h1>
         <div className="menu-lobby-code" onClick={copyCode} title="Cliquer pour copier">
           <span className="menu-code-value">{roomCode || '...'}</span>
           <i className="fas fa-copy menu-code-copy"></i>
@@ -181,7 +181,7 @@ const HelpDialog = ({ onClose }) => {
         <div className="help-dialog-content">
           <h3>Comment jouer ?</h3>
           <p style={{color:'#bbb',fontSize:'13px',lineHeight:'1.6',marginBottom:'12px'}}>
-            Not Me est un jeu de déduction sociale. Chaque joueur reçoit un rôle secret.
+            Among Liars est un jeu de déduction sociale. Chaque joueur reçoit un rôle secret.
             Le <strong style={{color:'#78ff78'}}>Village</strong> doit identifier et éliminer les menaces.
             La <strong style={{color:'#ff4444'}}>Mafia</strong> élimine les villageois la nuit en restant discrète.
             Les <strong style={{color:'#9370db'}}>Neutres</strong> ont leurs propres objectifs.

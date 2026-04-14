@@ -3,7 +3,7 @@
  * Historique des 50 dernieres parties. Pas de service externe.
  */
 
-const STORAGE_KEY = 'notme_game_metrics';
+const STORAGE_KEY = 'amongliars_game_metrics';
 const MAX_HISTORY = 50;
 
 // Collect metrics from final game state
