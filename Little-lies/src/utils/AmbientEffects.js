@@ -21,10 +21,11 @@ const NIGHT_TEXTS = [
 
 const AmbientEffects = () => {
   const { game, CONSTANTS } = useGameEngine();
-  const isNight = game.phase === CONSTANTS.PHASE.NIGHT;
+  const isNight = game.phase === CONSTANTS.PHASE.NIGHT || game.phase === CONSTANTS.PHASE.NIGHT_TRANSITION;
   const isExecution = game.phase === CONSTANTS.PHASE.EXECUTION;
   const isVoting = game.phase === CONSTANTS.PHASE.VOTING;
-  const isDay = game.isDay && !isExecution && !isVoting;
+  const isNightTransition = game.phase === CONSTANTS.PHASE.NIGHT_TRANSITION;
+  const isDay = game.isDay && !isExecution && !isVoting && !isNightTransition;
 
   // Pick a random night text per night cycle
   const nightText = useMemo(() => {

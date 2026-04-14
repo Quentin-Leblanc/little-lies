@@ -5,11 +5,12 @@ import trad from '../trad/roles.json';
 
 const GameEngineContext = React.createContext();
 
-// Phase durations (ms)
+// Phase durations (ms) — tuned for real multiplayer gameplay
 const DURATIONS = {
   NIGHT: 30000,
-  DEATH_REPORT: 5000,
-  DISCUSSION: 15000,
+  NIGHT_TRANSITION: 2000,   // visual fade between day/night
+  DEATH_REPORT: 7000,       // 7s to read deaths (was 5s)
+  DISCUSSION: 30000,        // 30s to discuss (was 15s)
   VOTING: 30000,
   DEFENSE: 20000,
   JUDGMENT: 15000,
@@ -22,6 +23,7 @@ const DURATIONS = {
 // All game phases in order
 const PHASE = {
   NIGHT: 'NIGHT',
+  NIGHT_TRANSITION: 'NIGHT_TRANSITION',
   DEATH_REPORT: 'DEATH_REPORT',
   DISCUSSION: 'DISCUSSION',
   VOTING: 'VOTING',
@@ -44,18 +46,35 @@ const STATUS = {
 // Phase labels for UI display
 const PHASE_LABELS = {
   [PHASE.NIGHT]: 'Nuit',
+  [PHASE.NIGHT_TRANSITION]: 'La nuit tombe...',
   [PHASE.DEATH_REPORT]: 'Annonce des morts',
   [PHASE.DISCUSSION]: 'Discussion',
   [PHASE.VOTING]: 'Vote',
-  [PHASE.DEFENSE]: 'Défense',
+  [PHASE.DEFENSE]: 'D\u00e9fense',
   [PHASE.JUDGMENT]: 'Jugement',
   [PHASE.LAST_WORDS]: 'Derniers mots',
-  [PHASE.EXECUTION]: 'Exécution',
+  [PHASE.EXECUTION]: 'Ex\u00e9cution',
   [PHASE.NO_LYNCH]: 'Pas de lynchage',
-  [PHASE.SPARED]: 'Épargné',
+  [PHASE.SPARED]: '\u00c9pargn\u00e9',
+};
+
+// Phase icons for HUD
+const PHASE_ICONS = {
+  [PHASE.NIGHT]: 'fa-moon',
+  [PHASE.NIGHT_TRANSITION]: 'fa-moon',
+  [PHASE.DEATH_REPORT]: 'fa-skull',
+  [PHASE.DISCUSSION]: 'fa-comments',
+  [PHASE.VOTING]: 'fa-gavel',
+  [PHASE.DEFENSE]: 'fa-shield',
+  [PHASE.JUDGMENT]: 'fa-scale-balanced',
+  [PHASE.LAST_WORDS]: 'fa-scroll',
+  [PHASE.EXECUTION]: 'fa-skull-crossbones',
+  [PHASE.NO_LYNCH]: 'fa-ban',
+  [PHASE.SPARED]: 'fa-dove',
 };
 
 const DAY_PHASES = [PHASE.DEATH_REPORT, PHASE.DISCUSSION, PHASE.VOTING, PHASE.DEFENSE, PHASE.JUDGMENT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.NO_LYNCH, PHASE.SPARED];
+const INFO_PHASES = [PHASE.DEATH_REPORT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.NO_LYNCH, PHASE.SPARED, PHASE.NIGHT_TRANSITION];
 
 // Exported constants
 const CONSTANTS = {
@@ -63,7 +82,9 @@ const CONSTANTS = {
   STATUS,
   DURATIONS,
   PHASE_LABELS,
+  PHASE_ICONS,
   DAY_PHASES,
+  INFO_PHASES,
   // Legacy compat for components not yet updated
   DURATION_DAY: DURATIONS.DISCUSSION,
   DURATION_NIGHT: DURATIONS.NIGHT,
@@ -116,6 +137,7 @@ export const GameEngineProvider = ({ children }) => {
     status: STATUS.SETUP,
     phase: PHASE.NIGHT,
     timer: DURATIONS.NIGHT,
+    phaseStartedAt: null,
     isGameStarted: false,
     isGameSetup: true,
     isDay: false,
@@ -286,11 +308,13 @@ export const GameEngineProvider = ({ children }) => {
     setReadyPlayers([]);
 
     // Game starts at Day 1 (Discussion) — players have no info yet, can /skip to night
+    // First day discussion is shorter (15s) since there's no info to discuss
     setGame({
       ...game,
       status: STATUS.STARTED,
       phase: PHASE.DISCUSSION,
-      timer: getDuration(game, 'DISCUSSION'),
+      timer: 15000,
+      phaseStartedAt: Date.now(),
       isGameStarted: true,
       isGameSetup: false,
       isDay: true,
@@ -585,9 +609,13 @@ export const GameEngineProvider = ({ children }) => {
       }
 
       case PHASE.NO_LYNCH:
-        // After announcement, go to night
-        // Night message removed from chat
-        nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
+        // After announcement, go to night transition
+        nextGame = { ...nextGame, phase: PHASE.NIGHT_TRANSITION, timer: dur('NIGHT_TRANSITION'), accusedId: null };
+        break;
+
+      case PHASE.NIGHT_TRANSITION:
+        // Visual fade done, start actual night
+        nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false };
         break;
 
       case PHASE.DEFENSE:
@@ -616,10 +644,9 @@ export const GameEngineProvider = ({ children }) => {
       }
 
       case PHASE.SPARED: {
-        // After spared announcement, go to night
-        // Night message removed from chat
+        // After spared announcement, go to night transition
         resetTrial();
-        nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
+        nextGame = { ...nextGame, phase: PHASE.NIGHT_TRANSITION, timer: dur('NIGHT_TRANSITION'), accusedId: null };
         break;
       }
 
@@ -631,16 +658,15 @@ export const GameEngineProvider = ({ children }) => {
         executeAccused();
         const winnerAfterExec = checkWinCondition();
         if (winnerAfterExec) { endGame(winnerAfterExec); return; }
-        // After execution, go to night
-        // Night message removed from chat
+        // After execution, go to night transition
         resetTrial();
-        nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false, accusedId: null };
+        nextGame = { ...nextGame, phase: PHASE.NIGHT_TRANSITION, timer: dur('NIGHT_TRANSITION'), accusedId: null };
         break;
 
       default: break;
     }
 
-    setGame(nextGame);
+    setGame({ ...nextGame, phaseStartedAt: Date.now() });
   };
 
   // --- Main game loop (host only) ---
@@ -664,6 +690,7 @@ export const GameEngineProvider = ({ children }) => {
             ...prev,
             phase: PHASE.DEFENSE,
             timer: dur('DEFENSE'),
+            phaseStartedAt: Date.now(),
             accusedId,
             trialsToday: prev.trialsToday + 1,
           }));
@@ -711,15 +738,15 @@ export const GameEngineProvider = ({ children }) => {
     const majority = Math.floor(aliveCount / 2) + 1;
 
     if (skipVoteCount >= majority) {
-      // Skip vote message removed from chat
+      // Skip vote — go through night transition
       resetTrial();
       setGame({
         ...game,
-        phase: PHASE.NIGHT,
-        timer: getDuration(game, 'NIGHT'),
-        isDay: false,
+        phase: PHASE.NIGHT_TRANSITION,
+        timer: getDuration(game, 'NIGHT_TRANSITION'),
         accusedId: null,
         skipVotes: [],
+        phaseStartedAt: Date.now(),
       });
     }
   }, [skipVoteCount]);
