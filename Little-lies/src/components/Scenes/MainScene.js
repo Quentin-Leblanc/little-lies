@@ -360,10 +360,10 @@ useGLTF.preload('/models/road.glb');
 
 const VillageCenter = () => (
   <group>
-    {/* Puits au centre de la place */}
-    <LowPolyWell position={[0, 0, 0]} scale={1.2} />
-    {/* Fontaine derrière les maisons */}
-    <KenneyModel path="/models/fountain-round-detail.glb" position={[-12, 0, 4]} scale={1.5} />
+    {/* Fontaine au centre de la place */}
+    <KenneyModel path="/models/fountain-round-detail.glb" position={[0, 0, 0]} scale={1.8} />
+    {/* Puits KayKit à côté */}
+    <KenneyModel path="/models/kaykit/building_well_red.gltf" position={[-5, 0, 3]} scale={2.5} />
   </group>
 );
 
@@ -831,8 +831,7 @@ const Village = React.memo(({ isDay }) => (
       <LowPolyTree key={`tree-${i}`} position={pos} scale={0.7 + (i % 4) * 0.2} variant={i} />
     ))}
 
-    {/* ——— DECORATIONS : puits, charrette, caisses ——— */}
-    <KenneyModel path="/models/kaykit/building_well_red.gltf" position={[-6, 0, -3]} scale={3} />
+    {/* ——— DECORATIONS : charrette, caisses ——— */}
     <LowPolyCart position={[7, 0, -3]} rotation={[0, -0.8, 0]} scale={1.1} />
     <LowPolyCrates position={[6, 0, 3]} scale={1.1} />
     <LowPolyCrates position={[-7, 0, -8]} scale={0.9} />

@@ -366,10 +366,14 @@
 .death-report-safe {
   font-family: 'Cinzel', serif;
   font-size: 1.6rem;
-  color: rgba(180, 200, 230, 0.9);
-  text-shadow: 0 0 12px rgba(100, 150, 200, 0.3);
+  color: #1a3a1a;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2);
   text-align: center;
   letter-spacing: 2px;
+  background: rgba(120, 255, 120, 0.12);
+  padding: 12px 28px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
 }
 
 @keyframes death-report-anim {
@@ -479,9 +483,13 @@
 .night-text-content {
   font-family: 'Cinzel', serif;
   font-size: 36px;
-  color: rgba(180, 190, 220, 0.9);
+  color: #111;
   letter-spacing: 4px;
-  text-shadow: 0 0 20px rgba(100, 120, 180, 0.4);
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  padding: 14px 36px;
+  border-radius: 12px;
 }
 
 .night-text-ambiance {
