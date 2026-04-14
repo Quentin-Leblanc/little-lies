@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { useMultiplayerState, getRoomCode } from 'playroomkit';
 import trad from '../../trad/roles.json';
 import Audio from '../../utils/AudioManager';
+import Legal from '../Legal/Legal';
 
 import './Menu.scss';
 
@@ -10,6 +11,7 @@ const Menu = () => {
   const [showLogs, setShowLogs] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
   const [roomCode, setRoomCode] = useState('');
   const [muted, setMuted] = useState(Audio.isMuted());
 
@@ -62,16 +64,18 @@ const Menu = () => {
           roomCode={roomCode}
           onClose={() => setShowMenu(false)}
           onQuit={handleQuitGame}
+          onShowLegal={() => { setShowMenu(false); setShowLegal(true); }}
         />,
         document.body
       )}
       {showLogs && ReactDOM.createPortal(<LogDialog messages={filteredLogs} onClose={() => setShowLogs(false)} />, document.body)}
       {showHelp && ReactDOM.createPortal(<HelpDialog onClose={() => setShowHelp(false)} />, document.body)}
+      {showLegal && ReactDOM.createPortal(<Legal onClose={() => setShowLegal(false)} />, document.body)}
     </div>
   );
 };
 
-const MenuDialog = ({ roomCode, onClose, onQuit }) => {
+const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
   const [copied, setCopied] = useState(false);
   const [volume, setVolume] = useState(Audio.getVolume());
   const [muted, setMuted] = useState(Audio.isMuted());
@@ -126,6 +130,9 @@ const MenuDialog = ({ roomCode, onClose, onQuit }) => {
               />
             </div>
           </div>
+          <button onClick={onShowLegal} className="legal-btn">
+            <i className="fas fa-scale-balanced"></i> Mentions l&eacute;gales
+          </button>
           <button onClick={onQuit} className="quit-game-btn">
             <i className="fas fa-sign-out-alt"></i> Quitter la partie
           </button>
