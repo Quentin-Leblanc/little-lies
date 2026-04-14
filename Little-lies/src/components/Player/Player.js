@@ -6,7 +6,7 @@ import PlayerActions from '../PlayerActions/PlayerActions';
 import './Player.scss';
 
 const Player = () => {
-    const { t } = useTranslation(['game', 'common']);
+    const { t } = useTranslation(['game', 'common', 'roles']);
     const { getMe, getPlayers, setPlayers } = useGameEngine();
     const { getMyNotifications } = useEvents();
     const me = getMe();
@@ -67,7 +67,7 @@ const Player = () => {
                         <div key={p.id} className="team-member" style={{ opacity: p.isAlive ? 1 : 0.4 }}>
                             <span style={{ color: p.profile?.color || '#ccc' }}>{p.profile?.name}</span>
                             <span className="team-member-role" style={{ color: p.character?.couleur || '#888' }}>
-                                {p.character?.label}
+                                {t(`roles:${p.character?.key}.label`, { defaultValue: p.character?.label })}
                             </span>
                             {!p.isAlive && <span className="team-member-dead">{t('common:dead').toLowerCase()}</span>}
                         </div>
@@ -94,15 +94,15 @@ const Player = () => {
                     <>
                         <div className="role-name" style={{ color: me.character.couleur }}>
                             {me.character.icon && <i className={`fas ${me.character.icon}`}></i>}
-                            <h2>{me.character.label}</h2>
+                            <h2>{t(`roles:${me.character.key}.label`, { defaultValue: me.character.label })}</h2>
                         </div>
 
                         <h4 className="role-section-title"><i className="fas fa-info-circle"></i> Description</h4>
-                        <p className="role-description">{me.character.description}</p>
+                        <p className="role-description">{t(`roles:${me.character.key}.description`, { defaultValue: me.character.description })}</p>
 
-                        <h4 className="role-section-title"><i className="fas fa-crosshairs"></i> Objectif</h4>
+                        <h4 className="role-section-title"><i className="fas fa-crosshairs"></i> {t('game:role_sections.objective', { defaultValue: 'Objectif' })}</h4>
                         <div className="role-objective">
-                            <span>{me.character.objectif}</span>
+                            <span>{t(`roles:${me.character.key}.objectif`, { defaultValue: me.character.objectif })}</span>
                             {execTarget && (
                                 <div className="exec-target">
                                     <i className="fas fa-bullseye"></i> Cible : <strong>{execTarget.profile.name}</strong>
@@ -114,9 +114,9 @@ const Player = () => {
                         <div className="role-actions">
                             {me.character.actions?.length > 0 ? (
                                 <ul>
-                                    {me.character.actions.map(({ label, description }, index) => (
+                                    {me.character.actions.map((action, index) => (
                                         <li key={index}>
-                                            <strong>{label}:</strong> {description}
+                                            <strong>{t(`roles:${me.character.key}.actions.${action.type}.label`, { defaultValue: action.label })}:</strong> {t(`roles:${me.character.key}.actions.${action.type}.description`, { defaultValue: action.description })}
                                         </li>
                                     ))}
                                 </ul>

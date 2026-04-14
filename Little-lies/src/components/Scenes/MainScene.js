@@ -278,41 +278,58 @@ const LowPolyChapel = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
   </group>
 );
 
-const LowPolyGallows = ({ position = [0, 0, 0], scale = 1 }) => (
+// Village well — central piece
+const LowPolyWell = ({ position = [0, 0, 0], scale = 1 }) => (
   <group position={position} scale={scale}>
-    {/* Platform */}
-    <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
-      <boxGeometry args={[2.5, 0.3, 2]} />
-      <meshStandardMaterial color="#8B6914" flatShading />
+    {/* Stone base (cylinder) */}
+    <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
+      <cylinderGeometry args={[1, 1.1, 1, 8]} />
+      <meshStandardMaterial color="#9a8a72" flatShading />
     </mesh>
-    {/* Uprights */}
-    <mesh position={[-0.8, 1.8, 0]} castShadow>
-      <boxGeometry args={[0.15, 3.3, 0.15]} />
-      <meshStandardMaterial color="#5a3a1a" flatShading />
+    {/* Inner dark (water) */}
+    <mesh position={[0, 0.95, 0]}>
+      <cylinderGeometry args={[0.75, 0.75, 0.15, 8]} />
+      <meshStandardMaterial color="#1a2a3a" flatShading />
     </mesh>
-    <mesh position={[0.8, 1.8, 0]} castShadow>
-      <boxGeometry args={[0.15, 3.3, 0.15]} />
-      <meshStandardMaterial color="#5a3a1a" flatShading />
+    {/* Stone rim */}
+    <mesh position={[0, 1.05, 0]} castShadow>
+      <torusGeometry args={[0.95, 0.12, 6, 8]} />
+      <meshStandardMaterial color="#b0a080" flatShading />
     </mesh>
-    {/* Crossbeam */}
-    <mesh position={[0, 3.4, 0]} castShadow>
-      <boxGeometry args={[1.8, 0.12, 0.12]} />
-      <meshStandardMaterial color="#5a3a1a" flatShading />
-    </mesh>
-    {/* Rope */}
-    <mesh position={[0.3, 2.8, 0]}>
-      <cylinderGeometry args={[0.02, 0.02, 1.2, 4]} />
-      <meshStandardMaterial color="#8a7a5a" flatShading />
-    </mesh>
-    {/* Noose loop */}
-    <mesh position={[0.3, 2.15, 0]} rotation={[Math.PI / 2, 0, 0]}>
-      <torusGeometry args={[0.08, 0.02, 4, 6]} />
-      <meshStandardMaterial color="#8a7a5a" flatShading />
-    </mesh>
-    {/* Steps */}
-    <mesh position={[1.1, 0.08, 0.5]} castShadow>
-      <boxGeometry args={[0.6, 0.15, 0.8]} />
+    {/* Left pillar */}
+    <mesh position={[-0.7, 1.8, 0]} castShadow>
+      <boxGeometry args={[0.12, 1.6, 0.12]} />
       <meshStandardMaterial color="#6b4226" flatShading />
+    </mesh>
+    {/* Right pillar */}
+    <mesh position={[0.7, 1.8, 0]} castShadow>
+      <boxGeometry args={[0.12, 1.6, 0.12]} />
+      <meshStandardMaterial color="#6b4226" flatShading />
+    </mesh>
+    {/* Roof beam */}
+    <mesh position={[0, 2.6, 0]} castShadow>
+      <boxGeometry args={[1.6, 0.1, 0.14]} />
+      <meshStandardMaterial color="#5a3a1a" flatShading />
+    </mesh>
+    {/* Roof (small triangle) */}
+    <mesh position={[0, 2.85, 0]} castShadow>
+      <coneGeometry args={[0.9, 0.5, 4]} />
+      <meshStandardMaterial color="#8B4513" flatShading />
+    </mesh>
+    {/* Rope winch */}
+    <mesh position={[0, 2.3, 0]} rotation={[0, 0, Math.PI / 2]}>
+      <cylinderGeometry args={[0.06, 0.06, 1.2, 6]} />
+      <meshStandardMaterial color="#6b4226" flatShading />
+    </mesh>
+    {/* Bucket rope */}
+    <mesh position={[0, 1.6, 0]}>
+      <cylinderGeometry args={[0.015, 0.015, 1.3, 4]} />
+      <meshStandardMaterial color="#8a7a5a" flatShading />
+    </mesh>
+    {/* Bucket */}
+    <mesh position={[0, 0.9, 0]} castShadow>
+      <cylinderGeometry args={[0.12, 0.15, 0.25, 6]} />
+      <meshStandardMaterial color="#5a3a1a" flatShading />
     </mesh>
   </group>
 );
@@ -343,8 +360,8 @@ useGLTF.preload('/models/road.glb');
 
 const VillageCenter = () => (
   <group>
-    {/* Potence au centre de la place */}
-    <LowPolyGallows position={[0, 0, 0]} scale={1.2} />
+    {/* Puits au centre de la place */}
+    <LowPolyWell position={[0, 0, 0]} scale={1.2} />
     {/* Fontaine derrière les maisons */}
     <KenneyModel path="/models/fountain-round-detail.glb" position={[-12, 0, 4]} scale={1.5} />
   </group>
@@ -1722,8 +1739,8 @@ const checkCollision = (x, z, y, otherPlayers) => {
     const h = 3.5 * s;
     if (dx * dx + dz * dz < r * r && y < h) return true;
   }
-  // Gallows at center (radius 1.2, height ~2.5)
-  if (x * x + z * z < 1.4 && y < 2.5) return true;
+  // Well at center (radius 1.2, height ~2.8)
+  if (x * x + z * z < 1.5 && y < 2.8) return true;
   // Mountains (large radius, tall)
   for (const m of MOUNTAINS) {
     const mx = m.position[0], mz = m.position[2];

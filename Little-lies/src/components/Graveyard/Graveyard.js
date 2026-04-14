@@ -4,7 +4,7 @@ import { useGameEngine } from '../../hooks/useGameEngine';
 import './Graveyard.scss';
 
 const Graveyard = () => {
-  const { t } = useTranslation('game');
+  const { t } = useTranslation(['game', 'roles']);
   const { getPlayers } = useGameEngine();
   const [expandedId, setExpandedId] = useState(null);
 
@@ -28,7 +28,7 @@ const Graveyard = () => {
                   {player.character?.icon && <i className={`fas ${player.character.icon}`}></i>}
                   {' '}{player.profile.name}
                 </span>
-                <span className="graveyard-role">{player.character?.label}</span>
+                <span className="graveyard-role">{t(`roles:${player.character?.key}.label`, { defaultValue: player.character?.label })}</span>
               </div>
               {expandedId === player.id && player.lastWill && (
                 <div className="graveyard-will">

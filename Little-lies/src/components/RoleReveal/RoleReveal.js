@@ -70,7 +70,7 @@ const CardParticles = ({ color }) => {
 };
 
 const RoleReveal = ({ onComplete }) => {
-  const { t } = useTranslation(['setup', 'game']);
+  const { t } = useTranslation(['setup', 'game', 'roles']);
   const { getMe, getPlayers, game, markReady, readyPlayers } = useGameEngine();
   const me = getMe();
   const players = getPlayers();
@@ -318,12 +318,12 @@ const RoleReveal = ({ onComplete }) => {
             >
               <div className="card-assigned-label">{t('setup:reveal.role_assigned')}</div>
               <div className="card-name" style={{ color: role.couleur }}>
-                {role.label}
+                {t(`roles:${role.key}.label`, { defaultValue: role.label })}
               </div>
             </motion.div>
 
             <div className="card-details">
-              <p className="card-objective">{role.objectif}</p>
+              <p className="card-objective">{t(`roles:${role.key}.objectif`, { defaultValue: role.objectif })}</p>
               {execTarget && (
                 <p className="card-exec-target">
                   <i className="fas fa-bullseye"></i> Cible : {execTarget.profile.name}

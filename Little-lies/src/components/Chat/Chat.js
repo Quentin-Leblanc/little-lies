@@ -3,8 +3,6 @@ import { useMultiplayerState, me as prk_me } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../trad/i18n';
 import { useGameEngine } from '../../hooks/useGameEngine';
-import { playChatMessage } from '../../utils/AudioManager';
-
 import './chat.scss';
 
 const MESSAGE_LIMIT = 5;
@@ -278,7 +276,6 @@ function Chat(props) {
       [myName]: [...recentTimestamps, now],
     });
     setInputValues('');
-    playChatMessage();
   };
 
   // --- State checks ---

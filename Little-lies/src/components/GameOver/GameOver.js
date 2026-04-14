@@ -52,7 +52,7 @@ const Particles = ({ type }) => {
 };
 
 const GameOver = () => {
-  const { t } = useTranslation(['game', 'common']);
+  const { t } = useTranslation(['game', 'common', 'roles']);
   const { game, getPlayers, getMe, resetForNewGame } = useGameEngine();
   const { user, refreshProfile } = useAuth();
   const [_events] = useMultiplayerState('events', []);
@@ -256,7 +256,7 @@ const GameOver = () => {
                         {player.id === mePlayer?.id && <span className="go-me-badge">{t('common:you')}</span>}
                       </span>
                       <span className="go-player-role" style={{ color: player.character?.couleur || '#888' }}>
-                        {player.character?.label}
+                        {t(`roles:${player.character?.key}.label`, { defaultValue: player.character?.label })}
                       </span>
                       <span className={`go-player-status ${player.isAlive ? 'alive' : 'dead'}`}>
                         {player.isAlive ? (
