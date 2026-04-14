@@ -86,13 +86,13 @@
   &::before {
     left: -2px;
     text-shadow: 2px 0 #0ff;
-    animation: glitch-top 3s infinite linear alternate-reverse;
+    animation: glitch-top 6s infinite linear alternate-reverse;
   }
 
   &::after {
     left: 2px;
     text-shadow: -2px 0 #ff0040;
-    animation: glitch-bottom 2.5s infinite linear alternate-reverse;
+    animation: glitch-bottom 5s infinite linear alternate-reverse;
   }
 }
 

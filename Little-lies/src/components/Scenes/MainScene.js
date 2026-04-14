@@ -1960,13 +1960,13 @@ const SceneLighting = ({ isDay, isSunset = false }) => {
 
   return (
     <>
-      <ambientLight ref={ambientRef} intensity={isDay ? 0.6 : 0.08} />
+      <ambientLight ref={ambientRef} intensity={isDay ? 0.45 : 0.08} />
 
       <directionalLight
         ref={sunRef}
         position={isDay ? [15, 20, 10] : [-5, 12, 8]}
-        intensity={isDay ? 3.0 : 0.2}
-        color={isDay ? '#fff5e0' : '#6677aa'}
+        intensity={isDay ? 2.0 : 0.2}
+        color={isDay ? '#ffe8c8' : '#6677aa'}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -1981,19 +1981,19 @@ const SceneLighting = ({ isDay, isSunset = false }) => {
       <directionalLight
         ref={fillRef}
         position={isDay ? [-10, 8, -5] : [5, 6, -8]}
-        intensity={isDay ? 1.0 : 0.05}
-        color={isDay ? '#ffd4a0' : '#334466'}
+        intensity={isDay ? 0.6 : 0.05}
+        color={isDay ? '#ddc8a0' : '#334466'}
       />
 
       <hemisphereLight
-        color={isDay ? '#87CEEB' : '#1a1a3a'}
+        color={isDay ? '#8ab4cc' : '#1a1a3a'}
         groundColor={isDay ? '#8B7355' : '#0a0a15'}
-        intensity={isDay ? 0.4 : 0.05}
+        intensity={isDay ? 0.3 : 0.05}
       />
 
       {isDay && (
         <group ref={sunGlowRef} position={[40, 50, 25]}>
-          <pointLight color="#fff0cc" intensity={0.8} distance={120} />
+          <pointLight color="#fff0cc" intensity={0.5} distance={120} />
           <mesh>
             <sphereGeometry args={[3, 16, 16]} />
             <meshBasicMaterial color="#fffae0" />
@@ -2334,12 +2334,12 @@ const MainScene = () => {
             if (game.isDay) {
               const isCloudy = dayWeather === 1;
               const isMisty = dayWeather === 2;
-              const skyColor = isCloudy ? '#9ab8d4' : isMisty ? '#a8b8c8' : '#87CEEB';
+              const skyColor = isCloudy ? '#8a9fb8' : isMisty ? '#909aa8' : '#7ab8d8';
               return (
                 <>
                   <color attach="background" args={[skyColor]} />
-                  <fog attach="fog" args={[skyColor, isMisty ? 25 : 40, isMisty ? 55 : 80]} />
-                  <Sky sunPosition={[100, isCloudy ? 30 : 60, 100]} turbidity={isCloudy ? 15 : 8} rayleigh={isCloudy ? 4 : 2} />
+                  <fog attach="fog" args={[skyColor, isMisty ? 22 : isCloudy ? 30 : 40, isMisty ? 50 : isCloudy ? 65 : 80]} />
+                  <Sky sunPosition={[100, isCloudy ? 20 : isMisty ? 25 : 50, 100]} turbidity={isCloudy ? 20 : isMisty ? 12 : 8} rayleigh={isCloudy ? 5 : 2} />
                   <DayFireflies count={isCloudy ? 20 : 50} />
                   <FloatingDust count={isMisty ? 120 : 80} isDay />
                   <GroundFog isDay />
@@ -2555,7 +2555,7 @@ const MainScene = () => {
       {nightFade === 'from-black' && <div className="night-fade-from-black" />}
       {showNightText && (
         <div className="night-text-overlay">
-          <div className="night-text-content">{i18n.t('game:phases.NIGHT_TRANSITION')}</div>
+          <div className="night-text-content text-night">{i18n.t('game:phases.NIGHT_TRANSITION')}</div>
         </div>
       )}
       {showDayText && (
@@ -2565,7 +2565,7 @@ const MainScene = () => {
       )}
       {nightAmbianceMsg && (
         <div className="night-text-overlay" key={nightAmbianceMsg}>
-          <div className="night-text-content night-text-ambiance">{nightAmbianceMsg}</div>
+          <div className="night-text-content text-night night-text-ambiance">{nightAmbianceMsg}</div>
         </div>
       )}
     </div>
