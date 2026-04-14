@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, Stars, Html, useGLTF } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette, BrightnessContrast, HueSaturation, SSAO } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
@@ -120,7 +120,49 @@ const Torch = ({ position }) => {
       </group>
       {/* Point light */}
       <pointLight ref={lightRef} position={[0, 1.85, 0]} intensity={2} color="#ff8833" distance={10} castShadow />
+      {/* Smoke particles rising */}
+      <TorchSmoke position={[0, 1.9, 0]} />
     </group>
+  );
+};
+
+// Torch smoke — small rising particles
+const TorchSmoke = ({ position }) => {
+  const meshRef = useRef();
+  const count = 6;
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const offsets = useMemo(() =>
+    Array.from({ length: count }, () => ({
+      speed: 0.3 + Math.random() * 0.4,
+      drift: (Math.random() - 0.5) * 0.3,
+      phase: Math.random() * Math.PI * 2,
+      size: 0.03 + Math.random() * 0.03,
+    })), []);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.elapsedTime;
+    for (let i = 0; i < count; i++) {
+      const o = offsets[i];
+      const life = ((t * o.speed + o.phase) % 1);
+      dummy.position.set(
+        position[0] + Math.sin(t + o.phase) * o.drift,
+        position[1] + life * 1.5,
+        position[2] + Math.cos(t * 0.7 + o.phase) * o.drift
+      );
+      const s = o.size * (1 - life * 0.5);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <sphereGeometry args={[1, 4, 4]} />
+      <meshBasicMaterial color="#888888" transparent opacity={0.15} />
+    </instancedMesh>
   );
 };
 
@@ -541,6 +583,7 @@ const LowPolyFence = ({ start, end }) => {
 // Low-poly River — sinuous water strip
 // ============================================================
 const LowPolyRiver = ({ isDay }) => {
+  const meshRef = useRef();
   const points = useMemo(() => [
     new THREE.Vector3(25, 0.02, 10),
     new THREE.Vector3(18, 0.02, 12),
@@ -552,7 +595,7 @@ const LowPolyRiver = ({ isDay }) => {
     new THREE.Vector3(-25, 0.02, 20),
   ], []);
 
-  const geometry = useMemo(() => {
+  const { geometry, basePositions } = useMemo(() => {
     const verts = [];
     const indices = [];
     const width = 1.2;
@@ -571,17 +614,31 @@ const LowPolyRiver = ({ isDay }) => {
     geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
     geo.setIndex(indices);
     geo.computeVertexNormals();
-    return geo;
+    return { geometry: geo, basePositions: [...verts] };
   }, [points]);
 
+  // Animate water surface
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const positions = meshRef.current.geometry.attributes.position;
+    const t = state.clock.elapsedTime;
+    for (let i = 0; i < positions.count; i++) {
+      const baseY = basePositions[i * 3 + 1];
+      const x = basePositions[i * 3];
+      positions.array[i * 3 + 1] = baseY + Math.sin(t * 1.5 + x * 0.3 + i * 0.5) * 0.04;
+    }
+    positions.needsUpdate = true;
+  });
+
   return (
-    <mesh geometry={geometry}>
+    <mesh ref={meshRef} geometry={geometry}>
       <meshStandardMaterial
-        color={isDay ? '#4A9BD9' : '#1a3a5a'}
+        color={isDay ? '#3A8BC9' : '#1a3a5a'}
         transparent
-        opacity={0.65}
-        roughness={0.2}
-        metalness={0.1}
+        opacity={0.7}
+        roughness={0.05}
+        metalness={0.4}
+        envMapIntensity={0.8}
       />
     </mesh>
   );
@@ -821,29 +878,33 @@ const Village = React.memo(({ isDay }) => (
       <Torch key={`torch-${i}`} position={pos} />
     ))}
 
-    {/* ——— MONTAGNES en arriere-plan ——— */}
+    {/* ——— MONTAGNES KayKit en arriere-plan ——— */}
     {MOUNTAINS.map((m, i) => (
-      <LowPolyMountain key={`mountain-${i}`} position={m.position} scale={m.scale} variant={m.variant} />
+      <KenneyModel key={`mountain-${i}`} path="/models/kaykit/mountain_A_grass_trees.gltf"
+        position={m.position} scale={m.scale * 2.5} rotation={[0, i * 1.5, 0]} />
     ))}
 
-    {/* ——— ARBRES ——— */}
+    {/* ——— ARBRES KayKit (remplace les cones proceduraux) ——— */}
     {TREE_POSITIONS.map((pos, i) => (
-      <LowPolyTree key={`tree-${i}`} position={pos} scale={0.7 + (i % 4) * 0.2} variant={i} />
+      <KenneyModel key={`tree-${i}`}
+        path={i % 2 === 0 ? '/models/kaykit/tree_single_A.gltf' : '/models/kaykit/tree_single_B.gltf'}
+        position={pos} scale={2 + (i % 4) * 0.5} rotation={[0, i * 1.3, 0]} />
     ))}
 
-    {/* ——— DECORATIONS : charrette, caisses ——— */}
+    {/* ——— DECORATIONS : charrette ——— */}
     <LowPolyCart position={[7, 0, -3]} rotation={[0, -0.8, 0]} scale={1.1} />
-    <LowPolyCrates position={[6, 0, 3]} scale={1.1} />
-    <LowPolyCrates position={[-7, 0, -8]} scale={0.9} />
 
-    {/* ——— ROCHERS ——— */}
+    {/* ——— ROCHERS KayKit ——— */}
     {ROCK_POSITIONS.map((r, i) => (
-      <LowPolyRock key={`rock-${i}`} position={r.position} scale={r.scale} variant={r.variant} />
+      <KenneyModel key={`rock-${i}`} path="/models/kaykit/rock_single_A.gltf"
+        position={r.position} scale={r.scale * 3} rotation={[0, i * 2.1, 0]} />
     ))}
 
-    {/* ——— BUISSONS ——— */}
+    {/* ——— BUISSONS (ameliores) ——— */}
     {BUSH_POSITIONS.map((b, i) => (
-      <LowPolyBush key={`bush-${i}`} position={b.position} scale={b.scale} variant={b.variant} />
+      <KenneyModel key={`bush-${i}`}
+        path={i % 2 === 0 ? '/models/kaykit/tree_single_A.gltf' : '/models/kaykit/tree_single_B.gltf'}
+        position={b.position} scale={b.scale * 1.2} rotation={[0, i * 0.8, 0]} />
     ))}
 
     {/* ——— DECORS KAYKIT entre les maisons ——— */}
@@ -2302,7 +2363,7 @@ const MainScene = () => {
       <Canvas
         shadows
         camera={{ position: [0, 8, 12], fov: 50 }}
-        gl={{ antialias: true }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.9 }}
       >
         <Suspense fallback={null}>
           {/* Camera — pause: follows player, normal: cinematic */}
@@ -2445,14 +2506,27 @@ const MainScene = () => {
           {/* Post-processing */}
           <EffectComposer>
             <Bloom
-              intensity={game.isDay ? 0.2 : 0.7}
-              luminanceThreshold={game.isDay ? 0.9 : 0.5}
+              intensity={game.isDay ? 0.15 : 0.6}
+              luminanceThreshold={game.isDay ? 0.92 : 0.5}
               luminanceSmoothing={0.4}
               mipmapBlur
             />
+            <SSAO
+              radius={0.4}
+              intensity={game.isDay ? 15 : 25}
+              luminanceInfluence={0.5}
+              color="#000000"
+            />
+            <BrightnessContrast
+              brightness={game.isDay ? -0.03 : -0.05}
+              contrast={game.isDay ? 0.08 : 0.15}
+            />
+            <HueSaturation
+              saturation={game.isDay ? -0.05 : -0.15}
+            />
             <Vignette
               offset={game.isDay ? 0.3 : 0.1}
-              darkness={game.isDay ? 0.3 : 0.85}
+              darkness={game.isDay ? 0.35 : 0.85}
             />
           </EffectComposer>
         </Suspense>
