@@ -1466,7 +1466,7 @@ const ChatBubble = ({ playerId, chatMessages, dayCount }) => {
     if (playerMsgs.length > lastMsgCount.current) {
       lastMsgCount.current = playerMsgs.length;
       setVisible(true);
-      const timer = setTimeout(() => setVisible(false), 2000);
+      const timer = setTimeout(() => setVisible(false), 2500);
       return () => clearTimeout(timer);
     }
   }, [chatMessages?.length, playerId, dayCount]);
@@ -1475,14 +1475,11 @@ const ChatBubble = ({ playerId, chatMessages, dayCount }) => {
 
   return (
     <Html position={[0, 2.8, 0]} center distanceFactor={8} style={{ pointerEvents: 'none' }}>
-      <div style={{
-        fontSize: '16px',
-        color: '#78ff78',
-        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))',
-        userSelect: 'none',
-        animation: 'fadeInOut 2s ease-out forwards',
-      }}>
-        <i className="fas fa-comment"></i>
+      <div className="chat-bubble-3d">
+        <span className="chat-bubble-dot" />
+        <span className="chat-bubble-dot" />
+        <span className="chat-bubble-dot" />
+        <div className="chat-bubble-tail" />
       </div>
     </Html>
   );
@@ -2518,20 +2515,20 @@ const MainScene = () => {
       {/* Phase announcements */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
         <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 2.5s ease-out forwards' }}>
-          <div className="announcement-text">Tout le monde peut rentrer chez soi ce soir.</div>
+          <div className="announcement-text">{i18n.t('game:scene.no_lynch')}</div>
         </div>
       )}
       {phase === CONSTANTS.PHASE.SPARED && (
         <div className="scene-announcement">
           <div className="announcement-text announcement-spared">
-            {players.find(p => p.id === game.accusedId)?.profile.name || 'Le joueur'} a été épargné !
+            {i18n.t('game:scene.spared', { name: players.find(p => p.id === game.accusedId)?.profile.name || '?' })}
           </div>
         </div>
       )}
       {phase === CONSTANTS.PHASE.EXECUTION && (
         <div className="scene-announcement">
           <div className="announcement-text announcement-execution">
-            {players.find(p => p.id === game.accusedId)?.profile.name || 'Le joueur'} a été exécuté !
+            {i18n.t('game:scene.executed', { name: players.find(p => p.id === game.accusedId)?.profile.name || '?' })}
           </div>
         </div>
       )}

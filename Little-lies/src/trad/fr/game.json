@@ -155,6 +155,14 @@
     "title": "Joueurs vivants ({{alive}}/{{total}})",
     "mayor_revealed": "Maire révélé — 3 votes"
   },
+  "scene": {
+    "no_lynch": "Tout le monde peut rentrer chez soi ce soir.",
+    "spared": "{{name}} a été épargné !",
+    "executed": "{{name}} a été exécuté !"
+  },
+  "role_sections": {
+    "objective": "Objectif"
+  },
   "graveyard": {
     "title": "Cimetière",
     "empty": "Aucun mort pour l'instant."
