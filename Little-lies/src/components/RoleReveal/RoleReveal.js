@@ -214,7 +214,7 @@ const RoleReveal = ({ onComplete }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="loading-title">Among Liars</p>
+            <p className="loading-title" data-text="Among Liars">Among Liars</p>
             <AnimatePresence mode="wait">
               <motion.p
                 className="loading-text"
@@ -245,7 +245,7 @@ const RoleReveal = ({ onComplete }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="loading-title">Among Liars</p>
+            <p className="loading-title" data-text="Among Liars">Among Liars</p>
             <p className="loading-text">{t('setup:reveal.waiting_players')}</p>
             {/* Player dots */}
             <div className="waiting-players-dots">
