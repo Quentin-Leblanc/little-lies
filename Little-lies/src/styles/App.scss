@@ -60,8 +60,7 @@
       "chat";
   }
   .layout-players {
-    max-height: 30vh;
-    max-width: 100%;
+    overflow: visible;
   }
   .layout-sidebar {
     position: fixed;
@@ -111,15 +110,13 @@
 // Top-left — Menu + (Graveyard | Roles) side by side
 .layout-players {
   grid-area: players;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   padding: 6px;
   z-index: 5;
   background: none;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 45vh;
   pointer-events: auto;
 
   // Graveyard + Roles on one row — spaced from menu
