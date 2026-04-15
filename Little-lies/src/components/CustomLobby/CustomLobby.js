@@ -186,7 +186,7 @@ const OrbitCamera = () => {
 const LOBBY_ANIMS = ['SitCross', 'LieDown'];
 
 // Player seat around fire
-const PlayerSeat = ({ index, total, player, color }) => {
+const PlayerSeat = ({ index, total, player, color, isMe }) => {
   const angle = (index / Math.max(total, 1)) * Math.PI * 2;
   const r = 2.2;
   const x = Math.cos(angle) * r;
@@ -221,7 +221,9 @@ const PlayerSeat = ({ index, total, player, color }) => {
               textShadow: isGrad ? 'none' : '0 1px 4px rgba(0,0,0,0.8)',
               border: `1px solid ${borderCol}`,
             }}>
+              {isMe && <span style={{ marginRight: 5, fontSize: 10 }}>&#9668;</span>}
               <span style={nameStyle}>{player.getState?.()?.profile?.name || 'Player'}</span>
+              {isMe && <span style={{ marginLeft: 5, fontSize: 10 }}>&#9658;</span>}
             </div>
           );
         })()}
@@ -528,6 +530,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
               index={idx}
               total={playroom_players.length}
               player={player}
+              isMe={player.id === currentPlayer?.id}
               color={getColor3D(player.getState?.()?.profile?.color) || PLAYER_COLORS[idx % PLAYER_COLORS.length]}
             />
           ))}
