@@ -438,6 +438,24 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     }
   }, [canUseGradient]);
 
+  // Assign a default unique color to this player on join (synced to PlayroomKit state)
+  useEffect(() => {
+    if (!currentPlayer) return;
+    const existing = currentPlayer.getState?.()?.profile?.color;
+    // Skip if already has a color set
+    if (existing && typeof existing === 'string' && existing !== '#888') return;
+    // Find first available color not taken by others
+    const otherColors = new Set(
+      playroom_players
+        .filter(p => p.id !== currentPlayer.id)
+        .map(p => p.getState?.()?.profile?.color)
+        .filter(c => c && typeof c === 'string')
+    );
+    const available = PLAYER_COLORS.find(c => !otherColors.has(c)) || PLAYER_COLORS[0];
+    setSelectedColor(available);
+    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: available });
+  }, [currentPlayer?.id, playroom_players.length]);
+
   // Sync Supabase username
   useEffect(() => {
     if (profile?.username && currentPlayer) {
