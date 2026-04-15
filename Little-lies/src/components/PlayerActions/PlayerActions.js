@@ -32,7 +32,7 @@ const getActionTooltip = (type) => i18n.t(`game:action_tooltips.${type}`, { defa
 
 const PlayerActions = memo(function () {
   const { t } = useTranslation(['game', 'common']);
-  const { getPlayers, getMe, game, CONSTANTS, trial, setTrial, setPlayers, addChatSystem } = useGameEngine();
+  const { getPlayers, getMe, game, CONSTANTS, trial, trialRef, setTrial, setPlayers, addChatSystem } = useGameEngine();
   const Events = useEvents();
   const players = getPlayers();
   const me = getMe();
@@ -86,14 +86,16 @@ const PlayerActions = memo(function () {
   const handleVoteClick = (suspectedPlayerId) => {
     if (!me.isAlive || !isVotingPhase || hasVoted) return;
     const voteWeight = me.voteWeight || 1;
-    const newSuspects = { ...(trial.suspects || {}) };
+    // Read latest trial via ref to avoid stale state when multiple players vote
+    const latestTrial = trialRef.current || { suspects: {}, votes: {} };
+    const newSuspects = { ...(latestTrial.suspects || {}) };
     if (!newSuspects[suspectedPlayerId]) {
       newSuspects[suspectedPlayerId] = { id: suspectedPlayerId, suspectedBy: [] };
     }
     for (let i = 0; i < voteWeight; i++) {
       newSuspects[suspectedPlayerId].suspectedBy.push(me.id);
     }
-    setTrial({ ...trial, suspects: newSuspects });
+    setTrial({ ...latestTrial, suspects: newSuspects });
     const targetPlayer = players.find(p => p.id === suspectedPlayerId);
     const totalVotes = newSuspects[suspectedPlayerId]?.suspectedBy?.length || 0;
     const aliveCount = players.filter(p => p.isAlive).length;
@@ -106,7 +108,8 @@ const PlayerActions = memo(function () {
   const handleJudgmentVote = (vote) => {
     if (!me.isAlive || !isJudgmentPhase) return;
     if (me.id === game.accusedId) return;
-    setTrial({ ...trial, votes: { ...trial.votes, [me.id]: vote } });
+    const latestTrial = trialRef.current || { suspects: {}, votes: {} };
+    setTrial({ ...latestTrial, votes: { ...latestTrial.votes, [me.id]: vote } });
   };
 
   // --- Day action handler (Jailor jail) ---

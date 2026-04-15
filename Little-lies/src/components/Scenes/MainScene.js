@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, Stars, Html, useGLTF } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette, BrightnessContrast, HueSaturation } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
@@ -1199,7 +1199,7 @@ const FloatingDust = ({ count = 80, isDay = true }) => {
 // Ground fog — drifting cloud layers near the ground
 // ============================================================
 const GroundFog = ({ isDay = true }) => {
-  const count = 18;
+  const count = isDay ? 8 : 18;
   const meshRef = useRef();
   const clouds = useMemo(() => {
     const arr = [];
@@ -1244,7 +1244,7 @@ const GroundFog = ({ isDay = true }) => {
       <meshBasicMaterial
         color={isDay ? '#dde8f0' : '#1a2244'}
         transparent
-        opacity={isDay ? 0.12 : 0.25}
+        opacity={isDay ? 0.08 : 0.25}
         depthWrite={false}
       />
     </instancedMesh>
@@ -2384,7 +2384,7 @@ const MainScene = () => {
       <Canvas
         shadows
         camera={{ position: [0, 8, 12], fov: 50 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.75 }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.65 }}
       >
         <Suspense fallback={null}>
           {/* Camera — pause: follows player, normal: cinematic */}
@@ -2529,20 +2529,13 @@ const MainScene = () => {
             );
           })}
 
-          {/* Post-processing */}
+          {/* Post-processing — minimal to avoid white artifacts */}
           <EffectComposer>
             <Bloom
-              intensity={game.isDay ? 0.1 : 0.15}
-              luminanceThreshold={game.isDay ? 0.92 : 0.92}
-              luminanceSmoothing={0.3}
+              intensity={game.isDay ? 0.08 : 0.1}
+              luminanceThreshold={0.95}
+              luminanceSmoothing={0.2}
               mipmapBlur
-            />
-            <BrightnessContrast
-              brightness={game.isDay ? -0.02 : -0.02}
-              contrast={game.isDay ? 0.06 : 0.08}
-            />
-            <HueSaturation
-              saturation={game.isDay ? -0.05 : -0.15}
             />
             <Vignette
               offset={game.isDay ? 0.3 : 0.1}

@@ -180,6 +180,9 @@ export const GameEngineProvider = ({ children }) => {
     votes: {},
   });
   const trial = _trial || { suspects: {}, votes: {} };
+  // Ref for latest trial value (avoids stale state in vote handlers)
+  const trialRef = React.useRef(trial);
+  trialRef.current = trial;
   const [_readyPlayers, setReadyPlayers] = useMultiplayerState('readyPlayers', []);
   const readyPlayers = _readyPlayers || [];
 
@@ -205,6 +208,7 @@ export const GameEngineProvider = ({ children }) => {
     setPlayers,
     setGame,
     trial,
+    trialRef,
     setTrial,
   };
 
