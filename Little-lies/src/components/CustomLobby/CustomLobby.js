@@ -10,7 +10,35 @@ import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
 import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
+import { getLevel } from '../../utils/xpSystem';
 import './CustomLobby.scss';
+
+const GRADIENT_UNLOCK_LEVEL = 6;
+const GRADIENT_STORAGE_KEY = 'amongliars_gradient';
+
+// Save/load gradient preference
+const saveGradient = (grad) => {
+  try { localStorage.setItem(GRADIENT_STORAGE_KEY, JSON.stringify(grad)); } catch {}
+};
+const loadGradient = () => {
+  try { return JSON.parse(localStorage.getItem(GRADIENT_STORAGE_KEY)); } catch { return null; }
+};
+
+// Get CSS color string from a color value (supports both solid and gradient)
+const getColorCSS = (color) => {
+  if (!color) return '#888';
+  if (typeof color === 'object' && color.type === 'gradient') {
+    return `linear-gradient(135deg, ${color.color1}, ${color.color2})`;
+  }
+  return color;
+};
+
+// Get first color for Three.js (doesn't support gradients)
+const getColor3D = (color) => {
+  if (!color) return '#888';
+  if (typeof color === 'object' && color.type === 'gradient') return color.color1;
+  return color;
+};
 
 // 15 distinct player colors
 const PLAYER_COLORS = [
@@ -172,19 +200,28 @@ const PlayerSeat = ({ index, total, player, color }) => {
     <group position={[x, 0, z]} rotation={[0, lookAtAngle, 0]}>
       <Character color={color} animation={anim} scale={0.55} animOffset={index * 0.5} />
       <Html position={[0, 1.6, 0]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
-        <div style={{
-          color: color,
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          padding: '3px 10px',
-          borderRadius: '6px',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          whiteSpace: 'nowrap',
-          textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-          border: `1px solid ${color}`,
-        }}>
-          {player.getState?.()?.profile?.name || 'Player'}
-        </div>
+        {(() => {
+          const rawColor = player.getState?.()?.profile?.color;
+          const isGrad = rawColor && typeof rawColor === 'object' && rawColor.type === 'gradient';
+          const borderCol = isGrad ? rawColor.color1 : (color || '#888');
+          const nameStyle = isGrad
+            ? { background: `linear-gradient(90deg, ${rawColor.color1}, ${rawColor.color2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
+            : { color: color };
+          return (
+            <div style={{
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              padding: '3px 10px',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              whiteSpace: 'nowrap',
+              textShadow: isGrad ? 'none' : '0 1px 4px rgba(0,0,0,0.8)',
+              border: `1px solid ${borderCol}`,
+            }}>
+              <span style={nameStyle}>{player.getState?.()?.profile?.name || 'Player'}</span>
+            </div>
+          );
+        })()}
       </Html>
     </group>
   );
@@ -282,6 +319,28 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const [selectedColor, setSelectedColor] = useState(
     currentPlayer?.getState?.()?.profile?.color || PLAYER_COLORS[0]
   );
+  const [useGradient, setUseGradient] = useState(false);
+  const [gradColor1, setGradColor1] = useState('#e74c3c');
+  const [gradColor2, setGradColor2] = useState('#3498db');
+
+  // Player level for gradient unlock
+  const playerLevel = profile ? getLevel(profile.xp) : 1;
+  const canUseGradient = playerLevel >= GRADIENT_UNLOCK_LEVEL;
+
+  // Load saved gradient on mount
+  useEffect(() => {
+    const saved = loadGradient();
+    if (saved && canUseGradient) {
+      setUseGradient(true);
+      setGradColor1(saved.color1 || '#e74c3c');
+      setGradColor2(saved.color2 || '#3498db');
+      const grad = { type: 'gradient', color1: saved.color1, color2: saved.color2 };
+      setSelectedColor(grad);
+      if (currentPlayer) {
+        currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: grad });
+      }
+    }
+  }, [canUseGradient]);
 
   // Sync Supabase username
   useEffect(() => {
@@ -311,7 +370,30 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
 
   const handleColorChange = (color) => {
     setSelectedColor(color);
+    setUseGradient(false);
     currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color });
+  };
+
+  const handleGradientChange = (c1, c2) => {
+    const grad = { type: 'gradient', color1: c1, color2: c2 };
+    setSelectedColor(grad);
+    setGradColor1(c1);
+    setGradColor2(c2);
+    saveGradient({ color1: c1, color2: c2 });
+    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: grad });
+  };
+
+  const toggleGradient = () => {
+    if (!canUseGradient) return;
+    if (useGradient) {
+      // Switch back to solid
+      setUseGradient(false);
+      const fallback = PLAYER_COLORS.find(c => !takenColors.has(c)) || PLAYER_COLORS[0];
+      handleColorChange(fallback);
+    } else {
+      setUseGradient(true);
+      handleGradientChange(gradColor1, gradColor2);
+    }
   };
 
   // Colors already taken by other players
@@ -362,7 +444,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
               index={idx}
               total={playroom_players.length}
               player={player}
-              color={player.getState?.()?.profile?.color || PLAYER_COLORS[idx % PLAYER_COLORS.length]}
+              color={getColor3D(player.getState?.()?.profile?.color) || PLAYER_COLORS[idx % PLAYER_COLORS.length]}
             />
           ))}
 
@@ -401,7 +483,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             <div className="lobby-color-picker">
               {PLAYER_COLORS.map((color) => {
                 const taken = takenColors.has(color);
-                const isSelected = selectedColor === color;
+                const isSelected = !useGradient && selectedColor === color;
                 return (
                   <button
                     key={color}
@@ -413,6 +495,38 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
                   />
                 );
               })}
+            </div>
+
+            {/* Gradient option — unlocked at level 6 */}
+            <div className="lobby-gradient-section">
+              <button
+                className={`lobby-gradient-toggle ${useGradient ? 'active' : ''} ${!canUseGradient ? 'locked' : ''}`}
+                onClick={toggleGradient}
+                disabled={!canUseGradient}
+              >
+                <i className={`fas ${canUseGradient ? 'fa-palette' : 'fa-lock'}`}></i>
+                {canUseGradient ? (useGradient ? 'Gradient ON' : 'Gradient') : `Niv. ${GRADIENT_UNLOCK_LEVEL}`}
+              </button>
+
+              {useGradient && canUseGradient && (
+                <div className="lobby-gradient-pickers">
+                  <input
+                    type="color"
+                    value={gradColor1}
+                    onChange={(e) => handleGradientChange(e.target.value, gradColor2)}
+                    className="lobby-color-input"
+                  />
+                  <div className="lobby-gradient-preview" style={{
+                    background: `linear-gradient(135deg, ${gradColor1}, ${gradColor2})`
+                  }} />
+                  <input
+                    type="color"
+                    value={gradColor2}
+                    onChange={(e) => handleGradientChange(gradColor1, e.target.value)}
+                    className="lobby-color-input"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -440,7 +554,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
                 const isH = playroom_players.indexOf(p) === 0;
                 return (
                   <div key={p.id} className={`player-list-item ${isMe ? 'is-me' : ''}`}>
-                    <span className="player-dot" style={{ background: p.getState?.()?.profile?.color || '#888' }} />
+                    <span className="player-dot" style={{ background: getColorCSS(p.getState?.()?.profile?.color) || '#888' }} />
                     <span className="player-list-name">{n}</span>
                     {isH && <span className="player-badge host">{t('common:host')}</span>}
                     {isMe && <span className="player-badge me">{t('common:me')}</span>}
