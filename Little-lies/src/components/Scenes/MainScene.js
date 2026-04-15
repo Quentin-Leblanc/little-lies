@@ -2217,11 +2217,15 @@ const MainScene = () => {
     return () => fadeTimers.current.forEach(clearTimeout);
   }, [phase]);
 
-  // Death report sequence: blood effect + text together, quickly
+  // Death report sequence: hide day text first, then show deaths
   useEffect(() => {
     if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
-      const t1 = setTimeout(() => setShowBloodEffect(true), 300);
-      const t2 = setTimeout(() => setShowDeathReport(true), 600);
+      // Hide the "Death report" center text first
+      setShowDayText(false);
+      // Blood effect after a short pause
+      const t1 = setTimeout(() => setShowBloodEffect(true), 1500);
+      // Death names appear after the day text has faded
+      const t2 = setTimeout(() => setShowDeathReport(true), 2500);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     } else {
       setShowDeathReport(false);
