@@ -205,7 +205,7 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
       {/* Aura glow under local player */}
       {isMe && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03 - yOffset, 0]}>
-          <circleGeometry args={[0.7, 32]} />
+          <circleGeometry args={[0.55, 32]} />
           <meshBasicMaterial color={color} transparent opacity={0.12} />
         </mesh>
       )}
