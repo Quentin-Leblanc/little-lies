@@ -438,23 +438,30 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     }
   }, [canUseGradient]);
 
-  // Assign a default unique color to this player on join (synced to PlayroomKit state)
+  // Assign a default unique color on mount — always write to PlayroomKit state
+  const colorAssigned = useRef(false);
   useEffect(() => {
-    if (!currentPlayer) return;
-    const existing = currentPlayer.getState?.()?.profile?.color;
-    // Skip if already has a color set
-    if (existing && typeof existing === 'string' && existing !== '#888') return;
-    // Find first available color not taken by others
+    if (!currentPlayer || colorAssigned.current) return;
+    colorAssigned.current = true;
+    // Check if we have a saved gradient
+    const saved = loadGradient();
+    if (saved && canUseGradient) return; // gradient useEffect handles this
+
+    // Find colors already taken by other players
     const otherColors = new Set(
       playroom_players
         .filter(p => p.id !== currentPlayer.id)
-        .map(p => p.getState?.()?.profile?.color)
-        .filter(c => c && typeof c === 'string')
+        .map(p => {
+          const c = p.getState?.()?.profile?.color;
+          return c && typeof c === 'string' ? c : null;
+        })
+        .filter(Boolean)
     );
+    // Pick first available color
     const available = PLAYER_COLORS.find(c => !otherColors.has(c)) || PLAYER_COLORS[0];
     setSelectedColor(available);
     currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: available });
-  }, [currentPlayer?.id, playroom_players.length]);
+  }, [currentPlayer, playroom_players.length]);
 
   // Sync Supabase username
   useEffect(() => {
@@ -502,7 +509,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     if (useGradient) {
       // Switch back to solid
       setUseGradient(false);
-      const fallback = PLAYER_COLORS.find(c => !takenColors.has(c)) || PLAYER_COLORS[0];
+      const fallback = PLAYER_COLORS.find(c => !takenByOthers.has(c)) || PLAYER_COLORS[0];
       handleColorChange(fallback);
     } else {
       setUseGradient(true);
@@ -510,15 +517,22 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     }
   };
 
-  // Colors already taken by other players (check both PlayroomKit state and profile colors)
-  const takenColors = new Set(
+  // ALL solid colors in use by ANY player (including self)
+  const allUsedColors = new Set(
+    playroom_players
+      .map(p => {
+        const c = p.getState?.()?.profile?.color;
+        return c && typeof c === 'string' ? c : null;
+      })
+      .filter(Boolean)
+  );
+  // Colors taken by OTHER players (can't pick these)
+  const takenByOthers = new Set(
     playroom_players
       .filter(p => p.id !== currentPlayer?.id)
-      .flatMap(p => {
-        const pkColor = p.getState?.()?.profile?.color;
-        // Get solid color (handle gradient objects)
-        const color = pkColor && typeof pkColor === 'object' ? null : pkColor;
-        return color ? [color] : [];
+      .map(p => {
+        const c = p.getState?.()?.profile?.color;
+        return c && typeof c === 'string' ? c : null;
       })
       .filter(Boolean)
   );
@@ -602,16 +616,16 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             <label className="lobby-label">{t('common:color', { defaultValue: 'Color' })}</label>
             <div className="lobby-color-picker">
               {PLAYER_COLORS.map((color) => {
-                const taken = takenColors.has(color);
-                const isSelected = !useGradient && selectedColor === color;
+                const isMine = !useGradient && selectedColor === color;
+                const takenByOther = takenByOthers.has(color);
+                const blocked = takenByOther; // can't pick colors taken by others
                 return (
                   <button
                     key={color}
-                    className={`lobby-color-dot ${isSelected ? 'selected' : ''} ${taken ? 'taken' : ''}`}
+                    className={`lobby-color-dot ${isMine ? 'selected' : ''} ${blocked ? 'taken' : ''}`}
                     style={{ '--dot-color': color }}
-                    onClick={() => !taken && handleColorChange(color)}
-                    disabled={taken}
-                    title={taken ? 'Taken' : color}
+                    onClick={() => !blocked && handleColorChange(color)}
+                    title={blocked ? 'Taken' : isMine ? 'Your color' : color}
                   />
                 );
               })}
