@@ -221,9 +221,8 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
               textShadow: isGrad ? 'none' : '0 1px 4px rgba(0,0,0,0.8)',
               border: `1px solid ${borderCol}`,
             }}>
-              {isMe && <span style={{ marginRight: 5, fontSize: 10 }}>&#9668;</span>}
+              {isMe && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block', marginRight: 6, flexShrink: 0 }} />}
               <span style={nameStyle}>{player.getState?.()?.profile?.name || 'Player'}</span>
-              {isMe && <span style={{ marginLeft: 5, fontSize: 10 }}>&#9658;</span>}
             </div>
           );
         })()}
