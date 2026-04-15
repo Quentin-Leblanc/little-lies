@@ -438,29 +438,22 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     }
   }, [canUseGradient]);
 
-  // Assign a default unique color on mount — always write to PlayroomKit state
+  // Assign a default unique color based on player index in the room
   const colorAssigned = useRef(false);
   useEffect(() => {
     if (!currentPlayer || colorAssigned.current) return;
-    colorAssigned.current = true;
     // Check if we have a saved gradient
     const saved = loadGradient();
-    if (saved && canUseGradient) return; // gradient useEffect handles this
+    if (saved && canUseGradient) { colorAssigned.current = true; return; }
 
-    // Find colors already taken by other players
-    const otherColors = new Set(
-      playroom_players
-        .filter(p => p.id !== currentPlayer.id)
-        .map(p => {
-          const c = p.getState?.()?.profile?.color;
-          return c && typeof c === 'string' ? c : null;
-        })
-        .filter(Boolean)
-    );
-    // Pick first available color
-    const available = PLAYER_COLORS.find(c => !otherColors.has(c)) || PLAYER_COLORS[0];
-    setSelectedColor(available);
-    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: available });
+    // Use player index in the room — guaranteed unique per player
+    const myIndex = playroom_players.findIndex(p => p.id === currentPlayer.id);
+    if (myIndex === -1) return; // not in list yet, wait
+    colorAssigned.current = true;
+
+    const color = PLAYER_COLORS[myIndex % PLAYER_COLORS.length];
+    setSelectedColor(color);
+    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color });
   }, [currentPlayer, playroom_players.length]);
 
   // Sync Supabase username
