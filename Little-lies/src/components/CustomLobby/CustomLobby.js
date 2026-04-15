@@ -174,7 +174,7 @@ const BackgroundTrees = () => {
 // Slow orbit camera
 const OrbitCamera = () => {
   useFrame((state) => {
-    const t = state.clock.elapsedTime * 0.08;
+    const t = state.clock.elapsedTime * 0.03;
     const r = 6;
     state.camera.position.set(Math.cos(t) * r, 3.5, Math.sin(t) * r);
     state.camera.lookAt(0, 0.5, 0);
@@ -195,11 +195,14 @@ const PlayerSeat = ({ index, total, player, color }) => {
 
   // Alternate animations based on player index
   const anim = LOBBY_ANIMS[index % LOBBY_ANIMS.length];
+  // LieDown animation model is offset upward — compensate with Y shift
+  const yOffset = anim === 'LieDown' ? -0.35 : 0;
+  const nameY = anim === 'LieDown' ? 1.1 : 1.6;
 
   return (
-    <group position={[x, 0, z]} rotation={[0, lookAtAngle, 0]}>
+    <group position={[x, yOffset, z]} rotation={[0, lookAtAngle, 0]}>
       <Character color={color} animation={anim} scale={0.55} animOffset={index * 0.5} />
-      <Html position={[0, 1.6, 0]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+      <Html position={[0, nameY, 0]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
         {(() => {
           const rawColor = player.getState?.()?.profile?.color;
           const isGrad = rawColor && typeof rawColor === 'object' && rawColor.type === 'gradient';
@@ -229,16 +232,20 @@ const PlayerSeat = ({ index, total, player, color }) => {
 
 // ── Main Lobby Component ──
 
-// Lobby chat component
+// Lobby chat component with /votehost and /votekick commands
 const LobbyChat = () => {
   const { t } = useTranslation('common');
   const currentPlayer = myPlayer();
+  const playroom_players = usePlayersList(true);
   const [lobbyMessages, setLobbyMessages] = useMultiplayerState('lobbyChat', []);
+  const [lobbyVotes, setLobbyVotes] = useMultiplayerState('lobbyVotes', {});
   const [input, setInput] = useState('');
   const [inputVisible, setInputVisible] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const msgs = lobbyMessages || [];
+  const votes = lobbyVotes || {};
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -256,15 +263,73 @@ const LobbyChat = () => {
     return () => window.removeEventListener('keydown', onKey);
   }, [inputVisible]);
 
+  const addSystemMsg = (content) => {
+    setLobbyMessages([...msgs.slice(-50), {
+      id: Date.now(), player: 'system', color: '#888', content, isSystem: true,
+    }]);
+  };
+
+  const getMyId = () => currentPlayer?.id;
+  const majority = Math.floor(playroom_players.length / 2) + 1;
+
+  const handleCommand = (cmd, args) => {
+    const myName = currentPlayer?.getState?.()?.profile?.name || 'Player';
+
+    // /votehost <number>
+    if (cmd === 'votehost' && args[0]) {
+      const idx = parseInt(args[0]) - 1;
+      const target = playroom_players[idx];
+      if (!target) { addSystemMsg(`Player #${args[0]} not found`); return true; }
+      if (playroom_players.length < 3) { addSystemMsg('Min 3 players to vote'); return true; }
+      const targetName = target.getState?.()?.profile?.name || 'Player';
+      const voteKey = `host_${target.id}`;
+      const current = votes[voteKey] || [];
+      if (current.includes(getMyId())) { addSystemMsg('Already voted'); return true; }
+      const newVotes = [...current, getMyId()];
+      setLobbyVotes({ ...votes, [voteKey]: newVotes });
+      addSystemMsg(`${myName} voted to make ${targetName} host (${newVotes.length}/${majority})`);
+      return true;
+    }
+
+    // /votekick <number>
+    if (cmd === 'votekick' && args[0]) {
+      const idx = parseInt(args[0]) - 1;
+      const target = playroom_players[idx];
+      if (!target) { addSystemMsg(`Player #${args[0]} not found`); return true; }
+      if (target.id === getMyId()) { addSystemMsg('Cannot kick yourself'); return true; }
+      if (playroom_players.length < 3) { addSystemMsg('Min 3 players to vote'); return true; }
+      const targetName = target.getState?.()?.profile?.name || 'Player';
+      const voteKey = `kick_${target.id}`;
+      const current = votes[voteKey] || [];
+      if (current.includes(getMyId())) { addSystemMsg('Already voted'); return true; }
+      const newVotes = [...current, getMyId()];
+      setLobbyVotes({ ...votes, [voteKey]: newVotes });
+      addSystemMsg(`${myName} voted to kick ${targetName} (${newVotes.length}/${majority})`);
+      // TODO: actual kick requires PlayroomKit host action — display result for now
+      if (newVotes.length >= majority) {
+        addSystemMsg(`${targetName} has been voted out!`);
+      }
+      return true;
+    }
+
+    return false;
+  };
+
   const sendMessage = () => {
     if (!input.trim()) return;
+
+    // Handle commands
+    if (input.startsWith('/')) {
+      const [rawCmd, ...args] = input.trim().split(' ');
+      const cmd = rawCmd.slice(1).toLowerCase();
+      if (handleCommand(cmd, args)) { setInput(''); setInputVisible(false); return; }
+    }
+
     const name = currentPlayer?.getState?.()?.profile?.name || 'Player';
-    const color = currentPlayer?.getState?.()?.profile?.color || '#ccc';
+    const rawColor = currentPlayer?.getState?.()?.profile?.color;
+    const color = typeof rawColor === 'object' ? rawColor.color1 : (rawColor || '#ccc');
     setLobbyMessages([...msgs.slice(-50), {
-      id: Date.now(),
-      player: name,
-      color,
-      content: input.trim(),
+      id: Date.now(), player: name, color, content: input.trim(),
     }]);
     setInput('');
     setInputVisible(false);
@@ -272,11 +337,30 @@ const LobbyChat = () => {
 
   return (
     <div className="lobby-chat">
+      <div className="lobby-chat-header">
+        <span>Chat</span>
+        <button className="lobby-chat-info-btn" onClick={() => setShowInfo(!showInfo)}>
+          <i className={`fas ${showInfo ? 'fa-times' : 'fa-circle-info'}`}></i>
+        </button>
+      </div>
+
+      {showInfo && (
+        <div className="lobby-chat-info-panel">
+          <div><code>/votehost #</code> — Vote to change host</div>
+          <div><code>/votekick #</code> — Vote to kick a player</div>
+          <div className="lobby-chat-info-hint"># = player number in list (1, 2, 3...)</div>
+          <div className="lobby-chat-info-hint">Majority needed ({majority}/{playroom_players.length})</div>
+        </div>
+      )}
+
       <div className="lobby-chat-messages">
         {msgs.map((m) => (
-          <div key={m.id} className="lobby-chat-msg">
-            <strong style={{ color: m.color }}>{m.player}</strong>
-            <span>: {m.content}</span>
+          <div key={m.id} className={`lobby-chat-msg ${m.isSystem ? 'system-msg' : ''}`}>
+            {m.isSystem ? (
+              <span>{m.content}</span>
+            ) : (
+              <><strong style={{ color: m.color }}>{m.player}</strong><span>: {m.content}</span></>
+            )}
           </div>
         ))}
         <div ref={messagesEndRef} />
@@ -298,7 +382,7 @@ const LobbyChat = () => {
         />
       ) : (
         <div className="lobby-chat-hint">
-          <kbd>Enter</kbd> {t('common:send').toLowerCase()}
+          <kbd>Enter</kbd> {t('send').toLowerCase()}
         </div>
       )}
     </div>
@@ -501,8 +585,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             <div className="lobby-gradient-section">
               <button
                 className={`lobby-gradient-toggle ${useGradient ? 'active' : ''} ${!canUseGradient ? 'locked' : ''}`}
-                onClick={toggleGradient}
-                disabled={!canUseGradient}
+                onClick={canUseGradient ? toggleGradient : undefined}
               >
                 <i className={`fas ${canUseGradient ? 'fa-palette' : 'fa-lock'}`}></i>
                 {canUseGradient ? (useGradient ? 'Gradient ON' : 'Gradient') : `Niv. ${GRADIENT_UNLOCK_LEVEL}`}
@@ -548,12 +631,13 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           <div className="lobby-section">
             <label className="lobby-label">{t('setup:players_count', { count: playroom_players.length })}</label>
             <div className="player-list">
-              {playroom_players.map((p) => {
+              {playroom_players.map((p, idx) => {
                 const n = p.getState?.()?.profile?.name || 'Player';
                 const isMe = p.id === currentPlayer?.id;
-                const isH = playroom_players.indexOf(p) === 0;
+                const isH = idx === 0;
                 return (
                   <div key={p.id} className={`player-list-item ${isMe ? 'is-me' : ''}`}>
+                    <span className="player-number">#{idx + 1}</span>
                     <span className="player-dot" style={{ background: getColorCSS(p.getState?.()?.profile?.color) || '#888' }} />
                     <span className="player-list-name">{n}</span>
                     {isH && <span className="player-badge host">{t('common:host')}</span>}
