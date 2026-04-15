@@ -75,7 +75,7 @@ const Torch = ({ position }) => {
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     if (lightRef.current) {
-      lightRef.current.intensity = 2 + Math.sin(t * 8 + position[0]) * 0.5 + Math.sin(t * 13) * 0.2;
+      lightRef.current.intensity = 0.8 + Math.sin(t * 8 + position[0]) * 0.2 + Math.sin(t * 13) * 0.1;
     }
     if (flameRef.current) {
       flameRef.current.scale.y = 1 + Math.sin(t * 10 + position[2]) * 0.25;
@@ -119,7 +119,7 @@ const Torch = ({ position }) => {
         </mesh>
       </group>
       {/* Point light */}
-      <pointLight ref={lightRef} position={[0, 1.85, 0]} intensity={2} color="#ff8833" distance={10} castShadow />
+      <pointLight ref={lightRef} position={[0, 1.85, 0]} intensity={0.8} color="#ff8833" distance={6} />
       {/* Smoke particles rising */}
       <TorchSmoke position={[0, 1.9, 0]} />
     </group>
@@ -933,14 +933,14 @@ const Village = React.memo(({ isDay }) => (
     <KenneyModel path="/models/kaykit/rock_single_A.gltf" position={[-14, 0, -5]} scale={3} />
     <KenneyModel path="/models/kaykit/rock_single_A.gltf" position={[15, 0, 3]} scale={2.5} />
 
-    {/* Lumières chaleureuses entre les maisons */}
-    <pointLight position={[-9, 2, -6]} color="#ff9944" intensity={1.5} distance={8} />
-    <pointLight position={[9, 2, -6]} color="#ff9944" intensity={1.5} distance={8} />
-    <pointLight position={[-10, 2, 2]} color="#ff8833" intensity={1.2} distance={7} />
-    <pointLight position={[10, 2, 3]} color="#ff8833" intensity={1.2} distance={7} />
-    <pointLight position={[-7, 2, 8]} color="#ff9944" intensity={1} distance={6} />
-    <pointLight position={[7, 2, 9]} color="#ff9944" intensity={1} distance={6} />
-    <pointLight position={[0, 2, -11]} color="#ffaa55" intensity={1.5} distance={8} />
+    {/* Lumières chaleureuses entre les maisons — reduced to avoid white textures */}
+    <pointLight position={[-9, 2, -6]} color="#ff9944" intensity={0.6} distance={6} />
+    <pointLight position={[9, 2, -6]} color="#ff9944" intensity={0.6} distance={6} />
+    <pointLight position={[-10, 2, 2]} color="#ff8833" intensity={0.5} distance={5} />
+    <pointLight position={[10, 2, 3]} color="#ff8833" intensity={0.5} distance={5} />
+    <pointLight position={[-7, 2, 8]} color="#ff9944" intensity={0.4} distance={5} />
+    <pointLight position={[7, 2, 9]} color="#ff9944" intensity={0.4} distance={5} />
+    <pointLight position={[0, 2, -11]} color="#ffaa55" intensity={0.6} distance={6} />
 
     {/* ——— CLOTURES ——— */}
     {FENCE_SEGMENTS.map((f, i) => (
@@ -2363,7 +2363,7 @@ const MainScene = () => {
       <Canvas
         shadows
         camera={{ position: [0, 8, 12], fov: 50 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.9 }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.75 }}
       >
         <Suspense fallback={null}>
           {/* Camera — pause: follows player, normal: cinematic */}
@@ -2511,14 +2511,14 @@ const MainScene = () => {
           {/* Post-processing */}
           <EffectComposer>
             <Bloom
-              intensity={game.isDay ? 0.15 : 0.6}
-              luminanceThreshold={game.isDay ? 0.92 : 0.5}
+              intensity={game.isDay ? 0.12 : 0.3}
+              luminanceThreshold={game.isDay ? 0.92 : 0.85}
               luminanceSmoothing={0.4}
               mipmapBlur
             />
             <BrightnessContrast
-              brightness={game.isDay ? -0.02 : -0.03}
-              contrast={game.isDay ? 0.06 : 0.1}
+              brightness={game.isDay ? -0.02 : -0.02}
+              contrast={game.isDay ? 0.06 : 0.08}
             />
             <HueSaturation
               saturation={game.isDay ? -0.05 : -0.15}
