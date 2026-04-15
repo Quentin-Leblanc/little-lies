@@ -667,7 +667,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
                 <i className="fas fa-play"></i> {t('common:start_game')}
               </button>
             ) : (
-              <p className="lobby-waiting"><i className="fas fa-hourglass-half"></i> {t('setup:waiting_host', { host: '...' })}</p>
+              <p className="lobby-waiting"><i className="fas fa-hourglass-half"></i> {t('setup:waiting_host', { host: playroom_players[0]?.getState?.()?.profile?.name || 'host' })}</p>
             )}
             <button className="lobby-btn lobby-btn-ghost" onClick={newLobby}>
               <i className="fas fa-plus"></i> {t('common:new_lobby')}
