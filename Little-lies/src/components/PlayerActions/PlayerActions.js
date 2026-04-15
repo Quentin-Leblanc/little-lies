@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect, useRef } from 'react';
+import React, { memo, useState, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../trad/i18n';
@@ -34,8 +34,24 @@ const PlayerActions = memo(function () {
   const { t } = useTranslation(['game', 'common']);
   const { getPlayers, getMe, game, CONSTANTS, trial, trialRef, setTrial, setPlayers, addChatSystem } = useGameEngine();
   const Events = useEvents();
-  const players = getPlayers();
+  const rawPlayers = getPlayers();
   const me = getMe();
+
+  // Sort players by PLAYER_COLORS index for consistent order across all clients
+  const PLAYER_COLORS_ORDER = [
+    '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6',
+    '#1abc9c', '#e91e63', '#00bcd4', '#ff9800', '#8bc34a',
+    '#ff5722', '#607d8b', '#cddc39', '#795548', '#03a9f4',
+  ];
+  const players = useMemo(() => {
+    return [...rawPlayers].sort((a, b) => {
+      const colA = typeof a.profile?.color === 'string' ? a.profile.color : '';
+      const colB = typeof b.profile?.color === 'string' ? b.profile.color : '';
+      const idxA = PLAYER_COLORS_ORDER.indexOf(colA);
+      const idxB = PLAYER_COLORS_ORDER.indexOf(colB);
+      return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+    });
+  }, [rawPlayers]);
 
   const [isDead, setIsDead] = useState(false);
   const prevAliveRef = useRef(me?.isAlive ?? true);
