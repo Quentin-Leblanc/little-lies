@@ -339,7 +339,7 @@
   height: 24px;
   border-radius: 50%;
   border: 2px solid transparent;
-  background: var(--dot-color);
+  background: var(--dot-color) !important;
   cursor: pointer;
   transition: all 0.15s;
   padding: 0;
@@ -349,6 +349,11 @@
   &:hover:not(:disabled) {
     transform: scale(1.2);
     border-color: rgba(255, 255, 255, 0.4);
+    background: var(--dot-color) !important;
+  }
+
+  &:active {
+    background: var(--dot-color) !important;
   }
 
   &.selected {
