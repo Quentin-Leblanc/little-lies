@@ -117,12 +117,14 @@ const Time = () => {
           </div>
         )}
 
-        {showCountdown && (
-          <div className="phase-progress-bar">
-            <div className="phase-progress-fill" style={{ width: `${progressPercentage}%`, backgroundColor: barColor }} />
-          </div>
-        )}
       </div>
+
+      {/* Progress bar — outside both pills, below */}
+      {showCountdown && (
+        <div className="phase-progress-bar">
+          <div className="phase-progress-fill" style={{ width: `${progressPercentage}%`, backgroundColor: barColor }} />
+        </div>
+      )}
     </div>
   );
 };

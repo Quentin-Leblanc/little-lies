@@ -4,10 +4,26 @@
 
 .time-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 0;
   pointer-events: none;
   white-space: nowrap;
+  min-width: 280px;
+}
+
+// Row for the two pills
+.time-container > .day-label,
+.time-container > .phase-info {
+  // pills sit in a row via the parent's flex + order trick
+}
+
+// Override: make pills sit in a row inside the column
+.time-container {
+  // Wrap pills in implicit row
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
 }
 
 // Day/Night pill — left side
@@ -27,6 +43,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  height: 36px;
+  box-sizing: border-box;
 
   i {
     font-size: 12px;
@@ -34,7 +52,7 @@
   }
 }
 
-// Phase info — right side, wider
+// Phase info — right side
 .phase-info {
   display: flex;
   align-items: center;
@@ -44,10 +62,9 @@
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0 8px 8px 0;
-  position: relative;
-  overflow: hidden;
-  min-width: 160px;
-  flex-wrap: wrap;
+  min-width: 140px;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 // Phase name
@@ -79,20 +96,19 @@
   text-align: right;
 }
 
-// Progress bar — full width bottom
+// Progress bar — below both pills, full width
 .phase-progress-bar {
   width: 100%;
-  height: 2px;
+  height: 3px;
   background: rgba(255, 255, 255, 0.06);
-  border-radius: 1px;
+  border-radius: 0 0 4px 4px;
   overflow: hidden;
-  flex-basis: 100%;
-  margin-top: 4px;
+  margin-top: -1px; // overlap border slightly
 }
 
 .phase-progress-fill {
   height: 100%;
-  border-radius: 1px;
+  border-radius: 0 0 4px 4px;
   transition: width 100ms linear, background-color 0.5s ease;
 }
 
@@ -106,10 +122,12 @@
   .day-label {
     font-size: 11px;
     padding: 6px 10px;
+    height: 30px;
   }
   .phase-info {
     padding: 6px 12px;
-    min-width: 120px;
+    min-width: 110px;
+    height: 30px;
   }
   .progress-content {
     font-size: 12px;
