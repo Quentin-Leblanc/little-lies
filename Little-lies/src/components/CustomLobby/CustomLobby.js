@@ -76,9 +76,9 @@ const CampfireFlame = () => {
         <mesh position={[0, 0.15, 0]}><coneGeometry args={[0.12, 0.4, 4]} /><meshBasicMaterial color="#ffdd44" transparent opacity={0.9} /></mesh>
         <mesh position={[0, 0.2, 0]}><coneGeometry args={[0.05, 0.2, 4]} /><meshBasicMaterial color="#ffffcc" transparent opacity={0.7} /></mesh>
       </group>
-      {/* Light */}
-      <pointLight position={[0, 1, 0]} intensity={3} color="#ff8833" distance={15} />
-      <pointLight position={[0, 0.5, 0]} intensity={1.5} color="#ff4400" distance={8} />
+      {/* Light — wide throw so it washes the surrounding seats & ground */}
+      <pointLight position={[0, 1, 0]} intensity={7} color="#ff8833" distance={28} decay={0.9} />
+      <pointLight position={[0, 0.5, 0]} intensity={3.5} color="#ff4400" distance={16} decay={1} />
     </group>
   );
 };

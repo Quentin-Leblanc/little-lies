@@ -211,7 +211,7 @@ const PlayerActions = memo(function () {
         document.body
       )}
 
-      <div className="player-list-container">
+      <div className={`player-list-container ${isVotingPhase ? 'highlight-vote' : ''}`}>
         {/* Mayor reveal button */}
         {canReveal && (
           <button className="reveal-btn" onClick={handleReveal}>
@@ -268,7 +268,7 @@ const PlayerActions = memo(function () {
         </div>
 
         {/* Player list */}
-        <div className={`player-list-wrapper ${isVotingPhase ? 'highlight-vote' : ''} ${isNightPhase ? 'night-mode' : ''}`}>
+        <div className={`player-list-wrapper ${isNightPhase ? 'night-mode' : ''}`}>
         <h4 className="player-list-title"><i className="fas fa-users"></i> {t('game:player_list.title', { alive: players.filter(p => p.isAlive).length, total: players.length })}</h4>
         <ul className="player-list">
           {players.map((player) => {

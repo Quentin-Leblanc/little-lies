@@ -80,7 +80,7 @@ function App() {
         if (!prev || prev === phase) return;
 
         const PHASE_BANNERS = {
-            [CONSTANTS.PHASE.VOTING]: { text: i18n.t('game:phases.VOTING'), icon: 'fa-gavel', className: 'banner-vote' },
+            // Voting banner removed — the action block now pulses to draw attention instead
             [CONSTANTS.PHASE.DEFENSE]: { text: i18n.t('game:phases.DEFENSE'), icon: 'fa-shield', className: 'banner-defense' },
             [CONSTANTS.PHASE.JUDGMENT]: { text: i18n.t('game:phases.JUDGMENT'), icon: 'fa-scale-balanced', className: 'banner-judgment' },
             [CONSTANTS.PHASE.EXECUTION]: { text: i18n.t('game:phases.EXECUTION'), icon: 'fa-skull-crossbones', className: 'banner-execution' },
@@ -122,6 +122,7 @@ function App() {
             {/* Curtain — persists across role reveal → game transition */}
             {curtainVisible && (
                 <div className={`curtain-overlay ${curtainClosed ? 'closed' : ''}`}>
+                    <div className="curtain-fade" />
                     <div className="curtain-panel curtain-left" />
                     <div className="curtain-panel curtain-right" />
                 </div>

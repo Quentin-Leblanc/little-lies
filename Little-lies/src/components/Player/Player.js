@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
@@ -7,7 +7,7 @@ import './Player.scss';
 
 const Player = () => {
     const { t } = useTranslation(['game', 'common', 'roles']);
-    const { getMe, getPlayers, setPlayers } = useGameEngine();
+    const { game, getMe, getPlayers, setPlayers } = useGameEngine();
     const { getMyNotifications } = useEvents();
     const me = getMe();
     const players = getPlayers();
@@ -15,6 +15,21 @@ const Player = () => {
 
     const [lastWill, setLastWill] = useState(me?.lastWill || '');
     const [showLwDialog, setShowLwDialog] = useState(false);
+
+    // White pulse around the role description block at game start (~3s) so
+    // players notice their role after the role reveal card closes. Fires
+    // exactly once per game on Day 1 when the character is assigned.
+    const [roleIntroHighlight, setRoleIntroHighlight] = useState(false);
+    const introFiredRef = useRef(false);
+    useEffect(() => {
+        if (introFiredRef.current) return;
+        if (!me?.character) return;
+        if (!game?.isGameStarted || game?.dayCount !== 1) return;
+        introFiredRef.current = true;
+        setRoleIntroHighlight(true);
+        const timer = setTimeout(() => setRoleIntroHighlight(false), 3100);
+        return () => clearTimeout(timer);
+    }, [me?.character, game?.isGameStarted, game?.dayCount]);
 
     const execTarget = me?.executionerTarget
         ? players.find((p) => p.id === me.executionerTarget)
@@ -75,7 +90,7 @@ const Player = () => {
                 </div>
             )}
             {/* Role info */}
-            <div className="role-container">
+            <div className={`role-container ${roleIntroHighlight ? 'role-intro-highlight' : ''}`}>
                 <div className="status-line">
                     <span className="status-name" style={{ color: me.profile?.color || '#fff' }}>{me.profile?.name || 'Joueur'}</span>
                     <span className="status-separator">&mdash;</span>

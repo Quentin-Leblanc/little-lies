@@ -10,6 +10,23 @@
   display: flex;
 }
 
+// Full-screen black fade that sits behind the panels. Starts transparent,
+// becomes opaque instantly when .closed is applied, and fades smoothly
+// back to transparent when the curtain re-opens — this gives a soft
+// "reveal from black" look as the panels slide away.
+.curtain-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  opacity: 0;
+  transition: opacity 1.2s ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
 .curtain-panel {
   width: 50%;
   height: 100%;
@@ -25,8 +42,13 @@
   transform: translateX(100%);
 }
 
-// When curtain is closed, panels slide in
+// When curtain is closed, panels slide in AND the fade snaps to black
+// (no transition) so the next open animates smoothly from black → clear.
 .curtain-overlay.closed {
+  .curtain-fade {
+    opacity: 1;
+    transition: none;
+  }
   .curtain-left {
     transform: translateX(0);
   }
@@ -86,63 +108,62 @@
   &::before {
     left: -2px;
     text-shadow: 2px 0 #0ff;
-    animation: glitch-top 6s infinite linear alternate-reverse;
+    // ~2s glitch burst → 1s rest → repeat (total 3s cycle)
+    animation: glitch-top 3s infinite linear;
   }
 
   &::after {
     left: 2px;
     text-shadow: -2px 0 #ff0040;
-    animation: glitch-bottom 5s infinite linear alternate-reverse;
+    animation: glitch-bottom 3s infinite linear;
   }
 }
 
-// Glitch clip-path animations — staggered, organic feeling
+// Glitch clip-path animations — ~2s of active staggered glitching followed
+// by a ~1s rest (clip-path fully collapsed = invisible). The `67%, 100%`
+// hidden stop produces the clean pause between bursts.
 @keyframes glitch-top {
   0%   { clip-path: inset(0 0 85% 0); }
-  5%   { clip-path: inset(45% 0 40% 0); }
-  10%  { clip-path: inset(80% 0 5% 0); }
-  15%  { clip-path: inset(10% 0 75% 0); }
-  20%  { clip-path: inset(60% 0 20% 0); }
-  25%  { clip-path: inset(0 0 65% 0); }
-  30%  { clip-path: inset(90% 0 2% 0); }
-  35%  { clip-path: inset(35% 0 50% 0); }
-  40%  { clip-path: inset(70% 0 15% 0); }
-  45%  { clip-path: inset(5% 0 80% 0); }
-  50%  { clip-path: inset(50% 0 30% 0); }
-  55%  { clip-path: inset(15% 0 70% 0); }
-  60%  { clip-path: inset(85% 0 0 0); }
-  65%  { clip-path: inset(25% 0 60% 0); }
-  70%  { clip-path: inset(55% 0 25% 0); }
-  75%  { clip-path: inset(0 0 90% 0); }
-  80%  { clip-path: inset(75% 0 10% 0); }
-  85%  { clip-path: inset(40% 0 45% 0); }
-  90%  { clip-path: inset(95% 0 0 0); }
-  95%  { clip-path: inset(20% 0 65% 0); }
-  100% { clip-path: inset(65% 0 20% 0); }
+  4%   { clip-path: inset(45% 0 40% 0); }
+  8%   { clip-path: inset(80% 0 5% 0); }
+  12%  { clip-path: inset(10% 0 75% 0); }
+  16%  { clip-path: inset(60% 0 20% 0); }
+  20%  { clip-path: inset(0 0 65% 0); }
+  24%  { clip-path: inset(90% 0 2% 0); }
+  28%  { clip-path: inset(35% 0 50% 0); }
+  32%  { clip-path: inset(70% 0 15% 0); }
+  36%  { clip-path: inset(5% 0 80% 0); }
+  40%  { clip-path: inset(50% 0 30% 0); }
+  44%  { clip-path: inset(15% 0 70% 0); }
+  48%  { clip-path: inset(85% 0 0 0); }
+  52%  { clip-path: inset(25% 0 60% 0); }
+  56%  { clip-path: inset(55% 0 25% 0); }
+  60%  { clip-path: inset(0 0 90% 0); }
+  64%  { clip-path: inset(75% 0 10% 0); }
+  66%  { clip-path: inset(40% 0 45% 0); }
+  67%, 100% { clip-path: inset(100% 0 0 0); }
 }
 
 @keyframes glitch-bottom {
   0%   { clip-path: inset(65% 0 15% 0); }
-  5%   { clip-path: inset(5% 0 80% 0); }
-  10%  { clip-path: inset(50% 0 35% 0); }
-  15%  { clip-path: inset(85% 0 5% 0); }
-  20%  { clip-path: inset(20% 0 60% 0); }
-  25%  { clip-path: inset(70% 0 10% 0); }
-  30%  { clip-path: inset(0 0 75% 0); }
-  35%  { clip-path: inset(55% 0 30% 0); }
-  40%  { clip-path: inset(30% 0 55% 0); }
-  45%  { clip-path: inset(90% 0 0 0); }
-  50%  { clip-path: inset(10% 0 70% 0); }
-  55%  { clip-path: inset(75% 0 5% 0); }
-  60%  { clip-path: inset(40% 0 45% 0); }
-  65%  { clip-path: inset(0 0 85% 0); }
-  70%  { clip-path: inset(60% 0 25% 0); }
-  75%  { clip-path: inset(25% 0 60% 0); }
-  80%  { clip-path: inset(80% 0 5% 0); }
-  85%  { clip-path: inset(15% 0 70% 0); }
-  90%  { clip-path: inset(45% 0 40% 0); }
-  95%  { clip-path: inset(95% 0 0 0); }
-  100% { clip-path: inset(35% 0 50% 0); }
+  4%   { clip-path: inset(5% 0 80% 0); }
+  8%   { clip-path: inset(50% 0 35% 0); }
+  12%  { clip-path: inset(85% 0 5% 0); }
+  16%  { clip-path: inset(20% 0 60% 0); }
+  20%  { clip-path: inset(70% 0 10% 0); }
+  24%  { clip-path: inset(0 0 75% 0); }
+  28%  { clip-path: inset(55% 0 30% 0); }
+  32%  { clip-path: inset(30% 0 55% 0); }
+  36%  { clip-path: inset(90% 0 0 0); }
+  40%  { clip-path: inset(10% 0 70% 0); }
+  44%  { clip-path: inset(75% 0 5% 0); }
+  48%  { clip-path: inset(40% 0 45% 0); }
+  52%  { clip-path: inset(0 0 85% 0); }
+  56%  { clip-path: inset(60% 0 25% 0); }
+  60%  { clip-path: inset(25% 0 60% 0); }
+  64%  { clip-path: inset(80% 0 5% 0); }
+  66%  { clip-path: inset(35% 0 50% 0); }
+  67%, 100% { clip-path: inset(100% 0 0 0); }
 }
 
 .loading-bar-track {

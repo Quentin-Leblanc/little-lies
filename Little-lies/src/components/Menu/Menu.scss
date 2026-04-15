@@ -32,38 +32,54 @@
     left: 0;
     width: 100%;
     height: 100%;
+    background: inherit;
     overflow: hidden;
   }
 
   &::before {
     left: -1px;
     text-shadow: 1px 0 #0ff;
-    animation: menu-glitch-a 10s infinite linear alternate-reverse;
+    // ~2s glitch burst → 1s rest → repeat (total 3s cycle) — same as lobby/loader
+    animation: menu-glitch-top 3s infinite linear;
   }
 
   &::after {
     left: 1px;
     text-shadow: -1px 0 #ff0040;
-    animation: menu-glitch-b 9s infinite linear alternate-reverse;
+    animation: menu-glitch-bottom 3s infinite linear;
   }
 }
 
-@keyframes menu-glitch-a {
-  0%   { clip-path: inset(0 0 85% 0); }
-  20%  { clip-path: inset(60% 0 20% 0); }
-  40%  { clip-path: inset(10% 0 75% 0); }
+// Active glitch runs from 0% → 66% (~2s), then the element is hidden
+// (clip-path fully collapsed) from 66% → 100% (~1s) for a clean rest.
+@keyframes menu-glitch-top {
+  0%   { clip-path: inset(0 0 90% 0); }
+  7%   { clip-path: inset(70% 0 10% 0); }
+  13%  { clip-path: inset(20% 0 60% 0); }
+  20%  { clip-path: inset(85% 0 5% 0); }
+  27%  { clip-path: inset(10% 0 75% 0); }
+  33%  { clip-path: inset(50% 0 30% 0); }
+  40%  { clip-path: inset(5% 0 85% 0); }
+  47%  { clip-path: inset(60% 0 20% 0); }
+  53%  { clip-path: inset(30% 0 55% 0); }
   60%  { clip-path: inset(80% 0 5% 0); }
-  80%  { clip-path: inset(30% 0 55% 0); }
-  100% { clip-path: inset(50% 0 35% 0); }
+  66%  { clip-path: inset(40% 0 45% 0); }
+  67%, 100% { clip-path: inset(100% 0 0 0); }
 }
 
-@keyframes menu-glitch-b {
-  0%   { clip-path: inset(50% 0 30% 0); }
-  20%  { clip-path: inset(5% 0 80% 0); }
-  40%  { clip-path: inset(70% 0 10% 0); }
-  60%  { clip-path: inset(20% 0 65% 0); }
-  80%  { clip-path: inset(90% 0 0 0); }
-  100% { clip-path: inset(40% 0 45% 0); }
+@keyframes menu-glitch-bottom {
+  0%   { clip-path: inset(60% 0 20% 0); }
+  7%   { clip-path: inset(5% 0 80% 0); }
+  13%  { clip-path: inset(45% 0 35% 0); }
+  20%  { clip-path: inset(0 0 75% 0); }
+  27%  { clip-path: inset(70% 0 10% 0); }
+  33%  { clip-path: inset(15% 0 65% 0); }
+  40%  { clip-path: inset(90% 0 0 0); }
+  47%  { clip-path: inset(25% 0 55% 0); }
+  53%  { clip-path: inset(55% 0 25% 0); }
+  60%  { clip-path: inset(0 0 85% 0); }
+  66%  { clip-path: inset(35% 0 50% 0); }
+  67%, 100% { clip-path: inset(100% 0 0 0); }
 }
 
 .menu-btn-icon {

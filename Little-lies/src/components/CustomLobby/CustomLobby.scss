@@ -57,42 +57,47 @@
   &::before {
     left: -1px;
     text-shadow: 1px 0 #0ff;
-    animation: lobby-glitch-top 8s infinite linear alternate-reverse;
+    // ~2s glitch burst → 1s rest → repeat (total 3s cycle)
+    animation: lobby-glitch-top 3s infinite linear;
   }
 
   &::after {
     left: 1px;
     text-shadow: -1px 0 #ff0040;
-    animation: lobby-glitch-bottom 7s infinite linear alternate-reverse;
+    animation: lobby-glitch-bottom 3s infinite linear;
   }
 }
 
+// Active glitch runs from 0% → 66% (~2s), then the element is hidden
+// (clip-path fully collapsed) from 66% → 100% (~1s) for a clean rest.
 @keyframes lobby-glitch-top {
   0%   { clip-path: inset(0 0 90% 0); }
-  10%  { clip-path: inset(70% 0 10% 0); }
-  20%  { clip-path: inset(20% 0 60% 0); }
-  30%  { clip-path: inset(85% 0 5% 0); }
-  40%  { clip-path: inset(10% 0 75% 0); }
-  50%  { clip-path: inset(50% 0 30% 0); }
-  60%  { clip-path: inset(5% 0 85% 0); }
-  70%  { clip-path: inset(60% 0 20% 0); }
-  80%  { clip-path: inset(30% 0 55% 0); }
-  90%  { clip-path: inset(80% 0 5% 0); }
-  100% { clip-path: inset(40% 0 45% 0); }
+  7%   { clip-path: inset(70% 0 10% 0); }
+  13%  { clip-path: inset(20% 0 60% 0); }
+  20%  { clip-path: inset(85% 0 5% 0); }
+  27%  { clip-path: inset(10% 0 75% 0); }
+  33%  { clip-path: inset(50% 0 30% 0); }
+  40%  { clip-path: inset(5% 0 85% 0); }
+  47%  { clip-path: inset(60% 0 20% 0); }
+  53%  { clip-path: inset(30% 0 55% 0); }
+  60%  { clip-path: inset(80% 0 5% 0); }
+  66%  { clip-path: inset(40% 0 45% 0); }
+  67%, 100% { clip-path: inset(100% 0 0 0); }
 }
 
 @keyframes lobby-glitch-bottom {
   0%   { clip-path: inset(60% 0 20% 0); }
-  10%  { clip-path: inset(5% 0 80% 0); }
-  20%  { clip-path: inset(45% 0 35% 0); }
-  30%  { clip-path: inset(0 0 75% 0); }
-  40%  { clip-path: inset(70% 0 10% 0); }
-  50%  { clip-path: inset(15% 0 65% 0); }
-  60%  { clip-path: inset(90% 0 0 0); }
-  70%  { clip-path: inset(25% 0 55% 0); }
-  80%  { clip-path: inset(55% 0 25% 0); }
-  90%  { clip-path: inset(0 0 85% 0); }
-  100% { clip-path: inset(35% 0 50% 0); }
+  7%   { clip-path: inset(5% 0 80% 0); }
+  13%  { clip-path: inset(45% 0 35% 0); }
+  20%  { clip-path: inset(0 0 75% 0); }
+  27%  { clip-path: inset(70% 0 10% 0); }
+  33%  { clip-path: inset(15% 0 65% 0); }
+  40%  { clip-path: inset(90% 0 0 0); }
+  47%  { clip-path: inset(25% 0 55% 0); }
+  53%  { clip-path: inset(55% 0 25% 0); }
+  60%  { clip-path: inset(0 0 85% 0); }
+  66%  { clip-path: inset(35% 0 50% 0); }
+  67%, 100% { clip-path: inset(100% 0 0 0); }
 }
 
 .lobby-subtitle {

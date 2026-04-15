@@ -3,6 +3,36 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border-radius: 10px;
+  transition: box-shadow 0.4s;
+
+  // When voting begins, pulse the ENTIRE action block (mayor button, phase
+  // context, player list) once with a white glow to grab attention. Replaces
+  // the old orange pulse that only wrapped the player list.
+  &.highlight-vote {
+    animation: vote-highlight-pulse 2.4s ease-out 1;
+  }
+}
+
+@keyframes vote-highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    background: rgba(255, 255, 255, 0);
+  }
+  12% {
+    box-shadow: 0 0 26px 5px rgba(255, 255, 255, 0.55),
+                inset 0 0 20px rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.07);
+  }
+  45% {
+    box-shadow: 0 0 32px 7px rgba(255, 255, 255, 0.4),
+                inset 0 0 24px rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    background: rgba(255, 255, 255, 0);
+  }
 }
 
 /* Phase context slot — fixed container to prevent layout shift */
@@ -19,19 +49,14 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-// Vote highlight wrapper
+// Player list wrapper — layout only, the voting highlight lives on the
+// parent `.player-list-container` now so it wraps the whole action block.
 .player-list-wrapper {
   transition: box-shadow 0.4s, border-color 0.4s;
   border-radius: 10px;
   padding: 8px;
   background: none;
   border: none;
-
-  &.highlight-vote {
-    background: none;
-    border: none;
-    box-shadow: none;
-  }
 }
 
 .vote-arrow-indicator {

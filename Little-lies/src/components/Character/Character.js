@@ -76,15 +76,51 @@ export function Character({
         }
         // Clone from original to preserve textures
         const mat = origMaterials.current.get(child.uuid).clone();
-        // Kill emissive to prevent white glow at night
+        // Kill baked emissive (prevents white glow at night from the GLB's
+        // default emissive). We'll inject a subtle colored rim light via
+        // onBeforeCompile instead, which only affects the silhouette.
         if (mat.emissive) mat.emissive.set(0, 0, 0);
         mat.emissiveIntensity = 0;
         mat.emissiveMap = null;
-        // Tint with player color — subtle blend (30% color, 70% white)
+        // Force non-metallic diffuse — the GLB ships with metallic PBR
+        // materials which, without bright local colored lights, make all
+        // villagers look like dull grey iron (metals take their color from
+        // the environment, not their base color). Force metalness=0 so the
+        // player color tint actually reads on screen.
+        mat.metalness = 0;
+        mat.metalnessMap = null;
+        mat.roughness = 0.85;
+        // Stronger base tint with player color (45% color / 55% white) —
+        // keeps the original baseColorTexture readable but makes the color
+        // identification much more visible than a faint wash.
+        const rimColor = new Color(color || '#ffffff');
         if (color) {
-          const tint = new Color(color);
-          mat.color = new Color('#ffffff').lerp(tint, 0.3);
+          mat.color = new Color('#ffffff').lerp(rimColor, 0.45);
         }
+        // Rim light injection — adds a subtle fresnel glow around the
+        // silhouette in the player's color. Does NOT replace the texture,
+        // just adds to the final fragment color. Highlights the character
+        // at a glance without a decal on the ground.
+        mat.onBeforeCompile = (shader) => {
+          shader.uniforms.uRimColor = { value: rimColor };
+          shader.uniforms.uRimIntensity = { value: 0.9 };
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <common>',
+            `#include <common>
+             uniform vec3 uRimColor;
+             uniform float uRimIntensity;`,
+          );
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <dithering_fragment>',
+            `// Fresnel rim — bright on the silhouette, 0 facing camera.
+             float rimFresnel = 1.0 - clamp(dot(normalize(geometryNormal), normalize(vViewPosition)), 0.0, 1.0);
+             rimFresnel = pow(rimFresnel, 2.2);
+             gl_FragColor.rgb += uRimColor * rimFresnel * uRimIntensity;
+             #include <dithering_fragment>`,
+          );
+        };
+        // Force recompile so the new onBeforeCompile takes effect
+        mat.needsUpdate = true;
         child.material = mat;
         child.castShadow = true;
         child.receiveShadow = true;
