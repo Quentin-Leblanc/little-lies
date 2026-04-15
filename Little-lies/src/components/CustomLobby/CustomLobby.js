@@ -154,6 +154,9 @@ const OrbitCamera = () => {
   return null;
 };
 
+// Lobby animations — assigned per player index
+const LOBBY_ANIMS = ['SitCross', 'LieDown'];
+
 // Player seat around fire
 const PlayerSeat = ({ index, total, player, color }) => {
   const angle = (index / Math.max(total, 1)) * Math.PI * 2;
@@ -162,9 +165,12 @@ const PlayerSeat = ({ index, total, player, color }) => {
   const z = Math.sin(angle) * r;
   const lookAtAngle = Math.atan2(-x, -z);
 
+  // Alternate animations based on player index
+  const anim = LOBBY_ANIMS[index % LOBBY_ANIMS.length];
+
   return (
     <group position={[x, 0, z]} rotation={[0, lookAtAngle, 0]}>
-      <Character color={color} animation="Idle" scale={0.55} />
+      <Character color={color} animation={anim} scale={0.55} animOffset={index * 0.5} />
       <Html position={[0, 1.6, 0]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
         <div style={{
           color: color,

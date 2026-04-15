@@ -18,6 +18,8 @@ export function Character({
   const walk = useGLTF('/models/Villager_Walk.glb');
   const run = useGLTF('/models/Villager_Run.glb');
   const jump = useGLTF('/models/Villager_Jump.glb');
+  const sitCross = useGLTF('/models/Villager_SitCross.glb');
+  const lieDown = useGLTF('/models/Villager_LieDown.glb');
 
   // Clone the base mesh from idle (all files share the same mesh/skeleton)
   const clone = useMemo(() => SkeletonUtils.clone(idle.scene), [idle.scene]);
@@ -37,8 +39,10 @@ export function Character({
     addAnim(walk, 'Walk');
     addAnim(run, 'Run');
     addAnim(jump, 'Jump');
+    addAnim(sitCross, 'SitCross');
+    addAnim(lieDown, 'LieDown');
     return anims;
-  }, [idle.animations, dead.animations, walk.animations, run.animations, jump.animations]);
+  }, [idle.animations, dead.animations, walk.animations, run.animations, jump.animations, sitCross.animations, lieDown.animations]);
 
   const { actions } = useAnimations(allAnimations, group);
 
@@ -95,3 +99,5 @@ useGLTF.preload('/models/Villager_Dead.glb');
 useGLTF.preload('/models/Villager_Walk.glb');
 useGLTF.preload('/models/Villager_Run.glb');
 useGLTF.preload('/models/Villager_Jump.glb');
+useGLTF.preload('/models/Villager_SitCross.glb');
+useGLTF.preload('/models/Villager_LieDown.glb');

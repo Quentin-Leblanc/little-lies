@@ -2512,10 +2512,10 @@ const MainScene = () => {
               mipmapBlur
             />
             <SSAO
-              radius={0.4}
-              intensity={game.isDay ? 15 : 25}
-              luminanceInfluence={0.5}
-              color="#000000"
+              radius={0.15}
+              intensity={game.isDay ? 2 : 4}
+              luminanceInfluence={0.6}
+              bias={0.01}
             />
             <BrightnessContrast
               brightness={game.isDay ? -0.03 : -0.05}
