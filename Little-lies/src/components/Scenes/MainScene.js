@@ -19,8 +19,7 @@ const getNightAmbiance = () => {
 // Ground with dirt path
 // ============================================================
 const GroundPlane = ({ isDay }) => {
-  // Dark werewolf theme: muted mossy greens, dark mud, weathered stone
-  const dirtColor = isDay ? '#5a4234' : '#2a1e16';
+  // Dark werewolf theme: muted mossy greens, weathered stone
   const grassColor = isDay ? '#3d4a35' : '#1a241b';
   const stoneColor = isDay ? '#4a453e' : '#2a2622';
   return (
@@ -35,26 +34,7 @@ const GroundPlane = ({ isDay }) => {
         <circleGeometry args={[5.5, 8]} />
         <meshStandardMaterial color={stoneColor} roughness={0.95} flatShading />
       </mesh>
-      {/* Dirt paths radiating from center — wider, organic look */}
-      {[0, Math.PI / 2, Math.PI, -Math.PI / 2, Math.PI / 4, -Math.PI / 4, 3 * Math.PI / 4, -3 * Math.PI / 4].map((angle, i) => (
-        <group key={`path-${i}`}>
-          {/* Main path strip */}
-          <mesh rotation={[-Math.PI / 2, 0, angle]} position={[Math.sin(angle) * 9, 0.005, Math.cos(angle) * 9]} receiveShadow>
-            <planeGeometry args={[2.5, 14]} />
-            <meshStandardMaterial color={dirtColor} roughness={1} flatShading />
-          </mesh>
-          {/* Left edge — rough border */}
-          <mesh rotation={[-Math.PI / 2, 0, angle + 0.04]} position={[Math.sin(angle + 0.08) * 9, 0.004, Math.cos(angle + 0.08) * 9]} receiveShadow>
-            <planeGeometry args={[1.2, 12]} />
-            <meshStandardMaterial color={dirtColor} transparent opacity={0.5} roughness={1} flatShading />
-          </mesh>
-          {/* Right edge — rough border */}
-          <mesh rotation={[-Math.PI / 2, 0, angle - 0.04]} position={[Math.sin(angle - 0.08) * 9, 0.004, Math.cos(angle - 0.08) * 9]} receiveShadow>
-            <planeGeometry args={[1.2, 12]} />
-            <meshStandardMaterial color={dirtColor} transparent opacity={0.5} roughness={1} flatShading />
-          </mesh>
-        </group>
-      ))}
+      {/* Dirt paths removed — clashed with the dark werewolf theme */}
       {/* Night ground fog layer */}
       {!isDay && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
@@ -760,14 +740,16 @@ const faceCenter = (bx, bz) => Math.atan2(-bx, -bz);
 // Dark theme: forge & tavern removed (no matching Meshy models). Chapel
 // (= Rootbound Manor) is enlarged to be THE landmark building.
 const BUILDING_POSITIONS = [
-  // Grande église (Rootbound Manor) — landmark imposant au nord
-  { type: 'chapel',  position: [0, 0, -13],   scale: 3.2, get rotation() { return [0, faceCenter(0, -13), 0]; } },
+  // Grande église (Rootbound Manor) — landmark imposant, agrandie pour
+  // rester visible en permanence quand la caméra orbite. Positionnée
+  // en retrait au nord pour ne pas déborder sur les lampadaires centraux.
+  { type: 'chapel',  position: [0, 0, -15],   scale: 4.8, get rotation() { return [0, faceCenter(0, -15), 0]; } },
   // Inner ring cottages
   { type: 'cottage', position: [-10, 0, 1],   scale: 1.6, variant: 0, get rotation() { return [0, faceCenter(-10, 1), 0]; } },
   { type: 'cottage', position: [10, 0, 2],    scale: 1.6, variant: 1, get rotation() { return [0, faceCenter(10, 2), 0]; } },
   { type: 'cottage', position: [-7, 0, 8],    scale: 1.5, variant: 2, get rotation() { return [0, faceCenter(-7, 8), 0]; } },
   { type: 'cottage', position: [7, 0, 9],     scale: 1.5, variant: 0, get rotation() { return [0, faceCenter(7, 9), 0]; } },
-  { type: 'cottage', position: [-5, 0, -10],  scale: 1.5, variant: 1, get rotation() { return [0, faceCenter(-5, -10), 0]; } },
+  // (cottage à [-5, 0, -10] retiré — rentrait dans l'église agrandie)
   // Outer ring — more cottages
   { type: 'cottage', position: [-15, 0, -8],  scale: 1.4, variant: 2, get rotation() { return [0, faceCenter(-15, -8), 0]; } },
   { type: 'cottage', position: [15, 0, -8],   scale: 1.4, variant: 0, get rotation() { return [0, faceCenter(15, -8), 0]; } },
@@ -849,6 +831,7 @@ const MESHY_TREE    = '/models/gnarled_tree.glb';
 const MESHY_BOARD   = '/models/bulletin_board.glb';
 const MESHY_SKULL   = '/models/skull_sign.glb';
 const MESHY_RING    = '/models/rope_ring.glb';
+const MESHY_LANTERN = '/models/skull_lantern.glb';
 
 // Only KayKit asset we still keep: neutral gray rocks (fit the dark theme)
 useGLTF.preload('/models/kaykit/rock_single_A.gltf');
@@ -860,6 +843,7 @@ useGLTF.preload(MESHY_TREE);
 useGLTF.preload(MESHY_BOARD);
 useGLTF.preload(MESHY_SKULL);
 useGLTF.preload(MESHY_RING);
+useGLTF.preload(MESHY_LANTERN);
 
 // Meshy models have their pivot at the CENTER of a unit cube (Y ∈ [-0.95, 0.95]).
 // After scaling by S, we must raise position.y by `halfHeight * S` to put the base
@@ -869,6 +853,57 @@ const MeshyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0
   const pos = [position[0], position[1] + halfHeight * scale, position[2]];
   return <KenneyModel path={path} position={pos} rotation={rotation} scale={scale} />;
 });
+
+// ============================================================
+// Skull Lantern — Meshy model + glowing lamp (model was exported
+// with a lit lamp, so we add an emissive sphere + pointLight at
+// the top of the lantern post where the lamp sits).
+// ============================================================
+const SkullLantern = ({ position, rotation = [0, 0, 0], scale = 1.2 }) => {
+  const lightRef = useRef();
+  const glowRef = useRef();
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    // Subtle flicker — gentle candle-like pulse
+    const flicker = 0.85 + Math.sin(t * 4 + position[0]) * 0.1 + Math.sin(t * 9 + position[2]) * 0.05;
+    if (lightRef.current) lightRef.current.intensity = 1.6 * flicker;
+    if (glowRef.current) {
+      glowRef.current.scale.setScalar(0.9 + (flicker - 0.85) * 2);
+    }
+  });
+
+  // The lamp sits near the top of the lantern post. Model is normalized to
+  // y ∈ [-0.95, 0.95]; the lamp head is roughly at y ≈ 0.55 of the model
+  // local frame (i.e. (0.55 + 0.95) * scale above ground after MeshyModel's
+  // halfHeight offset).
+  const glowY = (0.55 + 0.95) * scale;
+
+  return (
+    <group position={position} rotation={rotation}>
+      <MeshyModel path={MESHY_LANTERN} position={[0, 0, 0]} scale={scale} />
+      {/* Warm emissive glow orb — simulates the lit lamp */}
+      <mesh ref={glowRef} position={[0, glowY, 0]}>
+        <sphereGeometry args={[0.18 * scale, 10, 8]} />
+        <meshBasicMaterial color="#ffd080" transparent opacity={0.9} />
+      </mesh>
+      {/* Soft halo around the lamp */}
+      <mesh position={[0, glowY, 0]}>
+        <sphereGeometry args={[0.32 * scale, 10, 8]} />
+        <meshBasicMaterial color="#ffb060" transparent opacity={0.25} depthWrite={false} />
+      </mesh>
+      {/* Point light cast from the lamp */}
+      <pointLight
+        ref={lightRef}
+        position={[0, glowY, 0]}
+        color="#ffb060"
+        intensity={1.6}
+        distance={9}
+        decay={1.6}
+      />
+    </group>
+  );
+};
 
 const BuildingRenderer = ({ type, position, rotation, scale }) => {
   const path = type === 'chapel' ? MESHY_MANOR : MESHY_COTTAGE;
@@ -885,9 +920,9 @@ const Village = React.memo(({ isDay }) => (
       <BuildingRenderer key={`bld-${i}`} {...b} />
     ))}
 
-    {/* ——— TORCHES ——— */}
+    {/* ——— LAMPADAIRES : Skull Lantern Meshy autour du centre ——— */}
     {TORCH_POS.map((pos, i) => (
-      <Torch key={`torch-${i}`} position={pos} />
+      <SkullLantern key={`lantern-${i}`} position={pos} rotation={[0, i * Math.PI / 2, 0]} scale={1.2} />
     ))}
 
     {/* ——— MONTAGNES procédurales (thème dark) ——— */}
@@ -1577,21 +1612,15 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
           animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
         />
       </group>
-      {/* Player color glow — only during day, not during walk-away */}
-      {isDay && !isTransitioning && <>
-        <pointLight position={[0, 0.8, 0]} color={color} intensity={3} distance={5} />
-        <pointLight position={[0, 1.5, 0]} color={color} intensity={1.5} distance={3} />
-        <pointLight position={[0, 0.2, 0.5]} color={color} intensity={1} distance={2.5} />
-        <pointLight position={[0, 0.2, -0.5]} color={color} intensity={1} distance={2.5} />
+      {/* Player ground ring — subtle identifier, no colored point lights
+          (they clashed with the dark werewolf theme by scattering colored
+          splashes all over the village center) */}
+      {isDay && !isTransitioning && (
         <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.3, 0.7, 24]} />
-          <meshBasicMaterial color={color} transparent opacity={0.6} />
+          <meshBasicMaterial color={color} transparent opacity={0.45} />
         </mesh>
-        <mesh position={[0, 0.8, 0]}>
-          <cylinderGeometry args={[0.5, 0.5, 1.8, 16, 1, true]} />
-          <meshBasicMaterial color={color} transparent opacity={0.08} side={THREE.DoubleSide} />
-        </mesh>
-      </>}
+      )}
       {/* Accused ring */}
       {isAccused && (
         <mesh position={[0, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0]}>

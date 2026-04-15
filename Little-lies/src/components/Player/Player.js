@@ -90,15 +90,29 @@ const Player = () => {
                     )}
                 </div>
 
-                {me.character?.label && (
+                {me.character?.label && (() => {
+                    const roleLabel = t(`roles:${me.character.key}.label`, { defaultValue: me.character.label });
+                    const rawDescription = t(`roles:${me.character.key}.description`, { defaultValue: me.character.description });
+                    // Bold the role label wherever it appears in the description
+                    // (e.g. "Tu es le Sheriff." → "Tu es le **Sheriff**.")
+                    const descriptionParts = roleLabel
+                        ? rawDescription.split(new RegExp(`(${roleLabel.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'i'))
+                        : [rawDescription];
+                    return (
                     <>
                         <div className="role-name" style={{ color: me.character.couleur }}>
                             {me.character.icon && <i className={`fas ${me.character.icon}`}></i>}
-                            <h2>{t(`roles:${me.character.key}.label`, { defaultValue: me.character.label })}</h2>
+                            <h2>{roleLabel}</h2>
                         </div>
 
                         <h4 className="role-section-title"><i className="fas fa-info-circle"></i> Description</h4>
-                        <p className="role-description">{t(`roles:${me.character.key}.description`, { defaultValue: me.character.description })}</p>
+                        <p className="role-description">
+                            {descriptionParts.map((part, i) =>
+                                part.toLowerCase() === roleLabel.toLowerCase()
+                                    ? <strong key={i}>{part}</strong>
+                                    : <React.Fragment key={i}>{part}</React.Fragment>
+                            )}
+                        </p>
 
                         <h4 className="role-section-title"><i className="fas fa-crosshairs"></i> {t('game:role_sections.objective', { defaultValue: 'Objectif' })}</h4>
                         <div className="role-objective">
@@ -139,7 +153,8 @@ const Player = () => {
                             </div>
                         )}
                     </>
-                )}
+                    );
+                })()}
             </div>
             </div>{/* end role-team-row */}
 
