@@ -19,9 +19,10 @@ const getNightAmbiance = () => {
 // Ground with dirt path
 // ============================================================
 const GroundPlane = ({ isDay }) => {
-  const dirtColor = isDay ? '#D4A574' : '#5a4030';
-  const grassColor = isDay ? '#7EC850' : '#2D4A3E';
-  const stoneColor = isDay ? '#C4A882' : '#5a5040';
+  // Dark werewolf theme: muted mossy greens, dark mud, weathered stone
+  const dirtColor = isDay ? '#5a4234' : '#2a1e16';
+  const grassColor = isDay ? '#3d4a35' : '#1a241b';
+  const stoneColor = isDay ? '#4a453e' : '#2a2622';
   return (
     <group>
       {/* Main grass */}
@@ -370,8 +371,6 @@ const VillageCenter = () => (
       scale={2}
       halfHeight={0.92}
     />
-    {/* Puits KayKit à côté */}
-    <KenneyModel path="/models/kaykit/building_well_red.gltf" position={[-5, 0, 3]} scale={2.5} />
   </group>
 );
 
@@ -765,11 +764,11 @@ const HAY_POSITIONS = [
 const faceCenter = (bx, bz) => Math.atan2(-bx, -bz);
 
 // Building positions — all rotated to face center
+// Dark theme: forge & tavern removed (no matching Meshy models). Chapel
+// (= Rootbound Manor) is enlarged to be THE landmark building.
 const BUILDING_POSITIONS = [
-  // Unique buildings — bigger scale
-  { type: 'forge',   position: [-9, 0, -7],   scale: 1.8, get rotation() { return [0, faceCenter(-9, -7), 0]; } },
-  { type: 'tavern',  position: [9, 0, -7],    scale: 1.8, get rotation() { return [0, faceCenter(9, -7), 0]; } },
-  { type: 'chapel',  position: [0, 0, -12],   scale: 2.0, get rotation() { return [0, faceCenter(0, -12), 0]; } },
+  // Grande église (Rootbound Manor) — landmark imposant au nord
+  { type: 'chapel',  position: [0, 0, -13],   scale: 3.2, get rotation() { return [0, faceCenter(0, -13), 0]; } },
   // Inner ring cottages
   { type: 'cottage', position: [-10, 0, 1],   scale: 1.6, variant: 0, get rotation() { return [0, faceCenter(-10, 1), 0]; } },
   { type: 'cottage', position: [10, 0, 2],    scale: 1.6, variant: 1, get rotation() { return [0, faceCenter(10, 2), 0]; } },
@@ -826,16 +825,31 @@ const TREE_POSITIONS = [
   [-14, 0, 12], [14, 0, -11],
 ];
 
-// KayKit model paths mapped by building type (forge/tavern kept from KayKit)
-const KAYKIT_PATHS = {
-  forge:   '/models/kaykit/building_blacksmith_red.gltf',
-  tavern:  '/models/kaykit/building_tavern_red.gltf',
-  chapel:  '/models/kaykit/building_church_red.gltf',
-  cottage: '/models/kaykit/building_home_A_red.gltf',
-  cottageB:'/models/kaykit/building_home_B_red.gltf',
-};
+// Dark procedural mountain — two stacked cones, weathered dark tones
+const DarkMountain = React.memo(({ position, scale = 1, variant = 0 }) => {
+  const rotY = variant * 0.37;
+  return (
+    <group position={position} rotation={[0, rotY, 0]} scale={scale}>
+      {/* Main peak — dark slate */}
+      <mesh castShadow receiveShadow>
+        <coneGeometry args={[3, 5.5, 5]} />
+        <meshStandardMaterial color="#2a2630" flatShading roughness={1} />
+      </mesh>
+      {/* Snow/bone cap */}
+      <mesh position={[0, 2.2, 0]} castShadow>
+        <coneGeometry args={[1.4, 1.6, 5]} />
+        <meshStandardMaterial color="#3d3a44" flatShading roughness={1} />
+      </mesh>
+      {/* Small shoulder — offset cone for a ridgeline feel */}
+      <mesh position={[1.3, -0.5, 0.6]} castShadow>
+        <coneGeometry args={[1.6, 3.5, 5]} />
+        <meshStandardMaterial color="#23202a" flatShading roughness={1} />
+      </mesh>
+    </group>
+  );
+});
 
-// Meshy "dark werewolf" models — replace cottages, chapel, and trees
+// Meshy "dark werewolf" models — scene is fully Meshy now for buildings/trees
 const MESHY_COTTAGE = '/models/skullcrest_cottage.glb';
 const MESHY_MANOR   = '/models/rootbound_manor.glb';
 const MESHY_TREE    = '/models/gnarled_tree.glb';
@@ -843,15 +857,7 @@ const MESHY_BOARD   = '/models/bulletin_board.glb';
 const MESHY_SKULL   = '/models/skull_sign.glb';
 const MESHY_RING    = '/models/rope_ring.glb';
 
-// Preload KayKit buildings
-Object.values(KAYKIT_PATHS).forEach((p) => useGLTF.preload(p));
-useGLTF.preload('/models/kaykit/building_well_red.gltf');
-useGLTF.preload('/models/kaykit/tree_single_A.gltf');
-useGLTF.preload('/models/kaykit/tree_single_B.gltf');
-useGLTF.preload('/models/kaykit/barrel.gltf');
-useGLTF.preload('/models/kaykit/crate_A_big.gltf');
-useGLTF.preload('/models/kaykit/flag_red.gltf');
-useGLTF.preload('/models/kaykit/resource_lumber.gltf');
+// Only KayKit asset we still keep: neutral gray rocks (fit the dark theme)
 useGLTF.preload('/models/kaykit/rock_single_A.gltf');
 
 // Preload Meshy models
@@ -871,17 +877,9 @@ const MeshyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0
   return <KenneyModel path={path} position={pos} rotation={rotation} scale={scale} />;
 });
 
-const BuildingRenderer = ({ type, position, rotation, scale, variant = 0 }) => {
-  // New Meshy dark-theme models for cottages and chapel
-  if (type === 'cottage') {
-    return <MeshyModel path={MESHY_COTTAGE} position={position} rotation={rotation} scale={scale * 1.6} />;
-  }
-  if (type === 'chapel') {
-    return <MeshyModel path={MESHY_MANOR} position={position} rotation={rotation} scale={scale * 1.6} />;
-  }
-  // Forge and tavern keep KayKit models (user kept them)
-  const path = KAYKIT_PATHS[type] || KAYKIT_PATHS.cottage;
-  return <KenneyModel path={path} position={position} rotation={rotation} scale={scale * 3} />;
+const BuildingRenderer = ({ type, position, rotation, scale }) => {
+  const path = type === 'chapel' ? MESHY_MANOR : MESHY_COTTAGE;
+  return <MeshyModel path={path} position={position} rotation={rotation} scale={scale * 1.6} />;
 };
 
 const Village = React.memo(({ isDay }) => (
@@ -899,10 +897,10 @@ const Village = React.memo(({ isDay }) => (
       <Torch key={`torch-${i}`} position={pos} />
     ))}
 
-    {/* ——— MONTAGNES KayKit en arriere-plan ——— */}
+    {/* ——— MONTAGNES procédurales (thème dark) ——— */}
     {MOUNTAINS.map((m, i) => (
-      <KenneyModel key={`mountain-${i}`} path="/models/kaykit/mountain_A_grass_trees.gltf"
-        position={m.position} scale={m.scale * 2.5} rotation={[0, i * 1.5, 0]} />
+      <DarkMountain key={`mountain-${i}`}
+        position={m.position} scale={m.scale * 1.2} variant={i} />
     ))}
 
     {/* ——— ARBRES Meshy "Gnarled Sentinel" (dark theme) ——— */}
@@ -912,24 +910,13 @@ const Village = React.memo(({ isDay }) => (
         position={pos} scale={1.4 + (i % 4) * 0.3} rotation={[0, i * 1.3, 0]} />
     ))}
 
-    {/* ——— DECORATIONS : charrette ——— */}
-    <LowPolyCart position={[7, 0, -3]} rotation={[0, -0.8, 0]} scale={1.1} />
-
-    {/* ——— ROCHERS KayKit ——— */}
+    {/* ——— ROCHERS (gris neutre, OK avec dark theme) ——— */}
     {ROCK_POSITIONS.map((r, i) => (
       <KenneyModel key={`rock-${i}`} path="/models/kaykit/rock_single_A.gltf"
         position={r.position} scale={r.scale * 3} rotation={[0, i * 2.1, 0]} />
     ))}
 
-    {/* ——— BUISSONS (ameliores) ——— */}
-    {BUSH_POSITIONS.map((b, i) => (
-      <KenneyModel key={`bush-${i}`}
-        path={i % 2 === 0 ? '/models/kaykit/tree_single_A.gltf' : '/models/kaykit/tree_single_B.gltf'}
-        position={b.position} scale={b.scale * 1.2} rotation={[0, i * 0.8, 0]} />
-    ))}
-
-    {/* ——— DECORS entre les maisons ——— */}
-    {/* Arbres Meshy "Gnarled Sentinel" entre les bâtiments */}
+    {/* ——— ARBRES Meshy supplémentaires entre les bâtiments ——— */}
     <MeshyModel path={MESHY_TREE} position={[-6, 0, -1]} scale={1.7} rotation={[0, 0.4, 0]} />
     <MeshyModel path={MESHY_TREE} position={[6, 0, -1]} scale={1.6} rotation={[0, 1.1, 0]} />
     <MeshyModel path={MESHY_TREE} position={[-12, 0, 3]} scale={1.8} rotation={[0, 2.3, 0]} />
@@ -948,23 +935,6 @@ const Village = React.memo(({ isDay }) => (
       position={[-7, 0, 5]} scale={1.6}
       rotation={[0, 0.5, 0]}
       halfHeight={0.38} />
-
-    {/* Tonneaux et caisses à côté des maisons */}
-    <KenneyModel path="/models/kaykit/barrel.gltf" position={[-8, 0, -5.5]} rotation={[0, 0.5, 0]} scale={2.5} />
-    <KenneyModel path="/models/kaykit/barrel.gltf" position={[8, 0, -5]} rotation={[0, -0.8, 0]} scale={2.5} />
-    <KenneyModel path="/models/kaykit/barrel.gltf" position={[-11, 0, 3]} rotation={[0, 1.2, 0]} scale={2.2} />
-    <KenneyModel path="/models/kaykit/crate_A_big.gltf" position={[11, 0, 3.5]} rotation={[0, 0.3, 0]} scale={2.5} />
-    <KenneyModel path="/models/kaykit/crate_A_big.gltf" position={[-6, 0, 6.5]} rotation={[0, -0.5, 0]} scale={2.2} />
-    <KenneyModel path="/models/kaykit/resource_lumber.gltf" position={[-8.5, 0, -8.5]} rotation={[0, 0.7, 0]} scale={2.5} />
-    <KenneyModel path="/models/kaykit/resource_lumber.gltf" position={[7, 0, 7]} rotation={[0, -0.4, 0]} scale={2.2} />
-
-    {/* Drapeaux */}
-    <KenneyModel path="/models/kaykit/flag_red.gltf" position={[-4, 0, -4.5]} rotation={[0, 0.3, 0]} scale={3} />
-    <KenneyModel path="/models/kaykit/flag_red.gltf" position={[4, 0, -4.5]} rotation={[0, -0.3, 0]} scale={3} />
-
-    {/* Rochers KayKit */}
-    <KenneyModel path="/models/kaykit/rock_single_A.gltf" position={[-14, 0, -5]} scale={3} />
-    <KenneyModel path="/models/kaykit/rock_single_A.gltf" position={[15, 0, 3]} scale={2.5} />
 
     {/* Lumières chaleureuses entre les maisons — reduced to avoid white textures */}
     <pointLight position={[-9, 2, -6]} color="#ff9944" intensity={0.6} distance={6} />
