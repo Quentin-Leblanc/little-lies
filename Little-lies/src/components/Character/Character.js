@@ -80,9 +80,10 @@ export function Character({
         if (mat.emissive) mat.emissive.set(0, 0, 0);
         mat.emissiveIntensity = 0;
         mat.emissiveMap = null;
-        // Tint with player color if provided (multiplied with texture)
+        // Tint with player color — subtle blend (30% color, 70% white)
         if (color) {
-          mat.color = new Color(color);
+          const tint = new Color(color);
+          mat.color = new Color('#ffffff').lerp(tint, 0.3);
         }
         child.material = mat;
         child.castShadow = true;

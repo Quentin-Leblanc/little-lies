@@ -2535,9 +2535,9 @@ const MainScene = () => {
           {/* Post-processing */}
           <EffectComposer>
             <Bloom
-              intensity={game.isDay ? 0.12 : 0.3}
-              luminanceThreshold={game.isDay ? 0.92 : 0.85}
-              luminanceSmoothing={0.4}
+              intensity={game.isDay ? 0.1 : 0.15}
+              luminanceThreshold={game.isDay ? 0.92 : 0.92}
+              luminanceSmoothing={0.3}
               mipmapBlur
             />
             <BrightnessContrast
@@ -2592,11 +2592,20 @@ const MainScene = () => {
             <div className="death-report-card">
               {hasDead ? (
                 <>
-                  {killEvents.map((entry, i) => (
-                    <div key={i} className="death-report-name">
-                      <span className="death-desc">{entry.content.chatMessage}</span>
-                    </div>
-                  ))}
+                  {killEvents.map((entry, i) => {
+                    // Split message: before role reveal vs role reveal
+                    const msg = entry.content.chatMessage || '';
+                    // Try to split at role marker (works in both FR and EN)
+                    const roleMatch = msg.match(/(.*?)((?:Son rôle était|Their role was)\s*:\s*.+)/s);
+                    const beforeRole = roleMatch ? roleMatch[1] : msg;
+                    const roleText = roleMatch ? roleMatch[2] : null;
+                    return (
+                      <div key={i} className="death-report-name">
+                        <span className="death-desc">{beforeRole}</span>
+                        {roleText && <span className="death-role-reveal">{roleText}</span>}
+                      </div>
+                    );
+                  })}
                 </>
               ) : (
                 <div className="death-report-safe">{i18n.t('game:system.peaceful_night')}</div>

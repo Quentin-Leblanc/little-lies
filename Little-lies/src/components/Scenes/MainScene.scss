@@ -363,6 +363,23 @@
   max-width: 500px;
 }
 
+.death-role-reveal {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ff6666;
+  font-style: normal;
+  margin-top: 10px;
+  letter-spacing: 1px;
+  opacity: 0;
+  animation: role-reveal-fade 1s ease-out 2s forwards;
+}
+
+@keyframes role-reveal-fade {
+  0% { opacity: 0; transform: translateY(5px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 .death-report-safe {
   font-family: 'Cinzel', serif;
   font-size: 2.2rem;
