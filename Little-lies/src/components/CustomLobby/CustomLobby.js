@@ -197,7 +197,7 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
   const anim = LOBBY_ANIMS[index % LOBBY_ANIMS.length];
   // LieDown animation model is offset upward — compensate with Y shift
   const yOffset = anim === 'LieDown' ? -0.35 : 0;
-  const nameY = anim === 'LieDown' ? 1.1 : 1.6;
+  const nameY = anim === 'LieDown' ? 1.1 : 1.15;
 
   return (
     <group position={[x, yOffset, z]} rotation={[0, lookAtAngle, 0]}>
