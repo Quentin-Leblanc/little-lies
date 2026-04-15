@@ -1204,18 +1204,10 @@ const GroundFog = ({ isDay = true }) => {
   const clouds = useMemo(() => {
     const arr = [];
     for (let i = 0; i < count; i++) {
-      // Day: spawn around buildings (radius 12-25), NOT center plaza
-      // Night: spawn everywhere including center
+      // Spawn everywhere including center — clouds drift across village
       let x, z;
-      if (isDay) {
-        const angle = Math.random() * Math.PI * 2;
-        const r = 12 + Math.random() * 13; // radius 12 to 25
-        x = Math.cos(angle) * r;
-        z = Math.sin(angle) * r;
-      } else {
-        x = (Math.random() - 0.5) * 45;
-        z = (Math.random() - 0.5) * 45;
-      }
+      x = (Math.random() - 0.5) * 45;
+      z = (Math.random() - 0.5) * 45;
       arr.push({
         x,
         y: Math.random() * 1.2 + 0.3,
@@ -1982,9 +1974,9 @@ const SceneLighting = ({ isDay, isSunset = false }) => {
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
 
-    // Sunset animation — sun drops to horizon over ~3 seconds
+    // Sunset animation — sun drops to horizon over ~2.5 seconds
     if (isSunset) {
-      sunsetProgress.current = Math.min(sunsetProgress.current + delta * 0.2, 1);
+      sunsetProgress.current = Math.min(sunsetProgress.current + delta * 0.35, 1);
     } else if (isDay) {
       sunsetProgress.current = 0;
     }
@@ -2135,7 +2127,7 @@ const MainScene = () => {
   const lastPhaseForFade = useRef(phase);
 
   // Phases that lead directly to night (last phases before night falls)
-  const PRE_NIGHT_PHASES = [CONSTANTS.PHASE.NO_LYNCH, CONSTANTS.PHASE.SPARED, CONSTANTS.PHASE.EXECUTION];
+  const PRE_NIGHT_PHASES = [CONSTANTS.PHASE.NO_LYNCH, CONSTANTS.PHASE.SPARED, CONSTANTS.PHASE.EXECUTION, CONSTANTS.PHASE.NIGHT_TRANSITION];
   const fadeTimers = useRef([]);
   const walkTimer = useRef(null);
 
@@ -2145,8 +2137,13 @@ const MainScene = () => {
     fadeTimers.current = [];
 
     // Pre-night phases: show players, start walk-away, then fade to black
+    // Start sunset early during last words too
+    if (phase === CONSTANTS.PHASE.LAST_WORDS) {
+      setIsSunset(true);
+    }
+
     if (PRE_NIGHT_PHASES.includes(phase)) {
-      // Start sunset animation immediately
+      // Continue/start sunset animation
       setIsSunset(true);
       // Ensure players are visible for walk-away
       setNightPlayersHidden(false);
