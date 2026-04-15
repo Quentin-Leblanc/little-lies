@@ -204,13 +204,13 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
       <Character color={color} animation={anim} scale={0.55} animOffset={index * 0.5} />
       {/* Aura glow under local player */}
       {isMe && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-          <circleGeometry args={[0.5, 24]} />
-          <meshBasicMaterial color={color} transparent opacity={0.25} />
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03 - yOffset, 0]}>
+          <circleGeometry args={[0.7, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.12} />
         </mesh>
       )}
       {isMe && (
-        <pointLight position={[0, 0.5, 0]} color={color} intensity={1.2} distance={3} />
+        <pointLight position={[0, 0.3 - yOffset, 0]} color={color} intensity={1.5} distance={4} />
       )}
       <Html position={[0, nameY, 0]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
         {(() => {
