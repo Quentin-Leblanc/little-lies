@@ -172,31 +172,15 @@ const BackgroundTrees = () => {
 };
 
 // Slow orbit camera
-// Fixed camera behind local player, looking at fire
-const FixedCamera = ({ playerIndex, totalPlayers }) => {
+// Slow orbit camera
+const OrbitCamera = () => {
   useFrame((state) => {
-    const angle = (playerIndex / Math.max(totalPlayers, 1)) * Math.PI * 2;
-    const r = 5;
-    // Position camera behind the player (same angle but further out)
-    const camX = Math.cos(angle) * r;
-    const camZ = Math.sin(angle) * r;
-    state.camera.position.set(camX, 2.8, camZ);
-    state.camera.lookAt(0, 0.3, 0);
+    const t = state.clock.elapsedTime * 0.03;
+    const r = 6;
+    state.camera.position.set(Math.cos(t) * r, 3.5, Math.sin(t) * r);
+    state.camera.lookAt(0, 0.5, 0);
   });
   return null;
-};
-
-// Rotating stars group
-const RotatingStars = () => {
-  const ref = useRef();
-  useFrame((state) => {
-    if (ref.current) ref.current.rotation.y = state.clock.elapsedTime * 0.01;
-  });
-  return (
-    <group ref={ref}>
-      <Stars radius={50} depth={40} count={2000} factor={3} fade speed={0.5} />
-    </group>
-  );
 };
 
 // Lobby animations — assigned per player index
@@ -542,15 +526,12 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
         <ambientLight intensity={0.05} />
 
         <Suspense fallback={null}>
-          <FixedCamera
-            playerIndex={playroom_players.findIndex(p => p.id === currentPlayer?.id)}
-            totalPlayers={playroom_players.length}
-          />
+          <OrbitCamera />
           <CampGround />
           <CampfireFlame />
           <Embers />
           <BackgroundTrees />
-          <RotatingStars />
+          <Stars radius={50} depth={40} count={2000} factor={3} fade speed={0.5} />
 
           {/* Players seated around fire */}
           {playroom_players.map((player, idx) => (
