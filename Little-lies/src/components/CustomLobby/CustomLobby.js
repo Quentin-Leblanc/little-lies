@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
-import { usePlayersList, isHost, getRoomCode, myPlayer } from 'playroomkit';
+import { usePlayersList, isHost, getRoomCode, myPlayer, useMultiplayerState } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars, Html } from '@react-three/drei';
@@ -192,6 +192,82 @@ const PlayerSeat = ({ index, total, player, color }) => {
 
 // ── Main Lobby Component ──
 
+// Lobby chat component
+const LobbyChat = () => {
+  const { t } = useTranslation('common');
+  const currentPlayer = myPlayer();
+  const [lobbyMessages, setLobbyMessages] = useMultiplayerState('lobbyChat', []);
+  const [input, setInput] = useState('');
+  const [inputVisible, setInputVisible] = useState(false);
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+  const msgs = lobbyMessages || [];
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [msgs.length]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Enter' && !inputVisible && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault();
+        setInputVisible(true);
+        setTimeout(() => inputRef.current?.focus(), 50);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [inputVisible]);
+
+  const sendMessage = () => {
+    if (!input.trim()) return;
+    const name = currentPlayer?.getState?.()?.profile?.name || 'Player';
+    const color = currentPlayer?.getState?.()?.profile?.color || '#ccc';
+    setLobbyMessages([...msgs.slice(-50), {
+      id: Date.now(),
+      player: name,
+      color,
+      content: input.trim(),
+    }]);
+    setInput('');
+    setInputVisible(false);
+  };
+
+  return (
+    <div className="lobby-chat">
+      <div className="lobby-chat-messages">
+        {msgs.map((m) => (
+          <div key={m.id} className="lobby-chat-msg">
+            <strong style={{ color: m.color }}>{m.player}</strong>
+            <span>: {m.content}</span>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      {inputVisible ? (
+        <input
+          ref={inputRef}
+          className="lobby-chat-input"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') sendMessage();
+            if (e.key === 'Escape') { setInputVisible(false); setInput(''); }
+          }}
+          onBlur={() => { if (!input.trim()) setInputVisible(false); }}
+          placeholder="Message..."
+          maxLength={150}
+          autoFocus
+        />
+      ) : (
+        <div className="lobby-chat-hint">
+          <kbd>Enter</kbd> {t('common:send').toLowerCase()}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CustomLobby = ({ setIsSelectingRoles }) => {
   const { t } = useTranslation(['setup', 'common']);
   const currentPlayer = myPlayer();
@@ -202,6 +278,9 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const [copied, setCopied] = useState(false);
   const [playerName, setPlayerName] = useState(
     currentPlayer?.getState?.()?.profile?.name || ''
+  );
+  const [selectedColor, setSelectedColor] = useState(
+    currentPlayer?.getState?.()?.profile?.color || PLAYER_COLORS[0]
   );
 
   // Sync Supabase username
@@ -229,6 +308,19 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     setPlayerName(name);
     currentPlayer.setState('profile', { ...currentPlayer.getState().profile, name });
   };
+
+  const handleColorChange = (color) => {
+    setSelectedColor(color);
+    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color });
+  };
+
+  // Colors already taken by other players
+  const takenColors = new Set(
+    playroom_players
+      .filter(p => p.id !== currentPlayer?.id)
+      .map(p => p.getState?.()?.profile?.color)
+      .filter(Boolean)
+  );
 
   const copyCode = () => {
     navigator.clipboard.writeText(roomCode).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
@@ -303,6 +395,27 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             />
           </div>
 
+          {/* Color picker */}
+          <div className="lobby-section">
+            <label className="lobby-label">{t('common:color', { defaultValue: 'Color' })}</label>
+            <div className="lobby-color-picker">
+              {PLAYER_COLORS.map((color) => {
+                const taken = takenColors.has(color);
+                const isSelected = selectedColor === color;
+                return (
+                  <button
+                    key={color}
+                    className={`lobby-color-dot ${isSelected ? 'selected' : ''} ${taken ? 'taken' : ''}`}
+                    style={{ '--dot-color': color }}
+                    onClick={() => !taken && handleColorChange(color)}
+                    disabled={taken}
+                    title={taken ? 'Taken' : color}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
           <div className="lobby-section">
             <label className="lobby-label">{t('setup:room_code')}</label>
             <div className="room-code-row">
@@ -363,6 +476,9 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           </div>
         </div>
       </div>
+
+      {/* Lobby Chat */}
+      <LobbyChat />
     </div>
   );
 };

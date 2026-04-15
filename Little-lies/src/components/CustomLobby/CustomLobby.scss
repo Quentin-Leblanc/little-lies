@@ -326,6 +326,125 @@
   }
 }
 
+// Color picker
+.lobby-color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.lobby-color-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--dot-color);
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+
+  &:hover:not(:disabled) {
+    transform: scale(1.2);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  &.selected {
+    border-color: #fff;
+    box-shadow: 0 0 8px var(--dot-color);
+    transform: scale(1.15);
+  }
+
+  &.taken {
+    opacity: 0.2;
+    cursor: not-allowed;
+
+    &:hover { transform: none; }
+  }
+}
+
+// Lobby chat
+.lobby-chat {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  width: 320px;
+  max-height: 200px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.lobby-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  max-height: 150px;
+  min-height: 40px;
+}
+
+.lobby-chat-msg {
+  font-size: 13px;
+  color: #ddd;
+  padding: 2px 0;
+  line-height: 1.4;
+
+  strong {
+    margin-right: 2px;
+  }
+
+  span {
+    color: #ccc;
+  }
+}
+
+.lobby-chat-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ddd;
+  font-size: 13px;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &::placeholder { color: #555; }
+  &:focus { outline: none; background: rgba(0, 0, 0, 0.5); }
+}
+
+.lobby-chat-hint {
+  padding: 6px 12px;
+  font-size: 11px;
+  color: #555;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+
+  kbd {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    color: #888;
+    margin-right: 4px;
+  }
+}
+
+@media (max-width: 700px) {
+  .lobby-chat {
+    width: calc(100% - 32px);
+    bottom: 8px;
+    left: 8px;
+  }
+}
+
 /* ── Responsive ── */
 @media (max-width: 700px) {
   .lobby-panel {

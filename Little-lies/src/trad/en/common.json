@@ -1,5 +1,6 @@
 {
   "vote": "Vote",
+  "color": "Color",
   "close": "Close",
   "send": "Send",
   "skip": "Skip",
