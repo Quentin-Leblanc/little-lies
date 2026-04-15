@@ -10,9 +10,10 @@ Claude Code is allowed to run the following without asking for confirmation:
 - `node`, `npm`, `npx` (install, build, start, test)
 
 ### Git commands
-- `git status`, `git diff`, `git log`, `git branch`
-- `git add`, `git commit`, `git push`
-- `git checkout`, `git merge`
+All `git *` commands are pre-authorized (see `.claude/settings.json` `Bash(git:*)`).
+Common ones: `git status`, `git diff`, `git log`, `git branch`, `git add`,
+`git commit`, `git push`, `git pull`, `git checkout`, `git merge`, `git show`,
+`git stash`, `git restore`, `git reset`, `git remote`, `git fetch`.
 
 ### File operations
 - Read, write, and edit any file in this project

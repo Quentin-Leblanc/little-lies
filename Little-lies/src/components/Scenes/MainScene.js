@@ -362,14 +362,13 @@ const GALLOWS_PATH = '/models/Meshy_AI_potence_0415121815_texture.glb';
 
 const VillageCenter = () => (
   <group>
-    {/* Potence Meshy — landmark central du village.
-        Le bbox du modèle est centré (Y ∈ [-0.92, 0.92]) donc avec scale=2
-        on remonte de 1.84 pour que la base touche le sol. */}
-    <KenneyModel
+    {/* Potence Meshy — landmark central du village */}
+    <MeshyModel
       path={GALLOWS_PATH}
-      position={[0, 1.84, 0]}
+      position={[0, 0, 0]}
       rotation={[0, Math.PI * 0.15, 0]}
       scale={2}
+      halfHeight={0.92}
     />
     {/* Puits KayKit à côté */}
     <KenneyModel path="/models/kaykit/building_well_red.gltf" position={[-5, 0, 3]} scale={2.5} />
@@ -827,7 +826,7 @@ const TREE_POSITIONS = [
   [-14, 0, 12], [14, 0, -11],
 ];
 
-// KayKit model paths mapped by building type
+// KayKit model paths mapped by building type (forge/tavern kept from KayKit)
 const KAYKIT_PATHS = {
   forge:   '/models/kaykit/building_blacksmith_red.gltf',
   tavern:  '/models/kaykit/building_tavern_red.gltf',
@@ -835,6 +834,14 @@ const KAYKIT_PATHS = {
   cottage: '/models/kaykit/building_home_A_red.gltf',
   cottageB:'/models/kaykit/building_home_B_red.gltf',
 };
+
+// Meshy "dark werewolf" models — replace cottages, chapel, and trees
+const MESHY_COTTAGE = '/models/skullcrest_cottage.glb';
+const MESHY_MANOR   = '/models/rootbound_manor.glb';
+const MESHY_TREE    = '/models/gnarled_tree.glb';
+const MESHY_BOARD   = '/models/bulletin_board.glb';
+const MESHY_SKULL   = '/models/skull_sign.glb';
+const MESHY_RING    = '/models/rope_ring.glb';
 
 // Preload KayKit buildings
 Object.values(KAYKIT_PATHS).forEach((p) => useGLTF.preload(p));
@@ -847,10 +854,33 @@ useGLTF.preload('/models/kaykit/flag_red.gltf');
 useGLTF.preload('/models/kaykit/resource_lumber.gltf');
 useGLTF.preload('/models/kaykit/rock_single_A.gltf');
 
+// Preload Meshy models
+useGLTF.preload(MESHY_COTTAGE);
+useGLTF.preload(MESHY_MANOR);
+useGLTF.preload(MESHY_TREE);
+useGLTF.preload(MESHY_BOARD);
+useGLTF.preload(MESHY_SKULL);
+useGLTF.preload(MESHY_RING);
+
+// Meshy models have their pivot at the CENTER of a unit cube (Y ∈ [-0.95, 0.95]).
+// After scaling by S, we must raise position.y by `halfHeight * S` to put the base
+// on the ground. halfHeight defaults to 0.95 (most props), pass a custom value for
+// flatter props like rope_ring (0.38).
+const MeshyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, halfHeight = 0.95 }) => {
+  const pos = [position[0], position[1] + halfHeight * scale, position[2]];
+  return <KenneyModel path={path} position={pos} rotation={rotation} scale={scale} />;
+});
+
 const BuildingRenderer = ({ type, position, rotation, scale, variant = 0 }) => {
-  const path = type === 'cottage' && variant % 2 === 1
-    ? KAYKIT_PATHS.cottageB
-    : KAYKIT_PATHS[type] || KAYKIT_PATHS.cottage;
+  // New Meshy dark-theme models for cottages and chapel
+  if (type === 'cottage') {
+    return <MeshyModel path={MESHY_COTTAGE} position={position} rotation={rotation} scale={scale * 1.6} />;
+  }
+  if (type === 'chapel') {
+    return <MeshyModel path={MESHY_MANOR} position={position} rotation={rotation} scale={scale * 1.6} />;
+  }
+  // Forge and tavern keep KayKit models (user kept them)
+  const path = KAYKIT_PATHS[type] || KAYKIT_PATHS.cottage;
   return <KenneyModel path={path} position={position} rotation={rotation} scale={scale * 3} />;
 };
 
@@ -875,11 +905,11 @@ const Village = React.memo(({ isDay }) => (
         position={m.position} scale={m.scale * 2.5} rotation={[0, i * 1.5, 0]} />
     ))}
 
-    {/* ——— ARBRES KayKit (remplace les cones proceduraux) ——— */}
+    {/* ——— ARBRES Meshy "Gnarled Sentinel" (dark theme) ——— */}
     {TREE_POSITIONS.map((pos, i) => (
-      <KenneyModel key={`tree-${i}`}
-        path={i % 2 === 0 ? '/models/kaykit/tree_single_A.gltf' : '/models/kaykit/tree_single_B.gltf'}
-        position={pos} scale={2 + (i % 4) * 0.5} rotation={[0, i * 1.3, 0]} />
+      <MeshyModel key={`tree-${i}`}
+        path={MESHY_TREE}
+        position={pos} scale={1.4 + (i % 4) * 0.3} rotation={[0, i * 1.3, 0]} />
     ))}
 
     {/* ——— DECORATIONS : charrette ——— */}
@@ -898,14 +928,26 @@ const Village = React.memo(({ isDay }) => (
         position={b.position} scale={b.scale * 1.2} rotation={[0, i * 0.8, 0]} />
     ))}
 
-    {/* ——— DECORS KAYKIT entre les maisons ——— */}
-    {/* Arbres KayKit entre les bâtiments */}
-    <KenneyModel path="/models/kaykit/tree_single_A.gltf" position={[-6, 0, -1]} scale={3} />
-    <KenneyModel path="/models/kaykit/tree_single_B.gltf" position={[6, 0, -1]} scale={2.8} />
-    <KenneyModel path="/models/kaykit/tree_single_A.gltf" position={[-12, 0, 3]} scale={3.2} />
-    <KenneyModel path="/models/kaykit/tree_single_B.gltf" position={[12, 0, 4]} scale={2.5} />
-    <KenneyModel path="/models/kaykit/tree_single_A.gltf" position={[-3, 0, 11]} scale={2.8} />
-    <KenneyModel path="/models/kaykit/tree_single_B.gltf" position={[3, 0, 11]} scale={3} />
+    {/* ——— DECORS entre les maisons ——— */}
+    {/* Arbres Meshy "Gnarled Sentinel" entre les bâtiments */}
+    <MeshyModel path={MESHY_TREE} position={[-6, 0, -1]} scale={1.7} rotation={[0, 0.4, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[6, 0, -1]} scale={1.6} rotation={[0, 1.1, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[-12, 0, 3]} scale={1.8} rotation={[0, 2.3, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[12, 0, 4]} scale={1.5} rotation={[0, 0.8, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[-3, 0, 11]} scale={1.6} rotation={[0, 1.7, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[3, 0, 11]} scale={1.7} rotation={[0, 2.9, 0]} />
+
+    {/* ——— PROPS Meshy dark theme : avis de recherche, poteau au crâne, cercle rituel ——— */}
+    <MeshyModel path={MESHY_BOARD}
+      position={[5.5, 0, 3]} scale={1.3}
+      rotation={[0, faceCenter(5.5, 3), 0]} />
+    <MeshyModel path={MESHY_SKULL}
+      position={[-5.5, 0, -4]} scale={1.3}
+      rotation={[0, faceCenter(-5.5, -4), 0]} />
+    <MeshyModel path={MESHY_RING}
+      position={[-7, 0, 5]} scale={1.6}
+      rotation={[0, 0.5, 0]}
+      halfHeight={0.38} />
 
     {/* Tonneaux et caisses à côté des maisons */}
     <KenneyModel path="/models/kaykit/barrel.gltf" position={[-8, 0, -5.5]} rotation={[0, 0.5, 0]} scale={2.5} />
