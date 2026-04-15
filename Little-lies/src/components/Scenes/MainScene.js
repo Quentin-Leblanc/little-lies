@@ -2311,14 +2311,14 @@ const CameraController = ({ phase, CONSTANTS }) => {
         return;
       }
     } else {
-      // Day phases: continuous very slow orbit. Same distance as before
-      // but camera tilted more downward (lookAt at ground + lower Y) for
-      // a more top-down framing.
+      // Day phases: continuous very slow orbit. Pulled back slightly from
+      // the original (10 → 12 horizontal, 13 → 14 vertical) to frame the
+      // tighter player circle with a bit more breathing room on the sides.
       const orbitAngle = Date.now() * 0.000008; // ~13 min per full orbit
-      const orbitRadius = 10;
+      const orbitRadius = 12;
       const orbitX = Math.sin(orbitAngle) * orbitRadius;
       const orbitZ = Math.cos(orbitAngle) * orbitRadius;
-      targetPos.current.set(orbitX, 13, orbitZ);
+      targetPos.current.set(orbitX, 14, orbitZ);
       targetLookAt.current.set(0, 0, 0);
     }
 
@@ -2663,7 +2663,8 @@ const MainScene = () => {
   const PLAYER_Y = 0.1; // slightly above ground so feet align with the sunken runic circle
   const dayPositions = useMemo(() => {
     const positions = {};
-    const circleRadius = 4;
+    // Tightened circle — players stand closer to the plaza center
+    const circleRadius = 3.3;
     alivePlayers.forEach((p, i) => {
       const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
       positions[p.id] = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
@@ -2730,7 +2731,9 @@ const MainScene = () => {
   // Calculate player positions + rotations based on phase
   const playerPositions = useMemo(() => {
     const positions = {};
-    const circleRadius = 4;
+    // Tightened circle — matches dayPositions so discussion/voting phases
+    // keep the same layout as the walk-away start position.
+    const circleRadius = 3.3;
 
     if (phase === CONSTANTS.PHASE.NIGHT) {
       alivePlayers.forEach((p, i) => {
@@ -2790,7 +2793,7 @@ const MainScene = () => {
     <div className="main-scene-3d">
       <Canvas
         shadows="soft"
-        camera={{ position: [0, 8, 12], fov: 50 }}
+        camera={{ position: [0, 9, 14], fov: 50 }}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.65 }}
       >
         <Suspense fallback={null}>

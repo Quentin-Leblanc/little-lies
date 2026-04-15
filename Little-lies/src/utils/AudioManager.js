@@ -112,9 +112,9 @@ export const playNightStart = () => {
   playFile('/sounds/drawKnife1.ogg', 0.6);
 };
 
-/** Vote cast */
+/** Vote cast — Jofae Sci Fi Interface style (CC0 WAV) */
 export const playVote = () => {
-  playFile('/sounds/metalClick.ogg', 0.7);
+  playFile('/sounds/vote.wav', 0.7);
 };
 
 /** Death / execution — chop */
