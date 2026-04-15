@@ -1,101 +1,120 @@
 @import '../../styles/variables';
-@import '../../styles/global';
+
+// ── HUD Timer — top center, clean minimal design ──
 
 .time-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 0;
-  background: transparent;
+  gap: 0;
   pointer-events: none;
   white-space: nowrap;
 }
 
-.game-title {
-  display: none;
-}
-
-/* Day/Night label */
+// Day/Night pill — left side
 .day-label {
-  font-family: 'Cinzel', serif !important;
-  font-size: 20px !important;
-  font-weight: 700 !important;
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 700;
   color: #fff;
-  text-shadow: 0 0 16px rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.9);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 8px 0 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: none;
   display: flex;
   align-items: center;
   gap: 8px;
 
   i {
-    font-size: 18px !important;
+    font-size: 12px;
     color: #ffcc44;
-    filter: drop-shadow(0 0 6px rgba(255, 200, 60, 0.4));
   }
 }
 
-/* Phase + countdown + progress bar */
+// Phase info — right side, wider
 .phase-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.5) !important;
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: 0 8px 8px 0;
   position: relative;
   overflow: hidden;
+  min-width: 160px;
   flex-wrap: wrap;
-  min-width: 180px;
 }
 
+// Phase name
 .progress-content {
-  font-size: 18px !important;
-  font-family: 'Cinzel', serif !important;
-  font-weight: 700 !important;
-  letter-spacing: 1.5px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
-  color: #fff;
   white-space: nowrap;
-  text-shadow: 0 0 16px rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.9);
 
   i {
-    margin-right: 8px;
-    font-size: 16px !important;
-    color: #ffcc44;
-    filter: drop-shadow(0 0 6px rgba(255, 200, 60, 0.4));
+    margin-right: 6px;
+    font-size: 11px;
+    opacity: 0.6;
   }
 }
 
+// Countdown number
 .timer {
-  font-size: 20px !important;
-  color: #fff;
-  font-family: 'Cinzel', serif;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 16px;
   font-weight: 700;
-  text-shadow: 0 0 16px rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.9);
+  color: #fff;
+  letter-spacing: 1px;
+  min-width: 32px;
+  text-align: right;
 }
 
-/* Old scene-top bar — hidden, replaced by inline bar */
-.progress-bar-scene {
-  display: none;
-}
-
-/* Inline progress bar inside phase-info */
+// Progress bar — full width bottom
 .phase-progress-bar {
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 1px;
   overflow: hidden;
   flex-basis: 100%;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .phase-progress-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: 1px;
   transition: width 100ms linear, background-color 0.5s ease;
-  box-shadow: 0 0 6px currentColor;
+}
+
+// Old scene bar — hidden
+.progress-bar-scene {
+  display: none;
+}
+
+// ── Responsive ──
+@media (max-width: 768px) {
+  .day-label {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  .phase-info {
+    padding: 6px 12px;
+    min-width: 120px;
+  }
+  .progress-content {
+    font-size: 12px;
+  }
+  .timer {
+    font-size: 14px;
+  }
 }
