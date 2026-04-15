@@ -159,6 +159,7 @@
   },
   "mayor_reveal_btn": "Reveal as Mayor",
   "vigilante_night1": "Cannot shoot on the first night",
+  "judgment_default_guilty": "Guilty by default — vote Innocent to save",
   "scene": {
     "no_lynch": "Everyone can go home safely tonight.",
     "spared": "{{name}} has been spared!",

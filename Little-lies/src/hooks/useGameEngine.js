@@ -506,17 +506,22 @@ export const GameEngineProvider = ({ children }) => {
   };
 
   // Resolve judgment votes (guilty vs innocent)
+  // Judgment: guilty by default — need >= 50% of voters to save (innocent)
   const resolveJudgment = () => {
     const votes = trial.votes || {};
-    let guiltyCount = 0;
     let innocentCount = 0;
 
     Object.values(votes).forEach((vote) => {
-      if (vote === 'guilty') guiltyCount++;
       if (vote === 'innocent') innocentCount++;
     });
 
-    return { guiltyCount, innocentCount, isGuilty: guiltyCount > innocentCount };
+    // Alive players who can vote (excluding accused)
+    const eligibleVoters = players.filter(p => p.isAlive && p.id !== game.accusedId).length;
+    const majority = Math.floor(eligibleVoters / 2) + 1;
+    // Saved only if enough players vote innocent
+    const isSaved = innocentCount >= majority;
+
+    return { innocentCount, eligibleVoters, majority, isGuilty: !isSaved };
   };
 
   // Kill accused player and check for neutral wins
@@ -674,13 +679,10 @@ export const GameEngineProvider = ({ children }) => {
         break;
 
       case PHASE.JUDGMENT: {
-        const { guiltyCount, innocentCount } = resolveJudgment();
-        // Default: if no votes at all, player is acquitted (like SC2)
-        const totalVotes = guiltyCount + innocentCount;
-        const isGuilty = totalVotes === 0 ? false : guiltyCount > innocentCount;
+        const { innocentCount, majority, isGuilty } = resolveJudgment();
         const resultMsg = isGuilty
-          ? i18n.t('game:system.judgment_guilty', { guilty: guiltyCount, innocent: innocentCount })
-          : i18n.t('game:system.judgment_acquitted', { guilty: guiltyCount, innocent: innocentCount });
+          ? i18n.t('game:system.judgment_guilty', { guilty: '-', innocent: innocentCount })
+          : i18n.t('game:system.judgment_acquitted', { guilty: '-', innocent: innocentCount });
         addChatSystem(resultMsg, isGuilty ? '#ff4444' : '#78ff78');
         Events.add({ type: 'JUDGMENT_RESULT', content: { chatMessage: resultMsg }, displayed: true });
 

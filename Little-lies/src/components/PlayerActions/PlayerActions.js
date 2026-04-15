@@ -234,27 +234,14 @@ const PlayerActions = memo(function () {
               <p>{t('game:gameover.is_accused', { name: accusedPlayer.profile.name })}</p>
               <div className="judgment-buttons">
                 <button
-                  className={`primaryBtn judgment-guilty ${myJudgmentVote === 'guilty' ? 'active' : ''}`}
-                  onClick={() => handleJudgmentVote('guilty')}
-                  disabled={!!myJudgmentVote}
-                >
-                  {t('common:guilty')}
-                </button>
-                <button
                   className={`primaryBtn judgment-innocent ${myJudgmentVote === 'innocent' ? 'active' : ''}`}
                   onClick={() => handleJudgmentVote('innocent')}
                   disabled={!!myJudgmentVote}
                 >
-                  {t('common:innocent')}
-                </button>
-                <button
-                  className={`primaryBtn judgment-abstain ${myJudgmentVote === 'abstain' ? 'active' : ''}`}
-                  onClick={() => handleJudgmentVote('abstain')}
-                  disabled={!!myJudgmentVote}
-                >
-                  {t('common:abstain')}
+                  <i className="fas fa-shield"></i> {t('common:innocent')}
                 </button>
               </div>
+              <p className="judgment-hint">{t('game:judgment_default_guilty', { defaultValue: 'Guilty by default — vote Innocent to save' })}</p>
             </div>
           )}
 
