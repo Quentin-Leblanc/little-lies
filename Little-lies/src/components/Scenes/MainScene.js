@@ -700,16 +700,9 @@ const KenneyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 
 });
 
 // Preload all Kenney assets
-useGLTF.preload('/models/gravestone-cross.glb');
-useGLTF.preload('/models/gravestone-round.glb');
-useGLTF.preload('/models/gravestone-broken.glb');
-useGLTF.preload('/models/cross-wood.glb');
-useGLTF.preload('/models/lantern-candle.glb');
-useGLTF.preload('/models/coffin-old.glb');
-useGLTF.preload('/models/shovel-dirt.glb');
-useGLTF.preload('/models/candle-multiple.glb');
-useGLTF.preload('/models/iron-fence-damaged.glb');
-useGLTF.preload('/models/pumpkin-carved.glb');
+// Cemetery Kenney assets were previously preloaded here. Removed (clash
+// with new dark Meshy theme — the village no longer has ambient cemetery
+// props, graveyard UI still works via its own component).
 
 // ============================================================
 // Decoration positions
@@ -916,13 +909,13 @@ const Village = React.memo(({ isDay }) => (
         position={r.position} scale={r.scale * 3} rotation={[0, i * 2.1, 0]} />
     ))}
 
-    {/* ——— ARBRES Meshy supplémentaires entre les bâtiments ——— */}
-    <MeshyModel path={MESHY_TREE} position={[-6, 0, -1]} scale={1.7} rotation={[0, 0.4, 0]} />
-    <MeshyModel path={MESHY_TREE} position={[6, 0, -1]} scale={1.6} rotation={[0, 1.1, 0]} />
-    <MeshyModel path={MESHY_TREE} position={[-12, 0, 3]} scale={1.8} rotation={[0, 2.3, 0]} />
-    <MeshyModel path={MESHY_TREE} position={[12, 0, 4]} scale={1.5} rotation={[0, 0.8, 0]} />
-    <MeshyModel path={MESHY_TREE} position={[-3, 0, 11]} scale={1.6} rotation={[0, 1.7, 0]} />
-    <MeshyModel path={MESHY_TREE} position={[3, 0, 11]} scale={1.7} rotation={[0, 2.9, 0]} />
+    {/* ——— ARBRES Meshy supplémentaires DERRIÈRE les maisons (radius 20+) ——— */}
+    <MeshyModel path={MESHY_TREE} position={[-21, 0, -6]} scale={1.7} rotation={[0, 0.4, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[21, 0, -5]} scale={1.6} rotation={[0, 1.1, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[-22, 0, 4]} scale={1.8} rotation={[0, 2.3, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[22, 0, 5]} scale={1.5} rotation={[0, 0.8, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[-9, 0, 21]} scale={1.6} rotation={[0, 1.7, 0]} />
+    <MeshyModel path={MESHY_TREE} position={[9, 0, 22]} scale={1.7} rotation={[0, 2.9, 0]} />
 
     {/* ——— PROPS Meshy dark theme : avis de recherche, poteau au crâne, cercle rituel ——— */}
     <MeshyModel path={MESHY_BOARD}
@@ -936,23 +929,9 @@ const Village = React.memo(({ isDay }) => (
       rotation={[0, 0.5, 0]}
       halfHeight={0.38} />
 
-    {/* Lumières chaleureuses entre les maisons — reduced to avoid white textures */}
-    <pointLight position={[-9, 2, -6]} color="#ff9944" intensity={0.6} distance={6} />
-    <pointLight position={[9, 2, -6]} color="#ff9944" intensity={0.6} distance={6} />
-    <pointLight position={[-10, 2, 2]} color="#ff8833" intensity={0.5} distance={5} />
-    <pointLight position={[10, 2, 3]} color="#ff8833" intensity={0.5} distance={5} />
-    <pointLight position={[-7, 2, 8]} color="#ff9944" intensity={0.4} distance={5} />
-    <pointLight position={[7, 2, 9]} color="#ff9944" intensity={0.4} distance={5} />
-    <pointLight position={[0, 2, -11]} color="#ffaa55" intensity={0.6} distance={6} />
-
     {/* ——— CLOTURES ——— */}
     {FENCE_SEGMENTS.map((f, i) => (
       <LowPolyFence key={`fence-${i}`} start={f.start} end={f.end} />
-    ))}
-
-    {/* ——— BOTTES DE FOIN ——— */}
-    {HAY_POSITIONS.map((h, i) => (
-      <LowPolyHayBale key={`hay-${i}`} position={h.position} rotation={h.rotation} />
     ))}
 
     {/* ——— RIVIERE + PONT ——— */}
@@ -982,40 +961,8 @@ const Village = React.memo(({ isDay }) => (
       ))}
     </>}
 
-    {/* ——— AMBIANCE SOMBRE : Kenney Graveyard Kit (CC0) ——— */}
-    {/* Tombes dispersées autour du village */}
-    <KenneyModel path="/models/gravestone-cross.glb" position={[-11, 0, -12]} rotation={[0, 0.3, 0]} scale={2.5} />
-    <KenneyModel path="/models/gravestone-round.glb" position={[-12.5, 0, -11]} rotation={[0, -0.2, 0]} scale={2.2} />
-    <KenneyModel path="/models/gravestone-broken.glb" position={[-10.5, 0, -13]} rotation={[0, 0.8, 0]} scale={2.3} />
-    <KenneyModel path="/models/gravestone-cross.glb" position={[13, 0, -12]} rotation={[0, -0.5, 0]} scale={2.2} />
-    <KenneyModel path="/models/gravestone-round.glb" position={[14.5, 0, -11.5]} rotation={[0, 0.4, 0]} scale={2} />
-
-    {/* Croix en bois */}
-    <KenneyModel path="/models/cross-wood.glb" position={[-16, 0, -4]} rotation={[0, 0.6, 0.05]} scale={2.8} />
-    <KenneyModel path="/models/cross-wood.glb" position={[16, 0, -5]} rotation={[0, -0.4, -0.08]} scale={2.5} />
-
-    {/* Lanternes au sol */}
-    <KenneyModel path="/models/lantern-candle.glb" position={[-3, 0, -5]} rotation={[0, 1.2, 0]} scale={2.5} />
-    <KenneyModel path="/models/lantern-candle.glb" position={[4, 0, 3]} rotation={[0, -0.8, 0]} scale={2.2} />
-    <KenneyModel path="/models/lantern-candle.glb" position={[-6, 0, 9]} rotation={[0, 2.1, 0]} scale={2.3} />
-
-    {/* Bougies */}
-    <KenneyModel path="/models/candle-multiple.glb" position={[1, 0, -2]} rotation={[0, 0.5, 0]} scale={2.5} />
-    <KenneyModel path="/models/candle-multiple.glb" position={[-2, 0, 3.5]} rotation={[0, -1.2, 0]} scale={2.2} />
-
-    {/* Cercueil */}
-    <KenneyModel path="/models/coffin-old.glb" position={[-13, 0, -12.5]} rotation={[0, 0.4, 0]} scale={2.5} />
-
-    {/* Pelle */}
-    <KenneyModel path="/models/shovel-dirt.glb" position={[-11.5, 0, -10.5]} rotation={[0, -0.3, 0]} scale={2.5} />
-
-    {/* Clôtures en fer */}
-    <KenneyModel path="/models/iron-fence-damaged.glb" position={[-9, 0, -13]} rotation={[0, 0.1, 0]} scale={2.5} />
-    <KenneyModel path="/models/iron-fence-damaged.glb" position={[11, 0, -13]} rotation={[0, -0.1, 0]} scale={2.5} />
-
-    {/* Citrouilles */}
-    <KenneyModel path="/models/pumpkin-carved.glb" position={[8, 0, 3]} rotation={[0, 1.5, 0]} scale={2.5} />
-    <KenneyModel path="/models/pumpkin-carved.glb" position={[-5, 0, -9.5]} rotation={[0, -0.7, 0]} scale={2.2} />
+    {/* Ambient props Kenney Graveyard Kit removed — clashed with Meshy dark
+        theme. The Graveyard UI component (list of dead players) is unaffected. */}
   </group>
 ));
 
