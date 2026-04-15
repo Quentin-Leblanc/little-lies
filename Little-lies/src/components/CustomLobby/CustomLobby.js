@@ -379,7 +379,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
       {/* UI Panel */}
       <div className="lobby-panel">
         <div className="lobby-panel-inner">
-          <h1 className="lobby-title">AMONG LIARS</h1>
+          <h1 className="lobby-title" data-text="AMONG LIARS">AMONG LIARS</h1>
           <p className="lobby-subtitle">{t('setup:multiplayer_lobby')}</p>
 
           <div className="lobby-section lobby-auth-section">
