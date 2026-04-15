@@ -22,17 +22,28 @@ const RolesList = () => {
   const townRoles = uniqueRoles.filter((r) => r.team === 'town');
   const evilRoles = uniqueRoles.filter((r) => r.team === 'mafia' || r.team === 'neutral');
 
-  const renderRole = (role) => (
-    <span
-      key={role.key}
-      className="role-chip"
-      style={{ color: role.couleur || '#ccc', borderColor: `${role.couleur || '#ccc'}33` }}
-      onClick={() => setSelectedRole(selectedRole?.key === role.key ? null : role)}
-    >
-      {role.icon && <i className={`fas ${role.icon}`} style={{ marginRight: 4, fontSize: '0.8em' }}></i>}
-      {role.label}{role.count > 1 && <span className="role-count">x{role.count}</span>}
-    </span>
-  );
+  // Color by faction (not by individual role)
+  const FACTION_COLORS = {
+    town: '#4ade80',     // green
+    mafia: '#ff4757',    // red
+    neutral: '#a855f7',  // purple
+  };
+  const getFactionColor = (role) => FACTION_COLORS[role.team] || '#ccc';
+
+  const renderRole = (role) => {
+    const color = getFactionColor(role);
+    return (
+      <span
+        key={role.key}
+        className="role-chip"
+        style={{ color, borderColor: `${color}55` }}
+        onClick={() => setSelectedRole(selectedRole?.key === role.key ? null : role)}
+      >
+        {role.icon && <i className={`fas ${role.icon}`} style={{ marginRight: 4, fontSize: '0.8em' }}></i>}
+        {role.label}{role.count > 1 && <span className="role-count">x{role.count}</span>}
+      </span>
+    );
+  };
 
   return (
     <div className="roles-list-box">
@@ -53,13 +64,13 @@ const RolesList = () => {
         <div className="role-detail-overlay" onClick={() => setSelectedRole(null)}>
           <div className="role-detail-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="role-detail-header">
-              <div className="role-detail-title" style={{ color: selectedRole.couleur || '#ccc' }}>
+              <div className="role-detail-title" style={{ color: getFactionColor(selectedRole) }}>
                 {selectedRole.icon && <i className={`fas ${selectedRole.icon}`}></i>}
                 <h3>{selectedRole.label}</h3>
               </div>
               <button className="close-button" onClick={() => setSelectedRole(null)}>X</button>
             </div>
-            <div className="role-detail-team" style={{ color: selectedRole.couleur || '#ccc' }}>
+            <div className="role-detail-team" style={{ color: getFactionColor(selectedRole) }}>
               {t(`teams.${selectedRole.team}.short`)}
             </div>
             <p className="role-detail-desc">{selectedRole.description}</p>

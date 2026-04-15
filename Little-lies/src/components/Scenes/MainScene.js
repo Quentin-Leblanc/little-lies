@@ -2151,10 +2151,11 @@ const MainScene = () => {
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
       }, 4000));
-      // Show "La nuit tombe..." AFTER the screen is black (fade takes 1.5s)
+      // Show "La nuit tombe..." EARLY — during the sunset, before the fade-to-black
+      // so the text is visible while the scene is still readable
       fadeTimers.current.push(setTimeout(() => {
         setShowNightText(true);
-      }, 5800));
+      }, 1500));
       // Trigger walk-away animation (separate timer, not cleared on phase change)
       if (nightStartedForDay.current !== game.dayCount) {
         nightStartedForDay.current = game.dayCount;
@@ -2182,10 +2183,9 @@ const MainScene = () => {
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
       }, nightDuration - 3000));
-      // Show "Le village se lève..." AFTER screen is black
-      fadeTimers.current.push(setTimeout(() => {
-        setShowDayText(true);
-      }, nightDuration - 1000));
+      // NOTE: day text ("Le village se lève...") is shown in the DEATH_REPORT
+      // effect below — after the day fade-in has begun, so it doesn't land on
+      // a full black screen.
 
       // Night ambiance messages — 3 messages during the night
       const shuffled = [...getNightAmbiance()].sort(() => Math.random() - 0.5);
@@ -2204,12 +2204,12 @@ const MainScene = () => {
     }
 
     // Leaving night: reveal day scene + reset sunset
+    // (showDayText is now controlled by the DEATH_REPORT effect below)
     if (lastPhaseForFade.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT) {
       setIsSunset(false);
       setNightFade('from-black');
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('none');
-        setShowDayText(false);
       }, 2000));
     }
 
@@ -2217,16 +2217,19 @@ const MainScene = () => {
     return () => fadeTimers.current.forEach(clearTimeout);
   }, [phase]);
 
-  // Death report sequence: hide day text first, then show deaths
+  // Death report sequence: show "Le village se lève..." during day fade-in,
+  // then show deaths once the text has played out
   useEffect(() => {
     if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
-      // Hide the "Death report" center text first
-      setShowDayText(false);
-      // Blood effect after a short pause
-      const t1 = setTimeout(() => setShowBloodEffect(true), 1500);
-      // Death names appear after the day text has faded
-      const t2 = setTimeout(() => setShowDeathReport(true), 2500);
-      return () => { clearTimeout(t1); clearTimeout(t2); };
+      // Show "Le village se lève..." a bit after the fade-from-black starts
+      // (~0.8s) so it appears while the day scene is already becoming visible
+      const t0 = setTimeout(() => setShowDayText(true), 800);
+      // Hide the day text after ~2.2s of visibility
+      const t1 = setTimeout(() => setShowDayText(false), 3000);
+      // Blood effect + death names take over
+      const t2 = setTimeout(() => setShowBloodEffect(true), 3000);
+      const t3 = setTimeout(() => setShowDeathReport(true), 3300);
+      return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
     } else {
       setShowDeathReport(false);
       setShowBloodEffect(false);
@@ -2659,8 +2662,8 @@ const MainScene = () => {
         </div>
       )}
       {showDayText && (
-        <div className="night-text-overlay">
-          <div className="night-text-content">{i18n.t('game:phases.DEATH_REPORT')}</div>
+        <div className="night-text-overlay is-day-text">
+          <div className="night-text-content">{i18n.t('game:phases.DAY_RISING')}</div>
         </div>
       )}
       {nightAmbianceMsg && (

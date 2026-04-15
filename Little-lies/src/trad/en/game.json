@@ -2,6 +2,7 @@
   "phases": {
     "NIGHT": "Night",
     "NIGHT_TRANSITION": "Night falls...",
+    "DAY_RISING": "The village awakens...",
     "DEATH_REPORT": "Death report",
     "DISCUSSION": "Discussion",
     "VOTING": "Voting",

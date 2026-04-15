@@ -497,6 +497,18 @@
   animation: night-text-anim 5s ease-in-out forwards;
 }
 
+/* Shorter animation for "Le village se lève..." — plays during day fade-in */
+.night-text-overlay.is-day-text {
+  animation: day-text-anim 2.4s ease-in-out forwards;
+}
+
+@keyframes day-text-anim {
+  0% { opacity: 0; transform: scale(0.95); }
+  20% { opacity: 1; transform: scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.01); }
+}
+
 .night-text-content {
   font-family: 'Cinzel', serif;
   font-size: 36px;
