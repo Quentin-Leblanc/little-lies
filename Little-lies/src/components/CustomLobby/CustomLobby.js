@@ -1,19 +1,190 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { usePlayersList, isHost, getRoomCode, myPlayer } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
-import { CharacterController } from '../CharacterController/CharacterController';
-import LobbyParkour from '../LobbyParkour/LobbyParkour';
-import CameraFollow from './CameraFollow';
-import { Canvas } from '@react-three/fiber';
-import { Physics } from '@react-three/rapier';
-import { PerformanceMonitor } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { TEXT_LAYER } from '../../utils/constants';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Stars, Html } from '@react-three/drei';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import * as THREE from 'three';
+import { Character } from '../Character/Character';
 import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
 import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import './CustomLobby.scss';
+
+// 15 distinct player colors
+const PLAYER_COLORS = [
+  '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6',
+  '#1abc9c', '#e91e63', '#00bcd4', '#ff9800', '#8bc34a',
+  '#ff5722', '#607d8b', '#cddc39', '#795548', '#03a9f4',
+];
+
+// ── Campfire scene components ──
+
+const CampfireFlame = () => {
+  const flameRef = useRef();
+  useFrame((state) => {
+    if (!flameRef.current) return;
+    const t = state.clock.elapsedTime;
+    flameRef.current.scale.y = 1 + Math.sin(t * 8) * 0.2 + Math.sin(t * 13) * 0.1;
+    flameRef.current.scale.x = 1 + Math.sin(t * 6 + 1) * 0.15;
+    flameRef.current.rotation.y = t * 0.3;
+  });
+
+  return (
+    <group>
+      {/* Logs */}
+      {[0, 1.2, 2.4, 3.6, 4.8].map((angle, i) => (
+        <mesh key={i} position={[Math.cos(angle) * 0.4, 0.1, Math.sin(angle) * 0.4]}
+          rotation={[0, angle + 0.5, Math.PI / 12]}>
+          <cylinderGeometry args={[0.06, 0.08, 0.8, 5]} />
+          <meshStandardMaterial color="#4a2a0a" />
+        </mesh>
+      ))}
+      {/* Fire */}
+      <group ref={flameRef} position={[0, 0.35, 0]}>
+        <mesh><coneGeometry args={[0.3, 0.8, 6]} /><meshBasicMaterial color="#ff4400" transparent opacity={0.85} /></mesh>
+        <mesh position={[0, 0.1, 0]}><coneGeometry args={[0.2, 0.6, 5]} /><meshBasicMaterial color="#ff8800" transparent opacity={0.8} /></mesh>
+        <mesh position={[0, 0.15, 0]}><coneGeometry args={[0.12, 0.4, 4]} /><meshBasicMaterial color="#ffdd44" transparent opacity={0.9} /></mesh>
+        <mesh position={[0, 0.2, 0]}><coneGeometry args={[0.05, 0.2, 4]} /><meshBasicMaterial color="#ffffcc" transparent opacity={0.7} /></mesh>
+      </group>
+      {/* Light */}
+      <pointLight position={[0, 1, 0]} intensity={3} color="#ff8833" distance={15} />
+      <pointLight position={[0, 0.5, 0]} intensity={1.5} color="#ff4400" distance={8} />
+    </group>
+  );
+};
+
+// Embers rising from fire
+const Embers = () => {
+  const meshRef = useRef();
+  const count = 20;
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const offsets = useMemo(() =>
+    Array.from({ length: count }, () => ({
+      speed: 0.4 + Math.random() * 0.6,
+      drift: (Math.random() - 0.5) * 1.5,
+      driftZ: (Math.random() - 0.5) * 1.5,
+      phase: Math.random() * Math.PI * 2,
+      size: 0.02 + Math.random() * 0.03,
+    })), []);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.elapsedTime;
+    for (let i = 0; i < count; i++) {
+      const o = offsets[i];
+      const life = ((t * o.speed + o.phase) % 1);
+      dummy.position.set(
+        Math.sin(t * 0.5 + o.phase) * o.drift,
+        life * 4,
+        Math.cos(t * 0.3 + o.phase) * o.driftZ
+      );
+      const s = o.size * (1 - life);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[null, null, count]}>
+      <sphereGeometry args={[1, 4, 4]} />
+      <meshBasicMaterial color="#ff6600" transparent opacity={0.8} />
+    </instancedMesh>
+  );
+};
+
+// Ground
+const CampGround = () => (
+  <group>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+      <circleGeometry args={[20, 32]} />
+      <meshStandardMaterial color="#1a2a1a" />
+    </mesh>
+    {/* Stone circle around fire */}
+    {Array.from({ length: 10 }).map((_, i) => {
+      const angle = (i / 10) * Math.PI * 2;
+      return (
+        <mesh key={i} position={[Math.cos(angle) * 0.9, 0.05, Math.sin(angle) * 0.9]}>
+          <dodecahedronGeometry args={[0.12, 0]} />
+          <meshStandardMaterial color="#555" />
+        </mesh>
+      );
+    })}
+  </group>
+);
+
+// Dark trees in background
+const BackgroundTrees = () => {
+  const trees = useMemo(() =>
+    Array.from({ length: 20 }, (_, i) => {
+      const angle = (i / 20) * Math.PI * 2;
+      const r = 8 + Math.random() * 7;
+      return { x: Math.cos(angle) * r, z: Math.sin(angle) * r, h: 2 + Math.random() * 2, r: angle };
+    }), []);
+
+  return (
+    <group>
+      {trees.map((tree, i) => (
+        <group key={i} position={[tree.x, 0, tree.z]}>
+          <mesh position={[0, tree.h * 0.4, 0]} castShadow>
+            <cylinderGeometry args={[0.08, 0.12, tree.h * 0.8, 5]} />
+            <meshStandardMaterial color="#1a1008" />
+          </mesh>
+          <mesh position={[0, tree.h * 0.8, 0]}>
+            <coneGeometry args={[0.8 + Math.random() * 0.4, tree.h * 0.7, 6]} />
+            <meshStandardMaterial color="#0a1a0a" />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+};
+
+// Slow orbit camera
+const OrbitCamera = () => {
+  useFrame((state) => {
+    const t = state.clock.elapsedTime * 0.08;
+    const r = 6;
+    state.camera.position.set(Math.cos(t) * r, 3.5, Math.sin(t) * r);
+    state.camera.lookAt(0, 0.5, 0);
+  });
+  return null;
+};
+
+// Player seat around fire
+const PlayerSeat = ({ index, total, player, color }) => {
+  const angle = (index / Math.max(total, 1)) * Math.PI * 2;
+  const r = 2.2;
+  const x = Math.cos(angle) * r;
+  const z = Math.sin(angle) * r;
+  const lookAtAngle = Math.atan2(-x, -z);
+
+  return (
+    <group position={[x, 0, z]} rotation={[0, lookAtAngle, 0]}>
+      <Character color={color} animation="Idle" scale={0.55} />
+      <Html position={[0, 1.6, 0]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+        <div style={{
+          color: color,
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          padding: '3px 10px',
+          borderRadius: '6px',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          whiteSpace: 'nowrap',
+          textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+          border: `1px solid ${color}`,
+        }}>
+          {player.getState?.()?.profile?.name || 'Player'}
+        </div>
+      </Html>
+    </group>
+  );
+};
+
+// ── Main Lobby Component ──
 
 const CustomLobby = ({ setIsSelectingRoles }) => {
   const { t } = useTranslation(['setup', 'common']);
@@ -21,16 +192,13 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const playroom_players = usePlayersList(true);
   const { profile } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
-  const [keys, setKeys] = useState({});
   const [roomCode, setRoomCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [playerName, setPlayerName] = useState(
     currentPlayer?.getState?.()?.profile?.name || ''
   );
-  const localBodyRef = useRef();
-  const localRotRef = useRef(0);
 
-  // Sync Supabase username to PlayroomKit on login
+  // Sync Supabase username
   useEffect(() => {
     if (profile?.username && currentPlayer) {
       const current = currentPlayer.getState?.()?.profile?.name;
@@ -45,31 +213,10 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   }, [profile?.username]);
 
   useEffect(() => {
-    const isTyping = () => {
-      const tag = document.activeElement?.tagName;
-      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
-    };
-    const down = (e) => { if (!isTyping()) setKeys((p) => ({ ...p, [e.code]: true })); };
-    const up = (e) => { setKeys((p) => ({ ...p, [e.code]: false })); };
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
-    return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
-  }, []);
-
-  useEffect(() => {
     const code = getRoomCode();
     if (code && typeof code.then === 'function') code.then((c) => setRoomCode(c));
     else setRoomCode(code || '');
   }, []);
-
-  const dir = (k) => {
-    const d = { x: 0, z: 0 };
-    if (k['ArrowUp'] || k['KeyW']) d.z -= 1;
-    if (k['ArrowDown'] || k['KeyS']) d.z += 1;
-    if (k['ArrowLeft'] || k['KeyA']) d.x -= 1;
-    if (k['ArrowRight'] || k['KeyD']) d.x += 1;
-    return d;
-  };
 
   const handleNameChange = (e) => {
     const name = e.target.value;
@@ -89,61 +236,43 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     const url = new URL(window.location.href);
     const hadRoomCode = url.searchParams.has('r');
     url.searchParams.delete('r');
-    if (hadRoomCode) {
-      window.location.href = url.toString();
-    } else {
-      // URL already has no room code — force a full reload to create a fresh room
-      window.location.reload();
-    }
+    if (hadRoomCode) window.location.href = url.toString();
+    else window.location.reload();
   };
 
   return (
     <div className="custom-lobby-container">
-      {/* 3D Scene */}
-      <Canvas shadows camera={{ position: [0, 10, 18], fov: 55 }} dpr={[1, 1.5]}>
-        <color attach="background" args={['#87CEEB']} />
-        <fog attach="fog" args={['#87CEEB', 80, 180]} />
-        <PerformanceMonitor />
-        <ambientLight intensity={0.6} />
-        <directionalLight
-          castShadow position={[15, 25, 10]} intensity={2.5} color="#fff5e0"
-          shadow-mapSize-width={2048} shadow-mapSize-height={2048}
-          shadow-camera-left={-35} shadow-camera-right={35}
-          shadow-camera-top={35} shadow-camera-bottom={-35}
-        />
-        <hemisphereLight intensity={0.4} groundColor="#8B7355" color="#87CEEB" />
-        <EffectComposer>
-          <Bloom intensity={0.3} luminanceThreshold={0.8} luminanceSmoothing={0.4} />
-        </EffectComposer>
+      {/* 3D Campfire Scene */}
+      <Canvas shadows camera={{ position: [6, 3.5, 0], fov: 50 }} dpr={[1, 1.5]}
+        gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.8 }}>
+        <color attach="background" args={['#050810']} />
+        <fog attach="fog" args={['#050810', 10, 25]} />
+        <ambientLight intensity={0.05} />
 
-        <CameraFollow target={localBodyRef} rotationRef={localRotRef} />
+        <Suspense fallback={null}>
+          <OrbitCamera />
+          <CampGround />
+          <CampfireFlame />
+          <Embers />
+          <BackgroundTrees />
+          <Stars radius={50} depth={40} count={2000} factor={3} fade speed={0.5} />
 
-        <Physics gravity={[0, -20, 0]}>
-          <LobbyParkour />
-          {playroom_players.map((player, idx) => {
-            const name = player.getState?.()?.profile?.name || 'Joueur';
-            const isLocal = player.id === currentPlayer?.id;
-            // Unique spawn based on player ID hash — avoids collisions
-            const idHash = player.id ? player.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) : idx * 137;
-            const spawnAngle = (idHash % 360) * (Math.PI / 180);
-            const spawnRadius = 3 + (idHash % 4);
-            const spawnX = Math.cos(spawnAngle) * spawnRadius;
-            const spawnZ = Math.sin(spawnAngle) * spawnRadius;
-            return (
-              <CharacterController
-                key={player.id}
-                position={[spawnX, 0.5, spawnZ]}
-                state={player}
-                isLocalPlayer={isLocal}
-                playerName={name}
-                moveDirection={isLocal ? dir(keys) : null}
-                textLayer={TEXT_LAYER}
-                bodyRef={isLocal ? localBodyRef : undefined}
-                rotationRef={isLocal ? localRotRef : undefined}
-              />
-            );
-          })}
-        </Physics>
+          {/* Players seated around fire */}
+          {playroom_players.map((player, idx) => (
+            <PlayerSeat
+              key={player.id}
+              index={idx}
+              total={playroom_players.length}
+              player={player}
+              color={player.getState?.()?.profile?.color || PLAYER_COLORS[idx % PLAYER_COLORS.length]}
+            />
+          ))}
+
+          <EffectComposer>
+            <Bloom intensity={0.8} luminanceThreshold={0.4} luminanceSmoothing={0.5} mipmapBlur />
+            <Vignette offset={0.15} darkness={0.8} />
+          </EffectComposer>
+        </Suspense>
       </Canvas>
 
       {/* Auth modal */}
@@ -155,7 +284,6 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           <h1 className="lobby-title">AMONG LIARS</h1>
           <p className="lobby-subtitle">{t('setup:multiplayer_lobby')}</p>
 
-          {/* Profile badge / Login */}
           <div className="lobby-section lobby-auth-section">
             <ProfileBadge onClick={() => setShowAuth(true)} />
           </div>
@@ -188,7 +316,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             <label className="lobby-label">{t('setup:players_count', { count: playroom_players.length })}</label>
             <div className="player-list">
               {playroom_players.map((p) => {
-                const n = p.getState?.()?.profile?.name || 'Joueur';
+                const n = p.getState?.()?.profile?.name || 'Player';
                 const isMe = p.id === currentPlayer?.id;
                 const isH = playroom_players.indexOf(p) === 0;
                 return (
@@ -203,12 +331,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             </div>
           </div>
 
-          <div className="lobby-instructions">
-            <i className="fas fa-keyboard"></i> {t('setup:controls')}
-          </div>
-
           <div className="lobby-actions">
-            {/* isHost() re-evaluated on each render triggered by usePlayersList changes */}
             {playroom_players.length > 0 && isHost() ? (
               <button className="lobby-btn lobby-btn-primary" onClick={() => setIsSelectingRoles(true)}>
                 <i className="fas fa-play"></i> {t('common:start_game')}
@@ -221,7 +344,6 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             </button>
           </div>
 
-          {/* Language switcher */}
           <div className="lobby-lang-row">
             {AVAILABLE_LANGUAGES.map((lang) => (
               <button
