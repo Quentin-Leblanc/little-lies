@@ -158,6 +158,7 @@
     "mayor_revealed": "Maire révélé — 3 votes"
   },
   "mayor_reveal_btn": "Se révéler Maire",
+  "vigilante_night1": "Impossible de tirer la première nuit",
   "scene": {
     "no_lynch": "Tout le monde peut rentrer chez soi ce soir.",
     "spared": "{{name}} a été épargné !",

@@ -336,7 +336,17 @@ const PlayerActions = memo(function () {
                         if (action.type === 'VOTE' || action.type === 'REVEAL') return null;
                         if (!action.require.includes('isNight')) return null;
 
-                        if (action.type === 'VIGILANTE_KILL' && game.dayCount <= 1) return null;
+                        if (action.type === 'VIGILANTE_KILL' && game.dayCount <= 1) {
+                          // Show disabled hint only on first player to explain why
+                          if (players.indexOf(player) === 0) {
+                            return (
+                              <span key={action.type} className="action-hint-disabled" title={t('game:vigilante_night1', { defaultValue: 'Cannot shoot night 1' })}>
+                                <i className="fas fa-lock"></i> {action.label}
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
                         if (action.type === 'VEST' && action.maxUses && !Events.hasDoneThisActionTonight(action.type) && (me.vestUses || 0) >= action.maxUses) return null;
                         if (action.type === 'JAILOR_EXECUTE') {
                           if (player.id !== jailTarget) return null;

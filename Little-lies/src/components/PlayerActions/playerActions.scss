@@ -425,6 +425,18 @@
   }
 }
 
+// Disabled action hint (e.g. Vigilante night 1)
+.action-hint-disabled {
+  font-size: 12px;
+  color: #666;
+  padding: 4px 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  opacity: 0.5;
+
+  i { margin-right: 4px; font-size: 10px; }
+}
+
 .dead-label {
   color: #555;
   font-style: italic;

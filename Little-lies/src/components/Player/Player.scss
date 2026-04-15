@@ -156,9 +156,9 @@
 
 /* Actions block (between role info and last will) */
 .sidebar-actions-block {
-  flex: 1;
+  flex: 0 1 auto;
   width: 72%;
-  min-height: 0;
+  max-height: 420px;
   overflow-y: auto;
   padding: 8px;
   margin-top: 16px;

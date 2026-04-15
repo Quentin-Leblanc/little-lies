@@ -158,6 +158,7 @@
     "mayor_revealed": "Mayor revealed — 3 votes"
   },
   "mayor_reveal_btn": "Reveal as Mayor",
+  "vigilante_night1": "Cannot shoot on the first night",
   "scene": {
     "no_lynch": "Everyone can go home safely tonight.",
     "spared": "{{name}} has been spared!",
