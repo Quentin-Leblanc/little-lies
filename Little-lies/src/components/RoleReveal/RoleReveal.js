@@ -96,57 +96,49 @@ const RoleReveal = ({ onComplete }) => {
     return () => clearInterval(interval);
   }, [phase, loadingMessages.length]);
 
-  // Fake smooth progress bar — runs continuously until loaded
-  const realLoadedRef = useRef(false);
-  useEffect(() => { realLoadedRef.current = realLoaded; }, [realLoaded]);
-
+  // Model preloading with real progress tracking
   useEffect(() => {
     if (phase !== 'loading') return;
-    let cancelled = false;
-    const start = Date.now();
-    const fakeDuration = 4000;
-    const tick = () => {
-      if (cancelled) return;
-      const elapsed = Date.now() - start;
-      if (realLoadedRef.current) {
-        setProgress(1);
-        return; // stop ticking
-      }
-      const fakeProgress = Math.min(elapsed / fakeDuration, 0.9);
-      setProgress(fakeProgress);
-      requestAnimationFrame(tick); // keep running until realLoaded
-    };
-    requestAnimationFrame(tick);
-    return () => { cancelled = true; };
-  }, [phase]);
-
-  // Real model preloading
-  useEffect(() => {
     const loader = new GLTFLoader();
     let cancelled = false;
+    const total = MODELS_TO_PRELOAD.length;
+
     const loadModel = (url) =>
       new Promise((resolve) => {
         loader.load(url, () => resolve(), undefined, () => resolve());
       });
+
+    // Animate progress smoothly to a target value
+    let targetProgress = 0;
+    let displayProgress = 0;
+    const animate = () => {
+      if (cancelled) return;
+      // Smoothly approach target
+      displayProgress += (targetProgress - displayProgress) * 0.15;
+      if (displayProgress > 0.995 && targetProgress >= 1) displayProgress = 1;
+      setProgress(displayProgress);
+      if (displayProgress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+
     const loadAll = async () => {
-      for (let i = 0; i < MODELS_TO_PRELOAD.length; i++) {
+      for (let i = 0; i < total; i++) {
         if (cancelled) return;
         await loadModel(MODELS_TO_PRELOAD[i]);
+        targetProgress = (i + 1) / total;
       }
       if (!cancelled) {
+        targetProgress = 1;
         setRealLoaded(true);
-        // Small delay before transitioning — use rAF to survive throttled tabs
-        requestAnimationFrame(() => {
-          setProgress(1);
-          requestAnimationFrame(() => {
-            setTimeout(() => setPhase('waiting-players'), 400);
-          });
-        });
+        setTimeout(() => setPhase('waiting-players'), 800);
       }
     };
-    loadAll();
+
+    // Small delay before starting loads — let the UI render first
+    setTimeout(() => loadAll(), 100);
+
     return () => { cancelled = true; };
-  }, []);
+  }, [phase]);
 
   // Mark ready when loaded
   useEffect(() => {
