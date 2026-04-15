@@ -3,27 +3,11 @@
 // ── HUD Timer — top center, clean minimal design ──
 
 .time-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: stretch;
   pointer-events: none;
   white-space: nowrap;
-  min-width: 280px;
-}
-
-// Row for the two pills
-.time-container > .day-label,
-.time-container > .phase-info {
-  // pills sit in a row via the parent's flex + order trick
-}
-
-// Override: make pills sit in a row inside the column
-.time-container {
-  // Wrap pills in implicit row
-  flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: center;
 }
 
 // Day/Night pill — left side
@@ -96,14 +80,15 @@
   text-align: right;
 }
 
-// Progress bar — below both pills, full width
+// Progress bar — same width as the two pills combined
 .phase-progress-bar {
-  width: 100%;
-  height: 3px;
+  flex-basis: auto;
+  align-self: stretch;
+  height: 2px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 0 0 4px 4px;
   overflow: hidden;
-  margin-top: -1px; // overlap border slightly
+  margin-top: 0;
 }
 
 .phase-progress-fill {
