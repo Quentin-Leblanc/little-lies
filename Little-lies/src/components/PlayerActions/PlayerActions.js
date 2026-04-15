@@ -102,16 +102,21 @@ const PlayerActions = memo(function () {
   const handleVoteClick = (suspectedPlayerId) => {
     if (!me.isAlive || !isVotingPhase || hasVoted) return;
     const voteWeight = me.voteWeight || 1;
-    // Read latest trial via ref to avoid stale state when multiple players vote
+    // Deep copy trial to avoid mutating shared references
     const latestTrial = trialRef.current || { suspects: {}, votes: {} };
-    const newSuspects = { ...(latestTrial.suspects || {}) };
+    const newSuspects = {};
+    // Deep copy each suspect entry (clone the suspectedBy arrays)
+    Object.keys(latestTrial.suspects || {}).forEach(key => {
+      const entry = latestTrial.suspects[key];
+      newSuspects[key] = { ...entry, suspectedBy: [...(entry.suspectedBy || [])] };
+    });
     if (!newSuspects[suspectedPlayerId]) {
       newSuspects[suspectedPlayerId] = { id: suspectedPlayerId, suspectedBy: [] };
     }
     for (let i = 0; i < voteWeight; i++) {
       newSuspects[suspectedPlayerId].suspectedBy.push(me.id);
     }
-    setTrial({ ...latestTrial, suspects: newSuspects });
+    setTrial({ suspects: newSuspects, votes: latestTrial.votes || {} });
     const targetPlayer = players.find(p => p.id === suspectedPlayerId);
     const totalVotes = newSuspects[suspectedPlayerId]?.suspectedBy?.length || 0;
     const aliveCount = players.filter(p => p.isAlive).length;
@@ -125,7 +130,7 @@ const PlayerActions = memo(function () {
     if (!me.isAlive || !isJudgmentPhase) return;
     if (me.id === game.accusedId) return;
     const latestTrial = trialRef.current || { suspects: {}, votes: {} };
-    setTrial({ ...latestTrial, votes: { ...latestTrial.votes, [me.id]: vote } });
+    setTrial({ suspects: latestTrial.suspects || {}, votes: { ...(latestTrial.votes || {}), [me.id]: vote } });
   };
 
   // --- Day action handler (Jailor jail) ---
