@@ -424,10 +424,24 @@
   }
 
   &.taken {
-    opacity: 0.2;
+    opacity: 0.3;
     cursor: not-allowed;
+    position: relative;
 
-    &:hover { transform: none; }
+    // Strikethrough line
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 15%;
+      width: 70%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.7);
+      transform: rotate(-45deg);
+      pointer-events: none;
+    }
+
+    &:hover { transform: none; border-color: transparent; }
   }
 }
 

@@ -492,11 +492,16 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     }
   };
 
-  // Colors already taken by other players
+  // Colors already taken by other players (check both PlayroomKit state and profile colors)
   const takenColors = new Set(
     playroom_players
       .filter(p => p.id !== currentPlayer?.id)
-      .map(p => p.getState?.()?.profile?.color)
+      .flatMap(p => {
+        const pkColor = p.getState?.()?.profile?.color;
+        // Get solid color (handle gradient objects)
+        const color = pkColor && typeof pkColor === 'object' ? null : pkColor;
+        return color ? [color] : [];
+      })
       .filter(Boolean)
   );
 
