@@ -45,7 +45,7 @@ const Menu = () => {
   return (
     <div className="menu-wrapper">
       <div className="menu-bar">
-        <h1 className="menu-game-title">Among Liars</h1>
+        <h1 className="menu-game-title" data-text="AMONG LIARS">AMONG LIARS</h1>
         <div className="menu-lobby-code" onClick={copyCode} title={t('menu:copy_tooltip')}>
           <span className="menu-code-value">{roomCode || '...'}</span>
           <i className="fas fa-copy menu-code-copy"></i>

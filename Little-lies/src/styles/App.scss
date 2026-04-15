@@ -119,7 +119,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 520px;
   max-height: 45vh;
   pointer-events: auto;
 
@@ -129,7 +128,6 @@
     gap: 6px;
     align-items: stretch;
     margin-top: 16px;
-    min-width: 400px;
   }
 }
 

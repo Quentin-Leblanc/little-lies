@@ -96,7 +96,10 @@ const RoleReveal = ({ onComplete }) => {
     return () => clearInterval(interval);
   }, [phase, loadingMessages.length]);
 
-  // Fake smooth progress bar
+  // Fake smooth progress bar — runs continuously until loaded
+  const realLoadedRef = useRef(false);
+  useEffect(() => { realLoadedRef.current = realLoaded; }, [realLoaded]);
+
   useEffect(() => {
     if (phase !== 'loading') return;
     let cancelled = false;
@@ -105,14 +108,17 @@ const RoleReveal = ({ onComplete }) => {
     const tick = () => {
       if (cancelled) return;
       const elapsed = Date.now() - start;
+      if (realLoadedRef.current) {
+        setProgress(1);
+        return; // stop ticking
+      }
       const fakeProgress = Math.min(elapsed / fakeDuration, 0.9);
-      if (realLoaded) setProgress(1);
-      else setProgress(fakeProgress);
-      if (fakeProgress < 0.9 || !realLoaded) requestAnimationFrame(tick);
+      setProgress(fakeProgress);
+      requestAnimationFrame(tick); // keep running until realLoaded
     };
     requestAnimationFrame(tick);
     return () => { cancelled = true; };
-  }, [phase, realLoaded]);
+  }, [phase]);
 
   // Real model preloading
   useEffect(() => {

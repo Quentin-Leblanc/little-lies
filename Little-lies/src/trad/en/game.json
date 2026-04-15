@@ -157,6 +157,7 @@
     "title": "Living players ({{alive}}/{{total}})",
     "mayor_revealed": "Mayor revealed — 3 votes"
   },
+  "mayor_reveal_btn": "Reveal as Mayor",
   "scene": {
     "no_lynch": "Everyone can go home safely tonight.",
     "spared": "{{name}} has been spared!",

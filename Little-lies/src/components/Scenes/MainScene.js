@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sky, Stars, Html, useGLTF } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette, BrightnessContrast, HueSaturation, SSAO } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette, BrightnessContrast, HueSaturation } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
@@ -2387,25 +2387,30 @@ const MainScene = () => {
           {(() => {
             // Deterministic weather based on dayCount (same for all players)
             const seed = game.dayCount * 7 + 3;
-            // Day weather: 0=clear, 1=cloudy, 2=misty
-            const dayWeather = seed % 3;
+            // Day weather: 0=clear, 1=cloudy, 2=misty, 3=rainy, 4=grey/overcast
+            const dayWeather = seed % 5;
             // Night weather: 0=clear, 1=rainy+thunder, 2=foggy
             const nightWeather = (seed * 13 + 5) % 3;
 
             if (game.isDay) {
               const isCloudy = dayWeather === 1;
               const isMisty = dayWeather === 2;
-              const skyColor = isCloudy ? '#8a9fb8' : isMisty ? '#909aa8' : '#7ab8d8';
+              const isRainyDay = dayWeather === 3;
+              const isGrey = dayWeather === 4;
+              const isDark = isRainyDay || isGrey;
+              const skyColor = isRainyDay ? '#6a7a8a' : isGrey ? '#8090a0' : isCloudy ? '#8a9fb8' : isMisty ? '#909aa8' : '#7ab8d8';
               return (
                 <>
                   <color attach="background" args={[skyColor]} />
-                  <fog attach="fog" args={[skyColor, isMisty ? 22 : isCloudy ? 30 : 40, isMisty ? 50 : isCloudy ? 65 : 80]} />
-                  <Sky sunPosition={[100, isCloudy ? 20 : isMisty ? 25 : 50, 100]} turbidity={isCloudy ? 20 : isMisty ? 12 : 8} rayleigh={isCloudy ? 5 : 2} />
-                  <DayFireflies count={isCloudy ? 20 : 50} />
+                  <fog attach="fog" args={[skyColor, isDark ? 18 : isMisty ? 22 : isCloudy ? 30 : 40, isDark ? 50 : isMisty ? 50 : isCloudy ? 65 : 80]} />
+                  <Sky sunPosition={[100, isDark ? 10 : isCloudy ? 20 : isMisty ? 25 : 50, 100]} turbidity={isDark ? 25 : isCloudy ? 20 : isMisty ? 12 : 8} rayleigh={isDark ? 6 : isCloudy ? 5 : 2} />
+                  <DayFireflies count={isDark ? 10 : isCloudy ? 20 : 50} />
                   <FloatingDust count={isMisty ? 120 : 80} isDay />
                   <GroundFog isDay />
-                  {!isCloudy && <DayRabbits count={5} />}
-                  {isMisty && <GroundFog isDay />}{/* double fog when misty */}
+                  {!isDark && !isCloudy && <DayRabbits count={5} />}
+                  {(isMisty || isDark) && <GroundFog isDay />}
+                  {isRainyDay && <NightRain count={200} />}
+                  {isRainyDay && <NightLightning />}
                 </>
               );
             } else {
@@ -2511,15 +2516,9 @@ const MainScene = () => {
               luminanceSmoothing={0.4}
               mipmapBlur
             />
-            <SSAO
-              radius={0.15}
-              intensity={game.isDay ? 2 : 4}
-              luminanceInfluence={0.6}
-              bias={0.01}
-            />
             <BrightnessContrast
-              brightness={game.isDay ? -0.03 : -0.05}
-              contrast={game.isDay ? 0.08 : 0.15}
+              brightness={game.isDay ? -0.02 : -0.03}
+              contrast={game.isDay ? 0.06 : 0.1}
             />
             <HueSaturation
               saturation={game.isDay ? -0.05 : -0.15}

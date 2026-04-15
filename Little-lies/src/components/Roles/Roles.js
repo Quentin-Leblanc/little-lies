@@ -26,9 +26,10 @@ const RolesList = () => {
     <span
       key={role.key}
       className="role-chip"
-      style={{ color: role.team === 'town' ? '#78ff78' : '#ff4444', borderColor: role.team === 'town' ? 'rgba(120,255,120,0.2)' : 'rgba(255,68,68,0.2)' }}
+      style={{ color: role.couleur || '#ccc', borderColor: `${role.couleur || '#ccc'}33` }}
       onClick={() => setSelectedRole(selectedRole?.key === role.key ? null : role)}
     >
+      {role.icon && <i className={`fas ${role.icon}`} style={{ marginRight: 4, fontSize: '0.8em' }}></i>}
       {role.label}{role.count > 1 && <span className="role-count">x{role.count}</span>}
     </span>
   );
@@ -52,13 +53,13 @@ const RolesList = () => {
         <div className="role-detail-overlay" onClick={() => setSelectedRole(null)}>
           <div className="role-detail-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="role-detail-header">
-              <div className="role-detail-title" style={{ color: selectedRole.team === 'town' ? '#78ff78' : '#ff4444' }}>
+              <div className="role-detail-title" style={{ color: selectedRole.couleur || '#ccc' }}>
                 {selectedRole.icon && <i className={`fas ${selectedRole.icon}`}></i>}
                 <h3>{selectedRole.label}</h3>
               </div>
               <button className="close-button" onClick={() => setSelectedRole(null)}>X</button>
             </div>
-            <div className="role-detail-team" style={{ color: selectedRole.team === 'town' ? '#78ff78' : '#ff4444' }}>
+            <div className="role-detail-team" style={{ color: selectedRole.couleur || '#ccc' }}>
               {t(`teams.${selectedRole.team}.short`)}
             </div>
             <p className="role-detail-desc">{selectedRole.description}</p>

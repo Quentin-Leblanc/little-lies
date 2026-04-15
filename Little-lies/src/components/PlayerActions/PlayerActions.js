@@ -191,7 +191,7 @@ const PlayerActions = memo(function () {
         {/* Mayor reveal button */}
         {canReveal && (
           <button className="reveal-btn" onClick={handleReveal}>
-            <i className="fas fa-landmark"></i> Maire
+            <i className="fas fa-landmark"></i> {t('game:mayor_reveal_btn', { defaultValue: 'Reveal as Mayor' })}
           </button>
         )}
 
