@@ -703,7 +703,18 @@ const KenneyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 
   const clone = useMemo(() => {
     const c = scene.clone();
     c.traverse((child) => {
-      if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        // Disable emissive to prevent white glow at night
+        if (child.material) {
+          const mat = child.material.clone();
+          mat.emissive?.set(0, 0, 0);
+          mat.emissiveIntensity = 0;
+          mat.emissiveMap = null;
+          child.material = mat;
+        }
+      }
     });
     return c;
   }, [scene]);

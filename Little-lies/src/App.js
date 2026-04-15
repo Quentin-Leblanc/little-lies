@@ -80,7 +80,6 @@ function App() {
         if (!prev || prev === phase) return;
 
         const PHASE_BANNERS = {
-            [CONSTANTS.PHASE.NIGHT_TRANSITION]: { text: i18n.t('game:phases.NIGHT_TRANSITION'), icon: 'fa-moon', className: 'banner-night' },
             [CONSTANTS.PHASE.VOTING]: { text: i18n.t('game:phases.VOTING'), icon: 'fa-gavel', className: 'banner-vote' },
             [CONSTANTS.PHASE.DEFENSE]: { text: i18n.t('game:phases.DEFENSE'), icon: 'fa-shield', className: 'banner-defense' },
             [CONSTANTS.PHASE.JUDGMENT]: { text: i18n.t('game:phases.JUDGMENT'), icon: 'fa-scale-balanced', className: 'banner-judgment' },
