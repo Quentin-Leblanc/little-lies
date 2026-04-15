@@ -698,6 +698,21 @@ const LowPolyHayBale = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
 // ============================================================
 // Kenney Graveyard Kit assets — CC0 low-poly props
 // ============================================================
+const fixMaterial = (mat) => {
+  if (!mat) return mat;
+  const m = mat.clone();
+  // Kill all emissive
+  if (m.emissive) m.emissive.set(0, 0, 0);
+  m.emissiveIntensity = 0;
+  m.emissiveMap = null;
+  // Kill specular extensions that cause white highlights
+  if (m.specularIntensity !== undefined) m.specularIntensity = 0;
+  if (m.specularColor) m.specularColor.set(0, 0, 0);
+  // Ensure proper tone mapping response
+  m.toneMapped = true;
+  return m;
+};
+
 const KenneyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1 }) => {
   const { scene } = useGLTF(path);
   const clone = useMemo(() => {
@@ -706,13 +721,11 @@ const KenneyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
-        // Disable emissive to prevent white glow at night
-        if (child.material) {
-          const mat = child.material.clone();
-          mat.emissive?.set(0, 0, 0);
-          mat.emissiveIntensity = 0;
-          mat.emissiveMap = null;
-          child.material = mat;
+        // Fix materials — handle arrays and single materials
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map(fixMaterial);
+        } else {
+          child.material = fixMaterial(child.material);
         }
       }
     });

@@ -76,6 +76,10 @@ export function Character({
         }
         // Clone from original to preserve textures
         const mat = origMaterials.current.get(child.uuid).clone();
+        // Kill emissive to prevent white glow at night
+        if (mat.emissive) mat.emissive.set(0, 0, 0);
+        mat.emissiveIntensity = 0;
+        mat.emissiveMap = null;
         // Tint with player color if provided (multiplied with texture)
         if (color) {
           mat.color = new Color(color);
