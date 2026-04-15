@@ -18,18 +18,6 @@ const AmbientEffects = () => {
     return texts[Math.floor(Math.random() * texts.length)];
   }, [game.dayCount, isNight]);
 
-  // Firefly particles (night only)
-  const fireflies = useMemo(() =>
-    Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      left: `${5 + Math.random() * 90}%`,
-      top: `${10 + Math.random() * 80}%`,
-      size: 2 + Math.random() * 3,
-      delay: `${Math.random() * 6}s`,
-      duration: `${4 + Math.random() * 5}s`,
-      drift: (Math.random() - 0.5) * 60,
-    })), []);
-
   // Dust motes (day only)
   const dustMotes = useMemo(() =>
     Array.from({ length: 15 }, (_, i) => ({
@@ -50,27 +38,6 @@ const AmbientEffects = () => {
 
       {/* Voting orange glow */}
       {isVoting && <div className="ambient-vignette ambient-vignette-vote" />}
-
-      {/* Fireflies (night) */}
-      {isNight && (
-        <div className="ambient-fireflies">
-          {fireflies.map(f => (
-            <div
-              key={f.id}
-              className="firefly"
-              style={{
-                left: f.left,
-                top: f.top,
-                width: f.size,
-                height: f.size,
-                animationDelay: f.delay,
-                animationDuration: f.duration,
-                '--drift': `${f.drift}px`,
-              }}
-            />
-          ))}
-        </div>
-      )}
 
       {/* Dust motes (day) */}
       {isDay && (

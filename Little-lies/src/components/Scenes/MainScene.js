@@ -120,49 +120,7 @@ const Torch = ({ position }) => {
       </group>
       {/* Point light */}
       <pointLight ref={lightRef} position={[0, 1.85, 0]} intensity={0.8} color="#ff8833" distance={6} />
-      {/* Smoke particles rising */}
-      <TorchSmoke position={[0, 1.9, 0]} />
     </group>
-  );
-};
-
-// Torch smoke — small rising particles
-const TorchSmoke = ({ position }) => {
-  const meshRef = useRef();
-  const count = 6;
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-  const offsets = useMemo(() =>
-    Array.from({ length: count }, () => ({
-      speed: 0.3 + Math.random() * 0.4,
-      drift: (Math.random() - 0.5) * 0.3,
-      phase: Math.random() * Math.PI * 2,
-      size: 0.03 + Math.random() * 0.03,
-    })), []);
-
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    const t = state.clock.elapsedTime;
-    for (let i = 0; i < count; i++) {
-      const o = offsets[i];
-      const life = ((t * o.speed + o.phase) % 1);
-      dummy.position.set(
-        position[0] + Math.sin(t + o.phase) * o.drift,
-        position[1] + life * 1.5,
-        position[2] + Math.cos(t * 0.7 + o.phase) * o.drift
-      );
-      const s = o.size * (1 - life * 0.5);
-      dummy.scale.set(s, s, s);
-      dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
-    }
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <instancedMesh ref={meshRef} args={[null, null, count]}>
-      <sphereGeometry args={[1, 4, 4]} />
-      <meshBasicMaterial color="#888888" transparent opacity={0.15} />
-    </instancedMesh>
   );
 };
 
@@ -397,13 +355,22 @@ const LowPolyMountain = ({ position, scale = 1, variant = 0 }) => (
 );
 
 // Preload village center models
-useGLTF.preload('/models/fountain-round-detail.glb');
+useGLTF.preload('/models/Meshy_AI_potence_0415121815_texture.glb');
 useGLTF.preload('/models/road.glb');
+
+const GALLOWS_PATH = '/models/Meshy_AI_potence_0415121815_texture.glb';
 
 const VillageCenter = () => (
   <group>
-    {/* Fontaine au centre de la place */}
-    <KenneyModel path="/models/fountain-round-detail.glb" position={[0, 0, 0]} scale={1.8} />
+    {/* Potence Meshy — landmark central du village.
+        Le bbox du modèle est centré (Y ∈ [-0.92, 0.92]) donc avec scale=2
+        on remonte de 1.84 pour que la base touche le sol. */}
+    <KenneyModel
+      path={GALLOWS_PATH}
+      position={[0, 1.84, 0]}
+      rotation={[0, Math.PI * 0.15, 0]}
+      scale={2}
+    />
     {/* Puits KayKit à côté */}
     <KenneyModel path="/models/kaykit/building_well_red.gltf" position={[-5, 0, 3]} scale={2.5} />
   </group>

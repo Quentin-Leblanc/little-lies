@@ -438,23 +438,51 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     }
   }, [canUseGradient]);
 
-  // Assign a default unique color based on player index in the room
-  const colorAssigned = useRef(false);
+  // Assign / re-assign a unique color.
+  //
+  // Runs on every playroom_players change (not just once) so that if our
+  // local state wasn't yet synced with other players at mount time, we still
+  // correct our color once we see them.
+  //
+  // Conflict rule: sort players deterministically by id (all clients agree
+  // on the same order), and the player with the HIGHER sorted index yields.
+  // Earlier players keep their color, later players pick a free one.
   useEffect(() => {
-    if (!currentPlayer || colorAssigned.current) return;
-    // Check if we have a saved gradient
+    if (!currentPlayer || useGradient) return;
+    // Respect saved gradient preference
     const saved = loadGradient();
-    if (saved && canUseGradient) { colorAssigned.current = true; return; }
+    if (saved && canUseGradient) return;
 
-    // Use player index in the room — guaranteed unique per player
-    const myIndex = playroom_players.findIndex(p => p.id === currentPlayer.id);
-    if (myIndex === -1) return; // not in list yet, wait
-    colorAssigned.current = true;
+    // Deterministic ordering shared across clients
+    const sorted = [...playroom_players].sort((a, b) => (a.id < b.id ? -1 : 1));
+    const myIndex = sorted.findIndex(p => p.id === currentPlayer.id);
+    if (myIndex === -1) return;
 
-    const color = PLAYER_COLORS[myIndex % PLAYER_COLORS.length];
-    setSelectedColor(color);
-    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color });
-  }, [currentPlayer, playroom_players.length]);
+    const myColor = currentPlayer.getState?.()?.profile?.color;
+    const hasValidSolid = typeof myColor === 'string' && PLAYER_COLORS.includes(myColor);
+
+    // Do we collide with a player that sorts BEFORE us? If yes we yield.
+    const earlierConflict = hasValidSolid && sorted.some((p, i) => {
+      if (i >= myIndex) return false;
+      const c = p.getState?.()?.profile?.color;
+      return typeof c === 'string' && c === myColor;
+    });
+
+    if (hasValidSolid && !earlierConflict) return; // nothing to do
+
+    // Pick the first color not taken by anyone else
+    const takenByOthers = new Set(
+      sorted
+        .filter(p => p.id !== currentPlayer.id)
+        .map(p => p.getState?.()?.profile?.color)
+        .filter(c => typeof c === 'string')
+    );
+    const freeColor = PLAYER_COLORS.find(c => !takenByOthers.has(c));
+    if (!freeColor || freeColor === myColor) return;
+
+    setSelectedColor(freeColor);
+    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: freeColor });
+  }, [currentPlayer, playroom_players, useGradient, canUseGradient]);
 
   // Sync Supabase username
   useEffect(() => {
