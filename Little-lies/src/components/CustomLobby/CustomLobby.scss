@@ -375,8 +375,8 @@
   position: fixed;
   bottom: 16px;
   left: 16px;
-  width: 320px;
-  max-height: 200px;
+  width: 400px;
+  max-height: 240px;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -385,21 +385,24 @@
   flex-direction: column;
   z-index: 10;
   overflow: hidden;
+  text-align: left;
 }
 
 .lobby-chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 10px;
-  max-height: 150px;
-  min-height: 40px;
+  padding: 10px 12px;
+  max-height: 180px;
+  min-height: 50px;
+  text-align: left;
 }
 
 .lobby-chat-msg {
-  font-size: 13px;
+  font-size: 14px;
   color: #ddd;
-  padding: 2px 0;
-  line-height: 1.4;
+  padding: 3px 0;
+  line-height: 1.45;
+  text-align: left;
 
   strong {
     margin-right: 2px;
