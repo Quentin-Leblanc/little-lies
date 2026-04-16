@@ -300,6 +300,7 @@
 
 .player-list-name {
   font-size: 0.824rem;
+  font-weight: 800;
   color: #ddd;
   flex: 1;
   overflow: hidden;
@@ -534,30 +535,36 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-// Lobby chat
+// Lobby chat — matches in-game chat dimensions & visual language
 .lobby-chat {
   position: fixed;
-  bottom: 1.176rem;
+  bottom: 4rem;
   left: 1.176rem;
-  width: 28.235rem;
-  height: 22.353rem;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.706rem;
+  width: 40vw;
+  max-width: 40vw;
+  height: 21.176rem;
+  max-height: 21.176rem;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.471rem;
+  padding: 0.471rem 0.706rem;
   display: flex;
   flex-direction: column;
   z-index: 10;
   overflow: hidden;
   text-align: left;
+  font-size: 0.882rem;
+  box-sizing: border-box;
 }
 
 .lobby-chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.471rem 0.824rem 0.353rem;
+  padding: 0 0 0.235rem;
+  margin-bottom: 0.235rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 
   span {
     font-size: 0.706rem;
@@ -584,61 +591,119 @@
 .lobby-chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 0.588rem 0.824rem;
-  flex: 1;
   min-height: 0;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+// Mirror of .chat-message-wrapper
+.lobby-chat-msg-wrapper {
+  position: relative;
+  margin-bottom: 1px;
+  padding: 0.118rem 0.471rem;
+  min-height: 1.412rem;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  color: white;
+  border-radius: 0.176rem;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  &.system-msg {
+    padding: 0.118rem 0;
+    min-height: 1.176rem;
+    .lobby-chat-msg {
+      color: #888;
+      font-style: italic;
+      font-size: 0.765rem;
+    }
+  }
+}
+
+.lobby-chat-msg-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.08;
 }
 
 .lobby-chat-msg {
-  font-size: 0.882rem;
-  color: #ddd;
-  padding: 0.176rem 0;
-  line-height: 1.5;
-  text-align: left;
+  position: relative;
+  font-size: 0.941rem;
+  line-height: 1.45;
+  width: 100%;
+  color: #fff;
 
   strong {
+    color: inherit;
     margin-right: 3px;
+    font-weight: 800;
   }
 
   span {
-    color: #ccc;
+    color: #fff;
   }
+}
 
-  &.system-msg {
-    color: #888;
-    font-style: italic;
-    font-size: 0.765rem;
-  }
+// Input outside (like in-game .chat-input-outside)
+.lobby-chat-input-outside {
+  position: fixed;
+  bottom: 1.176rem;
+  left: 1.176rem;
+  width: 40vw;
+  max-width: 40vw;
+  display: flex;
+  align-items: center;
+  gap: 0.353rem;
+  padding: 0.471rem 0.588rem;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.471rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  z-index: 11;
+  box-sizing: border-box;
 }
 
 .lobby-chat-input {
-  width: 100%;
-  padding: 0.588rem 0.824rem;
-  background: rgba(0, 0, 0, 0.4);
-  border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  color: #ddd;
-  font-size: 0.882rem;
+  flex-grow: 1;
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.235rem;
+  padding: 0.412rem 0.588rem;
+  font-size: 0.765rem;
   font-family: inherit;
   box-sizing: border-box;
+  transition: border-color 0.2s;
 
   &::placeholder { color: #555; }
-  &:focus { outline: none; background: rgba(0, 0, 0, 0.5); }
+  &:focus { outline: none; border-color: rgba(200, 160, 80, 0.3); }
 }
 
-.lobby-chat-hint {
+.lobby-chat-hint-outside {
+  position: fixed;
+  bottom: 1.176rem;
+  left: 1.176rem;
+  width: 40vw;
+  max-width: 40vw;
+  text-align: left;
+  font-size: 0.706rem;
+  color: #ddd;
   padding: 0.353rem 0.706rem;
-  font-size: 0.647rem;
-  color: #555;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  text-align: center;
+  z-index: 11;
+  box-sizing: border-box;
 
   kbd {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 1px 0.294rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 0.176rem;
-    font-size: 0.588rem;
+    padding: 0.059rem 0.294rem;
+    font-size: 0.647rem;
     color: #888;
     margin-right: 0.235rem;
   }
@@ -646,7 +711,7 @@
 
 // Info panel for commands
 .lobby-chat-info-panel {
-  padding: 0.471rem 0.824rem;
+  padding: 0.471rem 0.706rem;
   background: rgba(47, 130, 255, 0.06);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 0.706rem;
@@ -674,8 +739,14 @@
 @media (max-width: 700px) {
   .lobby-chat {
     width: calc(100% - 1.882rem);
-    bottom: 0.471rem;
+    bottom: 3.2rem;
     left: 0.471rem;
+  }
+  .lobby-chat-input-outside,
+  .lobby-chat-hint-outside {
+    width: calc(100% - 1.882rem);
+    left: 0.471rem;
+    bottom: 0.471rem;
   }
 }
 

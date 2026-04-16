@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { usePlayersList, isHost, getRoomCode, myPlayer, useMultiplayerState } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 import { Stars, Html } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
@@ -70,12 +71,12 @@ const CampfireFlame = () => {
           <meshStandardMaterial color="#4a2a0a" />
         </mesh>
       ))}
-      {/* Fire */}
+      {/* Fire — HDR colors (>1) + toneMapped:false → bloom-glow */}
       <group ref={flameRef} position={[0, 0.35, 0]}>
-        <mesh><coneGeometry args={[0.3, 0.8, 6]} /><meshBasicMaterial color="#ff4400" transparent opacity={0.85} /></mesh>
-        <mesh position={[0, 0.1, 0]}><coneGeometry args={[0.2, 0.6, 5]} /><meshBasicMaterial color="#ff8800" transparent opacity={0.8} /></mesh>
-        <mesh position={[0, 0.15, 0]}><coneGeometry args={[0.12, 0.4, 4]} /><meshBasicMaterial color="#ffdd44" transparent opacity={0.9} /></mesh>
-        <mesh position={[0, 0.2, 0]}><coneGeometry args={[0.05, 0.2, 4]} /><meshBasicMaterial color="#ffffcc" transparent opacity={0.7} /></mesh>
+        <mesh><coneGeometry args={[0.3, 0.8, 6]} /><meshBasicMaterial color={[5, 1, 0]} transparent opacity={0.85} toneMapped={false} /></mesh>
+        <mesh position={[0, 0.1, 0]}><coneGeometry args={[0.2, 0.6, 5]} /><meshBasicMaterial color={[7, 3, 0.4]} transparent opacity={0.8} toneMapped={false} /></mesh>
+        <mesh position={[0, 0.15, 0]}><coneGeometry args={[0.12, 0.4, 4]} /><meshBasicMaterial color={[10, 7, 1.5]} transparent opacity={0.9} toneMapped={false} /></mesh>
+        <mesh position={[0, 0.2, 0]}><coneGeometry args={[0.05, 0.2, 4]} /><meshBasicMaterial color={[14, 13, 7]} transparent opacity={0.7} toneMapped={false} /></mesh>
       </group>
       {/* Light — wide throw so it washes the surrounding seats & ground */}
       <pointLight position={[0, 1, 0]} intensity={7} color="#ff8833" distance={28} decay={0.9} />
@@ -120,17 +121,31 @@ const Embers = () => {
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
       <sphereGeometry args={[1, 4, 4]} />
-      <meshBasicMaterial color="#ff6600" transparent opacity={0.8} />
+      <meshBasicMaterial color={[4, 1.2, 0.1]} transparent opacity={0.8} toneMapped={false} />
     </instancedMesh>
   );
 };
 
-// Ground
-const CampGround = () => (
+// Ground — textured sand
+const CampGround = () => {
+  const albedo = useLoader(TextureLoader, '/models/textures/lobby_sand_albedo.jpg');
+
+  useMemo(() => {
+    if (!albedo) return;
+    albedo.wrapS = albedo.wrapT = THREE.RepeatWrapping;
+    albedo.repeat.set(4, 4);
+    albedo.anisotropy = 16;
+    albedo.colorSpace = THREE.SRGBColorSpace;
+    albedo.minFilter = THREE.LinearMipmapLinearFilter;
+    albedo.magFilter = THREE.LinearFilter;
+    albedo.generateMipmaps = true;
+  }, [albedo]);
+
+  return (
   <group>
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
       <circleGeometry args={[20, 32]} />
-      <meshStandardMaterial color="#1a2a1a" />
+      <meshStandardMaterial map={albedo} color="#a89880" roughness={1} metalness={0} />
     </mesh>
     {/* Stone circle around fire */}
     {Array.from({ length: 10 }).map((_, i) => {
@@ -143,7 +158,8 @@ const CampGround = () => (
       );
     })}
   </group>
-);
+  );
+};
 
 // Dark trees in background
 const BackgroundTrees = () => {
@@ -172,7 +188,34 @@ const BackgroundTrees = () => {
   );
 };
 
-// Slow orbit camera
+// Distant moon — billboarded flat discs so outline is always a clean circle
+const Moon = () => {
+  const groupRef = useRef();
+  const _fwd = useMemo(() => new THREE.Vector3(), []);
+  const _up = useMemo(() => new THREE.Vector3(), []);
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    const cam = state.camera;
+    _fwd.set(0, 0, -1).applyQuaternion(cam.quaternion);
+    _up.set(0, 1, 0).applyQuaternion(cam.quaternion);
+    groupRef.current.position
+      .copy(cam.position)
+      .addScaledVector(_fwd, 28)
+      .addScaledVector(_up, 9);
+    // face camera → local axes align with camera space (X right, Y up, Z out)
+    groupRef.current.quaternion.copy(cam.quaternion);
+  });
+  return (
+    <group ref={groupRef}>
+      {/* Moon disc — bright emissive, always round (bloom adds the glow) */}
+      <mesh>
+        <circleGeometry args={[2.4, 64]} />
+        <meshBasicMaterial color={[2.2, 2.6, 3.4]} toneMapped={false} fog={false} />
+      </mesh>
+    </group>
+  );
+};
+
 // Slow orbit camera
 const OrbitCamera = () => {
   useFrame((state) => {
@@ -349,6 +392,7 @@ const LobbyChat = () => {
   };
 
   return (
+    <>
     <div className="lobby-chat">
       <div className="lobby-chat-header">
         <span>Chat</span>
@@ -367,18 +411,30 @@ const LobbyChat = () => {
       )}
 
       <div className="lobby-chat-messages">
-        {msgs.map((m) => (
-          <div key={m.id} className={`lobby-chat-msg ${m.isSystem ? 'system-msg' : ''}`}>
-            {m.isSystem ? (
-              <span>{m.content}</span>
-            ) : (
-              <><strong style={{ color: m.color }}>{m.player}</strong><span>: {m.content}</span></>
-            )}
-          </div>
-        ))}
+        {msgs.map((m) => {
+          if (m.isSystem) {
+            return (
+              <div key={m.id} className="lobby-chat-msg-wrapper system-msg">
+                <div className="lobby-chat-msg">{m.content}</div>
+              </div>
+            );
+          }
+          const col = typeof m.color === 'object' ? (m.color.color1 || '#ccc') : (m.color || '#ccc');
+          return (
+            <div key={m.id} className="lobby-chat-msg-wrapper">
+              <div className="lobby-chat-msg-bg" style={{ backgroundColor: col }}></div>
+              <div className="lobby-chat-msg">
+                <strong style={{ color: col }}>{m.player}</strong>
+                <span>: {m.content}</span>
+              </div>
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
-      {inputVisible ? (
+    </div>
+    {inputVisible ? (
+      <div className="lobby-chat-input-outside">
         <input
           ref={inputRef}
           className="lobby-chat-input"
@@ -393,12 +449,13 @@ const LobbyChat = () => {
           maxLength={150}
           autoFocus
         />
-      ) : (
-        <div className="lobby-chat-hint">
-          <kbd>Enter</kbd> {t('send').toLowerCase()}
-        </div>
-      )}
-    </div>
+      </div>
+    ) : (
+      <div className="lobby-chat-hint-outside">
+        <kbd>Enter</kbd> {t('send').toLowerCase()}
+      </div>
+    )}
+    </>
   );
 };
 
@@ -588,10 +645,15 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
         gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.8 }}>
         <color attach="background" args={['#050810']} />
         <fog attach="fog" args={['#050810', 10, 25]} />
-        <ambientLight intensity={0.05} />
+        <ambientLight intensity={0.18} color="#5a6a90" />
+        {/* Cool moonlight — stationary high-angle directional, shadows consistent */}
+        <directionalLight position={[8, 14, -6]} intensity={1.1} color="#7a9bd5" />
+        {/* Soft sky ambient — cool blue above, warm dim below */}
+        <hemisphereLight args={["#6a7ba8", "#1a1420", 0.6]} />
 
         <Suspense fallback={null}>
           <OrbitCamera />
+          <Moon />
           <CampGround />
           <CampfireFlame />
           <Embers />

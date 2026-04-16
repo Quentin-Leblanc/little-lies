@@ -175,7 +175,7 @@
   },
   "no_ability": "No special ability",
   "last_will_placeholder": "Your last will...",
-  "last_will_placeholder_write": "Write your last will... It will be revealed upon your death.",
+  "last_will_placeholder_write": "E.g.: I checked Alex on night 2, he's clean. Don't trust Sam...",
   "last_will_none": "No last will left.",
   "xp": {
     "participation": "Participation",

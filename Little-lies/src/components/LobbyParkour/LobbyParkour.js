@@ -1,8 +1,9 @@
 import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import { RigidBody, CuboidCollider, BallCollider, interactionGroups } from '@react-three/rapier';
 import { Text, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { TextureLoader } from 'three';
 
 // KayKit model loader for lobby
 const LobbyModel = React.memo(({ path, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1 }) => {
@@ -196,19 +197,39 @@ const GiantBall = ({ position, radius = 2.5, color = '#E8734A' }) => {
   );
 };
 
+/* ── Textured ground — same setup as MainScene GroundPlane ── */
+const LobbyGround = () => {
+  const albedo = useLoader(TextureLoader, '/models/textures/lobby_sand_albedo.jpg');
+
+  useMemo(() => {
+    if (!albedo) return;
+    albedo.wrapS = albedo.wrapT = THREE.RepeatWrapping;
+    albedo.repeat.set(6, 6);
+    albedo.anisotropy = 16;
+    albedo.colorSpace = THREE.SRGBColorSpace;
+    albedo.minFilter = THREE.LinearMipmapLinearFilter;
+    albedo.magFilter = THREE.LinearFilter;
+    albedo.generateMipmaps = true;
+  }, [albedo]);
+
+  return (
+    <RigidBody type="fixed" position={[0, -0.2, 0]} collisionGroups={interactionGroups([1], [0, 1])}>
+      <CuboidCollider args={[60, 0.2, 60]} />
+      <mesh receiveShadow>
+        <boxGeometry args={[120, 0.4, 120]} />
+        <meshStandardMaterial map={albedo} color="#c8c0a8" roughness={1} metalness={0} />
+      </mesh>
+    </RigidBody>
+  );
+};
+
 /* ══════════════════════════════
    VILLAGE LOBBY — thematic parkour
    ═══════════════════════════════ */
 const LobbyParkour = () => (
   <group>
-    {/* ── Ground — grassy terrain ── */}
-    <RigidBody type="fixed" position={[0, -0.2, 0]} collisionGroups={G}>
-      <CuboidCollider args={[60, 0.2, 60]} />
-      <mesh receiveShadow>
-        <boxGeometry args={[120, 0.4, 120]} />
-        <meshStandardMaterial color="#7EC850" roughness={0.95} flatShading />
-      </mesh>
-    </RigidBody>
+    {/* ── Ground — sand terrain with PBR texture ── */}
+    <LobbyGround />
 
     {/* ── Title ── */}
     <Text

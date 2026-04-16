@@ -259,13 +259,12 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 900;
-  backdrop-filter: blur(3px);
-  animation: lw-fade-in 0.25s ease-out;
+  animation: lw-fade-in 0.15s ease-out;
 }
 
 @keyframes lw-fade-in {
@@ -280,7 +279,7 @@
   padding: 1.412rem;
   width: 90%;
   max-width: 32.353rem;
-  animation: lw-slide-in 0.3s ease-out;
+  animation: lw-fade-in 0.15s ease-out;
 
   .lw-dialog-header {
     display: flex;
@@ -339,10 +338,6 @@
   }
 }
 
-@keyframes lw-slide-in {
-  from { opacity: 0; transform: scale(0.92) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
 
 /* Team members block */
 .team-block {

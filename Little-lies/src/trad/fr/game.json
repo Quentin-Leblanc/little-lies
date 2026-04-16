@@ -175,7 +175,7 @@
   },
   "no_ability": "Aucune capacité spéciale",
   "last_will_placeholder": "Votre testament...",
-  "last_will_placeholder_write": "Écrivez votre testament... Il sera révélé à votre mort.",
+  "last_will_placeholder_write": "Ex : J'ai vérifié Alex la nuit 2, il est clean. Ne faites pas confiance à Sam...",
   "last_will_none": "Aucun testament laissé.",
   "xp": {
     "participation": "Participation",

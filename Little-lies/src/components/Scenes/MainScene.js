@@ -415,8 +415,8 @@ const VillageCenter = ({ isTrialPhase }) => (
 // ============================================================
 // Camera targets relative to podium at [7, 0, -6]
 const DEFENSE_CAMERA_LOOK = new THREE.Vector3(7, 1.2, -6);      // accused chest height at podium
-const JUDGMENT_CAMERA_POS = new THREE.Vector3(2, 3.5, -4);      // wider angle, see accused + crowd
-const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(4, 0.8, -3);     // between podium and center
+const JUDGMENT_CAMERA_POS = new THREE.Vector3(4.5, 2, -4);       // front of podium, facing accused
+const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(7, 1.2, -6);     // accused at podium
 const EXECUTION_CAMERA_POS = new THREE.Vector3(7, 6, -10);      // overhead dramatic above podium
 const EXECUTION_CAMERA_LOOK = new THREE.Vector3(7, 0.5, -6);    // looking down at podium
 
@@ -1598,6 +1598,67 @@ const MistSlab = ({ y, scale = 1, speed = 0.02, density = 0.55, color, seed = 0 
   );
 };
 
+// Thick fog wall encircling the village — hides empty sky/mountains
+// from low camera angles (trial/defense). Dense ring at radius 18-28
+// with multiple layers so it reads as an impenetrable wall of mist.
+const VillageFogWall = ({ isDay = true }) => {
+  const color = isDay ? '#c8d4e0' : '#0a0e1c';
+
+  const clouds = useMemo(() => {
+    const arr = [];
+    let s = 7777;
+    const rand = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+    // Dense inner ring (radius ~18-22) — main wall
+    for (let i = 0; i < 20; i++) {
+      const angle = (i / 20) * Math.PI * 2 + rand() * 0.15;
+      const radius = 18 + rand() * 4;
+      arr.push({
+        position: [Math.cos(angle) * radius, 1.5 + rand() * 3, Math.sin(angle) * radius],
+        seed: i * 13,
+        bounds: [10 + rand() * 4, 4 + rand() * 2, 10 + rand() * 4],
+        volume: 10 + rand() * 5,
+        rotation: [0, angle, 0],
+      });
+    }
+    // Outer ring (radius ~24-30) — depth
+    for (let i = 0; i < 14; i++) {
+      const angle = (i / 14) * Math.PI * 2 + rand() * 0.2;
+      const radius = 24 + rand() * 6;
+      arr.push({
+        position: [Math.cos(angle) * radius, 2 + rand() * 4, Math.sin(angle) * radius],
+        seed: i * 17 + 300,
+        bounds: [12 + rand() * 5, 5 + rand() * 3, 12 + rand() * 5],
+        volume: 12 + rand() * 6,
+        rotation: [0, angle + 0.5, 0],
+      });
+    }
+    return arr;
+  }, []);
+
+  return (
+    <Clouds material={THREE.MeshBasicMaterial} limit={60}>
+      {clouds.map((c, i) => (
+        <Cloud
+          key={`fogwall-${i}`}
+          position={c.position}
+          rotation={c.rotation}
+          seed={c.seed}
+          segments={32}
+          bounds={c.bounds}
+          volume={c.volume}
+          smallestVolume={0.3}
+          concentrate="inside"
+          growth={6}
+          color={color}
+          opacity={isDay ? 0.85 : 0.92}
+          speed={0.02}
+          fade={50}
+        />
+      ))}
+    </Clouds>
+  );
+};
+
 const GroundFog = ({ isDay = true }) => {
   // Stacked diffuse mist slabs at different heights & speeds
   // create a layered drifting volume — much softer and more organic
@@ -1918,8 +1979,7 @@ const GhostOrb = ({ position }) => {
 const PhaseEmote = ({ phase, isAccused, CONSTANTS }) => {
   let iconClass = null;
   let color = '#fff';
-  if (isAccused) { iconClass = 'fa-exclamation-triangle'; color = '#ff4444'; }
-  else if (phase === CONSTANTS?.PHASE?.JUDGMENT) { iconClass = 'fa-scale-balanced'; color = '#cc88ff'; }
+  if (phase === CONSTANTS?.PHASE?.JUDGMENT && !isAccused) { iconClass = 'fa-scale-balanced'; color = '#cc88ff'; }
   // Discussion icon removed — handled by ChatBubble on message
 
   if (!iconClass) return null;
@@ -2014,6 +2074,14 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
       setCurrentAnim(playerIdle);
     }
   }, [isTransitioning, playerIdle]);
+
+  // Death animation when accused is executed
+  useEffect(() => {
+    if (isAccused && phase === CONSTANTS?.PHASE?.EXECUTION) {
+      const t = setTimeout(() => setCurrentAnim('Death'), 400);
+      return () => clearTimeout(t);
+    }
+  }, [phase, isAccused, CONSTANTS]);
 
   // Victory dance when game ends for winning team
   useEffect(() => {
@@ -2440,7 +2508,7 @@ const CameraController = ({ phase, CONSTANTS }) => {
         targetPos.current.set(cx, 2.8, cz);
         targetLookAt.current.copy(DEFENSE_CAMERA_LOOK);
       } else if (isJudgmentPhase) {
-        // Wider angle — see both accused and crowd
+        // Front of podium — see only the accused
         targetPos.current.copy(JUDGMENT_CAMERA_POS);
         targetLookAt.current.copy(JUDGMENT_CAMERA_LOOK);
       } else if (isLastWords) {
@@ -2667,6 +2735,7 @@ const MainScene = () => {
   const [nightAmbianceMsg, setNightAmbianceMsg] = useState(null);
   const [showDeathReport, setShowDeathReport] = useState(false);
   const [showBloodEffect, setShowBloodEffect] = useState(false);
+  const [showExecutionFlash, setShowExecutionFlash] = useState(false);
   const [fadingDead, setFadingDead] = useState(false);
   const [hideDead, setHideDead] = useState(false);
   const prevPhaseForDead = useRef(null);
@@ -2781,6 +2850,15 @@ const MainScene = () => {
 
     lastPhaseForFade.current = phase;
     return () => fadeTimers.current.forEach(clearTimeout);
+  }, [phase]);
+
+  // Execution flash: red vignette during EXECUTION phase, before the text
+  useEffect(() => {
+    if (phase === CONSTANTS.PHASE.EXECUTION) {
+      setShowExecutionFlash(true);
+      return () => setShowExecutionFlash(false);
+    }
+    setShowExecutionFlash(false);
   }, [phase]);
 
   // Death report sequence: show "Le village se lève..." during day fade-in,
@@ -2917,7 +2995,7 @@ const MainScene = () => {
       alivePlayers.forEach((p, i) => {
         if (p.id === game.accusedId) {
           // Accused stands behind the podium, facing toward village center
-          const behindOffset = 0.6; // slightly behind the podium
+          const behindOffset = 1.4; // behind the podium, visible gap
           const ax = PODIUM_POSITION[0] + Math.sin(podiumFaceAngle + Math.PI) * behindOffset;
           const az = PODIUM_POSITION[2] + Math.cos(podiumFaceAngle + Math.PI) * behindOffset;
           positions[p.id] = { position: [ax, PLAYER_Y, az], rotation: [0, podiumFaceAngle, 0] };
@@ -3007,13 +3085,14 @@ const MainScene = () => {
               return (
                 <>
                   <color attach="background" args={[skyColor]} />
-                  <fog attach="fog" args={[skyColor, isDark ? 12 : isMisty ? 14 : isCloudy ? 20 : 26, isDark ? 38 : isMisty ? 38 : isCloudy ? 48 : 58]} />
+                  <fog attach="fog" args={[skyColor, isDark ? 10 : isMisty ? 10 : isCloudy ? 14 : 18, isDark ? 30 : isMisty ? 30 : isCloudy ? 38 : 42]} />
                   <Sky sunPosition={[100, isDark ? 10 : isCloudy ? 20 : isMisty ? 25 : 50, 100]} turbidity={isDark ? 25 : isCloudy ? 20 : isMisty ? 12 : 8} rayleigh={isDark ? 6 : isCloudy ? 5 : 2} />
                   <DayFireflies count={isDark ? 10 : isCloudy ? 20 : 50} />
                   <FloatingDust count={isMisty ? 120 : 80} isDay />
                   {/* Wind-blown leaves — more on windy/rainy/cloudy days */}
                   <WindLeaves count={isRainyDay ? 130 : isCloudy || isGrey ? 110 : 90} />
                   <GroundFog isDay />
+                  <VillageFogWall isDay />
                   {!isDark && !isCloudy && <DayRabbits count={5} />}
                   {(isMisty || isDark) && <GroundFog isDay />}
                   {isRainyDay && <NightRain count={200} />}
@@ -3026,7 +3105,7 @@ const MainScene = () => {
               return (
                 <>
                   <color attach="background" args={['#060818']} />
-                  <fog attach="fog" args={['#060818', isRainy ? 10 : isFoggy ? 12 : 16, isRainy ? 32 : isFoggy ? 34 : 42]} />
+                  <fog attach="fog" args={['#060818', isRainy ? 8 : isFoggy ? 8 : 12, isRainy ? 26 : isFoggy ? 28 : 34]} />
                   <Stars radius={80} depth={50} count={isRainy ? 500 : 3000} factor={4} saturation={0} fade speed={1} />
                   <Moon />
                   <Fireflies count={isRainy ? 15 : 60} />
@@ -3034,6 +3113,7 @@ const MainScene = () => {
                   {/* Hot embers drifting in the wind — fewer on rainy nights */}
                   <NightEmbers count={isRainy ? 30 : isFoggy ? 50 : 70} />
                   <GroundFog isDay={false} />
+                  <VillageFogWall isDay={false} />
                   <NightCrows count={4} />
                   <NightDarkFog count={isFoggy ? 30 : 20} />
                   {/* Rain + lightning only on rainy nights (1 in 3) */}
@@ -3212,11 +3292,22 @@ const MainScene = () => {
         </div>
       )}
       {phase === CONSTANTS.PHASE.EXECUTION && (
-        <div className="scene-announcement">
-          <div className="announcement-text announcement-execution">
-            {i18n.t('game:scene.executed', { name: players.find(p => p.id === game.accusedId)?.profile.name || '?' })}
+        <>
+          {/* Red vignette flash — immediate */}
+          {showExecutionFlash && (
+            <div className="blood-overlay" style={{ animation: 'blood-flash 2.5s ease-out forwards' }}>
+              <div className="blood-overlay-inner">
+                <div className="blood-vignette" />
+              </div>
+            </div>
+          )}
+          {/* Executed text — delayed 1s so flash + death anim play first */}
+          <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 2.5s ease-out 0.8s both' }}>
+            <div className="announcement-text announcement-execution">
+              {i18n.t('game:scene.executed', { name: players.find(p => p.id === game.accusedId)?.profile.name || '?' })}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Admin pause overlay — shows for 5s then fades */}

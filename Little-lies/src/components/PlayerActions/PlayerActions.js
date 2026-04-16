@@ -5,7 +5,6 @@ import i18n from '../../trad/i18n';
 
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
-import { playVote } from '../../utils/AudioManager';
 import './playerActions.scss';
 
 const ACTION_COLORS = {
@@ -57,11 +56,6 @@ const PlayerActions = memo(function () {
   const [isDead, setIsDead] = useState(false);
   const prevAliveRef = useRef(me?.isAlive ?? true);
 
-  // Snapshot of last-seen suspects counts — used to detect when a new vote
-  // is cast by *any* player in the lobby (not just the local client) so
-  // every connected client hears the vote SFX when a vote ticks in.
-  const prevSuspectsRef = useRef({});
-
   const phase = game.phase;
   const isVotingPhase = phase === CONSTANTS.PHASE.VOTING;
   const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
@@ -82,34 +76,6 @@ const PlayerActions = memo(function () {
       return () => clearTimeout(timer);
     }
   }, [me?.isAlive]);
-
-  // Vote SFX — fires on *every* client whenever any player casts a new vote
-  // during the voting phase. We compare per-suspect vote counts against the
-  // last snapshot and play the sound if at least one suspect *gained* a
-  // vote. Changing vote target still fires (old target -1, new target +1 →
-  // still a net gain on the new target). Pure unvote (no new target) does
-  // NOT fire the sound.
-  useEffect(() => {
-    if (!isVotingPhase) {
-      prevSuspectsRef.current = {};
-      return;
-    }
-    const current = trial?.suspects || {};
-    const prev = prevSuspectsRef.current || {};
-    let gained = false;
-    for (const id of Object.keys(current)) {
-      const curCount = current[id]?.suspectedBy?.length || 0;
-      const prevCount = prev[id]?.suspectedBy?.length || 0;
-      if (curCount > prevCount) {
-        gained = true;
-        break;
-      }
-    }
-    if (gained) {
-      playVote();
-    }
-    prevSuspectsRef.current = current;
-  }, [trial?.suspects, isVotingPhase]);
 
   if (!me) return null;
 
