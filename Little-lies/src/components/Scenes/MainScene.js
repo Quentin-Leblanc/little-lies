@@ -6,7 +6,7 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
-import { Character } from '../Character/Character';
+import { Character, skinForPlayer } from '../Character/Character';
 import i18n from '../../trad/i18n';
 import './MainScene.scss';
 
@@ -363,7 +363,11 @@ useGLTF.preload('/models/road.glb');
 
 const GALLOWS_PATH = '/models/Meshy_AI_potence_0415121815_texture.glb';
 
-const VillageCenter = () => (
+// Defense podium — off to the side of the village, between player circle and buildings
+const PODIUM_POSITION = [7, 0, -6];
+const PODIUM_SCALE = 1.0;
+
+const VillageCenter = ({ isTrialPhase }) => (
   <group>
     {/* Ancient runic circle — flat on the plaza */}
     <RunicCircle position={[0, 0, 0]} scale={5.8} />
@@ -375,8 +379,46 @@ const VillageCenter = () => (
       scale={2}
       halfHeight={0.92}
     />
+    {/* Defense podium — off to the side, facing village center */}
+    <MeshyModel
+      path={MESHY_PODIUM}
+      position={PODIUM_POSITION}
+      rotation={[0, Math.atan2(-PODIUM_POSITION[0], -PODIUM_POSITION[2]), 0]}
+      scale={PODIUM_SCALE}
+      halfHeight={0.92}
+    />
+    {/* Dramatic spotlight on podium during trial phases */}
+    {isTrialPhase && (
+      <>
+        <spotLight
+          position={[PODIUM_POSITION[0], 8, PODIUM_POSITION[2]]}
+          target-position={PODIUM_POSITION}
+          angle={0.35}
+          penumbra={0.6}
+          intensity={3}
+          color="#ffcc88"
+          castShadow
+          shadow-mapSize-width={512}
+          shadow-mapSize-height={512}
+        />
+        {/* Ground glow under podium */}
+        <pointLight position={[PODIUM_POSITION[0], 0.3, PODIUM_POSITION[2]]} intensity={1.2} color="#ff6633" distance={3} decay={2} />
+      </>
+    )}
   </group>
 );
+
+// ============================================================
+// Defense Scene Camera — zooms in on the accused at the podium
+// Orbits slowly around the accused during DEFENSE, static during
+// JUDGMENT / LAST_WORDS / EXECUTION for dramatic tension.
+// ============================================================
+// Camera targets relative to podium at [7, 0, -6]
+const DEFENSE_CAMERA_LOOK = new THREE.Vector3(7, 1.2, -6);      // accused chest height at podium
+const JUDGMENT_CAMERA_POS = new THREE.Vector3(2, 3.5, -4);      // wider angle, see accused + crowd
+const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(4, 0.8, -3);     // between podium and center
+const EXECUTION_CAMERA_POS = new THREE.Vector3(7, 6, -10);      // overhead dramatic above podium
+const EXECUTION_CAMERA_LOOK = new THREE.Vector3(7, 0.5, -6);    // looking down at podium
 
 // ============================================================
 // Low-poly Tree
@@ -866,6 +908,7 @@ const MESHY_SKULL   = '/models/skull_sign.glb';
 const MESHY_RING    = '/models/rope_ring.glb';
 const MESHY_LANTERN = '/models/skull_lantern.glb';
 const MESHY_RUNIC   = '/models/runic_circle.glb';
+const MESHY_PODIUM  = '/models/defense_podium.glb';
 
 // Only KayKit asset we still keep: neutral gray rocks (fit the dark theme)
 useGLTF.preload('/models/kaykit/rock_single_A.gltf');
@@ -879,6 +922,7 @@ useGLTF.preload(MESHY_SKULL);
 useGLTF.preload(MESHY_RING);
 useGLTF.preload(MESHY_LANTERN);
 useGLTF.preload(MESHY_RUNIC);
+useGLTF.preload(MESHY_PODIUM);
 
 // Meshy models have their pivot at the CENTER of a unit cube (Y ∈ [-0.95, 0.95]).
 // After scaling by S, we must raise position.y by `halfHeight * S` to put the base
@@ -1007,10 +1051,10 @@ const BuildingRenderer = ({ type, position, rotation, scale }) => {
   return <MeshyModel path={path} position={position} rotation={rotation} scale={scale * 1.6} />;
 };
 
-const Village = React.memo(({ isDay }) => (
+const Village = React.memo(({ isDay, isTrialPhase }) => (
   <group>
-    {/* ——— CENTRE : Potence ——— */}
-    <VillageCenter />
+    {/* ——— CENTRE : Potence + Pupitre ——— */}
+    <VillageCenter isTrialPhase={isTrialPhase} />
 
     {/* ——— BATIMENTS : procéduraux low-poly ——— */}
     {BUILDING_POSITIONS.map((b, i) => (
@@ -1929,8 +1973,14 @@ const ChatBubble = ({ playerId, chatMessages, dayCount }) => {
 // ============================================================
 // Player Figure — uses Character model with rotation + walk
 // ============================================================
-const IDLE_VARIANTS = ['Idle', 'Idle2', 'Idle3', 'Idle4', 'Idle5', 'Idle6'];
-const DANCE_VARIANTS = ['Dance1', 'Dance2', 'Dance3'];
+const IDLE_VARIANTS = {
+  villager: ['Idle', 'Idle2', 'Idle3', 'Idle4', 'Idle5', 'Idle6'],
+  wanderer: ['Idle', 'Idle2', 'Idle3'],
+};
+const DANCE_VARIANTS = {
+  villager: ['Dance1', 'Dance2', 'Dance3'],
+  wanderer: ['Dance1', 'Dance2'],
+};
 
 // Deterministic pick from an array based on player ID string
 const pickForPlayer = (playerId, variants) => {
@@ -1939,14 +1989,17 @@ const pickForPlayer = (playerId, variants) => {
   return variants[Math.abs(hash) % variants.length];
 };
 
-const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8, pauseAnim = null, isDay = true, phase = null, CONSTANTS = null, fadeOnTransition = true, chatMessages = null, dayCount = 0, isGameOver = false, isWinningTeam = false }) => {
+const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 1.0, pauseAnim = null, isDay = true, phase = null, CONSTANTS = null, fadeOnTransition = true, chatMessages = null, dayCount = 0, isGameOver = false, isWinningTeam = false }) => {
   const groupRef = useRef();
   const transitionStartTime = useRef(null);
   const walkStarted = useRef(false);
 
-  // Stable random idle & dance per player (deterministic from ID)
-  const playerIdle = useMemo(() => pickForPlayer(player.id, IDLE_VARIANTS), [player.id]);
-  const playerDance = useMemo(() => pickForPlayer(player.id + '_dance', DANCE_VARIANTS), [player.id]);
+  // Deterministic skin per player
+  const playerSkin = useMemo(() => skinForPlayer(player.id), [player.id]);
+
+  // Stable random idle & dance per player (skin-aware variant lists)
+  const playerIdle = useMemo(() => pickForPlayer(player.id, IDLE_VARIANTS[playerSkin] || IDLE_VARIANTS.villager), [player.id, playerSkin]);
+  const playerDance = useMemo(() => pickForPlayer(player.id + '_dance', DANCE_VARIANTS[playerSkin] || DANCE_VARIANTS.villager), [player.id, playerSkin]);
 
   const [currentAnim, setCurrentAnim] = useState(playerIdle);
 
@@ -2035,7 +2088,8 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
         <Character
           color={color}
           animation={pauseAnim || currentAnim}
-          scale={characterScale || 0.8}
+          scale={characterScale || 1.0}
+          skin={playerSkin}
           animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
         />
       </group>
@@ -2104,6 +2158,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
 const DeadPlayerFigure = ({ player, position, fading = false }) => {
   const groupRef = useRef();
   const fadeStart = useRef(null);
+  const playerSkin = useMemo(() => skinForPlayer(player.id), [player.id]);
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -2128,7 +2183,8 @@ const DeadPlayerFigure = ({ player, position, fading = false }) => {
         <Character
           color="#555555"
           animation="DeadPose"
-          scale={0.65}
+          skin={playerSkin}
+          scale={0.8}
         />
       </group>
       {!fading && <GhostOrb position={[0, 2, 0]} />}
@@ -2324,6 +2380,14 @@ const CameraController = ({ phase, CONSTANTS }) => {
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
   const nightTimeRef = useRef(0);
   const prevPhaseRef = useRef(phase);
+  const defenseTimeRef = useRef(0);
+
+  // Trial phases that use the defense camera
+  const isDefensePhase = phase === CONSTANTS.PHASE.DEFENSE;
+  const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
+  const isLastWords = phase === CONSTANTS.PHASE.LAST_WORDS;
+  const isExecution = phase === CONSTANTS.PHASE.EXECUTION;
+  const isTrialCamera = isDefensePhase || isJudgmentPhase || isLastWords || isExecution;
 
   useFrame((_, delta) => {
     // Track night elapsed time
@@ -2357,6 +2421,37 @@ const CameraController = ({ phase, CONSTANTS }) => {
         prevPhaseRef.current = phase;
         return;
       }
+    } else if (isTrialCamera) {
+      // ——— TRIAL CAMERA: dramatic zoom on podium / accused ———
+      // Track time within defense for slow orbit
+      if (!prevPhaseRef.current || ![CONSTANTS.PHASE.DEFENSE, CONSTANTS.PHASE.JUDGMENT, CONSTANTS.PHASE.LAST_WORDS, CONSTANTS.PHASE.EXECUTION].includes(prevPhaseRef.current)) {
+        defenseTimeRef.current = 0; // reset on entering trial
+      }
+      defenseTimeRef.current += delta;
+
+      if (isDefensePhase) {
+        // Slow orbit around the accused at the podium — dramatic reveal
+        const orbitT = defenseTimeRef.current * 0.15;
+        const radius = 4;
+        const px = PODIUM_POSITION[0];
+        const pz = PODIUM_POSITION[2];
+        const cx = px + Math.sin(orbitT) * radius;
+        const cz = pz + Math.cos(orbitT) * radius * 0.6;
+        targetPos.current.set(cx, 2.8, cz);
+        targetLookAt.current.copy(DEFENSE_CAMERA_LOOK);
+      } else if (isJudgmentPhase) {
+        // Wider angle — see both accused and crowd
+        targetPos.current.copy(JUDGMENT_CAMERA_POS);
+        targetLookAt.current.copy(JUDGMENT_CAMERA_LOOK);
+      } else if (isLastWords) {
+        // Close-up, intimate angle for last words — near the podium
+        targetPos.current.set(5, 2, -4.5);
+        targetLookAt.current.set(7, 1.4, -6);
+      } else if (isExecution) {
+        // Overhead dramatic shot
+        targetPos.current.copy(EXECUTION_CAMERA_POS);
+        targetLookAt.current.copy(EXECUTION_CAMERA_LOOK);
+      }
     } else {
       // Day phases: continuous very slow orbit. Pulled back slightly from
       // the original (10 → 12 horizontal, 13 → 14 vertical) to frame the
@@ -2371,7 +2466,9 @@ const CameraController = ({ phase, CONSTANTS }) => {
 
     // Push target out of building obstacles (church / gallows) so the
     // orbit never ends up inside a model.
-    pushCameraOutOfObstacles(targetPos.current);
+    if (!isTrialCamera) {
+      pushCameraOutOfObstacles(targetPos.current);
+    }
 
     // When leaving night: snap camera to current orbit position (no lerp from stars)
     const comingFromNight = prevPhaseRef.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT;
@@ -2381,15 +2478,18 @@ const CameraController = ({ phase, CONSTANTS }) => {
     }
     prevPhaseRef.current = phase;
 
-    const lerpSpeed = phase === CONSTANTS.PHASE.NIGHT ? 0.002 : 0.02;
+    // Trial phases use faster lerp for snappy zoom-in, night uses slow cinematic lerp
+    const lerpSpeed = isTrialCamera ? 0.04 : phase === CONSTANTS.PHASE.NIGHT ? 0.002 : 0.02;
     camera.position.lerp(targetPos.current, lerpSpeed);
     // Also push the interpolated camera position out — the lerp can cross
     // the obstacle while going from A to B.
-    pushCameraOutOfObstacles(camera.position);
+    if (!isTrialCamera) {
+      pushCameraOutOfObstacles(camera.position);
+    }
     const currentLookAt = new THREE.Vector3();
     camera.getWorldDirection(currentLookAt);
     const desiredDir = targetLookAt.current.clone().sub(camera.position).normalize();
-    currentLookAt.lerp(desiredDir, lerpSpeed);
+    currentLookAt.lerp(desiredDir, isTrialCamera ? 0.04 : lerpSpeed);
     camera.lookAt(
       camera.position.x + currentLookAt.x,
       camera.position.y + currentLookAt.y,
@@ -2538,8 +2638,8 @@ const MainScene = () => {
   const players = getPlayers();
   const me = getMe();
   const phase = game.phase;
-  const [adminCharScale] = useMultiplayerState('adminCharScale', 0.8);
-  const characterScale = adminCharScale || 0.8;
+  const [adminCharScale] = useMultiplayerState('adminCharScale', 1.0);
+  const characterScale = adminCharScale || 1.0;
   const isPaused = !!game.adminFreeRoam;
   const isGameOver = game.status === CONSTANTS.GAME_ENDED;
   const alivePlayers = players.filter((p) => p.isAlive);
@@ -2811,16 +2911,24 @@ const MainScene = () => {
         };
       });
     } else if (isTrialPhase) {
+      // Podium is at PODIUM_POSITION [7, 0, -6] — accused goes behind it,
+      // crowd stays in the center circle facing the podium
+      const podiumFaceAngle = Math.atan2(-PODIUM_POSITION[0], -PODIUM_POSITION[2]);
       alivePlayers.forEach((p, i) => {
         if (p.id === game.accusedId) {
-          positions[p.id] = { position: [0, PLAYER_Y + 0.3, -1.5], rotation: [0, Math.PI, 0] }; // face crowd
+          // Accused stands behind the podium, facing toward village center
+          const behindOffset = 0.6; // slightly behind the podium
+          const ax = PODIUM_POSITION[0] + Math.sin(podiumFaceAngle + Math.PI) * behindOffset;
+          const az = PODIUM_POSITION[2] + Math.cos(podiumFaceAngle + Math.PI) * behindOffset;
+          positions[p.id] = { position: [ax, PLAYER_Y, az], rotation: [0, podiumFaceAngle, 0] };
         } else {
+          // Crowd stays in the normal circle but faces the podium
           const idx = i - (players.findIndex(pl => pl.id === game.accusedId) < i ? 1 : 0);
           const count = alivePlayers.length - 1;
-          const angle = (idx / Math.max(count, 1)) * Math.PI - Math.PI / 2;
-          const pos = [Math.cos(angle) * 4, PLAYER_Y, Math.sin(angle) * 4 + 2];
-          const dx = -pos[0];
-          const dz = -1.5 - pos[2];
+          const angle = (idx / Math.max(count, 1)) * Math.PI * 2 - Math.PI / 2;
+          const pos = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
+          const dx = PODIUM_POSITION[0] - pos[0];
+          const dz = PODIUM_POSITION[2] - pos[2];
           positions[p.id] = {
             position: pos,
             rotation: [0, Math.atan2(dx, dz), 0],
@@ -2940,7 +3048,7 @@ const MainScene = () => {
           })()}
 
           <GroundPlane isDay={game.isDay} />
-          <Village isDay={game.isDay} />
+          <Village isDay={game.isDay} isTrialPhase={isTrialPhase} />
 
           {/* Alive Players — hidden during night and after walk finishes */}
           {!nightPlayersHidden && phase !== CONSTANTS.PHASE.NIGHT && alivePlayers.map((player) => {

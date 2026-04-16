@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { RigidBody, CapsuleCollider, interactionGroups, useRapier } from '@react-three/rapier';
-import { Character } from '../Character/Character';
+import { Character, skinForPlayer } from '../Character/Character';
 import { Text } from '@react-three/drei';
 import { myPlayer } from 'playroomkit';
 
@@ -208,7 +208,7 @@ export const CharacterController = ({
 
       <group>
         <group ref={groupRef}>
-          <Character animation={currentAnimation} color={state.state?.profile?.color} />
+          <Character animation={currentAnimation} color={state.state?.profile?.color} skin={skinForPlayer(state.id)} />
         </group>
 
         {playerName && (

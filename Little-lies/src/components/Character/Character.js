@@ -3,69 +3,143 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { Color, LoopOnce } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 
-export function Character({
-  color,
-  animation = 'Idle',
-  animOffset = 0,
-  ...props
-}) {
+// ============================================================
+// Skin keys
+// ============================================================
+const SKIN_KEYS = ['villager', 'wanderer'];
+
+// Deterministic skin pick from player ID — stable across renders & sessions
+export function skinForPlayer(playerId) {
+  if (!playerId) return SKIN_KEYS[0];
+  let hash = 0;
+  for (let i = 0; i < playerId.length; i++) {
+    hash = ((hash << 5) - hash + playerId.charCodeAt(i)) | 0;
+  }
+  return SKIN_KEYS[Math.abs(hash) % SKIN_KEYS.length];
+}
+
+// Preload all GLBs
+const VILLAGER_PATHS = [
+  '/models/Villager_Idle.glb', '/models/Villager_Idle2.glb', '/models/Villager_Idle3.glb',
+  '/models/Villager_Idle4.glb', '/models/Villager_Idle5.glb', '/models/Villager_Idle6.glb',
+  '/models/Villager_Dead.glb', '/models/Villager_DeadPose.glb',
+  '/models/Villager_Walk.glb', '/models/Villager_Run.glb', '/models/Villager_Jump.glb',
+  '/models/Villager_SitCross.glb', '/models/Villager_LieDown.glb',
+  '/models/Villager_Dance1.glb', '/models/Villager_Dance2.glb', '/models/Villager_Dance3.glb',
+];
+const WANDERER_PATHS = [
+  '/models/Wanderer_Idle.glb', '/models/Wanderer_Idle2.glb', '/models/Wanderer_Idle3.glb',
+  '/models/Wanderer_Dead.glb',
+  '/models/Wanderer_Walk.glb', '/models/Wanderer_Run.glb',
+  '/models/Wanderer_SitCross.glb', '/models/Wanderer_LieDown.glb',
+  '/models/Wanderer_Dance1.glb', '/models/Wanderer_Dance2.glb',
+];
+VILLAGER_PATHS.forEach((p) => useGLTF.preload(p));
+WANDERER_PATHS.forEach((p) => useGLTF.preload(p));
+
+// ============================================================
+// Villager Character — original skin
+// ============================================================
+function VillagerCharacter({ color, animation, animOffset, ...props }) {
   const group = useRef();
   const origMaterials = useRef(new Map());
 
-  // Load all GLBs (mesh + 1 animation each)
   const idle = useGLTF('/models/Villager_Idle.glb');
-  const dead = useGLTF('/models/Villager_Dead.glb');
-  const walk = useGLTF('/models/Villager_Walk.glb');
-  const run = useGLTF('/models/Villager_Run.glb');
-  const jump = useGLTF('/models/Villager_Jump.glb');
-  const sitCross = useGLTF('/models/Villager_SitCross.glb');
-  const lieDown = useGLTF('/models/Villager_LieDown.glb');
-  const deadPose = useGLTF('/models/Villager_DeadPose.glb');
-  // Dance animations (victory)
-  const dance1 = useGLTF('/models/Villager_Dance1.glb');
-  const dance2 = useGLTF('/models/Villager_Dance2.glb');
-  const dance3 = useGLTF('/models/Villager_Dance3.glb');
-  // Extra idle variations
   const idle2 = useGLTF('/models/Villager_Idle2.glb');
   const idle3 = useGLTF('/models/Villager_Idle3.glb');
   const idle4 = useGLTF('/models/Villager_Idle4.glb');
   const idle5 = useGLTF('/models/Villager_Idle5.glb');
   const idle6 = useGLTF('/models/Villager_Idle6.glb');
+  const dead = useGLTF('/models/Villager_Dead.glb');
+  const deadPose = useGLTF('/models/Villager_DeadPose.glb');
+  const walk = useGLTF('/models/Villager_Walk.glb');
+  const run = useGLTF('/models/Villager_Run.glb');
+  const jump = useGLTF('/models/Villager_Jump.glb');
+  const sitCross = useGLTF('/models/Villager_SitCross.glb');
+  const lieDown = useGLTF('/models/Villager_LieDown.glb');
+  const dance1 = useGLTF('/models/Villager_Dance1.glb');
+  const dance2 = useGLTF('/models/Villager_Dance2.glb');
+  const dance3 = useGLTF('/models/Villager_Dance3.glb');
 
-  // Clone the base mesh from idle (all files share the same mesh/skeleton)
   const clone = useMemo(() => SkeletonUtils.clone(idle.scene), [idle.scene]);
 
-  // Combine all animations under clean names
   const allAnimations = useMemo(() => {
     const anims = [];
-    const addAnim = (source, name) => {
-      source.animations.forEach((a) => {
-        const clip = a.clone();
-        clip.name = name;
-        anims.push(clip);
-      });
-    };
-    addAnim(idle, 'Idle');
-    addAnim(dead, 'Death');
-    addAnim(walk, 'Walk');
-    addAnim(run, 'Run');
-    addAnim(jump, 'Jump');
-    addAnim(sitCross, 'SitCross');
-    addAnim(lieDown, 'LieDown');
-    addAnim(deadPose, 'DeadPose');
-    addAnim(dance1, 'Dance1');
-    addAnim(dance2, 'Dance2');
-    addAnim(dance3, 'Dance3');
-    addAnim(idle2, 'Idle2');
-    addAnim(idle3, 'Idle3');
-    addAnim(idle4, 'Idle4');
-    addAnim(idle5, 'Idle5');
-    addAnim(idle6, 'Idle6');
+    const add = (src, name) => src.animations.forEach((a) => { const c = a.clone(); c.name = name; anims.push(c); });
+    add(idle, 'Idle'); add(idle2, 'Idle2'); add(idle3, 'Idle3');
+    add(idle4, 'Idle4'); add(idle5, 'Idle5'); add(idle6, 'Idle6');
+    add(dead, 'Death'); add(deadPose, 'DeadPose');
+    add(walk, 'Walk'); add(run, 'Run'); add(jump, 'Jump');
+    add(sitCross, 'SitCross'); add(lieDown, 'LieDown');
+    add(dance1, 'Dance1'); add(dance2, 'Dance2'); add(dance3, 'Dance3');
     return anims;
-  }, [idle.animations, dead.animations, walk.animations, run.animations, jump.animations, sitCross.animations, lieDown.animations, deadPose.animations,
-      dance1.animations, dance2.animations, dance3.animations,
-      idle2.animations, idle3.animations, idle4.animations, idle5.animations, idle6.animations]);
+  }, [idle, idle2, idle3, idle4, idle5, idle6, dead, deadPose, walk, run, jump, sitCross, lieDown, dance1, dance2, dance3]);
 
+  return (
+    <CharacterRenderer
+      group={group}
+      clone={clone}
+      allAnimations={allAnimations}
+      origMaterials={origMaterials}
+      color={color}
+      animation={animation}
+      animOffset={animOffset}
+      {...props}
+    />
+  );
+}
+
+// ============================================================
+// Wanderer Character — new dark hooded skin
+// ============================================================
+function WandererCharacter({ color, animation, animOffset, ...props }) {
+  const group = useRef();
+  const origMaterials = useRef(new Map());
+
+  const idle = useGLTF('/models/Wanderer_Idle.glb');
+  const idle2 = useGLTF('/models/Wanderer_Idle2.glb');
+  const idle3 = useGLTF('/models/Wanderer_Idle3.glb');
+  const dead = useGLTF('/models/Wanderer_Dead.glb');
+  const walk = useGLTF('/models/Wanderer_Walk.glb');
+  const run = useGLTF('/models/Wanderer_Run.glb');
+  const sitCross = useGLTF('/models/Wanderer_SitCross.glb');
+  const lieDown = useGLTF('/models/Wanderer_LieDown.glb');
+  const dance1 = useGLTF('/models/Wanderer_Dance1.glb');
+  const dance2 = useGLTF('/models/Wanderer_Dance2.glb');
+
+  const clone = useMemo(() => SkeletonUtils.clone(idle.scene), [idle.scene]);
+
+  const allAnimations = useMemo(() => {
+    const anims = [];
+    const add = (src, name) => src.animations.forEach((a) => { const c = a.clone(); c.name = name; anims.push(c); });
+    add(idle, 'Idle'); add(idle2, 'Idle2'); add(idle3, 'Idle3');
+    add(dead, 'Death');
+    // Synthetic DeadPose — clone Death, code will jump to last frame
+    dead.animations.forEach((a) => { const c = a.clone(); c.name = 'DeadPose'; anims.push(c); });
+    add(walk, 'Walk'); add(run, 'Run');
+    add(sitCross, 'SitCross'); add(lieDown, 'LieDown');
+    add(dance1, 'Dance1'); add(dance2, 'Dance2');
+    return anims;
+  }, [idle, idle2, idle3, dead, walk, run, sitCross, lieDown, dance1, dance2]);
+
+  return (
+    <CharacterRenderer
+      group={group}
+      clone={clone}
+      allAnimations={allAnimations}
+      origMaterials={origMaterials}
+      color={color}
+      animation={animation}
+      animOffset={animOffset}
+      {...props}
+    />
+  );
+}
+
+// ============================================================
+// Shared renderer — animation logic + material tinting
+// ============================================================
+function CharacterRenderer({ group, clone, allAnimations, origMaterials, color, animation = 'Idle', animOffset = 0, ...props }) {
   const { actions } = useAnimations(allAnimations, group);
 
   // Death plays once and holds
@@ -73,64 +147,42 @@ export function Character({
     actions['Death'].loop = LoopOnce;
     actions['Death'].clampWhenFinished = true;
   }
-  // DeadPose: skip to last frame immediately (body already on ground)
   if (actions['DeadPose']) {
     actions['DeadPose'].loop = LoopOnce;
     actions['DeadPose'].clampWhenFinished = true;
   }
 
   useEffect(() => {
-    // Fallback: if requested animation doesn't exist, use Idle
     const anim = actions[animation] ? animation : 'Idle';
     const action = actions[anim];
     if (action) {
       action.reset().fadeIn(0.2).play();
-      // DeadPose: jump to last frame so the body is already on the ground
       if (anim === 'DeadPose') {
         action.time = action.getClip().duration;
       } else if (animOffset && action.time !== undefined) {
-        // Offset animation time so characters aren't all in sync
         action.time = animOffset;
       }
       return () => action.fadeOut(0.2);
     }
   }, [animation, actions, animOffset]);
 
-  // Store original materials once, then clone + tint for player color
   useEffect(() => {
     clone.traverse((child) => {
       if (child.isMesh) {
-        // Save original material on first encounter
         if (!origMaterials.current.has(child.uuid)) {
           origMaterials.current.set(child.uuid, child.material);
         }
-        // Clone from original to preserve textures
         const mat = origMaterials.current.get(child.uuid).clone();
-        // Kill baked emissive (prevents white glow at night from the GLB's
-        // default emissive). We'll inject a subtle colored rim light via
-        // onBeforeCompile instead, which only affects the silhouette.
         if (mat.emissive) mat.emissive.set(0, 0, 0);
         mat.emissiveIntensity = 0;
         mat.emissiveMap = null;
-        // Force non-metallic diffuse — the GLB ships with metallic PBR
-        // materials which, without bright local colored lights, make all
-        // villagers look like dull grey iron (metals take their color from
-        // the environment, not their base color). Force metalness=0 so the
-        // player color tint actually reads on screen.
         mat.metalness = 0;
         mat.metalnessMap = null;
         mat.roughness = 0.85;
-        // Stronger base tint with player color (45% color / 55% white) —
-        // keeps the original baseColorTexture readable but makes the color
-        // identification much more visible than a faint wash.
         const rimColor = new Color(color || '#ffffff');
         if (color) {
           mat.color = new Color('#ffffff').lerp(rimColor, 0.45);
         }
-        // Rim light injection — adds a subtle fresnel glow around the
-        // silhouette in the player's color. Does NOT replace the texture,
-        // just adds to the final fragment color. Highlights the character
-        // at a glance without a decal on the ground.
         mat.onBeforeCompile = (shader) => {
           shader.uniforms.uRimColor = { value: rimColor };
           shader.uniforms.uRimIntensity = { value: 0.9 };
@@ -142,14 +194,12 @@ export function Character({
           );
           shader.fragmentShader = shader.fragmentShader.replace(
             '#include <dithering_fragment>',
-            `// Fresnel rim — bright on the silhouette, 0 facing camera.
-             float rimFresnel = 1.0 - clamp(dot(normalize(geometryNormal), normalize(vViewPosition)), 0.0, 1.0);
+            `float rimFresnel = 1.0 - clamp(dot(normalize(geometryNormal), normalize(vViewPosition)), 0.0, 1.0);
              rimFresnel = pow(rimFresnel, 2.2);
              gl_FragColor.rgb += uRimColor * rimFresnel * uRimIntensity;
              #include <dithering_fragment>`,
           );
         };
-        // Force recompile so the new onBeforeCompile takes effect
         mat.needsUpdate = true;
         child.material = mat;
         child.castShadow = true;
@@ -165,19 +215,10 @@ export function Character({
   );
 }
 
-useGLTF.preload('/models/Villager_Idle.glb');
-useGLTF.preload('/models/Villager_Dead.glb');
-useGLTF.preload('/models/Villager_Walk.glb');
-useGLTF.preload('/models/Villager_Run.glb');
-useGLTF.preload('/models/Villager_Jump.glb');
-useGLTF.preload('/models/Villager_SitCross.glb');
-useGLTF.preload('/models/Villager_LieDown.glb');
-useGLTF.preload('/models/Villager_DeadPose.glb');
-useGLTF.preload('/models/Villager_Dance1.glb');
-useGLTF.preload('/models/Villager_Dance2.glb');
-useGLTF.preload('/models/Villager_Dance3.glb');
-useGLTF.preload('/models/Villager_Idle2.glb');
-useGLTF.preload('/models/Villager_Idle3.glb');
-useGLTF.preload('/models/Villager_Idle4.glb');
-useGLTF.preload('/models/Villager_Idle5.glb');
-useGLTF.preload('/models/Villager_Idle6.glb');
+// ============================================================
+// Public Character — dispatches to the right skin component
+// ============================================================
+export function Character({ skin = 'villager', ...props }) {
+  if (skin === 'wanderer') return <WandererCharacter {...props} />;
+  return <VillagerCharacter {...props} />;
+}

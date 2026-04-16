@@ -5,7 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars, Html } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { Character } from '../Character/Character';
+import { Character, skinForPlayer } from '../Character/Character';
 import GameConfig from '../GameConfig/GameConfig';
 import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
@@ -203,7 +203,7 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
 
   return (
     <group position={[x, yOffset, z]} rotation={[0, lookAtAngle, 0]}>
-      <Character color={color} animation={anim} scale={0.55} animOffset={index * 0.5} />
+      <Character color={color} animation={anim} scale={0.55} skin={skinForPlayer(player.id)} animOffset={index * 0.5} />
       {/* Aura glow under local player */}
       {isMe && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03 - yOffset, 0]}>
