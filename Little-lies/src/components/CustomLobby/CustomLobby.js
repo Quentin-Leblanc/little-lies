@@ -6,6 +6,7 @@ import { Stars, Html } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { Character } from '../Character/Character';
+import GameConfig from '../GameConfig/GameConfig';
 import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
 import i18n from '../../trad/i18n';
@@ -406,6 +407,12 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const currentPlayer = myPlayer();
   const playroom_players = usePlayersList(true);
   const { profile } = useAuth();
+  const [game, setGame] = useMultiplayerState('game', {});
+
+  const handleConfigChange = (newConfig) => {
+    if (!isHost()) return;
+    setGame({ ...(game || {}), config: newConfig });
+  };
   const [showAuth, setShowAuth] = useState(false);
   const [roomCode, setRoomCode] = useState('');
   const [copied, setCopied] = useState(false);
@@ -727,6 +734,8 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
               })}
             </div>
           </div>
+
+          <GameConfig config={game?.config} onConfigChange={handleConfigChange} />
 
           <div className="lobby-actions">
             {playroom_players.length > 0 && isHost() ? (
