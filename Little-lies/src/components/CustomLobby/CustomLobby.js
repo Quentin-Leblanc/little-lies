@@ -317,9 +317,9 @@ const LobbyChat = () => {
       const newVotes = [...current, getMyId()];
       setLobbyVotes({ ...votes, [voteKey]: newVotes });
       addSystemMsg(`${myName} voted to kick ${targetName} (${newVotes.length}/${majority})`);
-      // TODO: actual kick requires PlayroomKit host action — display result for now
       if (newVotes.length >= majority) {
-        addSystemMsg(`${targetName} has been voted out!`);
+        addSystemMsg(`${targetName} a été expulsé !`);
+        target.kick();
       }
       return true;
     }
@@ -713,6 +713,15 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
                     <span className="player-list-name">{n}</span>
                     {isH && <span className="player-badge host">{t('common:host')}</span>}
                     {isMe && <span className="player-badge me">{t('common:me')}</span>}
+                    {isHost() && !isMe && !isH && (
+                      <button
+                        className="player-kick-btn"
+                        onClick={() => p.kick()}
+                        title={t('common:kick')}
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
+                    )}
                   </div>
                 );
               })}

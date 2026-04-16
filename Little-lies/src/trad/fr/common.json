@@ -56,6 +56,7 @@
   "no_account": "Pas de compte ?",
   "has_account": "Déjà un compte ?",
   "admin_next_phase": "Phase suivante",
+  "kick": "Expulser",
   "admin_kick_lobby": "Kick tous → Lobby",
   "admin_free_roam": "Mode libre (pause)",
   "admin_resume": "Reprendre le jeu",
