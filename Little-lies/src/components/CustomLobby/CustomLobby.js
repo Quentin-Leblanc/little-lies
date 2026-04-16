@@ -395,7 +395,7 @@ const LobbyChat = () => {
     <>
     <div className="lobby-chat">
       <div className="lobby-chat-header">
-        <span>Chat</span>
+        <span>{t('lobby')}</span>
         <button className="lobby-chat-info-btn" onClick={() => setShowInfo(!showInfo)}>
           <i className={`fas ${showInfo ? 'fa-times' : 'fa-circle-info'}`}></i>
         </button>
