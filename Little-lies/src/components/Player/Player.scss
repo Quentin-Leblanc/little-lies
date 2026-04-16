@@ -7,31 +7,31 @@
   align-items: flex-end;
   justify-content: center;
   height: 100%;
-  gap: 6px;
+  gap: 0.353rem;
   padding-top: 0;
 }
 
 .role-team-row {
   display: flex;
-  gap: 6px;
+  gap: 0.353rem;
   align-items: stretch;
 
   .role-container { flex: 1; min-width: 0; }
-  .team-block { flex: 0 0 auto; min-width: 220px; }
+  .team-block { flex: 0 0 auto; min-width: 12.941rem; }
 }
 
 .role-container {
-  padding: 10px;
-  padding-bottom: 12px;
-  margin-bottom: 6px;
+  padding: 0.588rem;
+  padding-bottom: 0.706rem;
+  margin-bottom: 0.353rem;
   text-align: left;
-  border-radius: 10px;
+  border-radius: 0.588rem;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(3px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  max-width: 320px;
+  max-width: 18.824rem;
 
   // White pulse that fires once at game start so players notice their role
   // description block and have time to read it. Class is toggled by Player.js
@@ -67,39 +67,39 @@
 }
 
 .role-name {
-  font-size: 30px;
+  font-size: 1.765rem;
   font-weight: bold;
   text-transform: capitalize;
-  padding: 6px 0;
+  padding: 0.353rem 0;
   text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.471rem;
 
   h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: 1.294rem;
   }
 }
 
 .role-name i {
-  font-size: 18px;
+  font-size: 1.059rem;
 }
 
 .role-section-title {
   font-family: 'Cinzel', serif;
-  font-size: 11px;
+  font-size: 0.647rem;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.088rem;
   color: #fff;
-  margin: 8px 0 3px 0;
+  margin: 0.471rem 0 0.176rem 0;
   font-weight: 600;
-  i { margin-right: 5px; font-size: 10px; }
+  i { margin-right: 0.294rem; font-size: 0.588rem; }
 }
 
 .role-description {
   margin-top: 2px;
-  font-size: 13px;
+  font-size: 0.765rem;
   color: #fff;
   line-height: 1.5;
 
@@ -110,24 +110,24 @@
 }
 
 .role-objective {
-  font-size: 13px;
+  font-size: 0.765rem;
   color: #fff;
   font-style: italic;
-  margin: 6px 0 8px;
+  margin: 0.353rem 0 0.471rem;
   border-left: 2px solid rgba(255,255,255,0.15);
-  padding-left: 8px;
+  padding-left: 0.471rem;
 }
 
 .exec-target {
-  margin-top: 6px;
+  margin-top: 0.353rem;
   color: #ff6666;
   font-style: normal;
-  font-size: 15px;
-  i { margin-right: 4px; }
+  font-size: 0.882rem;
+  i { margin-right: 0.235rem; }
 }
 
 .role-actions {
-  font-size: 12px;
+  font-size: 0.706rem;
   color: #fff;
 
   ul {
@@ -157,10 +157,10 @@
 
 .status-line {
   display: flex;
-  gap: 6px;
+  gap: 0.353rem;
   align-items: center;
-  margin-bottom: 6px;
-  font-size: 14px;
+  margin-bottom: 0.353rem;
+  font-size: 0.824rem;
 }
 
 .status-name {
@@ -174,9 +174,9 @@
 
 .status-team {
   font-weight: bold;
-  font-size: 12px;
+  font-size: 0.706rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.059rem;
 }
 
 .status-dead {
@@ -187,26 +187,26 @@
 .status-blackmailed {
   color: #ff6666;
   font-style: italic;
-  i { margin-right: 4px; }
+  i { margin-right: 0.235rem; }
 }
 
 .no-ability {
   color: #888;
   font-style: italic;
-  font-size: 15px;
+  font-size: 0.882rem;
 }
 
 /* Actions block (between role info and last will) */
 .sidebar-actions-block {
   flex: 0 1 auto;
   width: 72%;
-  max-height: 420px;
+  max-height: 24.706rem;
   overflow-y: auto;
-  padding: 8px;
-  margin-top: 16px;
+  padding: 0.471rem;
+  margin-top: 0.941rem;
   background: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 0.353rem;
   box-sizing: border-box;
 }
 
@@ -218,12 +218,12 @@
 }
 
 .last-will-trigger {
-  padding: 14px 16px;
-  min-height: 60px;
+  padding: 0.824rem 0.941rem;
+  min-height: 3.529rem;
   background: rgba(15, 12, 8, 0.7);
   backdrop-filter: blur(4px);
   border: 2px solid rgba(200, 169, 110, 0.4);
-  border-radius: 8px;
+  border-radius: 0.471rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   display: flex;
@@ -238,12 +238,12 @@
   .lw-label {
     color: #c8a96e;
     font-weight: bold;
-    font-size: 15px;
-    i { margin-right: 6px; }
+    font-size: 0.882rem;
+    i { margin-right: 0.353rem; }
   }
 
   .lw-preview {
-    font-size: 13px;
+    font-size: 0.765rem;
     color: #888;
     font-style: italic;
     max-width: 55%;
@@ -276,36 +276,36 @@
 .lw-dialog {
   background: rgba(15, 15, 25, 0.95);
   border: 1px solid rgba(200, 169, 110, 0.3);
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 0.706rem;
+  padding: 1.412rem;
   width: 90%;
-  max-width: 550px;
+  max-width: 32.353rem;
   animation: lw-slide-in 0.3s ease-out;
 
   .lw-dialog-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 0.706rem;
 
     h3 {
       margin: 0;
       color: #c8a96e;
       font-family: 'Cinzel', serif;
-      i { margin-right: 6px; }
+      i { margin-right: 0.353rem; }
     }
   }
 
   .last-will-input {
     width: 100%;
-    min-height: 160px;
-    max-height: 250px;
+    min-height: 9.412rem;
+    max-height: 14.706rem;
     background: rgba(0, 0, 0, 0.5);
     color: #ddd;
     border: 1px solid rgba(200, 169, 110, 0.3);
-    border-radius: 6px;
-    padding: 10px;
-    font-size: 15px;
+    border-radius: 0.353rem;
+    padding: 0.588rem;
+    font-size: 0.882rem;
     font-family: inherit;
     resize: vertical;
     box-sizing: border-box;
@@ -323,18 +323,18 @@
   }
 
   .last-will-display {
-    font-size: 15px;
+    font-size: 0.882rem;
     color: #999;
     font-style: italic;
-    padding: 12px;
+    padding: 0.706rem;
     background: rgba(0,0,0,0.3);
-    border-radius: 6px;
-    min-height: 100px;
+    border-radius: 0.353rem;
+    min-height: 5.882rem;
   }
 
   .lw-hint {
-    margin-top: 8px;
-    font-size: 13px;
+    margin-top: 0.471rem;
+    font-size: 0.765rem;
     color: #666;
   }
 }
@@ -348,18 +348,18 @@
 .team-block {
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 68, 68, 0.15);
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 6px;
+  border-radius: 0.471rem;
+  padding: 0.588rem;
+  margin-bottom: 0.353rem;
 }
 
 .team-block-title {
   font-family: 'Cinzel', serif;
-  font-size: 13px;
+  font-size: 0.765rem;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.088rem;
   color: #ff6666;
-  margin: 0 0 8px 0;
+  margin: 0 0 0.471rem 0;
   font-weight: 700;
 }
 
@@ -367,46 +367,46 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 8px;
-  margin-bottom: 3px;
+  padding: 0.294rem 0.471rem;
+  margin-bottom: 0.176rem;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: 0.235rem;
+  font-size: 0.824rem;
   font-weight: 600;
 }
 
 .team-member-role {
-  font-size: 12px;
+  font-size: 0.706rem;
   font-style: italic;
 }
 
 .team-member-dead {
-  font-size: 11px;
+  font-size: 0.647rem;
   color: #666;
-  margin-left: 6px;
+  margin-left: 0.353rem;
 }
 
 /* Notifications panel */
 .notifications {
-  margin-top: 12px;
-  padding: 10px;
+  margin-top: 0.706rem;
+  padding: 0.588rem;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 5px;
+  border-radius: 0.294rem;
   border-left: 3px solid #ffcc00;
 
   .notif-title {
     font-weight: bold;
-    font-size: 15px;
+    font-size: 0.882rem;
     color: #ffcc00;
     display: block;
-    margin-bottom: 6px;
-    i { margin-right: 4px; }
+    margin-bottom: 0.353rem;
+    i { margin-right: 0.235rem; }
   }
 
   .notification-item {
-    font-size: 15px;
+    font-size: 0.882rem;
     color: #eee;
-    padding: 4px 0;
+    padding: 0.235rem 0;
     border-bottom: 1px solid rgba(255,255,255,0.05);
 
     &:last-child { border-bottom: none; }
@@ -416,21 +416,21 @@
 // === RESPONSIVE ===
 @media (max-width: 768px) {
   .player-container {
-    padding-top: 10px;
-    gap: 6px;
+    padding-top: 0.588rem;
+    gap: 0.353rem;
   }
   .role-container {
-    padding: 10px;
-    margin-bottom: 8px;
+    padding: 0.588rem;
+    margin-bottom: 0.471rem;
   }
   .role-name {
-    font-size: 24px;
+    font-size: 1.412rem;
   }
   .role-description, .role-objective {
-    font-size: 12px;
+    font-size: 0.706rem;
   }
   .lw-dialog {
     width: 92%;
-    padding: 16px;
+    padding: 0.941rem;
   }
 }

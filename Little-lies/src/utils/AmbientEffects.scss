@@ -99,7 +99,7 @@
 // Night ambiance text
 .ambient-text {
   position: fixed;
-  bottom: 100px;
+  bottom: 5.882rem;
   left: 50%;
   transform: translateX(-50%);
   color: rgba(180, 180, 200, 0.35);
@@ -112,7 +112,7 @@
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 
   i {
-    margin-right: 6px;
+    margin-right: 0.353rem;
     font-size: 0.75rem;
   }
 }
@@ -129,8 +129,8 @@
   position: absolute;
   top: -10%;
   right: 10%;
-  width: 200px;
-  height: 500px;
+  width: 11.765rem;
+  height: 29.412rem;
   background: linear-gradient(
     180deg,
     rgba(255, 230, 150, 0.08) 0%,

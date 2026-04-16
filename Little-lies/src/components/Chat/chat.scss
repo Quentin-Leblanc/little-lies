@@ -8,24 +8,24 @@
 
 .invalid-char-message {
   position: absolute;
-  bottom: 45px;
-  right: 20px;
-  font-size: 13px;
+  bottom: 2.647rem;
+  right: 1.176rem;
+  font-size: 0.765rem;
   color: #ff8686;
 }
 
 .chat-container {
   background: rgba(0, 0, 0, 0.8);
-  padding: 8px 12px;
+  padding: 0.471rem 0.706rem;
   width: 100%;
   height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  font-size: 15px;
+  font-size: 0.882rem;
   box-sizing: border-box;
   position: relative;
-  border-radius: 8px;
+  border-radius: 0.471rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   transition: box-shadow 0.4s, border-color 0.4s;
 
@@ -73,11 +73,11 @@
 .dead-chat-banner {
   text-align: center;
   color: #888;
-  font-size: 14px;
-  padding: 4px;
+  font-size: 0.824rem;
+  padding: 0.235rem;
   border-bottom: 1px solid rgba(255,255,255,0.1);
-  margin-bottom: 5px;
-  i { margin-right: 5px; }
+  margin-bottom: 0.294rem;
+  i { margin-right: 0.294rem; }
 }
 
 .chat-night-message {
@@ -91,18 +91,18 @@
 
   i {
     font-size: 2.5rem;
-    margin-bottom: 10px;
+    margin-bottom: 0.588rem;
     color: #445;
   }
 
   p {
-    margin: 4px 0;
+    margin: 0.235rem 0;
     font-family: 'Cinzel', serif;
-    font-size: 16px;
+    font-size: 0.941rem;
   }
 
   .chat-night-sub {
-    font-size: 14px;
+    font-size: 0.824rem;
     color: #556;
     font-family: inherit;
   }
@@ -119,26 +119,26 @@
 .chat-message-wrapper {
   position: relative;
   margin-bottom: 1px;
-  padding: 2px 8px;
-  min-height: 24px;
+  padding: 0.118rem 0.471rem;
+  min-height: 1.412rem;
   display: flex;
   align-items: center;
   text-align: left;
   color: white;
-  border-radius: 3px;
+  border-radius: 0.176rem;
   overflow: hidden;
   flex-shrink: 0;
 
   &.msg-system {
-    padding: 2px 0;
-    min-height: 20px;
+    padding: 0.118rem 0;
+    min-height: 1.176rem;
     .chat-message-background { opacity: 0; }
   }
 
   &.msg-whisper-notice {
     .chat-message {
       color: #888;
-      font-size: 13px;
+      font-size: 0.765rem;
       font-style: italic;
     }
     .chat-message-background { opacity: 0; }
@@ -162,13 +162,13 @@
   &.msg-vote {
     background-color: rgba(30, 60, 120, 0.5);
     border-left: 3px solid #3a7bd5;
-    padding: 2px 8px;
-    border-radius: 3px;
+    padding: 0.118rem 0.471rem;
+    border-radius: 0.176rem;
     min-height: auto;
     .chat-message, .chat-day-separator {
       color: #c8daf0 !important;
       font-weight: 600;
-      font-size: 13px;
+      font-size: 0.765rem;
     }
   }
 
@@ -207,7 +207,7 @@
 
 .chat-message {
   position: relative;
-  font-size: 16px !important;
+  font-size: 0.941rem !important;
   line-height: 1.45;
   width: 100%;
   color: #fff;
@@ -228,21 +228,21 @@
 
 .whisper-prefix {
   color: #da70d6;
-  font-size: 13px;
-  margin-right: 4px;
+  font-size: 0.765rem;
+  margin-right: 0.235rem;
   font-weight: bold;
 }
 
 .dead-prefix {
   color: #666;
-  font-size: 13px;
-  margin-right: 4px;
+  font-size: 0.765rem;
+  margin-right: 0.235rem;
 }
 
 .mafia-prefix {
   color: #ff4444;
-  font-size: 13px;
-  margin-right: 4px;
+  font-size: 0.765rem;
+  margin-right: 0.235rem;
   font-weight: bold;
 }
 
@@ -254,10 +254,10 @@
 .chat-day-separator {
   text-align: left;
   color: #fff;
-  font-size: 12px;
-  padding: 3px 0;
+  font-size: 0.706rem;
+  padding: 0.176rem 0;
   font-style: italic;
-  margin-top: 4px;
+  margin-top: 0.235rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -266,13 +266,13 @@
   align-items: center;
   justify-content: space-between;
   position: relative;
-  margin-top: 5px;
+  margin-top: 0.294rem;
   flex-shrink: 0;
 }
 
 .chat-input-name {
   font-weight: bold;
-  font-size: 13px;
+  font-size: 0.765rem;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -281,28 +281,28 @@
 .chat-input-outside {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
-  margin-top: 4px;
+  gap: 0.353rem;
+  padding: 0.471rem 0.588rem;
+  margin-top: 0.235rem;
   background: rgba(0, 0, 0, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
+  border-radius: 0.471rem;
   backdrop-filter: blur(6px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 .chat-input-hint-outside {
   text-align: left;
-  font-size: 12px;
+  font-size: 0.706rem;
   color: #ddd;
-  padding: 6px 4px;
-  margin-top: 4px;
+  padding: 0.353rem 0.235rem;
+  margin-top: 0.235rem;
   kbd {
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 3px;
-    padding: 1px 5px;
-    font-size: 11px;
+    border-radius: 0.176rem;
+    padding: 0.059rem 0.294rem;
+    font-size: 0.647rem;
     color: #888;
   }
 }
@@ -312,9 +312,9 @@
   background: rgba(0, 0, 0, 0.9);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 4px;
-  padding: 7px 10px;
-  font-size: 13px;
+  border-radius: 0.235rem;
+  padding: 0.412rem 0.588rem;
+  font-size: 0.765rem;
   font-family: inherit;
   transition: border-color 0.2s;
 
@@ -349,7 +349,7 @@
 
 .chat-messages::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  border-radius: 0.118rem;
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -368,17 +368,17 @@
 // === RESPONSIVE ===
 @media (max-width: 768px) {
   .chat-container {
-    padding: 4px 8px;
-    font-size: 12px;
+    padding: 0.235rem 0.471rem;
+    font-size: 0.706rem;
   }
   .chat-input {
-    font-size: 14px;
-    padding: 8px 10px;
-    min-height: 36px;
+    font-size: 0.824rem;
+    padding: 0.471rem 0.588rem;
+    min-height: 2.118rem;
   }
   .chat-send-button {
-    padding: 8px 14px;
-    font-size: 14px;
-    min-height: 36px;
+    padding: 0.471rem 0.824rem;
+    font-size: 0.824rem;
+    min-height: 2.118rem;
   }
 }

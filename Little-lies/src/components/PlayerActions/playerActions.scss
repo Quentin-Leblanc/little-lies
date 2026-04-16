@@ -2,8 +2,8 @@
 .player-list-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  border-radius: 10px;
+  gap: 0.471rem;
+  border-radius: 0.588rem;
   transition: box-shadow 0.4s;
 
   // When voting begins, pulse the ENTIRE action block (mayor button, phase
@@ -53,8 +53,8 @@
 // parent `.player-list-container` now so it wraps the whole action block.
 .player-list-wrapper {
   transition: box-shadow 0.4s, border-color 0.4s;
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 0.588rem;
+  padding: 0.471rem;
   background: none;
   border: none;
 }
@@ -62,14 +62,14 @@
 .vote-arrow-indicator {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  margin-bottom: 6px;
+  gap: 0.471rem;
+  padding: 0.353rem 0.588rem;
+  margin-bottom: 0.353rem;
   color: #ffa502;
   font-family: 'Cinzel', serif;
-  font-size: 13px;
+  font-size: 0.765rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.059rem;
   animation: vote-pulse 1.5s ease-in-out infinite;
 
   i { animation: vote-bounce 1s ease-in-out infinite; }
@@ -101,14 +101,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
-  margin-bottom: 6px;
-  border-radius: 4px;
+  padding: 0.471rem 0.588rem;
+  margin-bottom: 0.353rem;
+  border-radius: 0.235rem;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   font-weight: bold;
-  font-size: 16px;
+  font-size: 0.941rem;
   background: rgba(0, 0, 0, 0.75);
-  min-height: 42px;
+  min-height: 2.471rem;
   transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -141,19 +141,19 @@
 .vote-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.471rem;
 
   button {
-    padding: 6px 14px;
-    font-size: 14px;
+    padding: 0.353rem 0.824rem;
+    font-size: 0.824rem;
     margin: 0;
   }
 }
 
 .vote-count-num {
-  min-width: 20px;
+  min-width: 1.176rem;
   text-align: center;
-  font-size: 16px;
+  font-size: 0.941rem;
   font-weight: bold;
   color: #fff;
 }
@@ -179,27 +179,27 @@
 // Judgment panel
 .judgment-panel {
   text-align: center;
-  padding: 10px;
+  padding: 0.588rem;
   background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 5px;
+  border-radius: 0.294rem;
 
   p {
-    margin: 0 0 8px 0;
+    margin: 0 0 0.471rem 0;
     font-family: 'Cinzel', serif;
-    font-size: 15px;
+    font-size: 0.882rem;
   }
 }
 
 .judgment-buttons {
   display: flex;
-  gap: 6px;
+  gap: 0.353rem;
   justify-content: center;
   flex-wrap: wrap;
 
   button {
-    padding: 6px 14px;
-    font-size: 14px;
-    border-radius: 4px;
+    padding: 0.353rem 0.824rem;
+    font-size: 0.824rem;
+    border-radius: 0.235rem;
     transition: all 0.2s;
 
     &.judgment-guilty {
@@ -221,46 +221,46 @@
 // Defense panel
 .defense-panel {
   text-align: center;
-  padding: 10px;
+  padding: 0.588rem;
   background-color: rgba(255, 68, 68, 0.1);
-  border-radius: 5px;
+  border-radius: 0.294rem;
   border: 1px solid rgba(255, 68, 68, 0.3);
 
   p {
     margin: 0;
-    font-size: 14px;
+    font-size: 0.824rem;
   }
 }
 
 // Action confirmation
 .action-confirmation {
   text-align: center;
-  padding: 8px 12px;
+  padding: 0.471rem 0.706rem;
   background: rgba(0, 185, 106, 0.15);
   border: 1px solid rgba(0, 185, 106, 0.3);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   color: #00b96a;
-  font-size: 14px;
+  font-size: 0.824rem;
   font-weight: bold;
 
   i {
-    margin-right: 4px;
+    margin-right: 0.235rem;
   }
 }
 
 // Mayor reveal
 .reveal-btn {
   width: 100%;
-  font-size: 11px;
-  padding: 5px 6px;
+  font-size: 0.647rem;
+  padding: 0.294rem 0.353rem;
   background: rgba(255, 215, 0, 0.15);
   border: 1px solid rgba(255, 215, 0, 0.4);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   color: #ffd700;
   cursor: pointer;
   box-sizing: border-box;
 
-  i { margin-right: 4px; }
+  i { margin-right: 0.235rem; }
 
   &:hover {
     background: rgba(255, 215, 0, 0.3);
@@ -269,21 +269,21 @@
 
 .revealed-banner {
   text-align: center;
-  padding: 6px 10px;
+  padding: 0.353rem 0.588rem;
   background: rgba(255, 215, 0, 0.1);
   border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   color: #ffd700;
-  font-size: 13px;
+  font-size: 0.765rem;
   font-weight: bold;
 
-  i { margin-right: 4px; }
+  i { margin-right: 0.235rem; }
 }
 
 .player-name-cell {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.353rem;
   min-width: 0;
   overflow: hidden;
   flex: 1;
@@ -296,30 +296,30 @@
 }
 
 .player-color-dot {
-  width: 10px;
-  height: 10px;
+  width: 0.588rem;
+  height: 0.588rem;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .player-color-icon {
-  font-size: 12px;
+  font-size: 0.706rem;
   flex-shrink: 0;
 }
 
 .revealed-badge {
   color: #ffd700;
-  font-size: 12px;
+  font-size: 0.706rem;
 }
 
 .vote-btn {
-  padding: 4px 12px;
-  font-size: 12px;
+  padding: 0.235rem 0.706rem;
+  font-size: 0.706rem;
   margin: 0;
   background: #111;
   color: #eee;
   border: 1px solid #555;
-  border-radius: 3px;
+  border-radius: 0.176rem;
   cursor: pointer;
   transition: all 0.15s;
   font-weight: 600;
@@ -344,8 +344,8 @@
 }
 
 .player-status-dot {
-  width: 6px;
-  height: 6px;
+  width: 0.353rem;
+  height: 0.353rem;
   border-radius: 50%;
   flex-shrink: 0;
   &.dot-online { background: #44cc44; box-shadow: 0 0 4px #44cc44; }
@@ -360,31 +360,31 @@
 .phase-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.353rem;
   font-family: 'Cinzel', serif;
-  font-size: 11px;
+  font-size: 0.647rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  padding: 4px 0;
+  letter-spacing: 0.088rem;
+  padding: 0.235rem 0;
   opacity: 0.8;
 
-  i { font-size: 10px; }
+  i { font-size: 0.588rem; }
 }
 
 // Action feedback
 .action-feedback {
   text-align: center;
-  padding: 6px 10px;
+  padding: 0.353rem 0.588rem;
   background: rgba(0, 185, 106, 0.12);
   border: 1px solid rgba(0, 185, 106, 0.25);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   color: #00b96a;
-  font-size: 13px;
+  font-size: 0.765rem;
   font-weight: 600;
   animation: feedback-in 0.3s ease-out;
 
-  i { margin-right: 4px; }
+  i { margin-right: 0.235rem; }
 }
 
 @keyframes feedback-in {
@@ -395,8 +395,8 @@
 // Blackmailed badge
 .blackmailed-badge {
   color: #ff6666;
-  font-size: 11px;
-  margin-left: 2px;
+  font-size: 0.647rem;
+  margin-left: 0.118rem;
   animation: blink-slow 2s ease-in-out infinite;
 }
 
@@ -408,8 +408,8 @@
 // Disconnecting badge
 .disconnecting-badge {
   color: #ff8800;
-  font-size: 11px;
-  margin-left: 2px;
+  font-size: 0.647rem;
+  margin-left: 0.118rem;
   animation: dc-blink 1s ease-in-out infinite;
 }
 
@@ -422,14 +422,14 @@
 .player-list-wrapper.night-mode {
   border: 1px solid rgba(100, 120, 200, 0.1);
   background: rgba(10, 10, 30, 0.2);
-  border-radius: 8px;
+  border-radius: 0.471rem;
 }
 
 .action-btn {
-  padding: 5px 12px;
-  font-size: 13px;
+  padding: 0.294rem 0.706rem;
+  font-size: 0.765rem;
   margin: 0;
-  border-radius: 4px;
+  border-radius: 0.235rem;
   cursor: pointer;
   transition: all 0.15s;
   background: var(--action-bg, rgba(100,100,100,0.7)) !important;
@@ -453,28 +453,28 @@
 // Judgment hint
 .judgment-hint {
   text-align: center;
-  font-size: 11px;
+  font-size: 0.647rem;
   color: #888;
   font-style: italic;
-  margin: 4px 0 0;
+  margin: 0.235rem 0 0;
 }
 
 // Disabled action hint (e.g. Vigilante night 1)
 .action-hint-disabled {
-  font-size: 12px;
+  font-size: 0.706rem;
   color: #666;
-  padding: 4px 10px;
+  padding: 0.235rem 0.588rem;
   border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   opacity: 0.5;
 
-  i { margin-right: 4px; font-size: 10px; }
+  i { margin-right: 0.235rem; font-size: 0.588rem; }
 }
 
 .dead-label {
   color: #555;
   font-style: italic;
-  font-size: 11px;
+  font-size: 0.647rem;
 }
 
 .player-list-item.is-dead {

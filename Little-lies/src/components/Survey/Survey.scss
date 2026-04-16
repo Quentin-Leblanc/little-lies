@@ -1,10 +1,10 @@
 .survey-container {
-  margin-top: 12px;
-  padding: 14px 18px;
+  margin-top: 0.706rem;
+  padding: 0.824rem 1.059rem;
   background: rgba(15, 15, 25, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  max-width: 380px;
+  border-radius: 0.706rem;
+  max-width: 22.353rem;
   width: 90%;
   animation: survey-slide-in 0.4s ease-out;
 }
@@ -13,10 +13,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0.471rem;
   color: #aaa;
   font-size: 0.9rem;
-  padding: 12px;
+  padding: 0.706rem;
   animation: survey-fade 0.3s ease-out;
 
   i { font-size: 1.1rem; }
@@ -26,7 +26,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 0.588rem;
 }
 
 .survey-title {
@@ -40,7 +40,7 @@
   border: none;
   color: #666;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 2px 0.235rem;
   font-size: 0.8rem;
   margin: 0;
   box-shadow: none;
@@ -50,15 +50,15 @@
 
 .survey-ratings {
   display: flex;
-  gap: 6px;
+  gap: 0.353rem;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 0.588rem;
 }
 
 .survey-rating-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 2.588rem;
+  height: 2.588rem;
+  border-radius: 0.588rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #888;
@@ -90,14 +90,14 @@
 
 .survey-comment {
   width: 100%;
-  padding: 8px 12px;
+  padding: 0.471rem 0.706rem;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  border-radius: 0.353rem;
   color: #ccc;
   font-size: 0.8rem;
   font-family: inherit;
-  margin-bottom: 10px;
+  margin-bottom: 0.588rem;
   box-sizing: border-box;
 
   &::placeholder { color: #555; }
@@ -106,7 +106,7 @@
 
 .survey-actions {
   display: flex;
-  gap: 8px;
+  gap: 0.471rem;
   justify-content: flex-end;
 }
 
@@ -116,7 +116,7 @@
   color: #666;
   font-size: 0.8rem;
   cursor: pointer;
-  padding: 6px 12px;
+  padding: 0.353rem 0.706rem;
   margin: 0;
   box-shadow: none;
 
@@ -124,12 +124,12 @@
 }
 
 .survey-submit {
-  padding: 6px 16px;
+  padding: 0.353rem 0.941rem;
   font-size: 0.8rem;
   background: rgba(47, 130, 255, 0.2);
   border: 1px solid rgba(47, 130, 255, 0.3);
   color: #a0c4ff;
-  border-radius: 6px;
+  border-radius: 0.353rem;
   cursor: pointer;
   margin: 0;
   box-shadow: none;

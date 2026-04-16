@@ -4,24 +4,24 @@
 .graveyard-box {
   width: 100%;
   min-height: 0;
-  border-radius: 8px;
+  border-radius: 0.471rem;
   color: white;
-  padding: 8px 10px;
+  padding: 0.471rem 0.588rem;
   overflow-y: auto;
-  font-size: 14px;
+  font-size: 0.824rem;
   flex: 1;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(3px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 
   h2 {
-    font-size: 13px;
+    font-size: 0.765rem;
     text-align: left;
     padding-top: 0;
     margin-top: 0;
     color: #99a;
     font-family: 'Cinzel', serif;
-    i { margin-right: 6px; }
+    i { margin-right: 0.353rem; }
   }
 
   ul {
@@ -34,13 +34,13 @@
 .graveyard-empty {
   color: #555;
   font-style: italic;
-  font-size: 14px;
+  font-size: 0.824rem;
 }
 
 .graveyard-item {
-  padding: 6px 8px;
-  margin-bottom: 3px;
-  border-radius: 4px;
+  padding: 0.353rem 0.471rem;
+  margin-bottom: 0.176rem;
+  border-radius: 0.235rem;
   cursor: pointer;
   transition: background-color 0.2s;
 
@@ -53,8 +53,8 @@
   }
 
   i {
-    margin-right: 4px;
-    font-size: 12px;
+    margin-right: 0.235rem;
+    font-size: 0.706rem;
   }
 }
 
@@ -66,21 +66,21 @@
 
 .graveyard-role {
   color: #666;
-  font-size: 12px;
+  font-size: 0.706rem;
 }
 
 .graveyard-will {
-  margin-top: 4px;
-  padding: 6px 8px;
+  margin-top: 0.235rem;
+  padding: 0.353rem 0.471rem;
   background: rgba(200, 169, 110, 0.1);
   border-left: 2px solid #c8a96e;
   border-radius: 2px;
   color: #aaa;
-  font-size: 12px;
+  font-size: 0.706rem;
   font-style: italic;
 
   i {
     color: #c8a96e;
-    margin-right: 4px;
+    margin-right: 0.235rem;
   }
 }

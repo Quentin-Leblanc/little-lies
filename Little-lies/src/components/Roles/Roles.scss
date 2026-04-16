@@ -1,38 +1,38 @@
 .roles-list-box {
   margin-bottom: 0;
-  padding: 8px 10px;
+  padding: 0.471rem 0.588rem;
   flex: 1;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(3px);
-  border-radius: 8px;
+  border-radius: 0.471rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
 
   h3 {
     font-family: 'Cinzel', serif;
-    font-size: 13px;
-    margin: 0 0 6px 0;
+    font-size: 0.765rem;
+    margin: 0 0 0.353rem 0;
     text-align: left;
     color: #99a;
-    i { margin-right: 5px; color: #99a; font-size: 12px; }
+    i { margin-right: 0.294rem; color: #99a; font-size: 0.706rem; }
   }
 }
 
 .roles-empty {
   color: #666;
   font-style: italic;
-  font-size: 13px;
+  font-size: 0.765rem;
 }
 
 .roles-group {
-  margin-bottom: 4px;
+  margin-bottom: 0.235rem;
 }
 
 .roles-group-label {
-  font-size: 11px;
+  font-size: 0.647rem;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.088rem;
   font-weight: 700;
-  padding: 2px 0 4px 10px;
+  padding: 2px 0 0.235rem 0.588rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 2px;
 }
@@ -40,18 +40,18 @@
 .roles-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 0.235rem;
   padding: 2px 0;
 }
 
 .role-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 12px;
+  gap: 0.235rem;
+  padding: 0.176rem 0.471rem;
+  border-radius: 0.706rem;
   border: 1px solid;
-  font-size: 11px;
+  font-size: 0.647rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -65,12 +65,12 @@
   }
 
   .role-count {
-    font-size: 9px;
+    font-size: 0.529rem;
     color: #999;
     margin-left: 2px;
     background: rgba(255, 255, 255, 0.08);
-    padding: 0 4px;
-    border-radius: 6px;
+    padding: 0 0.235rem;
+    border-radius: 0.353rem;
   }
 }
 
@@ -91,10 +91,10 @@
 .role-detail-dialog {
   background: rgba(15, 15, 25, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 0.706rem;
+  padding: 1.176rem;
   width: 90%;
-  max-width: 420px;
+  max-width: 24.706rem;
   max-height: 70vh;
   overflow-y: auto;
 }
@@ -103,60 +103,60 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 0.471rem;
 }
 
 .role-detail-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.471rem;
 
-  i { font-size: 24px; }
+  i { font-size: 1.412rem; }
   h3 {
     margin: 0;
     font-family: 'Cinzel', serif;
-    font-size: 20px;
+    font-size: 1.176rem;
   }
 }
 
 .role-detail-team {
-  font-size: 12px;
+  font-size: 0.706rem;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.118rem;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 0.706rem;
 }
 
 .role-detail-desc {
-  font-size: 14px;
+  font-size: 0.824rem;
   color: #ccc;
   line-height: 1.5;
-  margin: 8px 0;
+  margin: 0.471rem 0;
 }
 
 .role-detail-obj {
-  font-size: 13px;
+  font-size: 0.765rem;
   color: #999;
   font-style: italic;
-  margin: 8px 0;
-  padding: 8px;
+  margin: 0.471rem 0;
+  padding: 0.471rem;
   border-left: 2px solid rgba(255, 255, 255, 0.15);
 }
 
 .role-detail-abilities {
-  margin-top: 12px;
-  font-size: 14px;
+  margin-top: 0.706rem;
+  font-size: 0.824rem;
   color: #bbb;
 
   ul {
     list-style: none;
     padding: 0;
-    margin: 6px 0 0;
+    margin: 0.353rem 0 0;
   }
 
   li {
-    padding: 4px 0;
-    font-size: 13px;
+    padding: 0.235rem 0;
+    font-size: 0.765rem;
     line-height: 1.4;
   }
 }

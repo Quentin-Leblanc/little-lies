@@ -18,17 +18,17 @@
 .auth-dialog {
   background: rgba(10, 10, 20, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  border-radius: 0.941rem;
   width: 90%;
-  max-width: 380px;
-  padding: 24px;
+  max-width: 22.353rem;
+  padding: 1.412rem;
 }
 
 .auth-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.176rem;
 
   h2 {
     margin: 0;
@@ -41,14 +41,14 @@
 // OAuth buttons
 .auth-oauth {
   display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 0.588rem;
+  margin-bottom: 0.941rem;
 }
 
 .auth-oauth-btn {
   flex: 1;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 0.588rem;
+  border-radius: 0.471rem;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -57,7 +57,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0.471rem;
 
   i { font-size: 1rem; }
 
@@ -78,7 +78,7 @@
 .auth-divider {
   display: flex;
   align-items: center;
-  margin: 12px 0;
+  margin: 0.706rem 0;
 
   &::before, &::after {
     content: '';
@@ -88,7 +88,7 @@
   }
 
   span {
-    padding: 0 12px;
+    padding: 0 0.706rem;
     color: #555;
     font-size: 0.8rem;
   }
@@ -98,14 +98,14 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.588rem;
 
   input {
     width: 100%;
-    padding: 10px 14px;
+    padding: 0.588rem 0.824rem;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border-radius: 0.471rem;
     color: #ddd;
     font-size: 0.85rem;
     font-family: inherit;
@@ -120,22 +120,22 @@
   color: #ff4444;
   font-size: 0.8rem;
   margin: 0;
-  i { margin-right: 4px; }
+  i { margin-right: 0.235rem; }
 }
 
 .auth-success {
   color: #78ff78;
   font-size: 0.8rem;
   margin: 0;
-  i { margin-right: 4px; }
+  i { margin-right: 0.235rem; }
 }
 
 .auth-btn-submit {
-  padding: 11px;
+  padding: 0.647rem;
   background: linear-gradient(135deg, #2f82ff, #0d5fcc);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 0.471rem;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -157,7 +157,7 @@
   text-align: center;
   font-size: 0.8rem;
   color: #666;
-  margin: 12px 0 8px;
+  margin: 0.706rem 0 0.471rem;
 
   button {
     background: none;
@@ -176,17 +176,17 @@
 // Guest button
 .auth-btn-guest {
   width: 100%;
-  padding: 10px;
+  padding: 0.588rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  border-radius: 0.471rem;
   color: #777;
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.2s;
   margin: 0;
 
-  i { margin-right: 6px; }
+  i { margin-right: 0.353rem; }
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -204,14 +204,14 @@
   background: rgba(47, 130, 255, 0.1);
   border: 1px solid rgba(47, 130, 255, 0.25);
   color: #a0c4ff;
-  padding: 6px 14px;
-  border-radius: 20px;
+  padding: 0.353rem 0.824rem;
+  border-radius: 1.176rem;
   font-size: 0.8rem;
   font-weight: 600;
   margin: 0;
   box-shadow: none;
 
-  i { margin-right: 6px; font-size: 0.75rem; }
+  i { margin-right: 0.353rem; font-size: 0.75rem; }
 
   &:hover {
     background: rgba(47, 130, 255, 0.2);
@@ -221,16 +221,16 @@
 .profile-badge-logged {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 6px 12px;
-  min-width: 100px;
+  border-radius: 0.706rem;
+  padding: 0.353rem 0.706rem;
+  min-width: 5.882rem;
 }
 
 .profile-badge-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 0.471rem;
 }
 
 .profile-badge-name {
@@ -250,7 +250,7 @@
   height: 3px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
-  margin-top: 4px;
+  margin-top: 0.235rem;
   overflow: hidden;
 }
 

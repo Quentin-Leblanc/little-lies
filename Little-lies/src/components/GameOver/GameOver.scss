@@ -19,8 +19,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 600px;
-  height: 600px;
+  width: 35.294rem;
+  height: 35.294rem;
   border-radius: 50%;
   background: radial-gradient(circle, var(--halo-color, #fff) 0%, transparent 70%);
   opacity: 0.06;
@@ -31,10 +31,10 @@
 // Container principal
 .go-container {
   text-align: center;
-  max-width: 560px;
+  max-width: 32.941rem;
   width: 92%;
   background: rgba(8, 8, 18, 0.95);
-  border-radius: 20px;
+  border-radius: 1.176rem;
   padding: 2rem 2rem 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 0, 0, 0.4);
@@ -60,18 +60,18 @@
 }
 
 .go-icon-ring {
-  width: 72px;
-  height: 72px;
+  width: 4.235rem;
+  height: 4.235rem;
   border-radius: 50%;
   border: 2px solid var(--ring-color, #fff);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 12px;
+  margin: 0 auto 0.706rem;
   animation: go-ring-pulse 2.5s ease-in-out infinite;
   box-shadow: 0 0 20px color-mix(in srgb, var(--ring-color, #fff) 30%, transparent);
 
-  i { font-size: 28px; }
+  i { font-size: 1.647rem; }
 }
 
 .go-title {
@@ -85,7 +85,7 @@
 .go-subtitle {
   color: #888;
   font-size: 0.95rem;
-  margin: 4px 0 0;
+  margin: 0.235rem 0 0;
   animation: go-fade-up 0.6s ease-out 0.6s both;
 }
 
@@ -93,9 +93,9 @@
 .go-personal {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 24px;
-  border-radius: 30px;
+  gap: 0.471rem;
+  padding: 0.471rem 1.412rem;
+  border-radius: 1.765rem;
   font-family: 'Cinzel', serif;
   font-size: 1.2rem;
   font-weight: 700;
@@ -132,7 +132,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 1.176rem;
 }
 
 .go-stat-value {
@@ -151,16 +151,16 @@
 
 .go-stat-divider {
   width: 1px;
-  height: 30px;
+  height: 1.765rem;
   background: rgba(255, 255, 255, 0.1);
 }
 
 // Gagnants neutres
 .go-neutrals {
   margin: 0.8rem 0;
-  padding: 10px 14px;
+  padding: 0.588rem 0.824rem;
   background: rgba(218, 165, 32, 0.06);
-  border-radius: 10px;
+  border-radius: 0.588rem;
   border: 1px solid rgba(218, 165, 32, 0.2);
   animation: go-fade-up 0.5s ease-out 0.9s both;
 }
@@ -168,8 +168,8 @@
 .go-neutral-item {
   color: #daa520;
   font-size: 0.85rem;
-  padding: 3px 0;
-  i { margin-right: 6px; }
+  padding: 0.176rem 0;
+  i { margin-right: 0.353rem; }
   strong { color: #f0c040; }
 }
 
@@ -191,10 +191,10 @@
 .go-xp-section {
   text-align: center;
   margin: 10px 0;
-  padding: 10px 14px;
+  padding: 0.588rem 0.824rem;
   background: rgba(47, 130, 255, 0.06);
   border: 1px solid rgba(47, 130, 255, 0.15);
-  border-radius: 10px;
+  border-radius: 0.588rem;
   animation: go-fade-up 0.5s ease-out 1.1s both;
 }
 
@@ -203,13 +203,13 @@
   font-size: 1.3rem;
   font-weight: 700;
   color: #6bb5ff;
-  margin-bottom: 4px;
+  margin-bottom: 0.235rem;
 }
 
 .go-xp-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 0.353rem;
   justify-content: center;
 }
 
@@ -217,15 +217,15 @@
   font-size: 0.7rem;
   color: #88b0dd;
   background: rgba(47, 130, 255, 0.08);
-  padding: 2px 8px;
-  border-radius: 10px;
+  padding: 2px 0.471rem;
+  border-radius: 0.588rem;
 }
 
 .go-xp-hint {
   font-size: 0.7rem;
   color: #666;
-  margin: 6px 0 0;
-  i { margin-right: 4px; }
+  margin: 0.353rem 0 0;
+  i { margin-right: 0.235rem; }
 }
 
 .go-recap-title {
@@ -234,11 +234,11 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 2px;
-  margin: 0 0 10px;
+  margin: 0 0 0.588rem;
 }
 
 .go-team-group {
-  margin-bottom: 10px;
+  margin-bottom: 0.588rem;
 
   &.go-team-winner {
     .go-team-header {
@@ -251,14 +251,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 10px;
+  padding: 0.294rem 0.588rem;
   border-left: 3px solid;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 0.235rem 0.235rem 0;
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 4px;
+  letter-spacing: 0.088rem;
+  margin-bottom: 0.235rem;
 
   .fa-trophy { font-size: 0.75rem; }
 }
@@ -266,7 +266,7 @@
 .go-player-row {
   display: flex;
   align-items: center;
-  padding: 6px 10px;
+  padding: 0.353rem 0.588rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   animation: go-row-in 0.3s ease-out both;
 
@@ -285,7 +285,7 @@
   font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.353rem;
 
   i { font-size: 0.75rem; }
 }
@@ -294,8 +294,8 @@
   font-size: 0.6rem;
   background: rgba(255, 255, 255, 0.1);
   color: #aaa;
-  padding: 1px 6px;
-  border-radius: 10px;
+  padding: 1px 0.353rem;
+  border-radius: 0.588rem;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -315,7 +315,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 0.235rem;
 
   &.alive {
     color: #78ff78;
@@ -331,15 +331,15 @@
 // Boutons
 .go-buttons {
   display: flex;
-  gap: 10px;
+  gap: 0.588rem;
   justify-content: center;
   margin-top: 1.2rem;
   animation: go-fade-up 0.5s ease-out 1.5s both;
 }
 
 .go-btn {
-  padding: 10px 22px;
-  border-radius: 10px;
+  padding: 0.588rem 1.294rem;
+  border-radius: 0.588rem;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -359,7 +359,7 @@
     transform: translateY(-1px);
   }
 
-  i { margin-right: 6px; }
+  i { margin-right: 0.353rem; }
 }
 
 .go-btn-replay {
@@ -372,7 +372,7 @@
     transform: translateY(-1px);
   }
 
-  i { margin-right: 6px; }
+  i { margin-right: 0.353rem; }
 }
 
 .go-btn-secondary {
@@ -487,21 +487,21 @@
   }
 
   .go-icon-ring {
-    width: 56px;
-    height: 56px;
-    i { font-size: 22px; }
+    width: 3.294rem;
+    height: 3.294rem;
+    i { font-size: 1.294rem; }
   }
 
   .go-stats {
     gap: 0;
   }
 
-  .go-stat { padding: 0 14px; }
+  .go-stat { padding: 0 0.824rem; }
 
   .go-stat-value { font-size: 1.3rem; }
 
   .go-player-row {
-    padding: 5px 6px;
+    padding: 0.294rem 0.353rem;
   }
 
   .go-buttons {

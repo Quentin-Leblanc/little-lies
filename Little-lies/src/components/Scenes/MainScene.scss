@@ -1,15 +1,15 @@
 // 3D Chat bubble — speech bubble with animated dots
 .chat-bubble-3d {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  padding: 6px 12px;
+  border-radius: 0.941rem;
+  padding: 0.353rem 0.706rem;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.235rem;
   position: relative;
   animation: bubble-pop 0.3s ease-out;
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
-  min-width: 36px;
+  min-width: 2.118rem;
   justify-content: center;
 }
 
@@ -63,7 +63,7 @@
 
 .scene-overlay {
   position: absolute;
-  bottom: 8px;
+  bottom: 0.471rem;
   left: 0;
   right: 0;
   pointer-events: none;
@@ -72,11 +72,11 @@
 }
 
 .scene-alive-count {
-  font-size: 13px;
+  font-size: 0.765rem;
   color: rgba(255, 255, 255, 0.5);
   background: rgba(0, 0, 0, 0.3);
-  padding: 3px 12px;
-  border-radius: 10px;
+  padding: 0.176rem 0.706rem;
+  border-radius: 0.588rem;
 }
 
 /* 3D Vote button — solid, prominent with pulse animation */
@@ -84,9 +84,9 @@
   background: #555;
   color: white;
   border: 2px solid #888;
-  border-radius: 6px;
-  padding: 5px 16px;
-  font-size: 13px;
+  border-radius: 0.353rem;
+  padding: 0.294rem 0.941rem;
+  font-size: 0.765rem;
   font-family: 'Cinzel', serif;
   font-weight: bold;
   cursor: pointer;
@@ -110,8 +110,8 @@
   }
 
   .vote-3d-count {
-    margin-left: 4px;
-    font-size: 11px;
+    margin-left: 0.235rem;
+    font-size: 0.647rem;
     opacity: 0.8;
     font-weight: normal;
   }
@@ -125,15 +125,15 @@
 /* 3D Judgment buttons */
 .judgment-3d-btns {
   display: flex;
-  gap: 6px;
+  gap: 0.353rem;
   white-space: nowrap;
 }
 
 .judge-btn {
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  padding: 4px 12px;
-  font-size: 12px;
+  border-radius: 0.353rem;
+  padding: 0.235rem 0.706rem;
+  font-size: 0.706rem;
   font-family: 'Cinzel', serif;
   font-weight: bold;
   cursor: pointer;
@@ -178,12 +178,12 @@
 
 .announcement-text {
   font-family: 'Cinzel', serif;
-  font-size: 26px;
+  font-size: 1.529rem;
   font-weight: 700;
   color: #eee;
-  padding: 14px 36px;
+  padding: 0.824rem 2.118rem;
   background: rgba(0, 0, 0, 0.7);
-  border-radius: 8px;
+  border-radius: 0.471rem;
   backdrop-filter: blur(4px);
   animation: announcement-fade-in 0.5s ease-out;
 
@@ -198,7 +198,7 @@
   }
 
   &.announcement-report {
-    font-size: 20px;
+    font-size: 1.176rem;
     text-align: center;
     line-height: 1.8;
   }
@@ -300,13 +300,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  padding: 40px 60px;
+  gap: 1.059rem;
+  padding: 2.353rem 3.529rem;
   background: rgba(10, 0, 0, 0.85);
-  border-radius: 16px;
+  border-radius: 0.941rem;
   backdrop-filter: blur(12px);
   border: 1px solid rgba(200, 30, 30, 0.2);
-  max-width: 700px;
+  max-width: 41.176rem;
   box-shadow: 0 0 60px rgba(150, 0, 0, 0.3), inset 0 0 30px rgba(100, 0, 0, 0.1);
 
   .no-dead & {
@@ -319,7 +319,7 @@
 
 .death-report-icon {
   font-size: 3.5rem;
-  margin-bottom: 8px;
+  margin-bottom: 0.471rem;
 
   .has-dead & {
     color: #cc2222;
@@ -340,7 +340,7 @@
 
 .death-report-name {
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 0.471rem;
 }
 
 .death-name {
@@ -350,7 +350,7 @@
   font-weight: 700;
   color: #ff3333;
   text-shadow: 0 0 24px rgba(200, 30, 30, 0.6), 0 2px 8px rgba(0, 0, 0, 0.8);
-  letter-spacing: 3px;
+  letter-spacing: 0.176rem;
 }
 
 .death-desc {
@@ -358,9 +358,9 @@
   font-size: 1.15rem;
   color: rgba(220, 210, 220, 0.85);
   font-style: italic;
-  margin-top: 8px;
+  margin-top: 0.471rem;
   line-height: 1.5;
-  max-width: 500px;
+  max-width: 29.412rem;
 }
 
 .death-role-reveal {
@@ -369,8 +369,8 @@
   font-weight: 700;
   color: #ff6666;
   font-style: normal;
-  margin-top: 10px;
-  letter-spacing: 1px;
+  margin-top: 0.588rem;
+  letter-spacing: 0.059rem;
   opacity: 0;
   animation: role-reveal-fade 1s ease-out 2s forwards;
 }
@@ -386,7 +386,7 @@
   font-weight: 800;
   color: #f0f0f0;
   text-align: center;
-  letter-spacing: 3px;
+  letter-spacing: 0.176rem;
   padding: 0;
   background: none;
   backdrop-filter: none;
@@ -405,7 +405,7 @@
 
 @media (max-width: 768px) {
   .death-report-card {
-    padding: 24px 20px;
+    padding: 1.412rem 1.176rem;
     max-width: 90vw;
   }
   .death-name {
@@ -419,7 +419,7 @@
 /* Night ambiance messages */
 .night-ambiance {
   position: absolute;
-  bottom: 40px;
+  bottom: 2.353rem;
   left: 0;
   right: 0;
   display: flex;
@@ -436,12 +436,12 @@
 
 .night-ambiance-text {
   font-family: 'Cinzel', serif;
-  font-size: 22px;
+  font-size: 1.294rem;
   font-style: italic;
   color: rgba(200, 210, 240, 0.9);
-  padding: 12px 30px;
+  padding: 0.706rem 1.765rem;
   background: rgba(0, 0, 15, 0.5);
-  border-radius: 6px;
+  border-radius: 0.353rem;
   backdrop-filter: blur(3px);
   max-width: 80%;
   text-align: center;
@@ -517,9 +517,9 @@
 
 .night-text-content {
   font-family: 'Cinzel', serif;
-  font-size: 36px;
-  letter-spacing: 4px;
-  padding: 14px 36px;
+  font-size: 2.118rem;
+  letter-spacing: 0.235rem;
+  padding: 0.824rem 2.118rem;
 
   // Day = dark text, Night = white text (set via .is-day / .is-night class)
   color: #111;
@@ -533,7 +533,7 @@
 }
 
 .night-text-ambiance {
-  font-size: 26px;
+  font-size: 1.529rem;
   font-style: italic;
   color: rgba(180, 200, 230, 0.8);
 }

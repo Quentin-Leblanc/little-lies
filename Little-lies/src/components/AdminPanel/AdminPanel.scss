@@ -1,18 +1,18 @@
 // Admin toggle button (visible only to admins)
 .admin-toggle {
   position: fixed;
-  bottom: 12px;
-  left: 12px;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  bottom: 0.706rem;
+  left: 0.706rem;
+  width: 2.118rem;
+  height: 2.118rem;
+  border-radius: 0.471rem;
   background: rgba(255, 68, 68, 0.15);
   border: 1px solid rgba(255, 68, 68, 0.3);
   color: #ff4444;
   cursor: pointer;
   z-index: 20;
   padding: 0;
-  font-size: 14px;
+  font-size: 0.824rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,9 +24,9 @@
 }
 
 .admin-pw-input {
-  width: 100px;
-  padding: 3px 6px;
-  font-size: 11px;
+  width: 5.882rem;
+  padding: 0.176rem 0.353rem;
+  font-size: 0.647rem;
   background: rgba(0, 0, 0, 0.8);
   border: 1px solid #333;
   border-radius: 3px;
@@ -35,35 +35,35 @@
 }
 
 .admin-pw-btn, .admin-pw-close {
-  padding: 3px 6px;
-  font-size: 10px;
+  padding: 0.176rem 0.353rem;
+  font-size: 0.588rem;
   background: #222;
   color: #888;
   border: 1px solid #333;
-  border-radius: 3px;
+  border-radius: 0.176rem;
   cursor: pointer;
 }
 
 .admin-pw-error {
-  font-size: 10px;
+  font-size: 0.588rem;
   color: #ff4444;
 }
 
 // Admin panel overlay — fixed, floats above everything
 .admin-panel {
   position: fixed;
-  bottom: 30px;
-  left: 30px;
-  width: 370px;
+  bottom: 1.765rem;
+  left: 1.765rem;
+  width: 21.765rem;
   max-height: 85vh;
   overflow-y: auto;
   background: rgba(10, 10, 18, 0.97);
   border: 1px solid rgba(255, 68, 68, 0.3);
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 0.588rem;
+  padding: 0.941rem;
   z-index: 999;
   backdrop-filter: blur(10px);
-  font-size: 14px;
+  font-size: 0.824rem;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
 }
 
@@ -71,12 +71,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  font-size: 15px;
+  margin-bottom: 0.706rem;
+  font-size: 0.882rem;
   font-weight: bold;
   color: #ff4444;
 
-  i { margin-right: 5px; }
+  i { margin-right: 0.294rem; }
 }
 
 .admin-close {
@@ -84,13 +84,13 @@
   border: none;
   color: #666;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.706rem;
   &:hover { color: #fff; }
 }
 
 .admin-section {
-  margin-bottom: 10px;
-  padding-bottom: 8px;
+  margin-bottom: 0.588rem;
+  padding-bottom: 0.471rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
   &:last-child { border-bottom: none; margin-bottom: 0; }
@@ -98,18 +98,18 @@
 
 .admin-action-btn {
   width: 100%;
-  padding: 8px 12px;
-  margin-bottom: 5px;
-  font-size: 13px;
+  padding: 0.471rem 0.706rem;
+  margin-bottom: 0.294rem;
+  font-size: 0.765rem;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   color: #ccc;
   cursor: pointer;
   text-align: left;
   transition: all 0.15s;
 
-  i { margin-right: 6px; width: 14px; text-align: center; }
+  i { margin-right: 0.353rem; width: 0.824rem; text-align: center; }
 
   &:hover {
     background: rgba(255, 255, 255, 0.12);
@@ -133,11 +133,11 @@
 
 .admin-label {
   display: block;
-  font-size: 12px;
+  font-size: 0.706rem;
   color: #888;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
+  letter-spacing: 0.059rem;
+  margin-bottom: 0.235rem;
 }
 
 .admin-slider {
@@ -147,16 +147,16 @@
 
 .admin-input-row {
   display: flex;
-  gap: 4px;
+  gap: 0.235rem;
 }
 
 .admin-input {
   flex: 1;
-  padding: 6px 10px;
-  font-size: 13px;
+  padding: 0.353rem 0.588rem;
+  font-size: 0.765rem;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   color: #ddd;
   outline: none;
 
@@ -168,7 +168,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-height: 200px;
+  max-height: 11.765rem;
   overflow-y: auto;
 }
 
@@ -176,9 +176,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 0.235rem 0.471rem;
+  border-radius: 0.235rem;
+  font-size: 0.765rem;
   font-weight: 500;
 
   &.admin-player-dead {
@@ -189,10 +189,10 @@
 .admin-kill-btn {
   background: rgba(255, 68, 68, 0.15);
   border: 1px solid rgba(255, 68, 68, 0.3);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   color: #ff4444;
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 0.176rem 0.471rem;
+  font-size: 0.647rem;
   cursor: pointer;
   transition: all 0.15s;
 
@@ -203,17 +203,17 @@
 }
 
 .admin-dead-tag {
-  font-size: 10px;
+  font-size: 0.588rem;
   color: #555;
   font-style: italic;
 }
 
 .admin-send {
-  padding: 5px 10px;
-  font-size: 12px;
+  padding: 0.294rem 0.588rem;
+  font-size: 0.706rem;
   background: rgba(255, 68, 68, 0.2);
   border: 1px solid rgba(255, 68, 68, 0.3);
-  border-radius: 4px;
+  border-radius: 0.235rem;
   color: #ff6666;
   cursor: pointer;
 
