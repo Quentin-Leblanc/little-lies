@@ -1929,24 +1929,45 @@ const ChatBubble = ({ playerId, chatMessages, dayCount }) => {
 // ============================================================
 // Player Figure — uses Character model with rotation + walk
 // ============================================================
-const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8, pauseAnim = null, isDay = true, phase = null, CONSTANTS = null, fadeOnTransition = true, chatMessages = null, dayCount = 0 }) => {
+const IDLE_VARIANTS = ['Idle', 'Idle2', 'Idle3', 'Idle4', 'Idle5', 'Idle6'];
+const DANCE_VARIANTS = ['Dance1', 'Dance2', 'Dance3'];
+
+// Deterministic pick from an array based on player ID string
+const pickForPlayer = (playerId, variants) => {
+  let hash = 0;
+  for (let i = 0; i < (playerId || '').length; i++) hash = (hash * 31 + playerId.charCodeAt(i)) | 0;
+  return variants[Math.abs(hash) % variants.length];
+};
+
+const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, isVoteTarget, onVote, voteCount, totalAlive, showJudgment, onJudge, startPosition, isTransitioning, transitionDuration = 3, characterScale = 0.8, pauseAnim = null, isDay = true, phase = null, CONSTANTS = null, fadeOnTransition = true, chatMessages = null, dayCount = 0, isGameOver = false, isWinningTeam = false }) => {
   const groupRef = useRef();
   const transitionStartTime = useRef(null);
   const walkStarted = useRef(false);
-  const [currentAnim, setCurrentAnim] = useState('Idle');
+
+  // Stable random idle & dance per player (deterministic from ID)
+  const playerIdle = useMemo(() => pickForPlayer(player.id, IDLE_VARIANTS), [player.id]);
+  const playerDance = useMemo(() => pickForPlayer(player.id + '_dance', DANCE_VARIANTS), [player.id]);
+
+  const [currentAnim, setCurrentAnim] = useState(playerIdle);
 
   useEffect(() => {
     if (isTransitioning && startPosition && !walkStarted.current) {
-      // Only start walk ONCE per transition cycle
       walkStarted.current = true;
       transitionStartTime.current = null;
       setCurrentAnim('Walk');
     }
     if (!isTransitioning) {
       walkStarted.current = false;
-      setCurrentAnim('Idle');
+      setCurrentAnim(playerIdle);
     }
-  }, [isTransitioning]);
+  }, [isTransitioning, playerIdle]);
+
+  // Victory dance when game ends for winning team
+  useEffect(() => {
+    if (isGameOver && isWinningTeam) {
+      setCurrentAnim(playerDance);
+    }
+  }, [isGameOver, isWinningTeam, playerDance]);
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -1972,7 +1993,7 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
 
       // End walk animation when done
       if (t >= 1 && currentAnim === 'Walk') {
-        setCurrentAnim('Idle');
+        setCurrentAnim(isGameOver && isWinningTeam ? playerDance : playerIdle);
       }
     } else {
       // Stay grounded (no floating)
@@ -2077,34 +2098,60 @@ const PlayerFigure = ({ player, position, rotation, color, isAccused, showVote, 
 };
 
 // ============================================================
-// Dead Player — Character with Death animation + ghost orb
+// Dead Player — Character with DeadPose (last frame = on ground) + ghost orb
+// Fades out when discussion starts
 // ============================================================
-const DeadPlayerFigure = ({ player, position }) => (
-  <group position={position}>
-    <Character
-      color="#555555"
-      animation="Death"
-      weapon="Knife_1"
-      scale={0.65}
-    />
-    <GhostOrb position={[0, 2, 0]} />
-    <Html position={[0, 2.4, 0]} center distanceFactor={8} zIndexRange={[15, 1]}>
-      <div style={{
-        color: '#888899',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: '3px 10px',
-        borderRadius: '5px',
-        fontSize: '17px',
-        fontWeight: 'bold',
-        whiteSpace: 'nowrap',
-        textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-        opacity: 0.7,
-      }}>
-        {player.profile.name}
-      </div>
-    </Html>
-  </group>
-);
+const DeadPlayerFigure = ({ player, position, fading = false }) => {
+  const groupRef = useRef();
+  const fadeStart = useRef(null);
+
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    if (fading) {
+      if (fadeStart.current === null) fadeStart.current = state.clock.elapsedTime;
+      const elapsed = state.clock.elapsedTime - fadeStart.current;
+      const opacity = Math.max(1 - elapsed / 2, 0); // 2s fade
+      groupRef.current.traverse((child) => {
+        if (child.isMesh && child.material) {
+          child.material.transparent = true;
+          child.material.opacity = opacity;
+        }
+      });
+    } else {
+      fadeStart.current = null;
+    }
+  });
+
+  return (
+    <group position={position}>
+      <group ref={groupRef}>
+        <Character
+          color="#555555"
+          animation="DeadPose"
+          scale={0.65}
+        />
+      </group>
+      {!fading && <GhostOrb position={[0, 2, 0]} />}
+      {!fading && (
+        <Html position={[0, 2.4, 0]} center distanceFactor={8} zIndexRange={[15, 1]}>
+          <div style={{
+            color: '#888899',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: '3px 10px',
+            borderRadius: '5px',
+            fontSize: '17px',
+            fontWeight: 'bold',
+            whiteSpace: 'nowrap',
+            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+            opacity: 0.7,
+          }}>
+            {player.profile.name}
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+};
 
 // ============================================================
 // Admin Free-Roam Camera — ZQSD + mouse look
@@ -2494,6 +2541,7 @@ const MainScene = () => {
   const [adminCharScale] = useMultiplayerState('adminCharScale', 0.8);
   const characterScale = adminCharScale || 0.8;
   const isPaused = !!game.adminFreeRoam;
+  const isGameOver = game.status === CONSTANTS.GAME_ENDED;
   const alivePlayers = players.filter((p) => p.isAlive);
   const deadPlayers = players.filter((p) => !p.isAlive);
 
@@ -2519,6 +2567,24 @@ const MainScene = () => {
   const [nightAmbianceMsg, setNightAmbianceMsg] = useState(null);
   const [showDeathReport, setShowDeathReport] = useState(false);
   const [showBloodEffect, setShowBloodEffect] = useState(false);
+  const [fadingDead, setFadingDead] = useState(false);
+  const [hideDead, setHideDead] = useState(false);
+  const prevPhaseForDead = useRef(null);
+
+  // Dead bodies: show during DEATH_REPORT, fade out when it ends, hide after fade
+  useEffect(() => {
+    const prev = prevPhaseForDead.current;
+    prevPhaseForDead.current = phase;
+    if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
+      setFadingDead(false);
+      setHideDead(false);
+    } else if (prev === CONSTANTS.PHASE.DEATH_REPORT) {
+      // Leaving death report → start fade
+      setFadingDead(true);
+      const t = setTimeout(() => { setFadingDead(false); setHideDead(true); }, 2500);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
   const fadeTimerRef = useRef(null);
   const lastPhaseForFade = useRef(phase);
 
@@ -2664,7 +2730,7 @@ const MainScene = () => {
   const dayPositions = useMemo(() => {
     const positions = {};
     // Tightened circle — players stand closer to the plaza center
-    const circleRadius = 3.3;
+    const circleRadius = 4.0;
     alivePlayers.forEach((p, i) => {
       const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
       positions[p.id] = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
@@ -2733,7 +2799,7 @@ const MainScene = () => {
     const positions = {};
     // Tightened circle — matches dayPositions so discussion/voting phases
     // keep the same layout as the walk-away start position.
-    const circleRadius = 3.3;
+    const circleRadius = 4.0;
 
     if (phase === CONSTANTS.PHASE.NIGHT) {
       alivePlayers.forEach((p, i) => {
@@ -2927,18 +2993,21 @@ const MainScene = () => {
                 CONSTANTS={CONSTANTS}
                 chatMessages={chatMessages}
                 dayCount={game.dayCount}
+                isGameOver={isGameOver}
+                isWinningTeam={isGameOver && (player.character?.team === game.winner)}
               />
             );
           })}
 
-          {/* Dead Players */}
-          {deadPlayers.map((player) => {
+          {/* Dead Players — visible during DEATH_REPORT, fade out after */}
+          {!hideDead && deadPlayers.map((player) => {
             const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
             return (
               <DeadPlayerFigure
                 key={player.id}
                 player={player}
                 position={pData.position}
+                fading={fadingDead}
               />
             );
           })}

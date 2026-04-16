@@ -12,7 +12,7 @@ export function Character({
   const group = useRef();
   const origMaterials = useRef(new Map());
 
-  // Load the 5 GLBs (mesh + 1 animation each)
+  // Load all GLBs (mesh + 1 animation each)
   const idle = useGLTF('/models/Villager_Idle.glb');
   const dead = useGLTF('/models/Villager_Dead.glb');
   const walk = useGLTF('/models/Villager_Walk.glb');
@@ -20,6 +20,17 @@ export function Character({
   const jump = useGLTF('/models/Villager_Jump.glb');
   const sitCross = useGLTF('/models/Villager_SitCross.glb');
   const lieDown = useGLTF('/models/Villager_LieDown.glb');
+  const deadPose = useGLTF('/models/Villager_DeadPose.glb');
+  // Dance animations (victory)
+  const dance1 = useGLTF('/models/Villager_Dance1.glb');
+  const dance2 = useGLTF('/models/Villager_Dance2.glb');
+  const dance3 = useGLTF('/models/Villager_Dance3.glb');
+  // Extra idle variations
+  const idle2 = useGLTF('/models/Villager_Idle2.glb');
+  const idle3 = useGLTF('/models/Villager_Idle3.glb');
+  const idle4 = useGLTF('/models/Villager_Idle4.glb');
+  const idle5 = useGLTF('/models/Villager_Idle5.glb');
+  const idle6 = useGLTF('/models/Villager_Idle6.glb');
 
   // Clone the base mesh from idle (all files share the same mesh/skeleton)
   const clone = useMemo(() => SkeletonUtils.clone(idle.scene), [idle.scene]);
@@ -41,8 +52,19 @@ export function Character({
     addAnim(jump, 'Jump');
     addAnim(sitCross, 'SitCross');
     addAnim(lieDown, 'LieDown');
+    addAnim(deadPose, 'DeadPose');
+    addAnim(dance1, 'Dance1');
+    addAnim(dance2, 'Dance2');
+    addAnim(dance3, 'Dance3');
+    addAnim(idle2, 'Idle2');
+    addAnim(idle3, 'Idle3');
+    addAnim(idle4, 'Idle4');
+    addAnim(idle5, 'Idle5');
+    addAnim(idle6, 'Idle6');
     return anims;
-  }, [idle.animations, dead.animations, walk.animations, run.animations, jump.animations, sitCross.animations, lieDown.animations]);
+  }, [idle.animations, dead.animations, walk.animations, run.animations, jump.animations, sitCross.animations, lieDown.animations, deadPose.animations,
+      dance1.animations, dance2.animations, dance3.animations,
+      idle2.animations, idle3.animations, idle4.animations, idle5.animations, idle6.animations]);
 
   const { actions } = useAnimations(allAnimations, group);
 
@@ -51,6 +73,11 @@ export function Character({
     actions['Death'].loop = LoopOnce;
     actions['Death'].clampWhenFinished = true;
   }
+  // DeadPose: skip to last frame immediately (body already on ground)
+  if (actions['DeadPose']) {
+    actions['DeadPose'].loop = LoopOnce;
+    actions['DeadPose'].clampWhenFinished = true;
+  }
 
   useEffect(() => {
     // Fallback: if requested animation doesn't exist, use Idle
@@ -58,8 +85,11 @@ export function Character({
     const action = actions[anim];
     if (action) {
       action.reset().fadeIn(0.2).play();
-      // Offset animation time so characters aren't all in sync
-      if (animOffset && action.time !== undefined) {
+      // DeadPose: jump to last frame so the body is already on the ground
+      if (anim === 'DeadPose') {
+        action.time = action.getClip().duration;
+      } else if (animOffset && action.time !== undefined) {
+        // Offset animation time so characters aren't all in sync
         action.time = animOffset;
       }
       return () => action.fadeOut(0.2);
@@ -142,3 +172,12 @@ useGLTF.preload('/models/Villager_Run.glb');
 useGLTF.preload('/models/Villager_Jump.glb');
 useGLTF.preload('/models/Villager_SitCross.glb');
 useGLTF.preload('/models/Villager_LieDown.glb');
+useGLTF.preload('/models/Villager_DeadPose.glb');
+useGLTF.preload('/models/Villager_Dance1.glb');
+useGLTF.preload('/models/Villager_Dance2.glb');
+useGLTF.preload('/models/Villager_Dance3.glb');
+useGLTF.preload('/models/Villager_Idle2.glb');
+useGLTF.preload('/models/Villager_Idle3.glb');
+useGLTF.preload('/models/Villager_Idle4.glb');
+useGLTF.preload('/models/Villager_Idle5.glb');
+useGLTF.preload('/models/Villager_Idle6.glb');
