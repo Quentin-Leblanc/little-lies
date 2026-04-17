@@ -9,6 +9,7 @@ import {
   sanitizeTrial as pureSanitizeTrial,
   trialsEqual,
 } from './gameRules';
+import { computeNextPhase } from './phaseTransitions';
 import { resolveDisconnects, resolveAFK } from './playerLifecycle';
 import i18n from '../trad/i18n';
 
@@ -605,105 +606,68 @@ export const GameEngineProvider = ({ children }) => {
   const dur = (phase) => getDuration(game, phase);
 
   // --- Phase transitions ---
+  // The transition table lives in phaseTransitions.js as a pure function
+  // so the rules can be tested exhaustively. This wrapper resolves the
+  // pre-transition checks (win, majority, judgment) and applies the
+  // side-effect list returned by the pure function.
   const transitionPhase = () => {
     const winner = checkWinCondition();
     if (winner) { endGame(winner); return; }
 
     const currentPhase = game.phase;
-    let nextGame = { ...game };
 
-    switch (currentPhase) {
-      case PHASE.NIGHT:
-        // Disconnects are now handled continuously (every 3s) — no need to check here
-        nextGame = { ...nextGame, phase: PHASE.DEATH_REPORT, timer: dur('DEATH_REPORT'), isDay: true, dayCount: game.dayCount + 1, trialsToday: 0, accusedId: null, skipVotes: [] };
-        break;
+    // Build a DURATIONS object that respects host config overrides, so the
+    // pure function doesn't need to know about game.config.
+    const resolvedDurations = Object.keys(DURATIONS).reduce((acc, k) => {
+      acc[k] = getDuration(game, k);
+      return acc;
+    }, {});
 
-      case PHASE.DEATH_REPORT:
-        nextGame = { ...nextGame, phase: PHASE.DISCUSSION, timer: dur('DISCUSSION') };
-        break;
+    const context = {
+      game,
+      trial,
+      accusedIfMajority: currentPhase === PHASE.VOTING ? checkVotingMajority() : null,
+      judgmentResult: currentPhase === PHASE.JUDGMENT ? resolveJudgment() : null,
+      PHASE,
+      DURATIONS: resolvedDurations,
+      MAX_TRIALS_PER_DAY,
+      t: i18n.t.bind(i18n),
+    };
 
-      case PHASE.DISCUSSION:
-        resetTrial();
-        nextGame = { ...nextGame, phase: PHASE.VOTING, timer: dur('VOTING'), skipVotes: [] };
-        break;
+    const { gameDelta, sideEffects } = computeNextPhase(currentPhase, context);
 
-      case PHASE.VOTING: {
-        const accusedId = checkVotingMajority();
-        if (accusedId && game.trialsToday < MAX_TRIALS_PER_DAY) {
-          nextGame = { ...nextGame, phase: PHASE.DEFENSE, timer: dur('DEFENSE'), accusedId, trialsToday: game.trialsToday + 1 };
-        } else {
-          // No majority → show NO_LYNCH announcement then go to night
-          Events.add({ type: 'NO_LYNCH', content: { chatMessage: '' }, displayed: true });
+    // Apply side effects in order. Kinds are documented in phaseTransitions.js.
+    for (const effect of sideEffects) {
+      switch (effect.kind) {
+        case 'resetTrial':
           resetTrial();
-          nextGame = { ...nextGame, phase: PHASE.NO_LYNCH, timer: dur('NO_LYNCH'), accusedId: null };
+          break;
+        case 'clearVotesKeepSuspects':
+          setTrial({ ...trial, votes: {} });
+          break;
+        case 'addEvent':
+          Events.add(effect.event);
+          break;
+        case 'addChat':
+          addChatSystem(effect.content, effect.color);
+          break;
+        case 'executeAccused':
+          executeAccused();
+          break;
+        case 'endGameIfWinner': {
+          const w = checkWinCondition();
+          if (w) { endGame(w); return; }
+          break;
         }
-        break;
+        default:
+          break;
       }
-
-      case PHASE.NO_LYNCH:
-        // After announcement, go to night transition
-        nextGame = { ...nextGame, phase: PHASE.NIGHT_TRANSITION, timer: dur('NIGHT_TRANSITION'), accusedId: null };
-        break;
-
-      case PHASE.NIGHT_TRANSITION:
-        // Visual fade done, start actual night
-        nextGame = { ...nextGame, phase: PHASE.NIGHT, timer: dur('NIGHT'), isDay: false };
-        break;
-
-      case PHASE.DEFENSE:
-        setTrial({ ...trial, votes: {} });
-        nextGame = { ...nextGame, phase: PHASE.JUDGMENT, timer: dur('JUDGMENT') };
-        break;
-
-      case PHASE.JUDGMENT: {
-        const { innocentCount, majority, isGuilty } = resolveJudgment();
-        const resultMsg = isGuilty
-          ? i18n.t('game:system.judgment_guilty', { guilty: '-', innocent: innocentCount })
-          : i18n.t('game:system.judgment_acquitted', { guilty: '-', innocent: innocentCount });
-        addChatSystem(resultMsg, isGuilty ? '#ff4444' : '#78ff78');
-        Events.add({ type: 'JUDGMENT_RESULT', content: { chatMessage: resultMsg }, displayed: true });
-
-        if (isGuilty) {
-          nextGame = { ...nextGame, phase: PHASE.LAST_WORDS, timer: dur('LAST_WORDS') };
-        } else {
-          // Spared → show announcement then go to night
-          nextGame = { ...nextGame, phase: PHASE.SPARED, timer: dur('SPARED') };
-        }
-        break;
-      }
-
-      case PHASE.SPARED: {
-        // After spared announcement, go to night transition
-        resetTrial();
-        nextGame = { ...nextGame, phase: PHASE.NIGHT_TRANSITION, timer: dur('NIGHT_TRANSITION'), accusedId: null };
-        break;
-      }
-
-      case PHASE.LAST_WORDS:
-        nextGame = { ...nextGame, phase: PHASE.EXECUTION, timer: dur('EXECUTION') };
-        break;
-
-      case PHASE.EXECUTION:
-        executeAccused();
-        const winnerAfterExec = checkWinCondition();
-        if (winnerAfterExec) { endGame(winnerAfterExec); return; }
-        // After execution, reveal the role before heading to night
-        // (accusedId kept so the reveal overlay knows who was lynched)
-        resetTrial();
-        nextGame = { ...nextGame, phase: PHASE.EXECUTION_REVEAL, timer: dur('EXECUTION_REVEAL') };
-        break;
-
-      case PHASE.EXECUTION_REVEAL:
-        nextGame = { ...nextGame, phase: PHASE.NIGHT_TRANSITION, timer: dur('NIGHT_TRANSITION'), accusedId: null };
-        break;
-
-      default: break;
     }
 
     // Clear the tally delay marker on every transition — it was set by the
     // main loop when timer hit 0 in VOTING/JUDGMENT, and a new phase resets
     // the buffer state for the next vote.
-    setGame({ ...nextGame, phaseStartedAt: Date.now(), tallyDelayedFor: null });
+    setGame({ ...game, ...gameDelta, phaseStartedAt: Date.now(), tallyDelayedFor: null });
   };
 
   // --- Main game loop (host only) ---
