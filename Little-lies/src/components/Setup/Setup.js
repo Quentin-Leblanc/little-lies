@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import './Setup.scss';
 import Roles from './Roles';
 import GameConfig from '../GameConfig/GameConfig';
+import { LobbyChat } from '../CustomLobby/CustomLobby';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { getRoles } from '../../data/roles.js';
 
@@ -95,7 +96,7 @@ const Setup = () => {
           <div className="setup-header-right">
             <div className="setup-host-badge">
               <i className="fas fa-crown"></i>
-              <span>{hostName}</span>
+              <span>Host : {hostName}</span>
             </div>
             <div className="setup-players-badge">
               <i className="fas fa-users"></i>
@@ -186,6 +187,9 @@ const Setup = () => {
           )}
         </div>
       </div>
+
+      {/* Persistent chat — same multiplayer state as the lobby */}
+      <LobbyChat />
     </div>
   );
 };

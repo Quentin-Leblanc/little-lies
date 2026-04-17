@@ -3,6 +3,7 @@ import { useMultiplayerState, me as prk_me } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../trad/i18n';
 import { useGameEngine } from '../../hooks/useGameEngine';
+import Audio from '../../utils/AudioManager';
 import './chat.scss';
 
 const MESSAGE_LIMIT = 5;
@@ -32,6 +33,22 @@ function Chat(props) {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+  }, [messages]);
+
+  // Play chat sound whenever a new message appears (votes, system, player).
+  // Inspects only freshly-appended entries so re-renders don't retrigger.
+  // First mount is silent — we don't ding for the backlog.
+  const prevMsgCountRef = useRef(null);
+  useEffect(() => {
+    const current = messages || [];
+    if (prevMsgCountRef.current === null) {
+      prevMsgCountRef.current = current.length;
+      return;
+    }
+    if (current.length > prevMsgCountRef.current) {
+      Audio.playChatMessage();
+    }
+    prevMsgCountRef.current = current.length;
   }, [messages]);
 
   // Open input on Enter key (global)
@@ -283,7 +300,7 @@ function Chat(props) {
   const isDead = me && !me.isAlive;
   const isNight = game.phase === CONSTANTS.PHASE.NIGHT;
   const isDefensePhase = game.phase === CONSTANTS.PHASE.DEFENSE || game.phase === CONSTANTS.PHASE.LAST_WORDS;
-  const isAnnouncementPhase = game.phase === CONSTANTS.PHASE.NO_LYNCH || game.phase === CONSTANTS.PHASE.SPARED || game.phase === CONSTANTS.PHASE.EXECUTION;
+  const isAnnouncementPhase = game.phase === CONSTANTS.PHASE.NO_LYNCH || game.phase === CONSTANTS.PHASE.SPARED || game.phase === CONSTANTS.PHASE.EXECUTION || game.phase === CONSTANTS.PHASE.EXECUTION_REVEAL;
   const isAccused = me?.id === game.accusedId;
   const isBlackmailed = me?.isBlackmailed && game.isDay;
   const isMutedByPhase = (isDefensePhase && !isAccused && !isDead) || isAnnouncementPhase;

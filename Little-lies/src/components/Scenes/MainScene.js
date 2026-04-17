@@ -7,6 +7,7 @@ import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { Character, skinForPlayer } from '../Character/Character';
+import Audio from '../../utils/AudioManager';
 import i18n from '../../trad/i18n';
 import './MainScene.scss';
 
@@ -414,9 +415,11 @@ const VillageCenter = ({ isTrialPhase }) => (
 // JUDGMENT / LAST_WORDS / EXECUTION for dramatic tension.
 // ============================================================
 // Camera targets relative to podium at [7, 0, -6]
-const DEFENSE_CAMERA_LOOK = new THREE.Vector3(7, 1.2, -6);      // accused chest height at podium
-const JUDGMENT_CAMERA_POS = new THREE.Vector3(4.5, 2, -4);       // front of podium, facing accused
-const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(7, 1.2, -6);     // accused at podium
+// Raised Y + pulled lookAt down → more top-down framing so the distant
+// mountains / horizon stay out of frame during trial phases.
+const DEFENSE_CAMERA_LOOK = new THREE.Vector3(7, 0.6, -6);      // low on podium, pulls view down
+const JUDGMENT_CAMERA_POS = new THREE.Vector3(5.5, 5, -4.2);     // higher front-of-podium angle
+const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(7, 0.8, -6);     // looking down at podium
 const EXECUTION_CAMERA_POS = new THREE.Vector3(7, 6, -10);      // overhead dramatic above podium
 const EXECUTION_CAMERA_LOOK = new THREE.Vector3(7, 0.5, -6);    // looking down at podium
 
@@ -841,26 +844,26 @@ const BUILDING_POSITIONS = [
 // Background mountains — procedural cones
 const MOUNTAINS = [
   // North
-  { position: [0, 0, -30],   scale: 5, variant: 0 },
-  { position: [-15, 0, -28], scale: 3.5, variant: 7 },
-  { position: [15, 0, -28],  scale: 4, variant: 8 },
+  { position: [0, 0, -50],   scale: 5, variant: 0 },
+  { position: [-25, 0, -48], scale: 3.5, variant: 7 },
+  { position: [25, 0, -48],  scale: 4, variant: 8 },
   // Northwest / Northeast
-  { position: [-25, 0, -20], scale: 4, variant: 1 },
-  { position: [25, 0, -20],  scale: 4.5, variant: 2 },
+  { position: [-42, 0, -34], scale: 4, variant: 1 },
+  { position: [42, 0, -34],  scale: 4.5, variant: 2 },
   // West / East
-  { position: [-30, 0, 0],   scale: 3.5, variant: 3 },
-  { position: [30, 0, 0],    scale: 3.5, variant: 4 },
-  { position: [-32, 0, -10], scale: 3, variant: 9 },
-  { position: [32, 0, -10],  scale: 3, variant: 10 },
+  { position: [-50, 0, 0],   scale: 3.5, variant: 3 },
+  { position: [50, 0, 0],    scale: 3.5, variant: 4 },
+  { position: [-54, 0, -17], scale: 3, variant: 9 },
+  { position: [54, 0, -17],  scale: 3, variant: 10 },
   // Southwest / Southeast
-  { position: [-25, 0, 18],  scale: 4, variant: 5 },
-  { position: [25, 0, 18],   scale: 4, variant: 6 },
-  { position: [-30, 0, 10],  scale: 3, variant: 11 },
-  { position: [30, 0, 10],   scale: 3, variant: 12 },
+  { position: [-42, 0, 30],  scale: 4, variant: 5 },
+  { position: [42, 0, 30],   scale: 4, variant: 6 },
+  { position: [-50, 0, 17],  scale: 3, variant: 11 },
+  { position: [50, 0, 17],   scale: 3, variant: 12 },
   // South — fill the gap
-  { position: [0, 0, 28],    scale: 4.5, variant: 13 },
-  { position: [-15, 0, 25],  scale: 3.5, variant: 14 },
-  { position: [15, 0, 25],   scale: 3.5, variant: 15 },
+  { position: [0, 0, 48],    scale: 4.5, variant: 13 },
+  { position: [-25, 0, 42],  scale: 3.5, variant: 14 },
+  { position: [25, 0, 42],   scale: 3.5, variant: 15 },
 ];
 
 const TORCH_POS = [
@@ -2498,23 +2501,24 @@ const CameraController = ({ phase, CONSTANTS }) => {
       defenseTimeRef.current += delta;
 
       if (isDefensePhase) {
-        // Slow orbit around the accused at the podium — dramatic reveal
+        // Slow orbit around the accused at the podium — dramatic reveal.
+        // Higher Y + tighter radius = more top-down framing, less horizon.
         const orbitT = defenseTimeRef.current * 0.15;
-        const radius = 4;
+        const radius = 3.2;
         const px = PODIUM_POSITION[0];
         const pz = PODIUM_POSITION[2];
         const cx = px + Math.sin(orbitT) * radius;
         const cz = pz + Math.cos(orbitT) * radius * 0.6;
-        targetPos.current.set(cx, 2.8, cz);
+        targetPos.current.set(cx, 5.2, cz);
         targetLookAt.current.copy(DEFENSE_CAMERA_LOOK);
       } else if (isJudgmentPhase) {
-        // Front of podium — see only the accused
+        // Front of podium — see only the accused (elevated angle)
         targetPos.current.copy(JUDGMENT_CAMERA_POS);
         targetLookAt.current.copy(JUDGMENT_CAMERA_LOOK);
       } else if (isLastWords) {
-        // Close-up, intimate angle for last words — near the podium
-        targetPos.current.set(5, 2, -4.5);
-        targetLookAt.current.set(7, 1.4, -6);
+        // Close-up, intimate angle for last words — near the podium, more top-down
+        targetPos.current.set(5.8, 4.5, -4.8);
+        targetLookAt.current.set(7, 0.8, -6);
       } else if (isExecution) {
         // Overhead dramatic shot
         targetPos.current.copy(EXECUTION_CAMERA_POS);
@@ -2758,7 +2762,7 @@ const MainScene = () => {
   const lastPhaseForFade = useRef(phase);
 
   // Phases that lead directly to night (last phases before night falls)
-  const PRE_NIGHT_PHASES = [CONSTANTS.PHASE.NO_LYNCH, CONSTANTS.PHASE.SPARED, CONSTANTS.PHASE.EXECUTION, CONSTANTS.PHASE.NIGHT_TRANSITION];
+  const PRE_NIGHT_PHASES = [CONSTANTS.PHASE.NO_LYNCH, CONSTANTS.PHASE.SPARED, CONSTANTS.PHASE.EXECUTION, CONSTANTS.PHASE.EXECUTION_REVEAL, CONSTANTS.PHASE.NIGHT_TRANSITION];
   const fadeTimers = useRef([]);
   const walkTimer = useRef(null);
 
@@ -2872,7 +2876,16 @@ const MainScene = () => {
       const t1 = setTimeout(() => setShowDayText(false), 3000);
       // Blood effect + death names take over
       const t2 = setTimeout(() => setShowBloodEffect(true), 3000);
-      const t3 = setTimeout(() => setShowDeathReport(true), 3300);
+      const t3 = setTimeout(() => {
+        setShowDeathReport(true);
+        // Church bell — only if someone actually died this day
+        const killEvents = (events || []).filter(
+          (e) => (e.type === 'KILL_RESULT' || e.type === 'disconnect') &&
+                 e.dayCount === game.dayCount &&
+                 e.content?.chatMessage
+        );
+        if (killEvents.length > 0) Audio.playDeathBell();
+      }, 3300);
       return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
     } else {
       setShowDeathReport(false);
@@ -3235,6 +3248,39 @@ const MainScene = () => {
               <div className="blood-drip" />
               <div className="blood-drip" />
               <div className="blood-drip" />
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Lynch role reveal overlay — post-execution suspense moment */}
+      {phase === CONSTANTS.PHASE.EXECUTION_REVEAL && (() => {
+        const executed = players.find((p) => p.id === game.accusedId);
+        if (!executed?.character) return null;
+        const role = executed.character;
+        const teamLabel = i18n.t(`game:teams.${role.team}.short`, { defaultValue: role.team });
+        const roleLabel = i18n.t(`roles:${role.key}.label`, { defaultValue: role.label });
+        return (
+          <div className="lynch-reveal-overlay">
+            <div
+              className="lynch-reveal-halo"
+              style={{
+                background: `radial-gradient(ellipse at center, ${role.couleur}88 0%, ${role.couleur}44 25%, ${role.couleur}1c 50%, transparent 75%)`,
+              }}
+            />
+            <div
+              className="lynch-reveal-card"
+              style={{
+                borderColor: role.couleur,
+                boxShadow: `0 0 40px ${role.couleur}55, 0 0 100px ${role.couleur}2a`,
+              }}
+            >
+              <div className="lynch-reveal-name">{executed.profile?.name || 'Player'}</div>
+              <div className="lynch-reveal-team" style={{ color: role.couleur }}>{teamLabel}</div>
+              <div className="lynch-reveal-icon" style={{ color: role.couleur }}>
+                <i className={`fas ${role.icon}`}></i>
+              </div>
+              <div className="lynch-reveal-role" style={{ color: role.couleur }}>{roleLabel}</div>
             </div>
           </div>
         );

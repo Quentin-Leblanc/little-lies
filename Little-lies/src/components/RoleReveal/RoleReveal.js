@@ -297,6 +297,13 @@ const RoleReveal = ({ onComplete }) => {
           animate={{ rotateY: 0, opacity: 1, scale: 1 }}
           transition={{ duration: 0.9, ease: 'easeOut' }}
         >
+          {/* Diffuse halo behind the card, colored by role */}
+          <div
+            className="card-halo"
+            style={{
+              background: `radial-gradient(ellipse at center, ${role.couleur}88 0%, ${role.couleur}44 25%, ${role.couleur}1c 50%, transparent 75%)`,
+            }}
+          />
           <CardParticles color={role.couleur} />
           <div className="card-inner" style={{ borderColor: role.couleur, '--glow-color': `${role.couleur}20` }}>
             <div className="card-glow-ring" style={{ boxShadow: `0 0 60px ${role.couleur}30, 0 0 120px ${role.couleur}15` }} />

@@ -1,5 +1,11 @@
 @import '../styles/variables';
 
+// ── Custom medieval gold cursors ──
+// Inline SVG via data URI — no asset file. Hotspot at (3, 3), the tip of the arrow.
+$cursor-default: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><path d='M3 3 L3 22 L8 17 L11.5 25 L14.5 24 L11 16 L18 16 Z' fill='%23c9a45a' stroke='%231a1108' stroke-width='1.2' stroke-linejoin='round'/></svg>") 3 3, default;
+
+$cursor-pointer: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><path d='M3 3 L3 22 L8 17 L11.5 25 L14.5 24 L11 16 L18 16 Z' fill='%23f3cc74' stroke='%231a1108' stroke-width='1.2' stroke-linejoin='round'/></svg>") 3 3, pointer;
+
 body, html {
     height: 100%;
     margin: 0;
@@ -7,6 +13,45 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: $cursor-default;
+}
+
+// Interactive elements get the brighter pointer variant
+button,
+a,
+[role='button'],
+label[for],
+select,
+summary,
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'],
+input[type='color'],
+input[type='submit'],
+input[type='button'],
+input[type='reset'],
+.clickable {
+    cursor: $cursor-pointer;
+}
+
+// Keep native text cursor where typing happens
+input[type='text'],
+input[type='password'],
+input[type='email'],
+input[type='number'],
+input[type='search'],
+input[type='tel'],
+input[type='url'],
+textarea,
+[contenteditable='true'] {
+    cursor: text;
+}
+
+// Disabled elements keep not-allowed (respect existing explicit rules)
+button:disabled,
+a[aria-disabled='true'],
+[role='button'][aria-disabled='true'] {
+    cursor: not-allowed;
 }
 
 html {

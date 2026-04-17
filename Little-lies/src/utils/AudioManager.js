@@ -117,6 +117,16 @@ export const playVote = () => {
   playFile('/sounds/vote.wav', 0.7);
 };
 
+/** Vote chat message appears — short click (Denielcz / Pixabay) */
+export const playVoteClick = () => {
+  playFile('/sounds/vote-click.mp3', 0.55);
+};
+
+/** Morning death report — old church bell (Pixabay Freesound Community) */
+export const playDeathBell = () => {
+  playFile('/sounds/death-bell.mp3', 0.6);
+};
+
 /** Death / execution — chop */
 export const playDeath = () => {
   playFile('/sounds/chop.ogg', 0.8);
@@ -136,9 +146,9 @@ export const playActionSelect = () => {
   playFile('/sounds/click3.ogg', 0.5);
 };
 
-/** Chat message — trimmed, short */
+/** Chat message — plays the full sound, no trimming */
 export const playChatMessage = () => {
-  playFile('/sounds/chat.mp3', 0.4, { trim: true, maxDur: 0.5 });
+  playFile('/sounds/chat.mp3', 0.45);
 };
 
 /** Door close — night transition */
@@ -162,34 +172,52 @@ export const playTick = () => {
 };
 
 // --- Looping music (lobby) ---
+// Playlist: plays track 1 → 2 → 3 → 1 → ... (chained via `source.onended`).
 // Token-based guard: protects against double-play from React StrictMode double-mounts,
 // rapid repeated calls (initial attempt + autoplay-unlock listener firing), and
-// stop()-during-inflight-start races. Each stop() invalidates any pending start.
+// stop()-during-inflight-start races. Each stop() invalidates the pending chain.
+const LOBBY_PLAYLIST = [
+  '/sounds/lobby-medieval-ambient.ogg',
+  '/sounds/lobby-tavern-ambient.ogg',
+  '/sounds/lobby-dungeon-synth.ogg',
+];
 let _lobbySource = null;
 let _lobbyGain = null;
 let _lobbyToken = 0;
 
-export const playLobbyMusic = async (url = '/sounds/deuslower-medieval-ambient-236809.mp3', volume = 0.5) => {
-  if (_lobbySource) return;
-  const myToken = ++_lobbyToken;
+const _loadBuffer = async (ctx, url) => {
+  let buffer = audioCache[url];
+  if (!buffer) {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    buffer = await ctx.decodeAudioData(arrayBuffer);
+    audioCache[url] = buffer;
+  }
+  return buffer;
+};
+
+const _playLobbyTrack = async (token, index, volume) => {
+  if (token !== _lobbyToken) return;
   try {
     const ctx = getCtx();
-    let buffer = audioCache[url];
-    if (!buffer) {
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      buffer = await ctx.decodeAudioData(arrayBuffer);
-      audioCache[url] = buffer;
-    }
-    // Bail if a newer call superseded us or if another start already landed
-    if (myToken !== _lobbyToken || _lobbySource) return;
+    const buffer = await _loadBuffer(ctx, LOBBY_PLAYLIST[index]);
+    if (token !== _lobbyToken) return;
+
     const source = ctx.createBufferSource();
     const gain = ctx.createGain();
     gain.gain.value = volume;
     source.buffer = buffer;
-    source.loop = true;
     source.connect(gain);
     gain.connect(getGain());
+
+    source.onended = () => {
+      // Ignore if we were stopped or superseded
+      if (token !== _lobbyToken) return;
+      if (_lobbySource === source) { _lobbySource = null; _lobbyGain = null; }
+      const next = (index + 1) % LOBBY_PLAYLIST.length;
+      _playLobbyTrack(token, next, volume);
+    };
+
     source.start(0);
     _lobbySource = source;
     _lobbyGain = gain;
@@ -198,9 +226,16 @@ export const playLobbyMusic = async (url = '/sounds/deuslower-medieval-ambient-2
   }
 };
 
+export const playLobbyMusic = async (_unusedUrl, volume = 0.5) => {
+  if (_lobbySource) return;
+  const myToken = ++_lobbyToken;
+  _playLobbyTrack(myToken, 0, volume);
+};
+
 export const stopLobbyMusic = () => {
-  _lobbyToken++; // invalidate any in-flight start
+  _lobbyToken++; // invalidates the onended chain so the next track never starts
   if (_lobbySource) {
+    try { _lobbySource.onended = null; } catch {}
     try { _lobbySource.stop(); } catch {}
     try { _lobbySource.disconnect(); } catch {}
     try { _lobbyGain?.disconnect(); } catch {}
@@ -211,8 +246,9 @@ export const stopLobbyMusic = () => {
 
 export default {
   setVolume, getVolume, toggleMute, isMuted,
-  playNightStart, playDayStart, playVote, playDeath,
+  playNightStart, playDayStart, playVote, playVoteClick, playDeath,
   playExecution, playSpared, playActionSelect,
   playVictory, playDefeat, playTick, playChatMessage, playDoorClose,
+  playDeathBell,
   playLobbyMusic, stopLobbyMusic,
 };

@@ -17,6 +17,7 @@ const DURATIONS = {
   JUDGMENT: 15000,
   LAST_WORDS: 5000,
   EXECUTION: 3000,
+  EXECUTION_REVEAL: 5000,   // suspense reveal of the lynched player's role
   NO_LYNCH: 6000,
   SPARED: 5000,
 };
@@ -32,6 +33,7 @@ const PHASE = {
   JUDGMENT: 'JUDGMENT',
   LAST_WORDS: 'LAST_WORDS',
   EXECUTION: 'EXECUTION',
+  EXECUTION_REVEAL: 'EXECUTION_REVEAL',
   NO_LYNCH: 'NO_LYNCH',
   SPARED: 'SPARED',
 };
@@ -55,6 +57,7 @@ const PHASE_LABELS = {
   [PHASE.JUDGMENT]: 'Jugement',
   [PHASE.LAST_WORDS]: 'Derniers mots',
   [PHASE.EXECUTION]: 'Ex\u00e9cution',
+  [PHASE.EXECUTION_REVEAL]: 'R\u00e9v\u00e9lation',
   [PHASE.NO_LYNCH]: 'Pas de lynchage',
   [PHASE.SPARED]: '\u00c9pargn\u00e9',
 };
@@ -70,12 +73,13 @@ const PHASE_ICONS = {
   [PHASE.JUDGMENT]: 'fa-scale-balanced',
   [PHASE.LAST_WORDS]: 'fa-scroll',
   [PHASE.EXECUTION]: 'fa-skull-crossbones',
+  [PHASE.EXECUTION_REVEAL]: 'fa-eye',
   [PHASE.NO_LYNCH]: 'fa-ban',
   [PHASE.SPARED]: 'fa-dove',
 };
 
-const DAY_PHASES = [PHASE.DEATH_REPORT, PHASE.DISCUSSION, PHASE.VOTING, PHASE.DEFENSE, PHASE.JUDGMENT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.NO_LYNCH, PHASE.SPARED];
-const INFO_PHASES = [PHASE.DEATH_REPORT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.NO_LYNCH, PHASE.SPARED, PHASE.NIGHT_TRANSITION];
+const DAY_PHASES = [PHASE.DEATH_REPORT, PHASE.DISCUSSION, PHASE.VOTING, PHASE.DEFENSE, PHASE.JUDGMENT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.EXECUTION_REVEAL, PHASE.NO_LYNCH, PHASE.SPARED];
+const INFO_PHASES = [PHASE.DEATH_REPORT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.EXECUTION_REVEAL, PHASE.NO_LYNCH, PHASE.SPARED, PHASE.NIGHT_TRANSITION];
 
 // Exported constants
 const CONSTANTS = {
@@ -710,8 +714,13 @@ export const GameEngineProvider = ({ children }) => {
         executeAccused();
         const winnerAfterExec = checkWinCondition();
         if (winnerAfterExec) { endGame(winnerAfterExec); return; }
-        // After execution, go to night transition
+        // After execution, reveal the role before heading to night
+        // (accusedId kept so the reveal overlay knows who was lynched)
         resetTrial();
+        nextGame = { ...nextGame, phase: PHASE.EXECUTION_REVEAL, timer: dur('EXECUTION_REVEAL') };
+        break;
+
+      case PHASE.EXECUTION_REVEAL:
         nextGame = { ...nextGame, phase: PHASE.NIGHT_TRANSITION, timer: dur('NIGHT_TRANSITION'), accusedId: null };
         break;
 

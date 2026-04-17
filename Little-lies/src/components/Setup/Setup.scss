@@ -299,6 +299,13 @@
     cursor: not-allowed;
   }
 
+  // Non-host viewers keep full visibility — no grey-out
+  &.is-viewer:disabled {
+    opacity: 1;
+    cursor: default;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
   i { font-size: 0.6rem; }
 }
 
@@ -344,6 +351,12 @@
   }
 
   &:disabled { cursor: default; }
+
+  // Non-host viewers keep full visibility — no grey-out
+  &.is-viewer:disabled {
+    opacity: 1;
+    color: rgba(255, 255, 255, 0.85);
+  }
 
   i:first-child { font-size: 0.6rem; }
 }

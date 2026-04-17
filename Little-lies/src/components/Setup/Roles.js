@@ -12,6 +12,7 @@ const Roles = () => {
   const { t } = useTranslation(['setup', 'game']);
   const { rolesAvailable, setRolesSelected, rolesSelected } = useGameEngine();
   const { length: nbPlayers } = usePlayersList(true);
+  const host = isHost();
 
   // Group available roles by team
   const rolesByTeam = {};
@@ -46,8 +47,8 @@ const Roles = () => {
                 {roles.map((role, index) => (
                   <button
                     key={`${role.key}-${index}`}
-                    className="role-pick-btn"
-                    disabled={rolesSelected.length >= nbPlayers || !isHost()}
+                    className={`role-pick-btn ${!host ? 'is-viewer' : ''}`}
+                    disabled={rolesSelected.length >= nbPlayers || !host}
                     onClick={() => addRole(role)}
                     title={role.description}
                     style={{ borderColor: role.couleur }}
@@ -70,14 +71,14 @@ const Roles = () => {
           {rolesSelected.map((role, index) => (
             <button
               key={`selected-${index}`}
-              className="role-selected-btn"
-              disabled={!isHost()}
+              className={`role-selected-btn ${!host ? 'is-viewer' : ''}`}
+              disabled={!host}
               onClick={() => removeRole(index)}
               style={{ borderColor: role.couleur }}
             >
               <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
               <span>{role.label}</span>
-              {isHost() && <i className="fas fa-times remove-icon"></i>}
+              {host && <i className="fas fa-times remove-icon"></i>}
             </button>
           ))}
         </div>

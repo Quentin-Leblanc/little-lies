@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Graveyard,
     Menu,
@@ -94,21 +95,37 @@ function App() {
         }
     }, [phase, isGameStarted]);
 
-    // Lobby (but not if game just ended — we want to show the overlay)
-    if (!isGameStarted && !isSelectingRoles && !isGameOver) {
+    // Pre-game: Lobby ↔ Setup with fade transition.
+    // Same status flip ('role_selection') drives the switch for all players,
+    // so host and guests see the transition at the same moment.
+    if (!isGameStarted && !isGameOver) {
         return (
             <div className="App">
-                <CustomLobby setIsSelectingRoles={setIsSelectingRoles} />
-            </div>
-        );
-    }
-
-    // Role selection
-    if (!isGameStarted && isSelectingRoles && !isGameOver) {
-        return (
-            <div className="App">
-                <StarryBackground />
-                <Setup />
+                <AnimatePresence mode="wait">
+                    {!isSelectingRoles ? (
+                        <motion.div
+                            key="lobby"
+                            initial={{ opacity: 1 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.7, ease: 'easeInOut' }}
+                            style={{ width: '100%', height: '100%' }}
+                        >
+                            <CustomLobby setIsSelectingRoles={setIsSelectingRoles} />
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="setup"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.45, ease: 'easeOut' }}
+                            style={{ width: '100%', height: '100%' }}
+                        >
+                            <StarryBackground />
+                            <Setup />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         );
     }

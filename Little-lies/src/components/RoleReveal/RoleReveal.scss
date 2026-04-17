@@ -284,6 +284,25 @@
 // Card
 .reveal-card {
   perspective: 800px;
+  position: relative;
+}
+
+// Diffuse colored halo that extends beyond the card (sits behind it)
+.card-halo {
+  position: absolute;
+  // Extend well beyond the card bounds so the glow feels ambient
+  inset: -55% -60%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(28px);
+  will-change: opacity, transform;
+  animation: card-halo-pulse 3.2s ease-in-out infinite;
+}
+
+@keyframes card-halo-pulse {
+  0%, 100% { opacity: 0.65; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.06); }
 }
 
 .card-inner {

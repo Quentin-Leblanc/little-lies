@@ -54,7 +54,25 @@ const Legal = ({ onClose }) => {
                   <strong>Medieval Ambient — DeusLower</strong>
                   <span className="legal-asset-role">{t('assets.music')}</span>
                 </div>
-                <a href="https://pixabay.com/music/ambient-deuslower-medieval-ambient-236809/" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
+                <a href="https://pixabay.com/users/deuslower-45666444/" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
+                  Pixabay <i className="fas fa-external-link-alt"></i>
+                </a>
+              </div>
+              <div className="credit-item legal-asset">
+                <div>
+                  <strong>Denielcz</strong>
+                  <span className="legal-asset-role">{t('assets.denielcz')}</span>
+                </div>
+                <a href="https://pixabay.com/users/denielcz-30027015/" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
+                  Pixabay <i className="fas fa-external-link-alt"></i>
+                </a>
+              </div>
+              <div className="credit-item legal-asset">
+                <div>
+                  <strong>freesound_community</strong>
+                  <span className="legal-asset-role">{t('assets.freesound_community')}</span>
+                </div>
+                <a href="https://pixabay.com/users/freesound_community-46691455/" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
                   Pixabay <i className="fas fa-external-link-alt"></i>
                 </a>
               </div>

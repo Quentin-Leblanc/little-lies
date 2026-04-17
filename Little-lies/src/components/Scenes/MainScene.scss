@@ -296,6 +296,93 @@
   animation: death-report-anim 5s ease-in-out forwards;
 }
 
+/* ── Lynch reveal (post-execution role reveal) ── */
+.lynch-reveal-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 36;
+  pointer-events: none;
+  animation: lynch-reveal-fade 5s ease-in-out forwards;
+}
+
+.lynch-reveal-halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40rem;
+  height: 40rem;
+  transform: translate(-50%, -50%);
+  filter: blur(30px);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: lynch-reveal-halo-pulse 3.2s ease-in-out infinite;
+}
+
+.lynch-reveal-card {
+  position: relative;
+  min-width: 18rem;
+  padding: 1.8rem 2.2rem;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 1rem;
+  background: linear-gradient(160deg, rgba(15, 15, 25, 0.94), rgba(8, 8, 18, 0.97));
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  animation: lynch-reveal-card-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+
+.lynch-reveal-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  color: #eee;
+  letter-spacing: 0.08rem;
+}
+
+.lynch-reveal-team {
+  font-size: 0.7rem;
+  letter-spacing: 0.25rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.lynch-reveal-icon {
+  font-size: 3.5rem;
+  margin: 0.25rem 0;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+
+.lynch-reveal-role {
+  font-family: 'Cinzel', serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0.12rem;
+  text-shadow: 0 0 16px currentColor;
+}
+
+@keyframes lynch-reveal-fade {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes lynch-reveal-halo-pulse {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.06); }
+}
+
+@keyframes lynch-reveal-card-in {
+  0%   { opacity: 0; transform: translateY(12px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
 .death-report-card {
   display: flex;
   flex-direction: column;

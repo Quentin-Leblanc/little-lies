@@ -11,6 +11,7 @@ import { Character, skinForPlayer } from '../Character/Character';
 import GameConfig from '../GameConfig/GameConfig';
 import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
+import { useGameEngine } from '../../hooks/useGameEngine';
 import Legal from '../Legal/Legal';
 import Audio from '../../utils/AudioManager';
 import i18n from '../../trad/i18n';
@@ -236,7 +237,7 @@ const LOBBY_ANIMS = ['SitCross', 'LieDown'];
 // LieDown origin differs between skins — compensate so the body rests on the ground.
 const LIEDOWN_Y_OFFSET = {
   villager: -0.35,
-  wanderer: -0.45,
+  wanderer: -0.47,
 };
 
 // Player seat around fire
@@ -298,7 +299,7 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
 // ── Main Lobby Component ──
 
 // Lobby chat component with /votehost and /votekick commands
-const LobbyChat = () => {
+export const LobbyChat = () => {
   const { t } = useTranslation('common');
   const currentPlayer = myPlayer();
   const playroom_players = usePlayersList(true);
@@ -473,6 +474,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const currentPlayer = myPlayer();
   const playroom_players = usePlayersList(true);
   const { profile } = useAuth();
+  const { moveToRoleSelection } = useGameEngine();
   const [game, setGame] = useMultiplayerState('game', {});
 
   const handleConfigChange = (newConfig) => {
@@ -916,7 +918,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
 
           <div className="lobby-actions">
             {playroom_players.length > 0 && isHost() ? (
-              <button className="lobby-btn lobby-btn-primary" onClick={() => setIsSelectingRoles(true)}>
+              <button className="lobby-btn lobby-btn-primary" onClick={moveToRoleSelection}>
                 <i className="fas fa-play"></i> {t('common:start_game')}
               </button>
             ) : (
