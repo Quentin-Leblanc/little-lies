@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import { usePlayersList, isHost, getRoomCode, myPlayer, useMultiplayerState } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
@@ -749,7 +749,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       {/* Legal / credits modal — portal so it floats above the R3F Html player labels */}
-      {showLegal && ReactDOM.createPortal(<Legal onClose={() => setShowLegal(false)} />, document.body)}
+      {showLegal && createPortal(<Legal onClose={() => setShowLegal(false)} />, document.body)}
 
       {/* Volume control — floating top-left, click opens vertical slider */}
       <div className="lobby-volume" ref={volumeRef}>

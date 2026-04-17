@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import useEscapeKey from '../../hooks/useEscapeKey';
@@ -67,7 +67,7 @@ const RolesList = () => {
           escapes the parent `.roles-list-box` (which has backdrop-filter,
           a property that creates a containing block and clips fixed
           descendants). */}
-      {selectedRole && ReactDOM.createPortal(
+      {selectedRole && createPortal(
         <div className="role-detail-overlay" onClick={() => setSelectedRole(null)}
              role="dialog" aria-modal="true" aria-label={selectedRole.label}>
           <div className="role-detail-dialog" onClick={(e) => e.stopPropagation()}>

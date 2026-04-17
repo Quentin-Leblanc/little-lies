@@ -9,7 +9,6 @@ import {
 // Keeps preload calls out of constants.js (pure data) and deduplicates
 // them vs scattering preload() calls across components.
 useGLTF.preload(GALLOWS_PATH);
-useGLTF.preload('/models/road.glb');
 useGLTF.preload('/models/kaykit/rock_single_A.gltf');
 useGLTF.preload(MESHY_COTTAGE);
 useGLTF.preload(MESHY_MANOR);

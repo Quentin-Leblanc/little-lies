@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import { useMultiplayerState, getRoomCode } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../trad/i18n';
@@ -64,7 +64,7 @@ const Menu = () => {
           <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
         </button>
       </div>
-      {showMenu && ReactDOM.createPortal(
+      {showMenu && createPortal(
         <MenuDialog
           roomCode={roomCode}
           onClose={() => setShowMenu(false)}
@@ -73,9 +73,9 @@ const Menu = () => {
         />,
         document.body
       )}
-      {showLogs && ReactDOM.createPortal(<LogDialog messages={filteredLogs} onClose={() => setShowLogs(false)} />, document.body)}
-      {showHelp && ReactDOM.createPortal(<HelpDialog onClose={() => setShowHelp(false)} />, document.body)}
-      {showLegal && ReactDOM.createPortal(<Legal onClose={() => setShowLegal(false)} />, document.body)}
+      {showLogs && createPortal(<LogDialog messages={filteredLogs} onClose={() => setShowLogs(false)} />, document.body)}
+      {showHelp && createPortal(<HelpDialog onClose={() => setShowHelp(false)} />, document.body)}
+      {showLegal && createPortal(<Legal onClose={() => setShowLegal(false)} />, document.body)}
     </div>
   );
 };
