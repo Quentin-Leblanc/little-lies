@@ -17,6 +17,12 @@ const avatars = [
   'https://cdn2.f-cdn.com/contestentries/1440473/30778261/5bdd02db9ff4c_thumb900.jpg',
 ];
 
+// PlayroomKit gameId — read from env var (set REACT_APP_PLAYROOM_GAME_ID
+// in .env.local for dev and in Netlify env vars for prod). The fallback
+// is an example/shared gameId used during early development — don't
+// ship it to prod unless you want rooms to live on someone else's quota.
+const PLAYROOM_GAME_ID = process.env.REACT_APP_PLAYROOM_GAME_ID || 'qxONse5t9p6pZgeX3KkY';
+
 // Composant principal pour démarrer Playroom
 const Main = () => {
   const [isPlayroomReady, setIsPlayroomReady] = useState(false); // Gestion de l'état pour savoir si Playroom est prêt
@@ -28,7 +34,7 @@ const Main = () => {
         await insertCoin({
           maxPlayersPerRoom: 15,
           avatars,
-          gameId: 'qxONse5t9p6pZgeX3KkY',
+          gameId: PLAYROOM_GAME_ID,
           skipLobby: true,
         });
 
