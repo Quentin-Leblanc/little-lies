@@ -2,6 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { isHost, useMultiplayerState, me } from 'playroomkit';
 import i18n from '../trad/i18n';
 import { getRole } from '../data/roles.js';
+import {
+  resolveKillAttempts,
+  filterResolvableEvents,
+  computeExecutionerConversions,
+} from './nightResolution';
 
 const EventsContext = React.createContext();
 
@@ -98,11 +103,11 @@ export const EventsProvider = ({ children }) => {
     // Night events were created with dayCount = N, but dayCount is now N+1
     // (incremented during NIGHT→DEATH_REPORT transition). Filter by N-1.
     const nightDayCount = game.dayCount - 1;
-    // AFK players' actions are ignored during night resolution.
+    // AFK players' actions are ignored during night resolution. The
+    // filter + AFK logic lives in nightResolution.js so it can be tested
+    // without mocking PlayroomKit.
     const afkIds = new Set(players.filter((p) => p.isAFK).map((p) => p.id));
-    const currentEvents = get().filter(
-      (event) => event.dayCount === nightDayCount && !event.displayed && !afkIds.has(event.content?.by)
-    );
+    const currentEvents = filterResolvableEvents(get(), { dayCount: nightDayCount, afkIds });
 
     // --- Batch notifications AND events to avoid stale state overwrites ---
     const pendingNotifs = [...(notifications || [])];
@@ -276,69 +281,47 @@ export const EventsProvider = ({ children }) => {
       });
 
     // === Resolve kills against defenses ===
-    const killed = {};
-    const survived = {};
-
-    killAttempts.forEach(({ targetId, attackerId, attackLevel, type }) => {
-      const target = players.find((p) => p.id === targetId);
-      if (!target?.isAlive) return;
-
-      // Jail protection: jailed players can't be killed by anyone except the jailor
-      if (jailedPlayers[targetId] && type !== 'jailor_execute') {
-        survived[targetId] = true;
-        addNotif(targetId, i18n.t('game:notifications.jail_protected'));
-        return;
-      }
-
-      // Bodyguard intercept: if target is bodyguarded, bodyguard kills attacker and dies
-      if (bodyguardTargets[targetId]) {
-        const bgId = bodyguardTargets[targetId];
-        const bg = players.find((p) => p.id === bgId);
-        if (bg?.isAlive) {
-          // Bodyguard dies
-          killed[bgId] = { attackerId: attackerId, type: 'bodyguard_sacrifice' };
-          // Attacker dies (bodyguard has powerful attack)
-          killed[attackerId] = { attackerId: bgId, type: 'bodyguard_kill' };
-          // Target survives
-          survived[targetId] = true;
-          addNotif(targetId, i18n.t('game:notifications.bodyguard_saved'));
-          addNotif(bgId, i18n.t('game:notifications.bodyguard_sacrifice'));
-          return;
-        }
-      }
-
-      const baseDefense = target.character?.defenseLevel || 0;
-      const bonus = defenseBonus[targetId] || 0;
-      const totalDefense = baseDefense + bonus;
-
-      if (attackLevel > totalDefense) {
-        // Kill succeeds
-        killed[targetId] = { attackerId, type };
-      } else {
-        // Kill blocked
-        survived[targetId] = true;
-        if (bonus > 0 && baseDefense < attackLevel) {
-          // Saved by doctor/vest specifically
-          const wasProtectedByDoctor = currentEvents.some(
-            (e) => e.type === 'PROTECT' && e.content.target === targetId
-          );
-          if (wasProtectedByDoctor) {
-            addEvent({
-              type: 'PROTECTION_SUCCESS',
-              content: {
-                target: targetId,
-                chatMessage: i18n.t('game:death_messages.protection_success', { name: target.profile.name }),
-              },
-              displayed: false,
-            });
-          }
-          addNotif(targetId, i18n.t('game:notifications.protection_saved'));
-        } else {
-          // Night immunity
-          addNotif(targetId, i18n.t('game:notifications.night_immune'));
-        }
-      }
+    // Attack vs defense matrix (jail → bodyguard → attack vs defense) is
+    // a pure function — see nightResolution.js. We then overlay the
+    // per-outcome notifications / events that depend on i18n state.
+    const { killed, survived } = resolveKillAttempts(killAttempts, {
+      players,
+      jailedPlayers,
+      bodyguardTargets,
+      defenseBonus,
     });
+
+    // Apply outcome-specific notifications and event emissions
+    for (const [targetId, reason] of Object.entries(survived)) {
+      const target = players.find((p) => p.id === targetId);
+      if (!target) continue;
+      if (reason === 'jailed') {
+        addNotif(targetId, i18n.t('game:notifications.jail_protected'));
+      } else if (reason === 'bodyguard') {
+        addNotif(targetId, i18n.t('game:notifications.bodyguard_saved'));
+        const bgId = bodyguardTargets[targetId];
+        if (bgId) addNotif(bgId, i18n.t('game:notifications.bodyguard_sacrifice'));
+      } else if (reason === 'protected') {
+        // Saved by doctor/vest — announce doctor save publicly if applicable
+        const wasProtectedByDoctor = currentEvents.some(
+          (e) => e.type === 'PROTECT' && e.content.target === targetId
+        );
+        if (wasProtectedByDoctor) {
+          addEvent({
+            type: 'PROTECTION_SUCCESS',
+            content: {
+              target: targetId,
+              chatMessage: i18n.t('game:death_messages.protection_success', { name: target.profile.name }),
+            },
+            displayed: false,
+          });
+        }
+        addNotif(targetId, i18n.t('game:notifications.protection_saved'));
+      } else {
+        // 'immune' — target's intrinsic defense shrugged the attack off
+        addNotif(targetId, i18n.t('game:notifications.night_immune'));
+      }
+    }
 
     // === Collect ALL player modifications, apply in ONE setPlayers at the end ===
     const killedIds = Object.keys(killed);
@@ -468,18 +451,17 @@ export const EventsProvider = ({ children }) => {
 
     // === SINGLE ATOMIC setPlayers: kills + blackmail + Executioner→Jester ===
     const jesterRole = getRole('jester');
+    // Pure function decides which Executioners flip — see nightResolution.js.
+    const executionerFlips = computeExecutionerConversions(players, new Set(killedIds));
 
     setPlayers(
       players.map((p) => {
         let updated = { ...p };
-        // Kill dead players
         if (allKilledIds.has(p.id)) {
           updated.isAlive = false;
         }
-        // Apply blackmail
         updated.isBlackmailed = !!blackmailedPlayers[p.id];
-        // Convert Executioner → Jester if their target died
-        if (killedIds.length > 0 && p.character?.winCondition === 'getTargetLynched' && killedIds.includes(p.executionerTarget) && p.isAlive) {
+        if (executionerFlips[p.id]) {
           addNotif(p.id, i18n.t('game:notifications.executioner_to_jester'));
           updated.character = jesterRole;
           updated.executionerTarget = null;
