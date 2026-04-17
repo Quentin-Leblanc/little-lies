@@ -4,7 +4,7 @@ import { usePlayersList, isHost, getRoomCode, myPlayer, useMultiplayerState } fr
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
-import { Stars, Html } from '@react-three/drei';
+import { Stars, Html, ContactShadows } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { Character, skinForPlayer } from '../Character/Character';
@@ -233,6 +233,12 @@ const OrbitCamera = () => {
 // Lobby animations — assigned per player index
 const LOBBY_ANIMS = ['SitCross', 'LieDown'];
 
+// LieDown origin differs between skins — compensate so the body rests on the ground.
+const LIEDOWN_Y_OFFSET = {
+  villager: -0.35,
+  wanderer: -0.45,
+};
+
 // Player seat around fire
 const PlayerSeat = ({ index, total, player, color, isMe }) => {
   const angle = (index / Math.max(total, 1)) * Math.PI * 2;
@@ -243,13 +249,13 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
 
   // Alternate animations based on player index
   const anim = LOBBY_ANIMS[index % LOBBY_ANIMS.length];
-  // LieDown animation model is offset upward — compensate with Y shift
-  const yOffset = anim === 'LieDown' ? -0.35 : 0;
+  const skin = skinForPlayer(player.id);
+  const yOffset = anim === 'LieDown' ? (LIEDOWN_Y_OFFSET[skin] ?? -0.35) : 0;
   const nameY = anim === 'LieDown' ? 1.1 : 1.15;
 
   return (
     <group position={[x, yOffset, z]} rotation={[0, lookAtAngle, 0]}>
-      <Character color={color} animation={anim} scale={0.55} skin={skinForPlayer(player.id)} animOffset={index * 0.5} />
+      <Character color={color} animation={anim} scale={0.55} skin={skin} animOffset={index * 0.5} />
       {/* Aura glow under local player */}
       {isMe && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03 - yOffset, 0]}>
@@ -705,6 +711,17 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           <Embers />
           <BackgroundTrees />
           <Stars radius={50} depth={40} count={2000} factor={3} fade speed={0.5} />
+
+          {/* Soft contact shadows under characters — cheap, always looks good */}
+          <ContactShadows
+            position={[0, 0.005, 0]}
+            opacity={0.45}
+            scale={14}
+            blur={2.8}
+            far={3}
+            resolution={512}
+            color="#000000"
+          />
 
           {/* Players seated around fire */}
           {playroom_players.map((player, idx) => (
