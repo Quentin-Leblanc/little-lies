@@ -4,6 +4,8 @@ import {
   resolveJudgment,
   sanitizeTrial,
   trialsEqual,
+  sanitizeGameState,
+  gameStateDirty,
 } from '../gameRules';
 
 // --- Helpers ---
@@ -304,6 +306,109 @@ describe('sanitizeTrial', () => {
   test('accepts abstain verdict', () => {
     const trial = { votes: { b: 'abstain' } };
     expect(sanitizeTrial(players, trial, 'a').votes).toEqual({ b: 'abstain' });
+  });
+});
+
+describe('sanitizeGameState', () => {
+  const players = [p('a'), p('b'), p('dead', { alive: false }), p('spec', { spectator: true })];
+
+  test('returns a safe default for null input', () => {
+    const clean = sanitizeGameState(null, players);
+    expect(clean).toEqual({ phase: 'NIGHT', dayCount: 0, winner: null, accusedId: null });
+  });
+
+  test('passes through a valid state untouched (same field values)', () => {
+    const game = {
+      phase: 'VOTING', winner: null, accusedId: 'a', dayCount: 3,
+      isGameStarted: true, isDay: true, trialsToday: 1,
+      timer: 30, phaseStartedAt: 12345,
+    };
+    const clean = sanitizeGameState(game, players);
+    expect(clean).toEqual(game);
+  });
+
+  test('invalid phase falls back to NIGHT', () => {
+    const clean = sanitizeGameState({ phase: 'HACKED', dayCount: 1 }, players);
+    expect(clean.phase).toBe('NIGHT');
+  });
+
+  test('non-string phase falls back to NIGHT', () => {
+    const clean = sanitizeGameState({ phase: 42, dayCount: 1 }, players);
+    expect(clean.phase).toBe('NIGHT');
+  });
+
+  test('unknown winner is reset to null', () => {
+    const clean = sanitizeGameState({ phase: 'NIGHT', winner: 'hacker' }, players);
+    expect(clean.winner).toBeNull();
+  });
+
+  test('known winner is kept', () => {
+    const clean = sanitizeGameState({ phase: 'GAMEOVER', winner: 'cult' }, players);
+    expect(clean.winner).toBe('cult');
+  });
+
+  test('accusedId pointing to a dead player is reset', () => {
+    const clean = sanitizeGameState({ phase: 'JUDGMENT', accusedId: 'dead' }, players);
+    expect(clean.accusedId).toBeNull();
+  });
+
+  test('accusedId pointing to a spectator is reset', () => {
+    const clean = sanitizeGameState({ phase: 'JUDGMENT', accusedId: 'spec' }, players);
+    expect(clean.accusedId).toBeNull();
+  });
+
+  test('accusedId pointing to a ghost id is reset', () => {
+    const clean = sanitizeGameState({ phase: 'JUDGMENT', accusedId: 'ghost' }, players);
+    expect(clean.accusedId).toBeNull();
+  });
+
+  test('negative dayCount is reset to 0', () => {
+    const clean = sanitizeGameState({ phase: 'NIGHT', dayCount: -5 }, players);
+    expect(clean.dayCount).toBe(0);
+  });
+
+  test('non-number dayCount is reset to 0', () => {
+    const clean = sanitizeGameState({ phase: 'NIGHT', dayCount: '5' }, players);
+    expect(clean.dayCount).toBe(0);
+  });
+
+  test('preserves unrelated fields (timer, phaseStartedAt, neutralWinners…)', () => {
+    const game = {
+      phase: 'NIGHT', dayCount: 1, winner: null,
+      timer: 42, phaseStartedAt: 123, neutralWinners: [{ id: 'x', role: 'jester' }],
+      config: { something: true },
+    };
+    const clean = sanitizeGameState(game, players);
+    expect(clean.timer).toBe(42);
+    expect(clean.phaseStartedAt).toBe(123);
+    expect(clean.neutralWinners).toEqual([{ id: 'x', role: 'jester' }]);
+    expect(clean.config).toEqual({ something: true });
+  });
+});
+
+describe('gameStateDirty', () => {
+  test('identical objects → not dirty', () => {
+    const g = { phase: 'NIGHT', winner: null, accusedId: null, dayCount: 1 };
+    expect(gameStateDirty(g, { ...g })).toBe(false);
+  });
+
+  test('phase change → dirty', () => {
+    const a = { phase: 'NIGHT', dayCount: 1 };
+    const b = { phase: 'VOTING', dayCount: 1 };
+    expect(gameStateDirty(a, b)).toBe(true);
+  });
+
+  test('winner change → dirty', () => {
+    expect(gameStateDirty({ winner: null }, { winner: 'cult' })).toBe(true);
+  });
+
+  test('unrelated field change (timer) → not dirty', () => {
+    expect(gameStateDirty({ phase: 'NIGHT', timer: 10 }, { phase: 'NIGHT', timer: 5 })).toBe(false);
+  });
+
+  test('handles nullish inputs', () => {
+    expect(gameStateDirty(null, null)).toBe(false);
+    expect(gameStateDirty(null, {})).toBe(true);
   });
 });
 

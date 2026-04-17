@@ -115,6 +115,73 @@ export function sanitizeTrial(players, trial, accusedId) {
 }
 
 /**
+ * Sanitize the top-level game state — strip obviously-tampered fields
+ * so a malicious client poking at PlayroomKit from the browser console
+ * can't force-end the game, fake a winner, or point the trial at a
+ * ghost player.
+ *
+ * This is a first line of defense, NOT a full anti-cheat. A sophisticated
+ * attacker could still write *valid* transitions at the wrong time (e.g.
+ * jump from VOTING to EXECUTION without a majority). Catching those
+ * requires comparing against the host's expected state machine, which
+ * lives in useGameEngine.
+ *
+ * Caller (host watchdog) should diff the result against the input and
+ * re-broadcast only if something changed — avoids setGame loops.
+ *
+ * @returns a (possibly-modified) game object. Only known-bad fields are
+ *   touched; everything else passes through untouched.
+ */
+const VALID_PHASES = new Set([
+  'NIGHT', 'NIGHT_TRANSITION', 'DAY_RISING', 'DEATH_REPORT', 'DISCUSSION',
+  'VOTING', 'DEFENSE', 'JUDGMENT', 'LAST_WORDS', 'EXECUTION',
+  'EXECUTION_REVEAL', 'NO_LYNCH', 'SPARED', 'GAMEOVER',
+]);
+const VALID_WINNERS = new Set([
+  'town', 'mafia', 'cult', 'evil', 'neutral_killing',
+]);
+
+export function sanitizeGameState(game, players) {
+  if (!game || typeof game !== 'object') {
+    return { phase: 'NIGHT', dayCount: 0, winner: null, accusedId: null };
+  }
+  const out = { ...game };
+  const livingIds = new Set(
+    (players || []).filter((p) => p?.isAlive && !p?.isSpectator).map((p) => p.id)
+  );
+
+  if (typeof out.phase !== 'string' || !VALID_PHASES.has(out.phase)) {
+    out.phase = 'NIGHT';
+  }
+  if (out.winner !== null && out.winner !== undefined && !VALID_WINNERS.has(out.winner)) {
+    out.winner = null;
+  }
+  if (out.accusedId && !livingIds.has(out.accusedId)) {
+    out.accusedId = null;
+  }
+  if (typeof out.dayCount !== 'number' || out.dayCount < 0 || !Number.isFinite(out.dayCount)) {
+    out.dayCount = 0;
+  }
+  if (typeof out.isGameStarted !== 'boolean') out.isGameStarted = !!out.isGameStarted;
+  if (typeof out.isDay !== 'boolean') out.isDay = !!out.isDay;
+  if (out.trialsToday !== undefined) {
+    if (typeof out.trialsToday !== 'number' || out.trialsToday < 0) out.trialsToday = 0;
+  }
+  return out;
+}
+
+/**
+ * Cheap delta check used by the host watchdog. Only compares the fields
+ * sanitizeGameState can rewrite — avoids false positives on harmless
+ * fields (timer, phaseStartedAt, etc.).
+ */
+export function gameStateDirty(before, after) {
+  if (!before || !after) return before !== after;
+  const keys = ['phase', 'winner', 'accusedId', 'dayCount', 'isGameStarted', 'isDay', 'trialsToday'];
+  return keys.some((k) => before[k] !== after[k]);
+}
+
+/**
  * Cheap structural equality check for trial payloads — used by the host
  * to decide whether a sanitized trial is worth broadcasting back.
  * Avoids a full JSON.stringify on every tick.

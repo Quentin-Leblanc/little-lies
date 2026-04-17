@@ -8,6 +8,8 @@ import {
   resolveJudgment as pureResolveJudgment,
   sanitizeTrial as pureSanitizeTrial,
   trialsEqual,
+  sanitizeGameState,
+  gameStateDirty,
 } from './gameRules';
 import { computeNextPhase } from './phaseTransitions';
 import { resolveDisconnects, resolveAFK } from './playerLifecycle';
@@ -751,6 +753,20 @@ export const GameEngineProvider = ({ children }) => {
       setTrial(clean);
     }
   }, [trial, players, game.accusedId, game.isGameStarted, game.status]);
+
+  // --- Host watchdog: sanitize top-level game state (host only) ---
+  // First line of defense against a client tampering with `game` from
+  // the browser console (e.g. pushing an invalid phase, a fake winner,
+  // or an accusedId that points to a ghost). See sanitizeGameState docs
+  // in gameRules.js for what is / isn't caught.
+  useEffect(() => {
+    if (!isHost()) return;
+    if (!_game) return;
+    const clean = sanitizeGameState(_game, players);
+    if (gameStateDirty(_game, clean)) {
+      _setGame(clean);
+    }
+  }, [_game, players]);
 
   // --- Wait for all players to load assets (host only) ---
   useEffect(() => {
