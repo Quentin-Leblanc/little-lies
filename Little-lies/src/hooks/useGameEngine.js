@@ -700,7 +700,10 @@ export const GameEngineProvider = ({ children }) => {
       default: break;
     }
 
-    setGame({ ...nextGame, phaseStartedAt: Date.now() });
+    // Clear the tally delay marker on every transition — it was set by the
+    // main loop when timer hit 0 in VOTING/JUDGMENT, and a new phase resets
+    // the buffer state for the next vote.
+    setGame({ ...nextGame, phaseStartedAt: Date.now(), tallyDelayedFor: null });
   };
 
   // --- Main game loop (host only) ---
@@ -733,6 +736,17 @@ export const GameEngineProvider = ({ children }) => {
       }
 
       if (game.timer <= 0) {
+        // Replication buffer: on VOTING/JUDGMENT the first tick at timer=0
+        // is a grace window so late votes from high-latency clients can
+        // land before we tally. The next tick sees tallyDelayedFor === phase
+        // and actually transitions. The host sanitizer runs in parallel,
+        // so by the time we read the trial here, any newly-arrived valid
+        // votes are included.
+        const isTallyPhase = game.phase === PHASE.VOTING || game.phase === PHASE.JUDGMENT;
+        if (isTallyPhase && game.tallyDelayedFor !== game.phase) {
+          setGame(prev => ({ ...prev, tallyDelayedFor: prev.phase }));
+          return;
+        }
         transitionPhase();
       } else {
         setGame(prev => ({ ...prev, timer: prev.timer - 1000 }));
@@ -740,7 +754,7 @@ export const GameEngineProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(tick);
-  }, [game.timer, game.phase, game.status, game.adminFreeRoam, game.waitingForPlayers, isHost(), trial]);
+  }, [game.timer, game.phase, game.status, game.adminFreeRoam, game.waitingForPlayers, game.tallyDelayedFor, isHost(), trial]);
 
   // --- Continuous disconnect monitoring (host only, every 3s) ---
   useEffect(() => {
