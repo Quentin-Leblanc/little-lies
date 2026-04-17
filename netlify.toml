@@ -29,7 +29,10 @@
     # needed by @react-three + @mediapipe. Data: URIs are allowed for the
     # inline SVG avatars. connect-src covers PlayroomKit, Supabase and
     # Google Fonts (CSS-font files are served from fonts.gstatic.com).
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://joinplayroom.com https://*.joinplayroom.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://joinplayroom.com https://*.joinplayroom.com wss://*.joinplayroom.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    # blob: dans connect-src : GLTFLoader extrait les textures du .glb en
+    # ObjectURL puis refait un fetch dessus. rawcdn.githack.com dans img-src :
+    # @react-three/drei charge cloud.png depuis ce CDN (à internaliser un jour).
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://joinplayroom.com https://*.joinplayroom.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://rawcdn.githack.com; media-src 'self'; connect-src 'self' blob: https://*.supabase.co wss://*.supabase.co https://joinplayroom.com https://*.joinplayroom.com wss://*.joinplayroom.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
 # Long cache for hashed assets (react-scripts embeds content hash)
 [[headers]]
