@@ -70,9 +70,10 @@ export const useAuth = () => {
   return ctx;
 };
 
-// Login/Register modal
+// Login/Register modal — si déjà connecté, affiche un menu profil avec déconnexion
 const AuthModal = ({ onClose }) => {
   const { t } = useTranslation('common');
+  const { user, profile, signOut: contextSignOut } = useAuth();
   const [mode, setMode] = useState('login'); // login | register
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -80,6 +81,39 @@ const AuthModal = ({ onClose }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Connecté : écran profil avec bouton déconnexion
+  if (user && profile) {
+    const xp = profile.xp || 0;
+    const level = profile.level || 1;
+    const progress = Math.min((xp % 100), 100);
+    return (
+      <div className="auth-overlay" onClick={onClose}>
+        <div className="auth-dialog" onClick={(e) => e.stopPropagation()}>
+          <div className="auth-header">
+            <h2>{profile.username}</h2>
+            <button className="close-button" onClick={onClose}>X</button>
+          </div>
+          <div className="auth-profile-stats">
+            <div className="auth-stat"><span>{t('level')}</span><strong>{level}</strong></div>
+            <div className="auth-stat"><span>XP</span><strong>{xp}</strong></div>
+            <div className="auth-stat"><span>{t('players')}</span><strong>{profile.games_played || 0}</strong></div>
+            <div className="auth-stat"><span>{t('survivors')}</span><strong>{profile.games_won || 0}</strong></div>
+          </div>
+          <div className="auth-profile-xp-bar">
+            <div className="auth-profile-xp-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <button
+            className="auth-btn-submit"
+            onClick={async () => { await contextSignOut(); onClose(); }}
+          >
+            <i className="fas fa-sign-out-alt"></i> {t('logout')}
+          </button>
+          <button className="auth-btn-guest" onClick={onClose}>{t('close')}</button>
+        </div>
+      </div>
+    );
+  }
 
   if (!isSupabaseConfigured()) {
     return (
