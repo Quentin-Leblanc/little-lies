@@ -16,16 +16,19 @@ export function checkWinCondition(players) {
   const townAlive = alive.filter((p) => p.character?.team === 'town').length;
   const mafiaAlive = alive.filter((p) => p.character?.team === 'mafia').length;
   const evilAlive = alive.filter((p) => p.character?.team === 'evil').length;
+  const cultAlive = alive.filter((p) => p.character?.team === 'cult').length;
   const neutralKillingAlive = alive.filter(
     (p) => p.character?.winCondition === 'lastStanding'
   ).length;
 
-  if (neutralKillingAlive > 0 && townAlive === 0 && mafiaAlive === 0 && evilAlive === 0) {
+  if (neutralKillingAlive > 0 && townAlive === 0 && mafiaAlive === 0 && evilAlive === 0 && cultAlive === 0) {
     return 'neutral_killing';
   }
-  if (mafiaAlive === 0 && evilAlive === 0 && neutralKillingAlive === 0 && townAlive > 0) return 'town';
-  if (mafiaAlive >= townAlive + evilAlive + neutralKillingAlive && mafiaAlive > 0) return 'mafia';
-  if (evilAlive >= townAlive + mafiaAlive + neutralKillingAlive && evilAlive > 0) return 'evil';
+  if (mafiaAlive === 0 && evilAlive === 0 && cultAlive === 0 && neutralKillingAlive === 0 && townAlive > 0) return 'town';
+  if (mafiaAlive >= townAlive + evilAlive + cultAlive + neutralKillingAlive && mafiaAlive > 0) return 'mafia';
+  if (evilAlive >= townAlive + mafiaAlive + cultAlive + neutralKillingAlive && evilAlive > 0) return 'evil';
+  // Cult wins at parity like mafia — conversions push them over the threshold.
+  if (cultAlive >= townAlive + mafiaAlive + evilAlive + neutralKillingAlive && cultAlive > 0) return 'cult';
   return null;
 }
 

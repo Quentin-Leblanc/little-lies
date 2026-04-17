@@ -6,6 +6,7 @@ import {
   resolveKillAttempts,
   filterResolvableEvents,
   computeExecutionerConversions,
+  resolveConversions,
 } from './nightResolution';
 
 const EventsContext = React.createContext();
@@ -388,6 +389,48 @@ export const EventsProvider = ({ children }) => {
       }
     });
 
+    // === Priority 5: Cult conversion ===
+    // Resolution lives in nightResolution.resolveConversions (pure, unit-tested).
+    // Rules: mafia + night-immune targets blocked, jailed blocked, dead
+    // converter/target blocked, target killed earlier in the pass blocked.
+    const conversionResult = resolveConversions(
+      activeEvents.filter((e) => e.type === 'CONVERT'),
+      {
+        players,
+        jailedPlayers,
+        roleblockedPlayers,
+        killedThisNight: new Set(killedIds),
+      }
+    );
+    const convertedMap = conversionResult.convertedIds;
+
+    Object.entries(convertedMap).forEach(([targetId, { by }]) => {
+      const target = players.find((p) => p.id === targetId);
+      const targetName = target?.profile?.name;
+      addNotif(targetId, i18n.t('game:notifications.converted_to_cult'), 'converted');
+      addNotif(by, i18n.t('game:notifications.conversion_success', { name: targetName }));
+      // Broadcast to other living cult members (exclude converter + new member)
+      players.forEach((p) => {
+        if (p.isAlive && p.id !== by && p.id !== targetId && p.character?.team === 'cult') {
+          addNotif(p.id, i18n.t('game:notifications.cult_new_member', { name: targetName }));
+        }
+      });
+    });
+
+    conversionResult.failures.forEach((f) => {
+      const target = f.targetId ? players.find((p) => p.id === f.targetId) : null;
+      const name = target?.profile?.name;
+      const key = {
+        mafia_immune: 'conversion_failed_mafia',
+        night_immune: 'conversion_failed_immune',
+        target_jailed: 'conversion_failed_jailed',
+        target_killed: 'conversion_failed_killed',
+      }[f.reason];
+      if (key && f.by) {
+        addNotif(f.by, i18n.t(`game:notifications.${key}`, { name }));
+      }
+    });
+
     // === Priority 6: Investigations (skip if roleblocked or target dead) ===
     activeEvents
       .filter((e) => e.type === 'INVESTIGATE')
@@ -449,8 +492,9 @@ export const EventsProvider = ({ children }) => {
         );
       });
 
-    // === SINGLE ATOMIC setPlayers: kills + blackmail + Executioner→Jester ===
+    // === SINGLE ATOMIC setPlayers: kills + blackmail + Executioner→Jester + cult conversion ===
     const jesterRole = getRole('jester');
+    const cultMemberRole = getRole('cult_member');
     // Pure function decides which Executioners flip — see nightResolution.js.
     const executionerFlips = computeExecutionerConversions(players, new Set(killedIds));
 
@@ -465,6 +509,11 @@ export const EventsProvider = ({ children }) => {
           addNotif(p.id, i18n.t('game:notifications.executioner_to_jester'));
           updated.character = jesterRole;
           updated.executionerTarget = null;
+        }
+        // Conversion overrides executioner flip (target was alive at kill
+        // resolution, so the exec flip wouldn't have fired anyway).
+        if (convertedMap[p.id] && cultMemberRole) {
+          updated.character = cultMemberRole;
         }
         return updated;
       })

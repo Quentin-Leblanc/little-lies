@@ -105,3 +105,85 @@ export function computeExecutionerConversions(players, killedIds) {
   });
   return flips;
 }
+
+/**
+ * Resolve cult conversion attempts for the night.
+ *
+ * Rules:
+ *  - Only CONVERT events are consumed (CULT_VOTE events are advisory and
+ *    consumed by the vote aggregator upstream).
+ *  - At most one conversion lands per night. If several CONVERT events
+ *    exist (unusual — leader is unique), the last one wins.
+ *  - Targets from team 'mafia' are immune (mafia loyalty).
+ *  - Targets with character.nightImmune are immune.
+ *  - Jailed targets can't be converted.
+ *  - Targets killed this night can't be converted (kill happens first).
+ *  - Roleblocked or killed-this-night converters fail silently.
+ *  - Already-cult targets → skip (defensive).
+ *
+ * @param {Array} conversionEvents
+ * @param {Object} context
+ * @param {Array} context.players
+ * @param {Object} context.jailedPlayers
+ * @param {Object} context.roleblockedPlayers
+ * @param {Set|Array} [context.killedThisNight] — ids killed earlier in the pass
+ * @returns {{ convertedIds: Record<string, {by}>, failures: Array }}
+ */
+export function resolveConversions(conversionEvents, context) {
+  const {
+    players,
+    jailedPlayers = {},
+    roleblockedPlayers = {},
+    killedThisNight,
+  } = context;
+  const byId = new Map((players || []).map((p) => [p.id, p]));
+  const killedSet = killedThisNight instanceof Set
+    ? killedThisNight
+    : new Set(killedThisNight || []);
+  const convertedIds = {};
+  const failures = [];
+
+  // Last conversion wins (leader is unique; this is defensive).
+  const events = [...(conversionEvents || [])].filter((e) => e?.type === 'CONVERT');
+  if (events.length === 0) return { convertedIds, failures };
+  const e = events[events.length - 1];
+
+  const converter = byId.get(e.content?.by);
+  const target = byId.get(e.content?.target);
+
+  if (!converter?.isAlive || killedSet.has(converter?.id)) {
+    failures.push({ by: e.content?.by, reason: 'converter_dead' });
+    return { convertedIds, failures };
+  }
+  if (!target?.isAlive) {
+    failures.push({ by: converter.id, reason: 'target_dead' });
+    return { convertedIds, failures };
+  }
+  if (killedSet.has(target.id)) {
+    failures.push({ by: converter.id, reason: 'target_killed', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (target.character?.team === 'cult') {
+    failures.push({ by: converter.id, reason: 'already_cult', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (target.character?.team === 'mafia') {
+    failures.push({ by: converter.id, reason: 'mafia_immune', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (target.character?.nightImmune) {
+    failures.push({ by: converter.id, reason: 'night_immune', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (jailedPlayers[target.id]) {
+    failures.push({ by: converter.id, reason: 'target_jailed', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (roleblockedPlayers[converter.id]) {
+    failures.push({ by: converter.id, reason: 'self_roleblocked' });
+    return { convertedIds, failures };
+  }
+
+  convertedIds[target.id] = { by: converter.id };
+  return { convertedIds, failures };
+}

@@ -2,6 +2,7 @@ import {
   resolveKillAttempts,
   filterResolvableEvents,
   computeExecutionerConversions,
+  resolveConversions,
 } from '../nightResolution';
 
 const p = (id, {
@@ -207,5 +208,173 @@ describe('computeExecutionerConversions', () => {
     const players = [exec('exec1', 'victim'), p('victim')];
     const flips = computeExecutionerConversions(players, ['victim']);
     expect(flips).toEqual({ exec1: true });
+  });
+});
+
+describe('resolveConversions', () => {
+  const convert = (by, target) => ({
+    type: 'CONVERT',
+    content: { by, target },
+  });
+
+  test('empty events → no conversions, no failures', () => {
+    const players = [p('a', { team: 'cult', key: 'cult_leader' }), p('b')];
+    const result = resolveConversions([], { players });
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures).toEqual([]);
+  });
+
+  test('basic conversion of a town villager succeeds', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('victim', { team: 'town' }),
+    ];
+    const result = resolveConversions([convert('leader', 'victim')], { players });
+    expect(result.convertedIds.victim).toEqual({ by: 'leader' });
+    expect(result.failures).toEqual([]);
+  });
+
+  test('mafia targets are immune (loyalty)', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('gf', { team: 'mafia', key: 'godfather' }),
+    ];
+    const result = resolveConversions([convert('leader', 'gf')], { players });
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures).toEqual([
+      { by: 'leader', reason: 'mafia_immune', targetId: 'gf' },
+    ]);
+  });
+
+  test('night-immune targets (e.g. Serial Killer) are rejected', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      {
+        id: 'sk',
+        isAlive: true,
+        isAFK: false,
+        profile: { name: 'sk' },
+        character: { key: 'serial_killer', team: 'neutral', nightImmune: true, defenseLevel: 1 },
+      },
+    ];
+    const result = resolveConversions([convert('leader', 'sk')], { players });
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'night_immune', targetId: 'sk' });
+  });
+
+  test('jailed targets cannot be converted', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('victim'),
+    ];
+    const result = resolveConversions(
+      [convert('leader', 'victim')],
+      { players, jailedPlayers: { victim: 'jailor' } }
+    );
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'target_jailed', targetId: 'victim' });
+  });
+
+  test('target killed earlier in the pass cannot be converted', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('victim'),
+    ];
+    const result = resolveConversions(
+      [convert('leader', 'victim')],
+      { players, killedThisNight: new Set(['victim']) }
+    );
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'target_killed', targetId: 'victim' });
+  });
+
+  test('converter killed the same night fails silently', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('victim'),
+    ];
+    const result = resolveConversions(
+      [convert('leader', 'victim')],
+      { players, killedThisNight: new Set(['leader']) }
+    );
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'converter_dead' });
+  });
+
+  test('roleblocked converter does not convert', () => {
+    // Upstream filter in useEvents already strips roleblocked converter
+    // events, but the pure function stays defensive.
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('victim'),
+    ];
+    const result = resolveConversions(
+      [convert('leader', 'victim')],
+      { players, roleblockedPlayers: { leader: true } }
+    );
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'self_roleblocked' });
+  });
+
+  test('already-cult target is rejected defensively', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('mate', { team: 'cult', key: 'cult_member' }),
+    ];
+    const result = resolveConversions([convert('leader', 'mate')], { players });
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'already_cult', targetId: 'mate' });
+  });
+
+  test('dead converter (already dead before night) fails', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader', alive: false }),
+      p('victim'),
+    ];
+    const result = resolveConversions([convert('leader', 'victim')], { players });
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'converter_dead' });
+  });
+
+  test('dead target (already dead before night) fails', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('victim', { alive: false }),
+    ];
+    const result = resolveConversions([convert('leader', 'victim')], { players });
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'target_dead' });
+  });
+
+  test('multiple CONVERT events → last one wins (defensive, leader is unique)', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('a'),
+      p('b'),
+    ];
+    const result = resolveConversions(
+      [convert('leader', 'a'), convert('leader', 'b')],
+      { players }
+    );
+    expect(result.convertedIds).toEqual({ b: { by: 'leader' } });
+  });
+
+  test('ignores non-CONVERT events', () => {
+    const players = [p('leader', { team: 'cult' }), p('victim')];
+    const result = resolveConversions(
+      [{ type: 'KILL', content: { by: 'leader', target: 'victim' } }],
+      { players }
+    );
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures).toEqual([]);
+  });
+
+  test('evil team targets (e.g. werewolves) are convertible', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('wolf', { team: 'evil' }),
+    ];
+    const result = resolveConversions([convert('leader', 'wolf')], { players });
+    expect(result.convertedIds.wolf).toEqual({ by: 'leader' });
   });
 });

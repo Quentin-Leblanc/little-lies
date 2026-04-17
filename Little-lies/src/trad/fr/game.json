@@ -62,7 +62,14 @@
     "heal_failed": "Vous n'avez pas pu soigner {{name}}.",
     "executioner_to_jester": "Votre cible est morte... Vous êtes maintenant un Jester. Faites-vous lyncher !",
     "jail_protected": "Vous étiez en prison, vous étiez protégé.",
-    "blackmailed": "Bâillonné"
+    "blackmailed": "Bâillonné",
+    "converted_to_cult": "Vous avez été converti au Culte. Rejoignez vos nouveaux frères...",
+    "conversion_success": "Vous avez converti {{name}} au Culte.",
+    "cult_new_member": "{{name}} a rejoint le Culte cette nuit.",
+    "conversion_failed_mafia": "Impossible de convertir {{name}} — il appartient à la Mafia.",
+    "conversion_failed_immune": "Impossible de convertir {{name}} — il est immunisé la nuit.",
+    "conversion_failed_jailed": "Impossible de convertir {{name}} — il était en prison.",
+    "conversion_failed_killed": "Impossible de convertir {{name}} — il est mort cette nuit."
   },
   "death_messages": {
     "mafia": [
@@ -99,6 +106,7 @@
     "town": { "name": "Le Village", "short": "Village" },
     "mafia": { "name": "La Mafia", "short": "Mafia" },
     "evil": { "name": "Les Loups-Garous", "short": "Loups-Garous" },
+    "cult": { "name": "Le Culte", "short": "Culte" },
     "neutral": { "name": "Neutre", "short": "Neutre" },
     "neutral_killing": { "name": "Le Serial Killer", "short": "Serial Killer" }
   },

@@ -62,7 +62,14 @@
     "heal_failed": "You couldn't heal {{name}}.",
     "executioner_to_jester": "Your target died... You are now a Jester. Get yourself lynched!",
     "jail_protected": "You were in jail, you were protected.",
-    "blackmailed": "Silenced"
+    "blackmailed": "Silenced",
+    "converted_to_cult": "You have been converted to the Cult. Join your new brethren...",
+    "conversion_success": "You converted {{name}} to the Cult.",
+    "cult_new_member": "{{name}} joined the Cult tonight.",
+    "conversion_failed_mafia": "Cannot convert {{name}} — they belong to the Mafia.",
+    "conversion_failed_immune": "Cannot convert {{name}} — they are night-immune.",
+    "conversion_failed_jailed": "Cannot convert {{name}} — they were in jail.",
+    "conversion_failed_killed": "Cannot convert {{name}} — they died tonight."
   },
   "death_messages": {
     "mafia": [
@@ -99,6 +106,7 @@
     "town": { "name": "The Town", "short": "Town" },
     "mafia": { "name": "The Mafia", "short": "Mafia" },
     "evil": { "name": "The Werewolves", "short": "Werewolves" },
+    "cult": { "name": "The Cult", "short": "Cult" },
     "neutral": { "name": "Neutral", "short": "Neutral" },
     "neutral_killing": { "name": "The Serial Killer", "short": "Serial Killer" }
   },

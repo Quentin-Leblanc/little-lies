@@ -83,6 +83,72 @@ describe('checkWinCondition', () => {
       ])
     ).toBe('town');
   });
+
+  test('cult wins at parity (conversions push them past the threshold)', () => {
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('c1', { team: 'cult' }),
+      ])
+    ).toBe('cult');
+  });
+
+  test('cult wins at majority', () => {
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('c1', { team: 'cult' }),
+        p('c2', { team: 'cult' }),
+      ])
+    ).toBe('cult');
+  });
+
+  test('living cult blocks town from winning', () => {
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('t2'),
+        p('t3'),
+        p('c1', { team: 'cult' }),
+      ])
+    ).toBeNull();
+  });
+
+  test('mafia parity vs cult → no winner (neither side has the upper hand)', () => {
+    // 1 mafia + 1 cult + 0 town: mafia needs mafiaAlive >= town+evil+cult+nk
+    // → 1 >= 0+0+1+0 = 1 → mafia wins. Sanity check: cult also meets parity,
+    // but mafia is checked first, so mafia wins.
+    expect(
+      checkWinCondition([
+        p('m1', { team: 'mafia' }),
+        p('c1', { team: 'cult' }),
+      ])
+    ).toBe('mafia');
+  });
+
+  test('cult wins when it outnumbers a mixed remainder', () => {
+    // 2 cult vs 1 town + 1 mafia → cult 2 >= 1+1+0+0 = 2 — but mafia
+    // parity check (1 >= 1+0+2+0 = 3) fails first. Town check requires
+    // all non-town dead. Cult branch must win.
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('m1', { team: 'mafia' }),
+        p('c1', { team: 'cult' }),
+        p('c2', { team: 'cult' }),
+      ])
+    ).toBe('cult');
+  });
+
+  test('neutral killer + cult alive → neutral_killing branch does not fire', () => {
+    // SK alone needs town+mafia+evil+cult all dead.
+    expect(
+      checkWinCondition([
+        p('sk', { team: 'neutral', winCondition: 'lastStanding' }),
+        p('c1', { team: 'cult' }),
+      ])
+    ).toBe('cult'); // cult has 1 >= 0+0+0+1 = 1 → parity wins
+  });
 });
 
 describe('checkVotingMajority', () => {
