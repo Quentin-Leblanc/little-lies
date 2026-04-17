@@ -39,7 +39,7 @@ const GroundFog = React.memo(function GroundFog({ isDay = true }) {
       <MistSlab y={0.85} scale={1.2} speed={0.012} density={dense * 0.45} color={color} seed={1.3} />
 
       {/* Far horizon mist ring (drei volumetric clouds) */}
-      <Clouds material={THREE.MeshBasicMaterial} limit={40}>
+      <Clouds material={THREE.MeshBasicMaterial} limit={40} texture="/cloud.png">
         {farClouds.map((c, i) => (
           <Cloud
             key={`far-${i}`}

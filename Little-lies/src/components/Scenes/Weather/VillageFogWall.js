@@ -40,7 +40,7 @@ const VillageFogWall = React.memo(function VillageFogWall({ isDay = true }) {
   }, []);
 
   return (
-    <Clouds material={THREE.MeshBasicMaterial} limit={60}>
+    <Clouds material={THREE.MeshBasicMaterial} limit={60} texture="/cloud.png">
       {clouds.map((c, i) => (
         <Cloud
           key={`fogwall-${i}`}
