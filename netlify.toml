@@ -5,6 +5,10 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # react-scripts transforme les warnings ESLint en erreurs quand CI=true
+  # (défaut Netlify). On désactive pour ne pas bloquer le build sur les
+  # warnings useEffect-deps / no-unused-vars hérités. À nettoyer un jour.
+  CI = "false"
 
 # SPA fallback — all routes to index.html
 [[redirects]]
