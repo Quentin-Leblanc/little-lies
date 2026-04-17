@@ -1,0 +1,164 @@
+import {
+  checkWinCondition,
+  checkVotingMajority,
+  resolveJudgment,
+} from '../gameRules';
+
+// --- Helpers ---
+const p = (id, { team = 'town', alive = true, winCondition = null } = {}) => ({
+  id,
+  isAlive: alive,
+  character: { team, winCondition },
+  profile: { name: id },
+});
+
+describe('checkWinCondition', () => {
+  test('returns null when no one has a character yet', () => {
+    expect(checkWinCondition([{ id: 'a', isAlive: true, profile: {} }])).toBeNull();
+  });
+
+  test('returns null when nobody is alive', () => {
+    expect(checkWinCondition([p('a', { alive: false })])).toBeNull();
+  });
+
+  test('town wins when no mafia / neutral killer / evil remain', () => {
+    expect(checkWinCondition([p('a'), p('b'), p('c')])).toBe('town');
+  });
+
+  test('mafia wins at parity', () => {
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('m1', { team: 'mafia' }),
+      ])
+    ).toBe('mafia');
+  });
+
+  test('mafia wins at majority', () => {
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('m1', { team: 'mafia' }),
+        p('m2', { team: 'mafia' }),
+      ])
+    ).toBe('mafia');
+  });
+
+  test('town still alive + mafia minority → no win yet', () => {
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('t2'),
+        p('m1', { team: 'mafia' }),
+      ])
+    ).toBeNull();
+  });
+
+  test('neutral killer wins alone', () => {
+    expect(
+      checkWinCondition([
+        p('sk', { team: 'neutral', winCondition: 'lastStanding' }),
+      ])
+    ).toBe('neutral_killing');
+  });
+
+  test('neutral killer vs town alone → no winner (mafia rule does not apply to neutral)', () => {
+    // With SK still alive, town cannot win. SK cannot win while town remains.
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('sk', { team: 'neutral', winCondition: 'lastStanding' }),
+      ])
+    ).toBeNull();
+  });
+
+  test('dead mafia is ignored — town wins', () => {
+    expect(
+      checkWinCondition([
+        p('t1'),
+        p('m1', { team: 'mafia', alive: false }),
+      ])
+    ).toBe('town');
+  });
+});
+
+describe('checkVotingMajority', () => {
+  const players = [p('a'), p('b'), p('c'), p('d'), p('e')]; // 5 alive → majority = 3
+
+  test('returns null when no suspects', () => {
+    expect(checkVotingMajority(players, { suspects: {} })).toBeNull();
+  });
+
+  test('returns null without majority', () => {
+    const trial = { suspects: { a: { suspectedBy: ['b', 'c'] } } }; // 2/3 needed
+    expect(checkVotingMajority(players, trial)).toBeNull();
+  });
+
+  test('returns the accused when majority reached', () => {
+    const trial = { suspects: { a: { suspectedBy: ['b', 'c', 'd'] } } };
+    expect(checkVotingMajority(players, trial)).toBe('a');
+  });
+
+  test('Mayor vote weight works (3 votes from same voter allowed)', () => {
+    // Mayor casts 3 votes by pushing id three times
+    const trial = { suspects: { a: { suspectedBy: ['b', 'b', 'b'] } } };
+    expect(checkVotingMajority(players, trial)).toBe('a');
+  });
+
+  test('ties go to the top-votes-encountered', () => {
+    const trial = {
+      suspects: {
+        a: { suspectedBy: ['x', 'y', 'z'] },
+        b: { suspectedBy: ['x', 'y', 'z'] },
+      },
+    };
+    // Tie at 3: first key processed wins (implementation detail — not asserted
+    // beyond "returns one of them")
+    const winner = checkVotingMajority(players, trial);
+    expect(['a', 'b']).toContain(winner);
+  });
+
+  test('dead players do not count toward majority baseline', () => {
+    const mix = [p('a'), p('b'), p('c', { alive: false }), p('d', { alive: false })];
+    // 2 alive → majority = 2
+    const trial = { suspects: { a: { suspectedBy: ['b', 'c'] } } };
+    expect(checkVotingMajority(mix, trial)).toBe('a');
+  });
+});
+
+describe('resolveJudgment', () => {
+  const players = [p('a'), p('b'), p('c'), p('d')]; // accused = 'a' → 3 voters → majority = 2
+
+  test('guilty by default when no one votes innocent', () => {
+    const result = resolveJudgment(players, { votes: {} }, 'a');
+    expect(result.isGuilty).toBe(true);
+    expect(result.innocentCount).toBe(0);
+  });
+
+  test('guilty when innocent votes < majority', () => {
+    const result = resolveJudgment(players, { votes: { b: 'innocent' } }, 'a');
+    expect(result.isGuilty).toBe(true);
+    expect(result.innocentCount).toBe(1);
+  });
+
+  test('saved when innocent votes >= majority', () => {
+    const result = resolveJudgment(
+      players,
+      { votes: { b: 'innocent', c: 'innocent' } },
+      'a'
+    );
+    expect(result.isGuilty).toBe(false);
+    expect(result.innocentCount).toBe(2);
+  });
+
+  test('accused cannot vote on themselves (excluded from voter count)', () => {
+    const result = resolveJudgment(
+      players,
+      { votes: { a: 'innocent' } }, // self-vote ignored in eligibleVoters
+      'a'
+    );
+    // 3 eligible voters, majority = 2 — 1 innocent vote not enough
+    expect(result.eligibleVoters).toBe(3);
+    expect(result.majority).toBe(2);
+  });
+});
