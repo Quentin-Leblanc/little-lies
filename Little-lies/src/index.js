@@ -9,12 +9,20 @@ import { AuthProvider } from './components/Auth/Auth';
 import './trad/i18n'; // Initialize i18n
 import './index.scss';
 
-// Liste d'avatars personnalisés
+// Generic letter avatars as data-URIs — no external CDN dependency,
+// no extra HTTP requests at boot. PlayroomKit assigns one per player.
+const svgAvatar = (color, letter) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><circle cx="40" cy="40" r="40" fill="${color}"/><text x="40" y="54" font-size="44" fill="#fff" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-weight="600">${letter}</text></svg>`
+  )}`;
+
 const avatars = [
-  'https://images.vexels.com/media/users/3/145908/raw/52eabf633ca6414e60a7677b0b917d92-male-avatar-maker.jpg',
-  'https://www.clipartkey.com/mpngs/m/118-1188761_avatar-cartoon-profile-picture-png.png',
-  'https://i.pinimg.com/736x/df/5f/5b/df5f5b1b174a2b4b6026cc6c8f9395c1.jpg',
-  'https://cdn2.f-cdn.com/contestentries/1440473/30778261/5bdd02db9ff4c_thumb900.jpg',
+  svgAvatar('#e74c3c', 'A'),
+  svgAvatar('#3498db', 'B'),
+  svgAvatar('#2ecc71', 'C'),
+  svgAvatar('#f39c12', 'D'),
+  svgAvatar('#9b59b6', 'E'),
+  svgAvatar('#1abc9c', 'F'),
 ];
 
 // PlayroomKit gameId — read from env var (set REACT_APP_PLAYROOM_GAME_ID

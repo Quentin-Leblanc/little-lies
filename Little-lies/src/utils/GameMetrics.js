@@ -69,8 +69,9 @@ export const saveMetrics = (metrics) => {
     // Keep only last N
     const trimmed = existing.slice(0, MAX_HISTORY);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
-    // Also log for future backend
-    console.log('[GameMetrics]', metrics);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[GameMetrics]', metrics);
+    }
     return true;
   } catch (e) {
     console.warn('[GameMetrics] Failed to save:', e);

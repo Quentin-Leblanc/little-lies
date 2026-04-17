@@ -19,7 +19,9 @@ const saveSurveyResponse = (response) => {
     const existing = JSON.parse(localStorage.getItem(SURVEY_STORAGE_KEY) || '[]');
     existing.push({ ...response, timestamp: Date.now() });
     localStorage.setItem(SURVEY_STORAGE_KEY, JSON.stringify(existing));
-    console.log('[Survey]', response);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Survey]', response);
+    }
   } catch (e) {
     console.warn('[Survey] Failed to save:', e);
   }
