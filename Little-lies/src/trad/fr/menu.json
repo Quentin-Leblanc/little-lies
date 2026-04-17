@@ -28,6 +28,7 @@
     "win_conditions": "Conditions de victoire",
     "win_town": "Village — Éliminer toute la Mafia et les menaces neutres.",
     "win_mafia": "Mafia — Être en majorité par rapport aux autres joueurs.",
+    "win_cult": "Culte — Convertir assez de joueurs pour être en majorité.",
     "win_sk": "Serial Killer — Être le dernier survivant.",
     "win_jester": "Jester — Se faire lyncher.",
     "win_survivor": "Survivor — Rester en vie jusqu'à la fin.",
@@ -42,6 +43,7 @@
     "key_escape": "Échap — Fermer le chat",
     "roles_town": "Rôles du Village",
     "roles_mafia": "Rôles de la Mafia",
+    "roles_cult": "Rôles du Culte",
     "roles_neutral": "Neutres"
   },
   "survey": {

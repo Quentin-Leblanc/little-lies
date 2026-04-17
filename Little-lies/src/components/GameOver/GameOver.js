@@ -13,11 +13,12 @@ const TEAM_STYLES = {
   town: { color: '#78ff78', icon: 'fa-users', bg: 'rgba(120,255,120,0.08)' },
   mafia: { color: '#ff4444', icon: 'fa-user-secret', bg: 'rgba(255,68,68,0.08)' },
   evil: { color: '#ff4444', icon: 'fa-paw', bg: 'rgba(255,68,68,0.08)' },
+  cult: { color: '#a96edd', icon: 'fa-hat-wizard', bg: 'rgba(122,61,153,0.10)' },
   neutral: { color: '#9370db', icon: 'fa-star', bg: 'rgba(147,112,219,0.08)' },
   neutral_killing: { color: '#9370db', icon: 'fa-skull', bg: 'rgba(147,112,219,0.08)' },
 };
 
-const TEAM_ORDER = ['town', 'mafia', 'evil', 'neutral'];
+const TEAM_ORDER = ['town', 'mafia', 'evil', 'cult', 'neutral'];
 
 // Particules flottantes selon victoire/defaite
 const Particles = ({ type }) => {

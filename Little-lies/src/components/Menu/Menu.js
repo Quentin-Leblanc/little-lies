@@ -203,6 +203,7 @@ const HelpDialog = ({ onClose }) => {
   const rolesByTeam = {
     town: allRoles.filter((r) => r.team === 'town'),
     mafia: allRoles.filter((r) => r.team === 'mafia'),
+    cult: allRoles.filter((r) => r.team === 'cult'),
     neutral: allRoles.filter((r) => r.team === 'neutral'),
   };
 
@@ -233,6 +234,7 @@ const HelpDialog = ({ onClose }) => {
           <div className="help-phases">
             <div className="help-phase"><strong style={{color:'#78ff78'}}>{t('menu:help_dialog.win_town')}</strong></div>
             <div className="help-phase"><strong style={{color:'#ff4444'}}>{t('menu:help_dialog.win_mafia')}</strong></div>
+            <div className="help-phase"><strong style={{color:'#a96edd'}}>{t('menu:help_dialog.win_cult')}</strong></div>
             <div className="help-phase"><strong style={{color:'#9370db'}}>{t('menu:help_dialog.win_sk')}</strong></div>
             <div className="help-phase"><strong style={{color:'#ff69b4'}}>{t('menu:help_dialog.win_jester')}</strong></div>
             <div className="help-phase"><strong style={{color:'#daa520'}}>{t('menu:help_dialog.win_survivor')}</strong></div>

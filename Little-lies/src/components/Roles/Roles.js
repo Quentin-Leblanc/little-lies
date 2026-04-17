@@ -23,12 +23,13 @@ const RolesList = () => {
 
   const uniqueRoles = Object.values(roleCounts);
   const townRoles = uniqueRoles.filter((r) => r.team === 'town');
-  const evilRoles = uniqueRoles.filter((r) => r.team === 'mafia' || r.team === 'neutral');
+  const evilRoles = uniqueRoles.filter((r) => r.team === 'mafia' || r.team === 'cult' || r.team === 'neutral');
 
   // Color by faction (not by individual role)
   const FACTION_COLORS = {
     town: '#4ade80',     // green
     mafia: '#ff4757',    // red
+    cult: '#a96edd',     // light purple
     neutral: '#a855f7',  // purple
   };
   const getFactionColor = (role) => FACTION_COLORS[role.team] || '#ccc';

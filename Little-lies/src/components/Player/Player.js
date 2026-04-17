@@ -74,11 +74,12 @@ const Player = () => {
         <div className="player-container">
             {/* Role + Team side by side */}
             <div className="role-team-row">
-            {/* Team block — left, for mafia */}
-            {me.character && me.character.team === 'mafia' && (
+            {/* Team block — left, for teams with shared night awareness
+                (mafia, cult). Members see each other and their roles. */}
+            {me.character && (me.character.team === 'mafia' || me.character.team === 'cult') && (
                 <div className="team-block">
-                    <h4 className="team-block-title">{t('game:teams.mafia.short')}</h4>
-                    {players.filter(p => p.character?.team === 'mafia').map(p => (
+                    <h4 className="team-block-title">{t(`game:teams.${me.character.team}.short`)}</h4>
+                    {players.filter(p => p.character?.team === me.character.team).map(p => (
                         <div key={p.id} className="team-member" style={{ opacity: p.isAlive ? 1 : 0.4 }}>
                             <span style={{ color: p.profile?.color || '#ccc' }}>{p.profile?.name}</span>
                             <span className="team-member-role" style={{ color: p.character?.couleur || '#888' }}>
@@ -94,7 +95,7 @@ const Player = () => {
                 <div className="status-line">
                     <span className="status-name" style={{ color: me.profile?.color || '#fff' }}>{me.profile?.name || 'Joueur'}</span>
                     <span className="status-separator">&mdash;</span>
-                    <span className="status-team" style={{ color: { town: '#78ff78', mafia: '#ff4444', neutral: '#9370db' }[me.character?.team] || '#aaa' }}>
+                    <span className="status-team" style={{ color: { town: '#78ff78', mafia: '#ff4444', cult: '#a96edd', neutral: '#9370db' }[me.character?.team] || '#aaa' }}>
                         {t(`game:teams.${me.character?.team}.short`)}
                     </span>
                     {!me.isAlive && <span className="status-dead">{t('common:dead').toLowerCase()}</span>}

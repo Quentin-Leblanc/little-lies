@@ -5,6 +5,7 @@ import { useGameEngine } from '../../hooks/useGameEngine';
 const TEAM_COLORS = {
   town: '#78ff78',
   mafia: '#ff4444',
+  cult: '#a96edd',
   neutral: '#9370db',
 };
 

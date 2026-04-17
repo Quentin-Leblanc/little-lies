@@ -26,6 +26,8 @@ const ACTION_COLORS = {
   ROLEBLOCK: { bg: 'rgba(180,80,200,0.7)', hover: 'rgba(180,80,200,0.9)', color: '#fff' },
   FRAME: { bg: 'rgba(180,80,200,0.7)', hover: 'rgba(180,80,200,0.9)', color: '#fff' },
   BLACKMAIL: { bg: 'rgba(180,80,200,0.7)', hover: 'rgba(180,80,200,0.9)', color: '#fff' },
+  CONVERT: { bg: 'rgba(122,61,153,0.75)', hover: 'rgba(122,61,153,0.95)', color: '#fff' },
+  CULT_VOTE: { bg: 'rgba(169,110,221,0.6)', hover: 'rgba(169,110,221,0.85)', color: '#fff' },
 };
 const getActionStyle = (type) => ACTION_COLORS[type] || { bg: 'rgba(100,100,100,0.7)', hover: 'rgba(100,100,100,0.9)', color: '#fff' };
 

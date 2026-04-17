@@ -159,6 +159,11 @@
     border-left: 2px solid #cc0000;
   }
 
+  &.msg-cult {
+    background-color: rgba(122, 61, 153, 0.1);
+    border-left: 2px solid #7a3d99;
+  }
+
   &.msg-vote {
     background-color: rgba(30, 60, 120, 0.5);
     border-left: 3px solid #3a7bd5;
@@ -241,6 +246,13 @@
 
 .mafia-prefix {
   color: #ff4444;
+  font-size: 0.765rem;
+  margin-right: 0.235rem;
+  font-weight: bold;
+}
+
+.cult-prefix {
+  color: #a96edd;
   font-size: 0.765rem;
   margin-right: 0.235rem;
   font-weight: bold;

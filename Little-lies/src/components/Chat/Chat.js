@@ -282,6 +282,8 @@ function Chat(props) {
       chatChannel = 'dead';
     } else if (isNight && myTeam === 'mafia') {
       chatChannel = 'mafia';
+    } else if (isNight && myTeam === 'cult') {
+      chatChannel = 'cult';
     }
 
     const message = {
@@ -353,6 +355,11 @@ function Chat(props) {
       return false;
     }
 
+    // Cult chat: visible to cult members only
+    if (message.chat === 'cult') {
+      return myTeam === 'cult';
+    }
+
     // Default chat: always visible to alive, visible to dead too
     if (message.chat === 'default') return true;
 
@@ -374,9 +381,11 @@ function Chat(props) {
     }
   }
 
-  // Villager night: can see chat (grayed out, read-only) but not write
+  // Villager night: can see chat (grayed out, read-only) but not write.
+  // Mafia and Cult have private night channels, so they write; everyone
+  // else (town, neutrals) is locked in read-only during the night.
   const isSpy = me?.character?.key === 'spy';
-  const isVillagerNight = props.night && myTeam !== 'mafia' && !isSpy && !isDead;
+  const isVillagerNight = props.night && myTeam !== 'mafia' && myTeam !== 'cult' && !isSpy && !isDead;
 
   // Placeholder text
   let placeholder = t('game:chat.placeholder');
@@ -387,6 +396,7 @@ function Chat(props) {
   else if (isMutedByPhase) placeholder = t('game:chat.placeholder_muted');
   else if (isPlayerInTimeout) placeholder = t('game:chat.placeholder_timeout');
   else if (isNight && myTeam === 'mafia') placeholder = t('game:chat.placeholder_mafia');
+  else if (isNight && myTeam === 'cult') placeholder = t('game:chat.placeholder_cult');
 
   const isDisabled = isSpectator || isVillagerNight || !canChat || (isMutedByPhase && !isDead);
   const maxInputLength = isBlackmailed ? BLACKMAIL_MAX_CHARS : undefined;
@@ -399,6 +409,7 @@ function Chat(props) {
     if (message.chat === 'whisper') return 'msg-whisper';
     if (message.chat === 'dead') return 'msg-dead';
     if (message.chat === 'mafia') return 'msg-mafia';
+    if (message.chat === 'cult') return 'msg-cult';
     return '';
   };
 
@@ -414,6 +425,7 @@ function Chat(props) {
     }
     if (message.chat === 'dead') return <span className="dead-prefix">{t('game:chat.prefix_dead')}</span>;
     if (message.chat === 'mafia') return <span className="mafia-prefix">{t('game:chat.prefix_mafia')}</span>;
+    if (message.chat === 'cult') return <span className="cult-prefix">{t('game:chat.prefix_cult')}</span>;
     return null;
   };
 
