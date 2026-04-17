@@ -4,7 +4,7 @@
 
 let audioCtx = null;
 let masterGain = null;
-let _volume = 0.3;
+let _volume = 0.18;
 let _muted = false;
 const audioCache = {};
 
@@ -161,9 +161,58 @@ export const playTick = () => {
   playTone(600, 0.05, 'square');
 };
 
+// --- Looping music (lobby) ---
+// Token-based guard: protects against double-play from React StrictMode double-mounts,
+// rapid repeated calls (initial attempt + autoplay-unlock listener firing), and
+// stop()-during-inflight-start races. Each stop() invalidates any pending start.
+let _lobbySource = null;
+let _lobbyGain = null;
+let _lobbyToken = 0;
+
+export const playLobbyMusic = async (url = '/sounds/deuslower-medieval-ambient-236809.mp3', volume = 0.5) => {
+  if (_lobbySource) return;
+  const myToken = ++_lobbyToken;
+  try {
+    const ctx = getCtx();
+    let buffer = audioCache[url];
+    if (!buffer) {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      buffer = await ctx.decodeAudioData(arrayBuffer);
+      audioCache[url] = buffer;
+    }
+    // Bail if a newer call superseded us or if another start already landed
+    if (myToken !== _lobbyToken || _lobbySource) return;
+    const source = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(gain);
+    gain.connect(getGain());
+    source.start(0);
+    _lobbySource = source;
+    _lobbyGain = gain;
+  } catch (e) {
+    // Silently fail
+  }
+};
+
+export const stopLobbyMusic = () => {
+  _lobbyToken++; // invalidate any in-flight start
+  if (_lobbySource) {
+    try { _lobbySource.stop(); } catch {}
+    try { _lobbySource.disconnect(); } catch {}
+    try { _lobbyGain?.disconnect(); } catch {}
+    _lobbySource = null;
+    _lobbyGain = null;
+  }
+};
+
 export default {
   setVolume, getVolume, toggleMute, isMuted,
   playNightStart, playDayStart, playVote, playDeath,
   playExecution, playSpared, playActionSelect,
   playVictory, playDefeat, playTick, playChatMessage, playDoorClose,
+  playLobbyMusic, stopLobbyMusic,
 };

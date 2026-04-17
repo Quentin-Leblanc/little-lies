@@ -2,7 +2,7 @@
   "title": "Mentions légales",
   "copyright": {
     "title": "Propriété",
-    "text": "© 2025 Quentin Leblanc — Among Liars",
+    "text": "© 2025-2026 Quentin Leblanc — Among Liars",
     "rights": "Tous droits réservés. Among Liars est un jeu indépendant de déduction sociale multijoueur."
   },
   "privacy": {
@@ -20,14 +20,18 @@
     "fiction": "Le contenu du jeu est fictif. Toute ressemblance avec des personnes réelles est fortuite."
   },
   "credits": {
-    "title": "Credits et technologies",
-    "react": "Interface utilisateur",
-    "threejs": "Rendu 3D",
-    "playroom": "Multijoueur temps réel",
-    "supabase": "Authentification et base de données",
-    "framer": "Animations",
-    "fontawesome": "Icônes (licence Free)",
-    "fonts": "Cinzel, Inter, Rajdhani (licence OFL/Apache)"
+    "title": "Logiciels open-source",
+    "intro": "Among Liars s'appuie sur plusieurs bibliothèques open-source dont les licences (MIT, Apache-2.0, SIL-OFL) permettent un usage libre en contrepartie du respect de leurs mentions de copyright respectives. Les avis complets sont inclus dans le code source distribué."
+  },
+  "assets": {
+    "title": "Ressources externes",
+    "intro": "Merci aux créateurs dont les ressources libres rendent Among Liars possible :",
+    "music": "Musique du lobby — Pixabay Content License",
+    "meshy": "Génération de modèles 3D (personnages Wanderer)",
+    "kaykit": "Modèles 3D médiévaux (bâtiments, mobilier) — CC0",
+    "kenney": "Effets sonores — CC0",
+    "textures": "Textures du sol (sable, terrain) — Pixabay Content License",
+    "license": "Toutes ces ressources sont utilisées dans le respect de leurs licences respectives (CC0 ou Pixabay Content License), qui autorisent l'usage commercial sans attribution obligatoire. Les crédits ci-dessus sont fournis par reconnaissance envers les auteurs."
   },
   "disclaimer": {
     "title": "Avertissement",

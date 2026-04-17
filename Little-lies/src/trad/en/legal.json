@@ -2,7 +2,7 @@
   "title": "Legal notice",
   "copyright": {
     "title": "Ownership",
-    "text": "© 2025 Quentin Leblanc — Among Liars",
+    "text": "© 2025-2026 Quentin Leblanc — Among Liars",
     "rights": "All rights reserved. Among Liars is an independent multiplayer social deduction game."
   },
   "privacy": {
@@ -20,14 +20,18 @@
     "fiction": "Game content is fictional. Any resemblance to real persons is coincidental."
   },
   "credits": {
-    "title": "Credits and technologies",
-    "react": "User interface",
-    "threejs": "3D rendering",
-    "playroom": "Real-time multiplayer",
-    "supabase": "Authentication and database",
-    "framer": "Animations",
-    "fontawesome": "Icons (Free license)",
-    "fonts": "Cinzel, Inter, Rajdhani (OFL/Apache license)"
+    "title": "Open-source software",
+    "intro": "Among Liars is built on top of several open-source libraries whose licenses (MIT, Apache-2.0, SIL-OFL) allow free use in exchange for respecting their respective copyright notices. Full notices are included in the distributed source code."
+  },
+  "assets": {
+    "title": "External resources",
+    "intro": "Thanks to the creators whose free resources make Among Liars possible:",
+    "music": "Lobby music — Pixabay Content License",
+    "meshy": "3D model generation (Wanderer characters)",
+    "kaykit": "Medieval 3D models (buildings, props) — CC0",
+    "kenney": "Sound effects — CC0",
+    "textures": "Ground textures (sand, terrain) — Pixabay Content License",
+    "license": "All these resources are used in compliance with their respective licenses (CC0 or Pixabay Content License), which allow commercial use without mandatory attribution. The credits above are provided as a token of appreciation to the authors."
   },
   "disclaimer": {
     "title": "Disclaimer",

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import ReactDOM from 'react-dom';
 import { usePlayersList, isHost, getRoomCode, myPlayer, useMultiplayerState } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
@@ -10,6 +11,8 @@ import { Character, skinForPlayer } from '../Character/Character';
 import GameConfig from '../GameConfig/GameConfig';
 import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
+import Legal from '../Legal/Legal';
+import Audio from '../../utils/AudioManager';
 import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import { getLevel } from '../../utils/xpSystem';
@@ -471,8 +474,51 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     setGame({ ...(game || {}), config: newConfig });
   };
   const [showAuth, setShowAuth] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
+  const [muted, setMuted] = useState(Audio.isMuted());
   const [roomCode, setRoomCode] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // Lobby ambient music — gesture-gated (browser autoplay policy).
+  // Starts on the first user pointerdown/keydown anywhere on the page.
+  useEffect(() => {
+    const unlock = () => { Audio.playLobbyMusic(); };
+    window.addEventListener('pointerdown', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+      Audio.stopLobbyMusic();
+    };
+  }, []);
+
+  // Volume popup (vertical slider)
+  const [volumeOpen, setVolumeOpen] = useState(false);
+  const [volume, setVolumeState] = useState(Audio.getVolume());
+  const volumeRef = useRef(null);
+
+  // Close popup on outside click
+  useEffect(() => {
+    if (!volumeOpen) return;
+    const onDoc = (e) => {
+      if (!volumeRef.current?.contains(e.target)) setVolumeOpen(false);
+    };
+    // Defer one tick so the click that opened it doesn't immediately close it
+    const t = setTimeout(() => document.addEventListener('pointerdown', onDoc), 0);
+    return () => { clearTimeout(t); document.removeEventListener('pointerdown', onDoc); };
+  }, [volumeOpen]);
+
+  const handleToggleMute = () => {
+    const m = Audio.toggleMute();
+    setMuted(m);
+  };
+
+  const handleVolumeChange = (e) => {
+    const v = parseFloat(e.target.value);
+    setVolumeState(v);
+    Audio.setVolume(v);
+    if (v > 0 && muted) { Audio.toggleMute(); setMuted(false); }
+  };
   const [playerName, setPlayerName] = useState(
     currentPlayer?.getState?.()?.profile?.name || ''
   );
@@ -682,11 +728,63 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
       {/* Auth modal */}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
+      {/* Legal / credits modal — portal so it floats above the R3F Html player labels */}
+      {showLegal && ReactDOM.createPortal(<Legal onClose={() => setShowLegal(false)} />, document.body)}
+
+      {/* Volume control — floating top-left, click opens vertical slider */}
+      <div className="lobby-volume" ref={volumeRef}>
+        <button
+          className="lobby-mute-btn"
+          onClick={() => setVolumeOpen((o) => !o)}
+          title={muted || volume === 0 ? 'Unmute' : 'Volume'}
+          aria-label="Volume"
+        >
+          <i className={`fas ${muted || volume === 0 ? 'fa-volume-mute' : volume < 0.4 ? 'fa-volume-down' : 'fa-volume-up'}`}></i>
+        </button>
+        {volumeOpen && (
+          <div className="lobby-volume-popup">
+            <button
+              className="lobby-volume-mute"
+              onClick={handleToggleMute}
+              title={muted ? 'Unmute' : 'Mute'}
+              aria-label={muted ? 'Unmute' : 'Mute'}
+            >
+              <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.02"
+              value={muted ? 0 : volume}
+              onChange={handleVolumeChange}
+              className="lobby-volume-slider"
+              orient="vertical"
+            />
+            <span className="lobby-volume-value">{Math.round((muted ? 0 : volume) * 100)}</span>
+          </div>
+        )}
+      </div>
+
       {/* UI Panel */}
       <div className="lobby-panel">
         <div className="lobby-panel-inner">
           <h1 className="lobby-title" data-text="AMONG LIARS">AMONG LIARS</h1>
-          <p className="lobby-subtitle">{t('setup:multiplayer_lobby')}</p>
+          <div className="lobby-subtitle-row">
+            <p className="lobby-subtitle">{t('setup:multiplayer_lobby')}</p>
+            <div className="lobby-lang-inline">
+              {AVAILABLE_LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  className={`lobby-lang-flag ${i18n.language === lang.code ? 'active' : ''}`}
+                  onClick={() => i18n.changeLanguage(lang.code)}
+                  title={lang.label}
+                >
+                  {lang.flag}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="lobby-section lobby-auth-section">
             <ProfileBadge onClick={() => setShowAuth(true)} />
@@ -812,17 +910,10 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             </button>
           </div>
 
-          <div className="lobby-lang-row">
-            {AVAILABLE_LANGUAGES.map((lang) => (
-              <button
-                key={lang.code}
-                className={`lobby-lang-btn ${i18n.language === lang.code ? 'active' : ''}`}
-                onClick={() => i18n.changeLanguage(lang.code)}
-              >
-                {lang.flag}
-              </button>
-            ))}
-          </div>
+          <button className="lobby-legal-link" onClick={() => setShowLegal(true)}>
+            {t('common:legal', { defaultValue: 'Mentions légales & crédits' })}
+          </button>
+
         </div>
       </div>
 

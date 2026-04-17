@@ -5,7 +5,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  // Must win over drei's <Html> labels (z-index ≈ 16777271) rendered from the lobby Canvas
+  z-index: 2147483000;
   backdrop-filter: blur(4px);
   animation: legal-fade 0.25s ease-out;
 }
@@ -107,6 +108,71 @@
     color: #777;
     font-size: 0.75rem;
   }
+}
+
+.legal-credits-text {
+  color: #999;
+  font-size: 0.78rem;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.legal-assets-intro {
+  color: #999;
+  font-size: 0.78rem;
+  margin: 0 0 0.5rem;
+}
+
+.legal-asset {
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+
+  strong {
+    color: #ddd;
+    font-size: 0.8rem;
+  }
+
+  .legal-asset-role {
+    color: #777;
+    font-size: 0.7rem;
+    margin-top: 1px;
+  }
+}
+
+.legal-asset-link {
+  color: #8a9ed6;
+  font-size: 0.72rem;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.2rem;
+  transition: color 0.15s, background 0.15s;
+
+  i {
+    margin-left: 0.3rem;
+    font-size: 0.6rem;
+    opacity: 0.7;
+  }
+
+  &:hover {
+    color: #b6c6ef;
+    background: rgba(138, 158, 214, 0.1);
+  }
+}
+
+.legal-asset-license {
+  color: #666;
+  font-size: 0.7rem;
+  font-style: italic;
+  margin-top: 0.6rem !important;
+  line-height: 1.5;
 }
 
 .legal-version {

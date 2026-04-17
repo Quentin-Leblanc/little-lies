@@ -42,29 +42,60 @@ const Legal = ({ onClose }) => {
 
           <section>
             <h3><i className="fas fa-code"></i> {t('credits.title')}</h3>
+            <p className="legal-credits-text">{t('credits.intro')}</p>
+          </section>
+
+          <section>
+            <h3><i className="fas fa-images"></i> {t('assets.title')}</h3>
+            <p className="legal-assets-intro">{t('assets.intro')}</p>
             <div className="legal-credits">
-              <div className="credit-item">
-                <strong>React</strong> <span>{t('credits.react')}</span>
+              <div className="credit-item legal-asset">
+                <div>
+                  <strong>Medieval Ambient — DeusLower</strong>
+                  <span className="legal-asset-role">{t('assets.music')}</span>
+                </div>
+                <a href="https://pixabay.com/music/ambient-deuslower-medieval-ambient-236809/" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
+                  Pixabay <i className="fas fa-external-link-alt"></i>
+                </a>
               </div>
-              <div className="credit-item">
-                <strong>Three.js / React Three Fiber</strong> <span>{t('credits.threejs')}</span>
+              <div className="credit-item legal-asset">
+                <div>
+                  <strong>Meshy AI</strong>
+                  <span className="legal-asset-role">{t('assets.meshy')}</span>
+                </div>
+                <a href="https://www.meshy.ai/" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
+                  meshy.ai <i className="fas fa-external-link-alt"></i>
+                </a>
               </div>
-              <div className="credit-item">
-                <strong>PlayroomKit</strong> <span>{t('credits.playroom')}</span>
+              <div className="credit-item legal-asset">
+                <div>
+                  <strong>KayKit — Kay Lousberg</strong>
+                  <span className="legal-asset-role">{t('assets.kaykit')}</span>
+                </div>
+                <a href="https://kaylousberg.itch.io/" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
+                  kaylousberg.itch.io <i className="fas fa-external-link-alt"></i>
+                </a>
               </div>
-              <div className="credit-item">
-                <strong>Supabase</strong> <span>{t('credits.supabase')}</span>
+              <div className="credit-item legal-asset">
+                <div>
+                  <strong>Kenney</strong>
+                  <span className="legal-asset-role">{t('assets.kenney')}</span>
+                </div>
+                <a href="https://kenney.nl/assets" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
+                  kenney.nl <i className="fas fa-external-link-alt"></i>
+                </a>
               </div>
-              <div className="credit-item">
-                <strong>Framer Motion</strong> <span>{t('credits.framer')}</span>
-              </div>
-              <div className="credit-item">
-                <strong>Font Awesome</strong> <span>{t('credits.fontawesome')}</span>
-              </div>
-              <div className="credit-item">
-                <strong>Google Fonts</strong> <span>{t('credits.fonts')}</span>
+              <div className="credit-item legal-asset">
+                <div>
+                  <strong>Pixabay</strong>
+                  <span className="legal-asset-role">{t('assets.textures')}</span>
+                </div>
+                <a href="https://pixabay.com/" target="_blank" rel="noopener noreferrer" className="legal-asset-link">
+                  pixabay.com <i className="fas fa-external-link-alt"></i>
+                </a>
               </div>
             </div>
+            <p className="legal-asset-license">{t('assets.license')}</p>
           </section>
 
           <section>
