@@ -75,5 +75,20 @@
   "survey_meh": "Meh",
   "survey_ok": "Ok",
   "survey_good": "Good",
-  "survey_great": "Awesome"
+  "survey_great": "Awesome",
+  "edit": "Edit",
+  "save": "Save",
+  "username_too_long": "Username too long (20 chars max)",
+  "games_played_label": "Games",
+  "wins": "Wins",
+  "win_rate": "Win rate",
+  "ranks": "Ranks",
+  "color_skins": "Skins",
+  "coming_soon": "Coming soon",
+  "coming_soon_short": "Soon",
+  "unlocked": "Unlocked",
+  "match_history": "Match history",
+  "achievements": "Achievements",
+  "role_stats": "Role stats",
+  "wip": "WIP"
 }

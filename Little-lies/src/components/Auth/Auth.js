@@ -8,7 +8,9 @@ import {
   signInWithOAuth,
   signOut,
   getProfile,
+  updateProfile,
 } from '../../utils/supabase';
+import { TIERS, COLOR_REWARDS, getTierForLevel, getNextTier, getTierProgress } from '../../data/progression';
 import './Auth.scss';
 
 // Auth context — provides user + profile to the entire app
@@ -70,10 +72,259 @@ export const useAuth = () => {
   return ctx;
 };
 
-// Login/Register modal — si déjà connecté, affiche un menu profil avec déconnexion
+// ============================================================
+// Profile panel (shown when user is connected) — rich view with
+// avatar, tier, stats, rewards grid.
+// ============================================================
+const ProfilePanel = ({ onClose }) => {
+  const { t, i18n } = useTranslation('common');
+  const { user, profile, refreshProfile, signOut: contextSignOut } = useAuth();
+
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(profile?.username || '');
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState('');
+
+  const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en';
+  const level = profile?.level || 1;
+  const xp = profile?.xp || 0;
+  const gamesPlayed = profile?.games_played || 0;
+  const gamesWon = profile?.games_won || 0;
+  const winRate = gamesPlayed > 0 ? Math.round((gamesWon / gamesPlayed) * 100) : 0;
+  const tier = getTierForLevel(level);
+  const nextTier = getNextTier(level);
+  const tierProgress = getTierProgress(level);
+  const xpInLevel = xp % 100;
+  const initial = (profile?.username || '?').trim().charAt(0).toUpperCase();
+
+  const handleSaveName = async () => {
+    const trimmed = nameDraft.trim();
+    if (!trimmed) { setNameError(t('username_required')); return; }
+    if (trimmed.length > 20) { setNameError(t('username_too_long')); return; }
+    if (trimmed === profile.username) { setEditingName(false); return; }
+    setSavingName(true);
+    setNameError('');
+    const { error } = await updateProfile(user.id, { username: trimmed });
+    setSavingName(false);
+    if (error) {
+      setNameError(error.message);
+    } else {
+      await refreshProfile();
+      setEditingName(false);
+    }
+  };
+
+  return (
+    <div className="auth-overlay" onClick={onClose}>
+      <div className="auth-dialog profile-panel" onClick={(e) => e.stopPropagation()}>
+
+        {/* Header : avatar, pseudo éditable, rang */}
+        <div className="profile-hero">
+          <button className="close-button profile-close" onClick={onClose}>X</button>
+
+          <div
+            className="profile-avatar"
+            style={{ background: `linear-gradient(135deg, ${tier.gradient[0]}, ${tier.gradient[1]})` }}
+          >
+            <span className="profile-avatar-initial">{initial}</span>
+            <div className="profile-avatar-tier" title={tier.name[lang]}>
+              <i className={`fas ${tier.icon}`}></i>
+            </div>
+          </div>
+
+          <div className="profile-hero-info">
+            {editingName ? (
+              <div className="profile-name-edit">
+                <input
+                  type="text"
+                  className="profile-name-input"
+                  value={nameDraft}
+                  onChange={(e) => { setNameDraft(e.target.value); setNameError(''); }}
+                  maxLength={20}
+                  autoFocus
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') { setEditingName(false); setNameDraft(profile.username); } }}
+                />
+                <button className="profile-name-save" onClick={handleSaveName} disabled={savingName}>
+                  <i className="fas fa-check"></i>
+                </button>
+                <button
+                  className="profile-name-cancel"
+                  onClick={() => { setEditingName(false); setNameDraft(profile.username); setNameError(''); }}
+                  disabled={savingName}
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+            ) : (
+              <div className="profile-name-display">
+                <h2 className="profile-name">{profile.username}</h2>
+                <button
+                  className="profile-name-edit-btn"
+                  onClick={() => { setNameDraft(profile.username); setEditingName(true); }}
+                  title={t('edit')}
+                >
+                  <i className="fas fa-pen"></i>
+                </button>
+              </div>
+            )}
+            {nameError && <p className="auth-error"><i className="fas fa-exclamation-circle"></i> {nameError}</p>}
+
+            <div className="profile-tier-label" style={{ color: tier.gradient[1] }}>
+              <i className={`fas ${tier.icon}`}></i> {tier.name[lang]}
+              <span className="profile-level-badge">{t('level')} {level}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tier progress bar (to next rank) */}
+        {nextTier && (
+          <div className="profile-tier-progress">
+            <div className="profile-tier-progress-label">
+              <span>{tier.name[lang]}</span>
+              <span>{nextTier.name[lang]} ({t('level')} {nextTier.minLevel})</span>
+            </div>
+            <div className="profile-tier-progress-bar">
+              <div
+                className="profile-tier-progress-fill"
+                style={{
+                  width: `${tierProgress * 100}%`,
+                  background: `linear-gradient(90deg, ${tier.gradient[0]}, ${nextTier.gradient[0]})`,
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* XP progress within current level */}
+        <div className="profile-xp-section">
+          <div className="profile-xp-label">
+            <span><i className="fas fa-star"></i> {xp} XP</span>
+            <span className="profile-xp-next">{100 - xpInLevel} XP → {t('level')} {level + 1}</span>
+          </div>
+          <div className="profile-xp-bar">
+            <div className="profile-xp-fill" style={{ width: `${xpInLevel}%` }} />
+          </div>
+        </div>
+
+        {/* Stats grid */}
+        <div className="profile-stats-grid">
+          <div className="profile-stat">
+            <i className="fas fa-gamepad"></i>
+            <strong>{gamesPlayed}</strong>
+            <span>{t('games_played_label')}</span>
+          </div>
+          <div className="profile-stat">
+            <i className="fas fa-trophy"></i>
+            <strong>{gamesWon}</strong>
+            <span>{t('wins')}</span>
+          </div>
+          <div className="profile-stat">
+            <i className="fas fa-chart-line"></i>
+            <strong>{winRate}%</strong>
+            <span>{t('win_rate')}</span>
+          </div>
+        </div>
+
+        {/* Tier rewards — show all tiers, highlight current */}
+        <div className="profile-section">
+          <h3 className="profile-section-title">
+            <i className="fas fa-medal"></i> {t('ranks')}
+          </h3>
+          <div className="profile-tiers-grid">
+            {TIERS.map((ti) => {
+              const unlocked = level >= ti.minLevel;
+              const isCurrent = ti.key === tier.key;
+              return (
+                <div
+                  key={ti.key}
+                  className={`profile-tier-card ${unlocked ? 'unlocked' : 'locked'} ${isCurrent ? 'current' : ''}`}
+                  style={unlocked ? { borderColor: ti.gradient[1] } : null}
+                >
+                  <div
+                    className="profile-tier-icon"
+                    style={unlocked ? { background: `linear-gradient(135deg, ${ti.gradient[0]}, ${ti.gradient[1]})` } : null}
+                  >
+                    <i className={`fas ${ti.icon}`}></i>
+                  </div>
+                  <div className="profile-tier-name">{ti.name[lang]}</div>
+                  <div className="profile-tier-req">{t('level')} {ti.minLevel}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Color skins — unlockable */}
+        <div className="profile-section">
+          <h3 className="profile-section-title">
+            <i className="fas fa-palette"></i> {t('color_skins')}
+            <span className="profile-section-hint">{t('coming_soon_short')}</span>
+          </h3>
+          <div className="profile-skins-grid">
+            {COLOR_REWARDS.map((c) => {
+              const unlocked = level >= c.unlockLevel;
+              return (
+                <div key={c.id} className={`profile-skin ${unlocked ? 'unlocked' : 'locked'}`}>
+                  <div
+                    className="profile-skin-swatch"
+                    style={{ background: `linear-gradient(135deg, ${c.gradient[0]}, ${c.gradient[1]})` }}
+                  />
+                  <div className="profile-skin-name">{c.name[lang]}</div>
+                  <div className="profile-skin-req">
+                    {unlocked ? <><i className="fas fa-check"></i> {t('unlocked')}</> : <><i className="fas fa-lock"></i> {t('level')} {c.unlockLevel}</>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Teaser — future features */}
+        <div className="profile-section profile-section-teaser">
+          <h3 className="profile-section-title">
+            <i className="fas fa-flask"></i> {t('coming_soon')}
+          </h3>
+          <div className="profile-teaser-grid">
+            <div className="profile-teaser">
+              <i className="fas fa-history"></i>
+              <span>{t('match_history')}</span>
+              <em>{t('wip')}</em>
+            </div>
+            <div className="profile-teaser">
+              <i className="fas fa-award"></i>
+              <span>{t('achievements')}</span>
+              <em>{t('wip')}</em>
+            </div>
+            <div className="profile-teaser">
+              <i className="fas fa-user-tag"></i>
+              <span>{t('role_stats')}</span>
+              <em>{t('wip')}</em>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer actions */}
+        <div className="profile-footer">
+          <button className="auth-btn-guest" onClick={onClose}>{t('close')}</button>
+          <button
+            className="profile-logout-btn"
+            onClick={async () => { await contextSignOut(); onClose(); }}
+          >
+            <i className="fas fa-sign-out-alt"></i> {t('logout')}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+// ============================================================
+// Login / Register form (shown when user is NOT connected)
+// ============================================================
 const AuthModal = ({ onClose }) => {
   const { t } = useTranslation('common');
-  const { user, profile, signOut: contextSignOut } = useAuth();
+  const { user, profile } = useAuth();
   const [mode, setMode] = useState('login'); // login | register
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -82,38 +333,8 @@ const AuthModal = ({ onClose }) => {
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Connecté : écran profil avec bouton déconnexion
-  if (user && profile) {
-    const xp = profile.xp || 0;
-    const level = profile.level || 1;
-    const progress = Math.min((xp % 100), 100);
-    return (
-      <div className="auth-overlay" onClick={onClose}>
-        <div className="auth-dialog" onClick={(e) => e.stopPropagation()}>
-          <div className="auth-header">
-            <h2>{profile.username}</h2>
-            <button className="close-button" onClick={onClose}>X</button>
-          </div>
-          <div className="auth-profile-stats">
-            <div className="auth-stat"><span>{t('level')}</span><strong>{level}</strong></div>
-            <div className="auth-stat"><span>XP</span><strong>{xp}</strong></div>
-            <div className="auth-stat"><span>{t('players')}</span><strong>{profile.games_played || 0}</strong></div>
-            <div className="auth-stat"><span>{t('survivors')}</span><strong>{profile.games_won || 0}</strong></div>
-          </div>
-          <div className="auth-profile-xp-bar">
-            <div className="auth-profile-xp-fill" style={{ width: `${progress}%` }} />
-          </div>
-          <button
-            className="auth-btn-submit"
-            onClick={async () => { await contextSignOut(); onClose(); }}
-          >
-            <i className="fas fa-sign-out-alt"></i> {t('logout')}
-          </button>
-          <button className="auth-btn-guest" onClick={onClose}>{t('close')}</button>
-        </div>
-      </div>
-    );
-  }
+  // Connecté : délègue à ProfilePanel
+  if (user && profile) return <ProfilePanel onClose={onClose} />;
 
   if (!isSupabaseConfigured()) {
     return (
@@ -235,9 +456,11 @@ const AuthModal = ({ onClose }) => {
   );
 };
 
-// Profile badge (small, for lobby/in-game)
+// ============================================================
+// Profile badge (shown in lobby sidebar)
+// ============================================================
 export const ProfileBadge = ({ onClick }) => {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const { user, profile } = useAuth();
 
   if (!user || !profile) {
@@ -248,20 +471,43 @@ export const ProfileBadge = ({ onClick }) => {
     );
   }
 
+  const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en';
   const level = profile.level || 1;
   const xp = profile.xp || 0;
-  const progress = Math.min((xp % 100) / 100 * 100, 100);
+  const xpInLevel = xp % 100;
+  const tier = getTierForLevel(level);
+  const initial = (profile.username || '?').trim().charAt(0).toUpperCase();
 
   return (
-    <div className="profile-badge profile-badge-logged" onClick={onClick}>
-      <div className="profile-badge-info">
-        <span className="profile-badge-name">{profile.username}</span>
-        <span className="profile-badge-level">{t('level')} {level}</span>
+    <button className="profile-badge profile-badge-logged" onClick={onClick}>
+      <div
+        className="profile-badge-avatar"
+        style={{ background: `linear-gradient(135deg, ${tier.gradient[0]}, ${tier.gradient[1]})` }}
+      >
+        <span>{initial}</span>
+        <div className="profile-badge-tier-icon" title={tier.name[lang]}>
+          <i className={`fas ${tier.icon}`}></i>
+        </div>
       </div>
-      <div className="profile-badge-xp-bar">
-        <div className="profile-badge-xp-fill" style={{ width: `${progress}%` }} />
+      <div className="profile-badge-body">
+        <div className="profile-badge-top">
+          <span className="profile-badge-name">{profile.username}</span>
+          <span className="profile-badge-level">{t('level')} {level}</span>
+        </div>
+        <div className="profile-badge-tier-name" style={{ color: tier.gradient[1] }}>
+          {tier.name[lang]}
+        </div>
+        <div className="profile-badge-xp-bar">
+          <div
+            className="profile-badge-xp-fill"
+            style={{
+              width: `${xpInLevel}%`,
+              background: `linear-gradient(90deg, ${tier.gradient[0]}, ${tier.gradient[1]})`,
+            }}
+          />
+        </div>
       </div>
-    </div>
+    </button>
   );
 };
 

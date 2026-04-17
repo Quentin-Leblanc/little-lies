@@ -75,5 +75,20 @@
   "survey_meh": "Bof",
   "survey_ok": "Ok",
   "survey_good": "Bien",
-  "survey_great": "Top"
+  "survey_great": "Top",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "username_too_long": "Pseudo trop long (20 caractères max)",
+  "games_played_label": "Parties",
+  "wins": "Victoires",
+  "win_rate": "Victoires %",
+  "ranks": "Rangs",
+  "color_skins": "Palettes",
+  "coming_soon": "Bientôt disponible",
+  "coming_soon_short": "Bientôt",
+  "unlocked": "Débloqué",
+  "match_history": "Historique",
+  "achievements": "Succès",
+  "role_stats": "Stats par rôle",
+  "wip": "WIP"
 }
