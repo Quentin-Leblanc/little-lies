@@ -92,7 +92,12 @@ const AdminPanel = () => {
     <div className="admin-panel">
       <div className="admin-header">
         <span><i className="fas fa-shield-alt" aria-hidden="true"></i> {t('admin_title')}</span>
-        <button onClick={() => setVisible(false)} className="admin-close">X</button>
+        <button
+          onClick={() => setVisible(false)}
+          className="admin-close"
+          aria-label={t('common:close', { defaultValue: 'Close' })}
+          title={t('common:close', { defaultValue: 'Close' })}
+        >X</button>
       </div>
 
       <div className="admin-section">

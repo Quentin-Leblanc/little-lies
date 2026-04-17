@@ -25,11 +25,16 @@ const avatars = [
   svgAvatar('#1abc9c', 'F'),
 ];
 
-// PlayroomKit gameId — read from env var (set REACT_APP_PLAYROOM_GAME_ID
-// in .env.local for dev and in Netlify env vars for prod). The fallback
-// is an example/shared gameId used during early development — don't
-// ship it to prod unless you want rooms to live on someone else's quota.
-const PLAYROOM_GAME_ID = process.env.REACT_APP_PLAYROOM_GAME_ID || 'qxONse5t9p6pZgeX3KkY';
+// PlayroomKit gameId — required. Set REACT_APP_PLAYROOM_GAME_ID in
+// .env.local (dev) and in Netlify env vars (prod). No fallback on
+// purpose: a silent shared gameId means rooms live on someone else's
+// quota and break when that quota runs out.
+const PLAYROOM_GAME_ID = process.env.REACT_APP_PLAYROOM_GAME_ID;
+if (!PLAYROOM_GAME_ID) {
+  throw new Error(
+    'REACT_APP_PLAYROOM_GAME_ID is not set. Define it in .env.local for development or in the Netlify environment variables for production.'
+  );
+}
 
 // Composant principal pour démarrer Playroom
 const Main = () => {
