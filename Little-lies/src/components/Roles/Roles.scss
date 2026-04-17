@@ -74,6 +74,10 @@
   }
 }
 
+// Anchor from the top of the viewport (just under the Roles block) so
+// the dialog never gets cropped by the top edge when the list is long.
+// Centering the overlay caused clipping on small viewports because the
+// Roles list already lives at the top of the screen.
 .role-detail-overlay {
   position: fixed;
   top: 0;
@@ -82,10 +86,12 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 4.5rem;
   z-index: 900;
   backdrop-filter: blur(3px);
+  overflow-y: auto;
 }
 
 .role-detail-dialog {
@@ -95,8 +101,16 @@
   padding: 1.176rem;
   width: 90%;
   max-width: 24.706rem;
-  max-height: 70vh;
+  // Cap so the dialog always fits below the Roles block + leaves room
+  // at the bottom; scrollbar appears inside if content is too long.
+  max-height: calc(100vh - 6rem);
   overflow-y: auto;
+  animation: role-detail-slide-in 0.2s ease-out;
+}
+
+@keyframes role-detail-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .role-detail-header {
@@ -143,20 +157,47 @@
   border-left: 2px solid rgba(255, 255, 255, 0.15);
 }
 
+// Abilities — visual emphasis: larger font, highlight panel, icon-led title
 .role-detail-abilities {
-  margin-top: 0.706rem;
-  font-size: 0.824rem;
-  color: #bbb;
+  margin-top: 1rem;
+  padding: 0.8rem 0.9rem;
+  background: rgba(255, 215, 0, 0.06);
+  border-left: 3px solid #ffc857;
+  border-radius: 0.353rem;
+  color: #e6e6e6;
+
+  .role-detail-abilities-title {
+    margin: 0 0 0.5rem 0;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffc857;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    i { font-size: 0.95rem; }
+  }
 
   ul {
     list-style: none;
     padding: 0;
-    margin: 0.353rem 0 0;
+    margin: 0;
   }
 
   li {
-    padding: 0.235rem 0;
-    font-size: 0.765rem;
-    line-height: 1.4;
+    padding: 0.35rem 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+
+    strong {
+      color: #ffd97a;
+      margin-right: 0.25rem;
+    }
+
+    & + li {
+      border-top: 1px dashed rgba(255, 200, 87, 0.18);
+    }
   }
 }

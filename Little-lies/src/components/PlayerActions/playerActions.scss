@@ -5,6 +5,12 @@
   gap: 0.471rem;
   border-radius: 0.588rem;
   transition: box-shadow 0.4s;
+  // Natural height: the container hugs its content so the parent
+  // `.sidebar-actions-block` (size-to-content) doesn't stretch.
+  // `min-height: 0` is kept so the inner UL can still shrink + scroll
+  // when the viewport can't fit every player.
+  min-height: 0;
+  max-height: 100%;
 
   // When voting begins, pulse the ENTIRE action block (mayor button, phase
   // context, player list) once with a white glow to grab attention. Replaces
@@ -57,6 +63,11 @@
   padding: 0.471rem;
   background: none;
   border: none;
+  // Flex column so the UL inside can become the scroll zone without
+  // growing the wrapper beyond its content.
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .vote-arrow-indicator {
@@ -95,6 +106,25 @@
   margin: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  // No flex-grow: the UL sizes to its content (one row per player) so
+  // the black card tightens to the actual count. `min-height: 0` plus
+  // the parent's `max-height: 100%` chain is what lets the scrollbar
+  // kick in when there are more players than the viewport can fit.
+  min-height: 0;
+  max-height: 100%;
+  // Thin scrollbar — subtle, matches the dark theme.
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  &::-webkit-scrollbar {
+    width: 0.4rem;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 0.2rem;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 .player-list-item {
@@ -174,6 +204,47 @@
   height: 100vh;
   z-index: 9999;
   pointer-events: none;
+}
+
+// Block / jail flash — subtle red radial pulse + centered label
+@keyframes block-pulse {
+  0% { opacity: 0; transform: scale(0.98); }
+  20% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.02); }
+}
+
+.block-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: block-pulse 1.5s ease-out forwards;
+
+  &.block-flash-roleblocked {
+    background: radial-gradient(ellipse at center, rgba(180, 80, 200, 0.35), transparent 60%);
+  }
+  &.block-flash-jailed {
+    background: radial-gradient(ellipse at center, rgba(220, 40, 40, 0.4), transparent 60%);
+  }
+
+  .block-flash-label {
+    padding: 0.7rem 1.4rem;
+    background: rgba(15, 15, 25, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 0.4rem;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    i { font-size: 1.1rem; }
+  }
 }
 
 // Judgment panel
@@ -416,6 +487,21 @@
 @keyframes dc-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.2; }
+}
+
+// AFK badge
+.afk-badge {
+  color: #999;
+  font-size: 0.58rem;
+  margin-left: 0.25rem;
+  padding: 0.05rem 0.3rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.4rem;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
 }
 
 // Night mode glow on wrapper

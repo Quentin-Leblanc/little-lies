@@ -12,7 +12,7 @@ const TIMEOUT_DURATION = 10000;
 
 function Chat(props) {
   const { t } = useTranslation(['game', 'common']);
-  const { game, getMe, getPlayers, updatePlayerName, setPlayers, CONSTANTS, voteSkip } = useGameEngine();
+  const { game, getMe, getPlayers, updatePlayerName, setPlayers, CONSTANTS, voteSkip, updateActivity } = useGameEngine();
   const me = getMe();
   const players = getPlayers();
   const myName = me?.profile?.name;
@@ -35,9 +35,11 @@ function Chat(props) {
     }
   }, [messages]);
 
-  // Play chat sound whenever a new message appears (votes, system, player).
-  // Inspects only freshly-appended entries so re-renders don't retrigger.
-  // First mount is silent — we don't ding for the backlog.
+  // Play a cue ONLY when a fresh vote lands in the chat (the "Vote Alice
+  // (2/5)" system lines pushed by PlayerActions). Everything else —
+  // player chat, death reports, day separators, reconnect lines — stays
+  // silent. First mount and state reloads are ignored so yesterday's
+  // vote lines don't re-trigger the sound when Playroom replays history.
   const prevMsgCountRef = useRef(null);
   useEffect(() => {
     const current = messages || [];
@@ -46,10 +48,17 @@ function Chat(props) {
       return;
     }
     if (current.length > prevMsgCountRef.current) {
-      Audio.playChatMessage();
+      const last = current[current.length - 1];
+      const isFreshVote =
+        last?.type === 'system' &&
+        last?.color === 'vote' &&
+        last?.dayCount === game.dayCount;
+      if (isFreshVote) {
+        Audio.playVote();
+      }
     }
     prevMsgCountRef.current = current.length;
-  }, [messages]);
+  }, [messages, game.dayCount]);
 
   // Open input on Enter key (global)
   useEffect(() => {
@@ -234,6 +243,7 @@ function Chat(props) {
   // --- Send message ---
   const sendMessage = () => {
     if (inputValues.trim() === '' || inputError !== '') return;
+    if (me?.id) updateActivity(me.id);
 
     // Handle commands (both / and - prefixes)
     if (inputValues.startsWith('-') || inputValues.startsWith('/')) {
@@ -297,7 +307,8 @@ function Chat(props) {
 
   // --- State checks ---
   const isPlayerInTimeout = timeouts[myName] && Date.now() < timeouts[myName];
-  const isDead = me && !me.isAlive;
+  const isSpectator = !!me?.isSpectator;
+  const isDead = me && !me.isAlive && !isSpectator;
   const isNight = game.phase === CONSTANTS.PHASE.NIGHT;
   const isDefensePhase = game.phase === CONSTANTS.PHASE.DEFENSE || game.phase === CONSTANTS.PHASE.LAST_WORDS;
   const isAnnouncementPhase = game.phase === CONSTANTS.PHASE.NO_LYNCH || game.phase === CONSTANTS.PHASE.SPARED || game.phase === CONSTANTS.PHASE.EXECUTION || game.phase === CONSTANTS.PHASE.EXECUTION_REVEAL;
@@ -308,7 +319,8 @@ function Chat(props) {
 
   // Dead players can always chat (in dead chat) unless it's a mute phase
   // Blackmailed players CAN chat but with limited chars
-  const canChat = isDead ? true : !isMutedByPhase && !isPlayerInTimeout;
+  // Spectators cannot chat at all
+  const canChat = isSpectator ? false : (isDead ? true : !isMutedByPhase && !isPlayerInTimeout);
 
   // --- Message filtering ---
   const filterMessage = (message) => {
@@ -368,14 +380,15 @@ function Chat(props) {
 
   // Placeholder text
   let placeholder = t('game:chat.placeholder');
-  if (isVillagerNight) placeholder = t('game:chat.placeholder_night');
+  if (isSpectator) placeholder = t('game:chat.placeholder_spectator', { defaultValue: 'Spectator — read-only' });
+  else if (isVillagerNight) placeholder = t('game:chat.placeholder_night');
   else if (isDead) placeholder = t('game:chat.placeholder_dead');
   else if (isBlackmailed) placeholder = t('game:chat.placeholder_blackmailed', { max: BLACKMAIL_MAX_CHARS });
   else if (isMutedByPhase) placeholder = t('game:chat.placeholder_muted');
   else if (isPlayerInTimeout) placeholder = t('game:chat.placeholder_timeout');
   else if (isNight && myTeam === 'mafia') placeholder = t('game:chat.placeholder_mafia');
 
-  const isDisabled = isVillagerNight || !canChat || (isMutedByPhase && !isDead);
+  const isDisabled = isSpectator || isVillagerNight || !canChat || (isMutedByPhase && !isDead);
   const maxInputLength = isBlackmailed ? BLACKMAIL_MAX_CHARS : undefined;
 
   // Message CSS class

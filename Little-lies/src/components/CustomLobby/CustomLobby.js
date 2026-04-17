@@ -455,9 +455,10 @@ export const LobbyChat = () => {
             if (e.key === 'Escape') { setInputVisible(false); setInput(''); }
           }}
           onBlur={() => { if (!input.trim()) setInputVisible(false); }}
-          placeholder="Message..."
+          placeholder={t('common:lobby_chat_placeholder', { defaultValue: 'Message...' })}
           maxLength={150}
           autoFocus
+          aria-label={t('common:lobby_chat_placeholder', { defaultValue: 'Message...' })}
         />
       </div>
     ) : (
@@ -755,20 +756,20 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
         <button
           className="lobby-mute-btn"
           onClick={() => setVolumeOpen((o) => !o)}
-          title={muted || volume === 0 ? 'Unmute' : 'Volume'}
-          aria-label="Volume"
+          title={muted || volume === 0 ? t('menu:unmute') : t('menu:volume')}
+          aria-label={t('menu:volume')}
         >
-          <i className={`fas ${muted || volume === 0 ? 'fa-volume-mute' : volume < 0.4 ? 'fa-volume-down' : 'fa-volume-up'}`}></i>
+          <i className={`fas ${muted || volume === 0 ? 'fa-volume-mute' : volume < 0.4 ? 'fa-volume-down' : 'fa-volume-up'}`} aria-hidden="true"></i>
         </button>
         {volumeOpen && (
           <div className="lobby-volume-popup">
             <button
               className="lobby-volume-mute"
               onClick={handleToggleMute}
-              title={muted ? 'Unmute' : 'Mute'}
-              aria-label={muted ? 'Unmute' : 'Mute'}
+              title={muted ? t('menu:unmute') : t('menu:mute')}
+              aria-label={muted ? t('menu:unmute') : t('menu:mute')}
             >
-              <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
+              <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
             </button>
             <input
               type="range"
@@ -832,7 +833,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
                     className={`lobby-color-dot ${isMine ? 'selected' : ''} ${blocked ? 'taken' : ''}`}
                     style={{ '--dot-color': color }}
                     onClick={() => !blocked && handleColorChange(color)}
-                    title={blocked ? 'Taken' : isMine ? 'Your color' : color}
+                    title={blocked ? t('common:color_taken', { defaultValue: 'Taken' }) : isMine ? t('common:your_color', { defaultValue: 'Your color' }) : color}
                   />
                 );
               })}

@@ -37,6 +37,8 @@
     "player_disconnected": "{{name}} est mort de façon inconnue",
     "player_disconnecting": "{{name}} s'est déconnecté — {{seconds}}s pour revenir",
     "player_reconnected": "{{name}} s'est reconnecté !",
+    "player_afk": "{{name}} est inactif — ses actions seront ignorées.",
+    "player_back": "{{name}} est de retour.",
     "name_changed": "{{oldName}} a changé son pseudo en {{newName}}",
     "whisper_notice": "{{sender}} chuchote à {{receiver}}",
     "last_will_updated": "Testament mis à jour.",
@@ -135,6 +137,7 @@
     "placeholder": "Entrez un message...",
     "placeholder_night": "La nuit tombe sur le village...",
     "placeholder_dead": "Chat des morts...",
+    "placeholder_spectator": "Mode spectateur — lecture seule",
     "placeholder_blackmailed": "Bâillonné (max {{max}} car.)...",
     "placeholder_muted": "Seul l'accusé peut parler...",
     "placeholder_timeout": "Vous êtes en timeout...",
@@ -157,10 +160,19 @@
   },
   "player_list": {
     "title": "Joueurs vivants ({{alive}}/{{total}})",
-    "mayor_revealed": "Maire révélé — 3 votes"
+    "mayor_revealed": "Maire révélé — 3 votes",
+    "afk": "Inactif",
+    "disconnecting": "Déconnexion en cours…"
+  },
+  "aria": {
+    "vote_for": "Voter contre {{name}}",
+    "action_on": "{{action}} sur {{name}}"
   },
   "mayor_reveal_btn": "Se révéler Maire",
+  "spectator_banner": "Mode spectateur",
+  "lag_indicator": "Connexion instable / FPS bas",
   "vigilante_night1": "Impossible de tirer la première nuit",
+  "vigilante_out_of_shots": "Plus de munitions — tirs épuisés",
   "judgment_default_guilty": "Coupable par défaut — votez Innocent pour sauver",
   "scene": {
     "no_lynch": "Tout le monde peut rentrer chez soi ce soir.",
@@ -168,7 +180,13 @@
     "executed": "{{name}} a été exécuté !"
   },
   "role_sections": {
-    "objective": "Objectif"
+    "objective": "Objectif",
+    "description": "Description",
+    "actions": "Actions",
+    "abilities": "Capacités",
+    "information": "Informations",
+    "target": "Cible",
+    "roles_title": "Rôles"
   },
   "graveyard": {
     "title": "Cimetière",

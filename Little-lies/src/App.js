@@ -24,7 +24,9 @@ import './styles/global.scss';
 import './styles/App.scss';
 
 function App() {
-    const { game: { isGameStarted, status, phase }, CONSTANTS } = useGameEngine();
+    const { game: { isGameStarted, status, phase }, CONSTANTS, getMe } = useGameEngine();
+    const me = getMe();
+    const isSpectator = !!me?.isSpectator;
     const isNight = phase === CONSTANTS.PHASE.NIGHT || phase === CONSTANTS.PHASE.NIGHT_TRANSITION;
     const [isSelectingRoles, setIsSelectingRoles] = useState(false);
     const [showRoleReveal, setShowRoleReveal] = useState(true);
@@ -155,6 +157,14 @@ function App() {
                 <div className={`phase-banner ${phaseBanner.className}`}>
                     <i className={`fas ${phaseBanner.icon}`}></i>
                     <span>{phaseBanner.text}</span>
+                </div>
+            )}
+
+            {/* Spectator banner */}
+            {isSpectator && (
+                <div className="spectator-banner">
+                    <i className="fas fa-eye" aria-hidden="true"></i>
+                    <span>{i18n.t('game:spectator_banner', { defaultValue: 'Spectator mode' })}</span>
                 </div>
             )}
 

@@ -120,7 +120,7 @@ const Player = () => {
                             <h2>{roleLabel}</h2>
                         </div>
 
-                        <h4 className="role-section-title"><i className="fas fa-info-circle"></i> Description</h4>
+                        <h4 className="role-section-title"><i className="fas fa-info-circle" aria-hidden="true"></i> {t('game:role_sections.description')}</h4>
                         <p className="role-description">
                             {descriptionParts.map((part, i) =>
                                 part.toLowerCase() === roleLabel.toLowerCase()
@@ -134,13 +134,13 @@ const Player = () => {
                             <span>{t(`roles:${me.character.key}.objectif`, { defaultValue: me.character.objectif })}</span>
                             {execTarget && (
                                 <div className="exec-target">
-                                    <i className="fas fa-bullseye"></i> Cible : <strong>{execTarget.profile.name}</strong>
+                                    <i className="fas fa-bullseye" aria-hidden="true"></i> {t('game:role_sections.target')} : <strong>{execTarget.profile.name}</strong>
                                 </div>
                             )}
                         </div>
 
-                        <h4 className="role-section-title"><i className="fas fa-bolt"></i> Actions</h4>
-                        <div className="role-actions">
+                        <h4 className="role-section-title role-section-title-abilities"><i className="fas fa-bolt" aria-hidden="true"></i> {t('game:role_sections.abilities')}</h4>
+                        <div className="role-actions role-actions-highlight">
                             {me.character.actions?.length > 0 ? (
                                 <ul>
                                     {me.character.actions.map((action, index) => (
@@ -158,7 +158,7 @@ const Player = () => {
                         {notifications.length > 0 && (
                             <div className="notifications">
                                 <span className="notif-title">
-                                    <i className="fas fa-bell"></i> Informations
+                                    <i className="fas fa-bell" aria-hidden="true"></i> {t('game:role_sections.information')}
                                 </span>
                                 {notifications.map((notif, i) => (
                                     <div key={i} className="notification-item">

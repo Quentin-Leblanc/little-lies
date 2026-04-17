@@ -1,16 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import useEscapeKey from '../../hooks/useEscapeKey';
 import './Legal.scss';
 
 const Legal = ({ onClose }) => {
-  const { t } = useTranslation('legal');
+  const { t } = useTranslation(['legal', 'common']);
+  useEscapeKey(onClose);
 
   return (
     <div className="legal-overlay" onClick={onClose}>
-      <div className="legal-dialog" onClick={(e) => e.stopPropagation()}>
+      <div className="legal-dialog" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={t('legal:title')}>
         <div className="legal-header">
           <h2>{t('title')}</h2>
-          <button className="close-button" onClick={onClose}>X</button>
+          <button className="close-button" onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}>X</button>
         </div>
         <div className="legal-content">
 

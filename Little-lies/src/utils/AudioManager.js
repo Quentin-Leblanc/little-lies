@@ -112,14 +112,9 @@ export const playNightStart = () => {
   playFile('/sounds/drawKnife1.ogg', 0.6);
 };
 
-/** Vote cast — Jofae Sci Fi Interface style (CC0 WAV) */
+/** Vote cast — short cue played when a new vote message lands in chat. */
 export const playVote = () => {
   playFile('/sounds/vote.wav', 0.7);
-};
-
-/** Vote chat message appears — short click (Denielcz / Pixabay) */
-export const playVoteClick = () => {
-  playFile('/sounds/vote-click.mp3', 0.55);
 };
 
 /** Morning death report — old church bell (Pixabay Freesound Community) */
@@ -146,10 +141,6 @@ export const playActionSelect = () => {
   playFile('/sounds/click3.ogg', 0.5);
 };
 
-/** Chat message — plays the full sound, no trimming */
-export const playChatMessage = () => {
-  playFile('/sounds/chat.mp3', 0.45);
-};
 
 /** Door close — night transition */
 export const playDoorClose = () => {
@@ -169,6 +160,18 @@ export const playDefeat = () => {
 /** Tick */
 export const playTick = () => {
   playTone(600, 0.05, 'square');
+};
+
+/** Action blocked (roleblock by Escort/Consort) */
+export const playActionBlocked = () => {
+  playFile('/sounds/doorClose_1.ogg', 0.55);
+  playTone(220, 0.18, 'sawtooth');
+};
+
+/** Jailed by Jailor */
+export const playJailed = () => {
+  playFile('/sounds/doorClose_1.ogg', 0.7);
+  playTone(160, 0.25, 'sine');
 };
 
 // --- Looping music (lobby) ---
@@ -246,9 +249,9 @@ export const stopLobbyMusic = () => {
 
 export default {
   setVolume, getVolume, toggleMute, isMuted,
-  playNightStart, playDayStart, playVote, playVoteClick, playDeath,
+  playNightStart, playDayStart, playVote, playDeath,
   playExecution, playSpared, playActionSelect,
-  playVictory, playDefeat, playTick, playChatMessage, playDoorClose,
-  playDeathBell,
+  playVictory, playDefeat, playTick, playDoorClose,
+  playDeathBell, playActionBlocked, playJailed,
   playLobbyMusic, stopLobbyMusic,
 };

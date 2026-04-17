@@ -98,14 +98,16 @@ export const EventsProvider = ({ children }) => {
     // Night events were created with dayCount = N, but dayCount is now N+1
     // (incremented during NIGHT→DEATH_REPORT transition). Filter by N-1.
     const nightDayCount = game.dayCount - 1;
+    // AFK players' actions are ignored during night resolution.
+    const afkIds = new Set(players.filter((p) => p.isAFK).map((p) => p.id));
     const currentEvents = get().filter(
-      (event) => event.dayCount === nightDayCount && !event.displayed
+      (event) => event.dayCount === nightDayCount && !event.displayed && !afkIds.has(event.content?.by)
     );
 
     // --- Batch notifications AND events to avoid stale state overwrites ---
     const pendingNotifs = [...(notifications || [])];
-    const addNotif = (playerId, message) => {
-      pendingNotifs.push({ playerId, message, dayCount: game.dayCount, read: false });
+    const addNotif = (playerId, message, type = null) => {
+      pendingNotifs.push({ playerId, message, type, dayCount: game.dayCount, read: false });
     };
     const pendingEvents = [...(events || [])];
     const addEvent = (event) => {
@@ -129,7 +131,7 @@ export const EventsProvider = ({ children }) => {
       .forEach((e) => {
         jailedPlayers[e.content.target] = e.content.by;
         roleblockedPlayers[e.content.target] = true;
-        addNotif(e.content.target, i18n.t('game:notifications.jailed'));
+        addNotif(e.content.target, i18n.t('game:notifications.jailed'), 'jailed');
       });
 
     // === Jailor Execute (unstoppable attack on jailed target) ===
@@ -165,7 +167,7 @@ export const EventsProvider = ({ children }) => {
           });
         } else {
           roleblockedPlayers[e.content.target] = true;
-          addNotif(e.content.target, i18n.t('game:notifications.roleblocked'));
+          addNotif(e.content.target, i18n.t('game:notifications.roleblocked'), 'roleblocked');
         }
         trackVisitor(visitorsMap, e.content.target, e.content.by);
       });

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import './LagIndicator.scss';
 
 const LagIndicator = () => {
+  const { t } = useTranslation('game');
   const [lagging, setLagging] = useState(false);
   const framesRef = useRef([]);
 
@@ -32,8 +34,9 @@ const LagIndicator = () => {
   if (!lagging) return null;
 
   return (
-    <div className="lag-indicator" title="Connexion instable / FPS bas">
-      <i className="fas fa-exclamation-triangle"></i>
+    <div className="lag-indicator" title={t('lag_indicator', { defaultValue: 'Unstable connection / low FPS' })}
+         role="status" aria-live="polite">
+      <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
     </div>
   );
 };

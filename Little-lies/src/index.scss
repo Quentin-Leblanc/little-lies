@@ -12,3 +12,21 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+// Global keyboard focus — visible outline on every focusable element
+// (buttons, inputs, anchors, contenteditable). Hidden for mouse users
+// via :focus-visible which only activates on keyboard navigation.
+:focus {
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #78ff78;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

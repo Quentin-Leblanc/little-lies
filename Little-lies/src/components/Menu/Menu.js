@@ -6,6 +6,7 @@ import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import { getRoles } from '../../data/roles.js';
 import Audio from '../../utils/AudioManager';
+import useEscapeKey from '../../hooks/useEscapeKey';
 import Legal from '../Legal/Legal';
 
 import './Menu.scss';
@@ -50,17 +51,17 @@ const Menu = () => {
           <span className="menu-code-value">{roomCode || '...'}</span>
           <i className="fas fa-copy menu-code-copy"></i>
         </div>
-        <button className="menu-btn-icon" onClick={() => setShowMenu(true)} title={t('menu:menu')}>
-          <i className="fas fa-bars"></i>
+        <button className="menu-btn-icon" onClick={() => setShowMenu(true)} title={t('menu:menu')} aria-label={t('menu:menu')} aria-expanded={showMenu}>
+          <i className="fas fa-bars" aria-hidden="true"></i>
         </button>
-        <button className="menu-btn-icon" onClick={() => setShowHelp(true)} title={t('menu:help')}>
-          <i className="fas fa-book"></i>
+        <button className="menu-btn-icon" onClick={() => setShowHelp(true)} title={t('menu:help')} aria-label={t('menu:help')} aria-expanded={showHelp}>
+          <i className="fas fa-book" aria-hidden="true"></i>
         </button>
-        <button className="menu-btn-icon" onClick={() => setShowLogs(true)} title={t('menu:logs')}>
-          <i className="fas fa-scroll"></i>
+        <button className="menu-btn-icon" onClick={() => setShowLogs(true)} title={t('menu:logs')} aria-label={t('menu:logs')} aria-expanded={showLogs}>
+          <i className="fas fa-scroll" aria-hidden="true"></i>
         </button>
-        <button className="menu-btn-icon" onClick={() => { const m = Audio.toggleMute(); setMuted(m); }} title={muted ? t('menu:unmute') : t('menu:mute')}>
-          <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
+        <button className="menu-btn-icon" onClick={() => { const m = Audio.toggleMute(); setMuted(m); }} title={muted ? t('menu:unmute') : t('menu:mute')} aria-label={muted ? t('menu:unmute') : t('menu:mute')} aria-pressed={muted}>
+          <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
         </button>
       </div>
       {showMenu && ReactDOM.createPortal(
@@ -84,6 +85,7 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
   const [copied, setCopied] = useState(false);
   const [volume, setVolume] = useState(Audio.getVolume());
   const [muted, setMuted] = useState(Audio.isMuted());
+  useEscapeKey(onClose);
 
   const copyCode = () => {
     navigator.clipboard.writeText(roomCode);
@@ -104,10 +106,10 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
 
   return (
     <div className="quit-dialog-overlay" onClick={onClose}>
-      <div className="quit-dialog" onClick={(e) => e.stopPropagation()}>
+      <div className="quit-dialog" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={t('menu:menu')}>
         <div className="quit-dialog-header">
           <h2>{t('menu:menu')}</h2>
-          <button className="close-button" onClick={onClose}>X</button>
+          <button className="close-button" onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}>X</button>
         </div>
         <div className="quit-dialog-content">
           <div className="room-code-section">
@@ -136,7 +138,7 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
             </div>
           </div>
           <div className="language-section">
-            <span className="room-code-label"><i className="fas fa-globe"></i> Language</span>
+            <span className="room-code-label"><i className="fas fa-globe" aria-hidden="true"></i> {t('menu:language')}</span>
             <div className="language-buttons">
               {AVAILABLE_LANGUAGES.map((lang) => (
                 <button
@@ -163,14 +165,15 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
 };
 
 const LogDialog = ({ messages, onClose }) => {
-  const { t } = useTranslation('menu');
+  const { t } = useTranslation(['menu', 'common']);
+  useEscapeKey(onClose);
 
   return (
     <div className="log-dialog-overlay" onClick={onClose}>
-      <div className="log-dialog" onClick={(e) => e.stopPropagation()}>
+      <div className="log-dialog" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={t('menu:logs')}>
         <div className="log-dialog-header">
           <h2>{t('logs')}</h2>
-          <button className="close-button" onClick={onClose}>X</button>
+          <button className="close-button" onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}>X</button>
         </div>
         <div className="log-dialog-content">
           {messages.length > 0 ? (
@@ -189,7 +192,8 @@ const LogDialog = ({ messages, onClose }) => {
 };
 
 const HelpDialog = ({ onClose }) => {
-  const { t } = useTranslation(['menu', 'game']);
+  const { t } = useTranslation(['menu', 'game', 'common']);
+  useEscapeKey(onClose);
   const allRoles = getRoles();
   const rolesByTeam = {
     town: allRoles.filter((r) => r.team === 'town'),
@@ -199,10 +203,10 @@ const HelpDialog = ({ onClose }) => {
 
   return (
     <div className="help-dialog-overlay" onClick={onClose}>
-      <div className="help-dialog" onClick={(e) => e.stopPropagation()}>
+      <div className="help-dialog" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={t('menu:help_dialog.title')}>
         <div className="help-dialog-header">
           <h2>{t('menu:help_dialog.title')}</h2>
-          <button className="close-button" onClick={onClose}>X</button>
+          <button className="close-button" onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}>X</button>
         </div>
         <div className="help-dialog-content">
           <h3>{t('menu:help_dialog.how_to_play')}</h3>

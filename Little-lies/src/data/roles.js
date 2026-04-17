@@ -37,7 +37,7 @@ const ROLE_DATA = [
   {
     key: 'vigilante', team: 'town', category: 'town_killing',
     couleur: '#c8e600', icon: 'fa-crosshairs',
-    actions: [{ type: 'VIGILANTE_KILL', require: ['isNight'], targets: 'notMe', priority: 4 }],
+    actions: [{ type: 'VIGILANTE_KILL', require: ['isNight'], targets: 'notMe', priority: 4, maxUses: 2 }],
     nightImmune: false, detectResult: 'non-suspect', attackLevel: 1, defenseLevel: 0,
   },
   {

@@ -32,8 +32,8 @@ const AdminPanel = () => {
   // Admin icon (collapsed)
   if (!visible) {
     return (
-      <button className="admin-toggle" onClick={() => setVisible(true)} title="Admin Panel">
-        <i className="fas fa-shield-alt"></i>
+      <button className="admin-toggle" onClick={() => setVisible(true)} title={t('admin_panel')} aria-label={t('admin_panel')}>
+        <i className="fas fa-shield-alt" aria-hidden="true"></i>
       </button>
     );
   }
@@ -91,7 +91,7 @@ const AdminPanel = () => {
   return (
     <div className="admin-panel">
       <div className="admin-header">
-        <span><i className="fas fa-shield-alt"></i> Admin</span>
+        <span><i className="fas fa-shield-alt" aria-hidden="true"></i> {t('admin_title')}</span>
         <button onClick={() => setVisible(false)} className="admin-close">X</button>
       </div>
 

@@ -174,6 +174,30 @@
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); filter: blur(4px); }
 }
 
+.spectator-banner {
+  position: fixed;
+  top: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 750;
+  pointer-events: none;
+  padding: 0.35rem 0.85rem;
+  background: rgba(20, 20, 40, 0.78);
+  color: #aab5d8;
+  border: 1px solid rgba(150, 170, 230, 0.35);
+  border-radius: 1rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  backdrop-filter: blur(4px);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+
+  i { font-size: 0.78rem; color: #8ec3ff; }
+}
+
 .phase-banner {
   position: fixed;
   top: 50%;

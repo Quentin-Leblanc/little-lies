@@ -37,6 +37,8 @@
     "player_disconnected": "{{name}} died under mysterious circumstances",
     "player_disconnecting": "{{name}} disconnected — {{seconds}}s to reconnect",
     "player_reconnected": "{{name}} reconnected!",
+    "player_afk": "{{name}} is inactive — their actions will be skipped.",
+    "player_back": "{{name}} is back.",
     "name_changed": "{{oldName}} changed their name to {{newName}}",
     "whisper_notice": "{{sender}} whispers to {{receiver}}",
     "last_will_updated": "Last will updated.",
@@ -135,6 +137,7 @@
     "placeholder": "Type a message...",
     "placeholder_night": "Night falls on the village...",
     "placeholder_dead": "Dead chat...",
+    "placeholder_spectator": "Spectator — read-only",
     "placeholder_blackmailed": "Silenced (max {{max}} chars)...",
     "placeholder_muted": "Only the accused can speak...",
     "placeholder_timeout": "You are timed out...",
@@ -157,10 +160,19 @@
   },
   "player_list": {
     "title": "Living players ({{alive}}/{{total}})",
-    "mayor_revealed": "Mayor revealed — 3 votes"
+    "mayor_revealed": "Mayor revealed — 3 votes",
+    "afk": "Inactive",
+    "disconnecting": "Disconnecting…"
+  },
+  "aria": {
+    "vote_for": "Vote for {{name}}",
+    "action_on": "{{action}} on {{name}}"
   },
   "mayor_reveal_btn": "Reveal as Mayor",
+  "spectator_banner": "Spectator mode",
+  "lag_indicator": "Unstable connection / low FPS",
   "vigilante_night1": "Cannot shoot on the first night",
+  "vigilante_out_of_shots": "No ammo left — shots depleted",
   "judgment_default_guilty": "Guilty by default — vote Innocent to save",
   "scene": {
     "no_lynch": "Everyone can go home safely tonight.",
@@ -168,7 +180,13 @@
     "executed": "{{name}} has been executed!"
   },
   "role_sections": {
-    "objective": "Objective"
+    "objective": "Objective",
+    "description": "Description",
+    "actions": "Actions",
+    "abilities": "Abilities",
+    "information": "Information",
+    "target": "Target",
+    "roles_title": "Roles"
   },
   "graveyard": {
     "title": "Graveyard",

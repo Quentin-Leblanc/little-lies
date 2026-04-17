@@ -5,6 +5,7 @@ import i18n from '../../trad/i18n';
 
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
+import Audio from '../../utils/AudioManager';
 import './playerActions.scss';
 
 const ACTION_COLORS = {
@@ -32,7 +33,7 @@ const getActionTooltip = (type) => i18n.t(`game:action_tooltips.${type}`, { defa
 
 const PlayerActions = memo(function () {
   const { t } = useTranslation(['game', 'common']);
-  const { getPlayers, getMe, game, CONSTANTS, trial, trialRef, setTrial, setPlayers, addChatSystem } = useGameEngine();
+  const { getPlayers, getMe, game, CONSTANTS, trial, trialRef, setTrial, setPlayers, addChatSystem, updateActivity } = useGameEngine();
   const Events = useEvents();
   const rawPlayers = getPlayers();
   const me = getMe();
@@ -54,7 +55,9 @@ const PlayerActions = memo(function () {
   }, [rawPlayers]);
 
   const [isDead, setIsDead] = useState(false);
+  const [blockFlash, setBlockFlash] = useState(null); // 'roleblocked' | 'jailed' | null
   const prevAliveRef = useRef(me?.isAlive ?? true);
+  const seenBlockNotifRef = useRef(new Set());
 
   const phase = game.phase;
   const isVotingPhase = phase === CONSTANTS.PHASE.VOTING;
@@ -76,6 +79,23 @@ const PlayerActions = memo(function () {
       return () => clearTimeout(timer);
     }
   }, [me?.isAlive]);
+
+  // Roleblock / Jail flash — fires when a fresh notification of that type lands
+  const myNotifs = Events?.getMyNotifications?.() || [];
+  const blockNotifKey = myNotifs
+    .filter((n) => n.type === 'roleblocked' || n.type === 'jailed')
+    .map((n) => `${n.dayCount}:${n.type}`)
+    .pop() || null;
+  useEffect(() => {
+    if (!blockNotifKey) return;
+    if (seenBlockNotifRef.current.has(blockNotifKey)) return;
+    seenBlockNotifRef.current.add(blockNotifKey);
+    const type = blockNotifKey.split(':')[1];
+    setBlockFlash(type);
+    if (type === 'jailed') Audio.playJailed(); else Audio.playActionBlocked();
+    const timer = setTimeout(() => setBlockFlash(null), 1500);
+    return () => clearTimeout(timer);
+  }, [blockNotifKey]);
 
   if (!me) return null;
 
@@ -100,7 +120,8 @@ const PlayerActions = memo(function () {
   const hasVoted = !!myVoteTarget;
 
   const handleVoteClick = (suspectedPlayerId) => {
-    if (!me.isAlive || !isVotingPhase || hasVoted) return;
+    if (!me.isAlive || me.isSpectator || !isVotingPhase || hasVoted) return;
+    updateActivity(me.id);
     const voteWeight = me.voteWeight || 1;
     // Deep copy trial to avoid mutating shared references
     const latestTrial = trialRef.current || { suspects: {}, votes: {} };
@@ -127,14 +148,17 @@ const PlayerActions = memo(function () {
 
   // --- Judgment handlers ---
   const handleJudgmentVote = (vote) => {
-    if (!me.isAlive || !isJudgmentPhase) return;
+    if (!me.isAlive || me.isSpectator || !isJudgmentPhase) return;
     if (me.id === game.accusedId) return;
+    updateActivity(me.id);
     const latestTrial = trialRef.current || { suspects: {}, votes: {} };
     setTrial({ suspects: latestTrial.suspects || {}, votes: { ...(latestTrial.votes || {}), [me.id]: vote } });
   };
 
   // --- Day action handler (Jailor jail) ---
   const handleDayAction = (action, targetPlayer) => {
+    if (me.isSpectator || !me.isAlive) return;
+    updateActivity(me.id);
     if (action.type === 'JAIL') {
       const currentTarget = Events.getMyActionTarget('JAIL');
       if (currentTarget === targetPlayer.id) return;
@@ -148,6 +172,8 @@ const PlayerActions = memo(function () {
 
   // --- Night action handler ---
   const handleNightAction = (action, targetPlayer) => {
+    if (me.isSpectator || !me.isAlive) return;
+    updateActivity(me.id);
     if (action.type === 'VEST' && action.maxUses) {
       const alreadyUsed = Events.hasDoneThisActionTonight(action.type);
       if (!alreadyUsed) {
@@ -174,7 +200,21 @@ const PlayerActions = memo(function () {
       }
     }
 
-    if (action.type === 'VIGILANTE_KILL' && game.dayCount <= 1) return;
+    if (action.type === 'VIGILANTE_KILL') {
+      if (game.dayCount <= 1) return;
+      if (action.maxUses) {
+        const alreadyUsed = Events.hasDoneThisActionTonight(action.type);
+        if (!alreadyUsed) {
+          const shots = me.vigilanteShots || 0;
+          if (shots >= action.maxUses) return;
+          setPlayers((prev) =>
+            prev.map((p) =>
+              p.id === me.id ? { ...p, vigilanteShots: shots + 1 } : p
+            )
+          );
+        }
+      }
+    }
 
     const currentTarget = Events.getMyActionTarget(action.type);
     if (currentTarget === targetPlayer.id) return;
@@ -211,6 +251,18 @@ const PlayerActions = memo(function () {
         document.body
       )}
 
+      {blockFlash && ReactDOM.createPortal(
+        <div className={`block-flash block-flash-${blockFlash}`}>
+          <div className="block-flash-label">
+            <i className={`fas ${blockFlash === 'jailed' ? 'fa-lock' : 'fa-ban'}`}></i>
+            {blockFlash === 'jailed'
+              ? t('game:notifications.jailed')
+              : t('game:notifications.roleblocked')}
+          </div>
+        </div>,
+        document.body
+      )}
+
       <div className={`player-list-container ${isVotingPhase ? 'highlight-vote' : ''}`}>
         {/* Mayor reveal button */}
         {canReveal && (
@@ -237,8 +289,10 @@ const PlayerActions = memo(function () {
                   className={`primaryBtn judgment-innocent ${myJudgmentVote === 'innocent' ? 'active' : ''}`}
                   onClick={() => handleJudgmentVote('innocent')}
                   disabled={!!myJudgmentVote}
+                  aria-pressed={myJudgmentVote === 'innocent'}
+                  aria-label={t('common:innocent')}
                 >
-                  <i className="fas fa-shield"></i> {t('common:innocent')}
+                  <i className="fas fa-shield" aria-hidden="true"></i> {t('common:innocent')}
                 </button>
               </div>
               <p className="judgment-hint">{t('game:judgment_default_guilty', { defaultValue: 'Guilty by default — vote Innocent to save' })}</p>
@@ -297,8 +351,13 @@ const PlayerActions = memo(function () {
                     </span>
                   )}
                   {player.disconnectedAt && player.isAlive && (
-                    <span className="disconnecting-badge" title="Disconnecting...">
-                      <i className="fas fa-wifi"></i>
+                    <span className="disconnecting-badge" title={t('game:player_list.disconnecting', { defaultValue: 'Disconnecting...' })}>
+                      <i className="fas fa-wifi" aria-hidden="true"></i>
+                    </span>
+                  )}
+                  {player.isAFK && player.isAlive && (
+                    <span className="afk-badge" title={t('game:player_list.afk', { defaultValue: 'Inactive' })}>
+                      <i className="fas fa-moon"></i> AFK
                     </span>
                   )}
                 </span>
@@ -312,6 +371,8 @@ const PlayerActions = memo(function () {
                           className={`vote-btn ${myVoteTarget === player.id ? 'vote-btn-active' : ''} ${(hasVoted && myVoteTarget !== player.id) || player.id === me.id ? 'vote-btn-disabled' : ''}`}
                           onClick={() => player.id !== me.id && handleVoteClick(player.id)}
                           disabled={player.id === me.id}
+                          aria-pressed={myVoteTarget === player.id}
+                          aria-label={t('game:aria.vote_for', { name: player.profile.name, defaultValue: `Vote for ${player.profile.name}` })}
                         >
                           Vote
                         </button>
@@ -336,6 +397,8 @@ const PlayerActions = memo(function () {
                             onClick={() => handleDayAction(action, player)}
                             key={action.type}
                             title={getActionTooltip(action.type) || action.description || ''}
+                            aria-pressed={isSelected}
+                            aria-label={t('game:aria.action_on', { action: action.label, name: player.profile.name, defaultValue: `${action.label} ${player.profile.name}` })}
                           >
                             {action.label}
                           </button>
@@ -358,6 +421,16 @@ const PlayerActions = memo(function () {
                           }
                           return null;
                         }
+                        if (action.type === 'VIGILANTE_KILL' && action.maxUses && !Events.hasDoneThisActionTonight(action.type) && (me.vigilanteShots || 0) >= action.maxUses) {
+                          if (players.indexOf(player) === 0) {
+                            return (
+                              <span key={action.type} className="action-hint-disabled" title={t('game:vigilante_out_of_shots', { defaultValue: 'No shots remaining' })}>
+                                <i className="fas fa-ban"></i> {action.label}
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
                         if (action.type === 'VEST' && action.maxUses && !Events.hasDoneThisActionTonight(action.type) && (me.vestUses || 0) >= action.maxUses) return null;
                         if (action.type === 'JAILOR_EXECUTE') {
                           if (player.id !== jailTarget) return null;
@@ -371,6 +444,8 @@ const PlayerActions = memo(function () {
 
                         const isSelected = Events.getMyActionTarget(action.type) === player.id;
                         const style = getActionStyle(action.type);
+                        const showCounter = action.type === 'VIGILANTE_KILL' && action.maxUses;
+                        const shotsLeft = showCounter ? action.maxUses - (me.vigilanteShots || 0) : null;
                         return (
                           <button
                             className={`action-btn ${isSelected ? 'action-btn-active' : ''}`}
@@ -378,8 +453,10 @@ const PlayerActions = memo(function () {
                             onClick={() => handleNightAction(action, player)}
                             key={action.type}
                             title={getActionTooltip(action.type) || action.description || ''}
+                            aria-pressed={isSelected}
+                            aria-label={t('game:aria.action_on', { action: action.label, name: player.profile.name, defaultValue: `${action.label} ${player.profile.name}` })}
                           >
-                            {action.label}
+                            {action.label}{showCounter ? ` (${shotsLeft})` : ''}
                           </button>
                         );
                       })}

@@ -2,6 +2,12 @@ import React, { useEffect } from 'react';
 import { isHost, useMultiplayerState, usePlayersList, me } from 'playroomkit';
 import { useEvents } from './useEvents';
 import { getRoles } from '../data/roles.js';
+import {
+  checkWinCondition as pureCheckWinCondition,
+  checkVotingMajority as pureCheckVotingMajority,
+  resolveJudgment as pureResolveJudgment,
+} from './gameRules';
+import { resolveDisconnects, resolveAFK } from './playerLifecycle';
 import i18n from '../trad/i18n';
 
 const GameEngineContext = React.createContext();
@@ -250,6 +256,33 @@ export const GameEngineProvider = ({ children }) => {
     }
   }, [playroom_players]);
 
+  // Mid-game joiners: add them as spectators (isSpectator=true, isAlive=false).
+  // Host-authoritative so we don't race: only the host writes new spectators.
+  useEffect(() => {
+    if (!isHost() || !game.isGameStarted) return;
+    const knownIds = new Set(players.map((p) => p.id));
+    const newcomers = playroom_players.filter((pp) => !knownIds.has(pp.id));
+    if (newcomers.length === 0) return;
+    const usedColors = new Set(players.map((p) => p.profile?.color).filter(Boolean));
+    const additions = newcomers.map((pp) => {
+      const color = PLAYER_COLORS.find((c) => !usedColors.has(c)) || '#888';
+      usedColors.add(color);
+      return {
+        id: pp.id,
+        profile: {
+          ...pp.getState().profile,
+          name: pp.getState().profile.name || 'Spectator',
+          color,
+        },
+        character: null,
+        connected: true,
+        isAlive: false,
+        isSpectator: true,
+      };
+    });
+    setPlayers([...players, ...additions]);
+  }, [playroom_players.length, game.isGameStarted]);
+
   const moveToRoleSelection = () => {
     setGame({
       ...game,
@@ -363,64 +396,62 @@ export const GameEngineProvider = ({ children }) => {
   // Continuous disconnect monitoring (runs every game tick via useEffect below)
   const handleDisconnectPlayers = () => {
     if (!game.isGameStarted || game.status === STATUS.ENDED) return;
-    const connectedIds = new Set(playroom_players.map((p) => p.id));
+    const { updated, newMessages, killedNotifs, changed } = resolveDisconnects({
+      players,
+      connectedIds: new Set(playroom_players.map((p) => p.id)),
+      now: Date.now(),
+      dayCount: game.dayCount,
+      graceMs: DISCONNECT_GRACE_MS,
+    });
+    killedNotifs.forEach((n) => Events.add(n));
+    if (newMessages.length > 0) setChatMessages([...(chatMessages || []), ...newMessages]);
+    if (changed) setPlayers(updated);
+  };
+
+  // --- AFK detection ---
+  const AFK_TIMEOUT_MS = 180000; // 3 min before marking AFK
+  const AFK_WRITE_THROTTLE_MS = 5000; // don't spam network
+
+  const updateActivity = (playerId) => {
+    if (!playerId) return;
     const now = Date.now();
-    let changed = false;
-    const newMessages = [];
-
-    const updated = players.map((player) => {
-      if (!player.isAlive) return player;
-
-      const isConnected = connectedIds.has(player.id);
-
-      // Player just disconnected — start grace period
-      if (!isConnected && player.connected !== false && !player.disconnectedAt) {
-        changed = true;
-        newMessages.push({
-          player: 'system',
-          color: '#ff8800',
-          content: i18n.t('game:system.player_disconnecting', { name: player.profile.name, seconds: Math.round(DISCONNECT_GRACE_MS / 1000) }),
-          type: 'system',
-          dayCount: game.dayCount,
-          chat: 'default',
-        });
-        return { ...player, disconnectedAt: now, connected: false };
-      }
-
-      // Player reconnected within grace period
-      if (isConnected && player.disconnectedAt) {
-        changed = true;
-        newMessages.push({
+    const target = players.find((p) => p.id === playerId);
+    if (!target) return;
+    // Throttle: skip if we already wrote recently AND player is not AFK
+    if (!target.isAFK && target.lastActivityAt && now - target.lastActivityAt < AFK_WRITE_THROTTLE_MS) {
+      return;
+    }
+    const wasAFK = !!target.isAFK;
+    setPlayers((prev) =>
+      prev.map((p) =>
+        p.id === playerId ? { ...p, lastActivityAt: now, isAFK: false } : p
+      )
+    );
+    if (wasAFK) {
+      setChatMessages([
+        ...(chatMessages || []),
+        {
           player: 'system',
           color: '#78ff78',
-          content: i18n.t('game:system.player_reconnected', { name: player.profile.name }),
+          content: i18n.t('game:system.player_back', { name: target.profile?.name || '?' }),
           type: 'system',
           dayCount: game.dayCount,
           chat: 'default',
-        });
-        return { ...player, disconnectedAt: null, connected: true };
-      }
+        },
+      ]);
+    }
+  };
 
-      // Grace period expired — kill player
-      if (!isConnected && player.disconnectedAt && (now - player.disconnectedAt >= DISCONNECT_GRACE_MS)) {
-        changed = true;
-        Events.add({
-          type: 'disconnect',
-          content: { chatMessage: i18n.t('game:system.player_disconnected', { name: player.profile.name }) },
-          displayed: false,
-        });
-        return { ...player, disconnectedAt: null, connected: false, isAlive: false };
-      }
-
-      return player;
+  const handleAFKPlayers = () => {
+    if (!game.isGameStarted || game.status === STATUS.ENDED) return;
+    const { updated, newMessages, changed } = resolveAFK({
+      players,
+      now: Date.now(),
+      dayCount: game.dayCount,
+      timeoutMs: AFK_TIMEOUT_MS,
     });
-
-    if (newMessages.length > 0) {
-      setChatMessages([...(chatMessages || []), ...newMessages]);
-    }
-    if (changed) {
-      setPlayers(updated);
-    }
+    if (newMessages.length > 0) setChatMessages([...(chatMessages || []), ...newMessages]);
+    if (changed) setPlayers(updated);
   };
 
   // --- Chat helper ---
@@ -441,34 +472,7 @@ export const GameEngineProvider = ({ children }) => {
   // --- Trial / Voting ---
   const resetTrial = () => setTrial({ suspects: {}, votes: {} });
 
-  const checkWinCondition = () => {
-    const alive = players.filter((p) => p.isAlive);
-    // Don't check win conditions if no players have characters assigned yet
-    if (alive.length === 0 || !alive.some((p) => p.character)) return null;
-
-    const townAlive = alive.filter((p) => p.character?.team === 'town').length;
-    const mafiaAlive = alive.filter((p) => p.character?.team === 'mafia').length;
-    const evilAlive = alive.filter((p) => p.character?.team === 'evil').length;
-    const neutralKillingAlive = alive.filter(
-      (p) => p.character?.winCondition === 'lastStanding'
-    ).length;
-
-    // SK wins: only neutral killers alive (or alone)
-    if (neutralKillingAlive > 0 && townAlive === 0 && mafiaAlive === 0 && evilAlive === 0) {
-      return 'neutral_killing';
-    }
-
-    // Town wins: no mafia, no evil, no neutral killers
-    if (mafiaAlive === 0 && evilAlive === 0 && neutralKillingAlive === 0 && townAlive > 0) return 'town';
-
-    // Mafia wins: majority over non-mafia (excluding neutral killers who are still threats)
-    if (mafiaAlive >= townAlive + evilAlive + neutralKillingAlive && mafiaAlive > 0) return 'mafia';
-
-    // Evil wins
-    if (evilAlive >= townAlive + mafiaAlive + neutralKillingAlive && evilAlive > 0) return 'evil';
-
-    return null;
-  };
+  const checkWinCondition = () => pureCheckWinCondition(players);
 
   const endGame = (winner) => {
     // Survivors who are alive also win
@@ -485,48 +489,10 @@ export const GameEngineProvider = ({ children }) => {
     });
   };
 
-  // Check majority vote during VOTING phase
   // Majority = strict >50% (like Town of Salem): Math.floor(n/2) + 1
-  // 4 players → need 3, 5 players → need 3, 6 players → need 4
-  const checkVotingMajority = () => {
-    if (!trial.suspects || Object.keys(trial.suspects).length === 0) return null;
-
-    const totalPossibleVotes = players.filter((p) => p.isAlive).length;
-    const majority = Math.floor(totalPossibleVotes / 2) + 1;
-
-    let topSuspect = null;
-    let topVotes = 0;
-
-    Object.keys(trial.suspects).forEach((suspectedId) => {
-      const votes = trial.suspects[suspectedId]?.suspectedBy?.length || 0;
-      if (votes > topVotes) {
-        topVotes = votes;
-        topSuspect = suspectedId;
-      }
-    });
-
-    if (topVotes >= majority) return topSuspect;
-    return null;
-  };
-
-  // Resolve judgment votes (guilty vs innocent)
+  const checkVotingMajority = () => pureCheckVotingMajority(players, trial);
   // Judgment: guilty by default — need >= 50% of voters to save (innocent)
-  const resolveJudgment = () => {
-    const votes = trial.votes || {};
-    let innocentCount = 0;
-
-    Object.values(votes).forEach((vote) => {
-      if (vote === 'innocent') innocentCount++;
-    });
-
-    // Alive players who can vote (excluding accused)
-    const eligibleVoters = players.filter(p => p.isAlive && p.id !== game.accusedId).length;
-    const majority = Math.floor(eligibleVoters / 2) + 1;
-    // Saved only if enough players vote innocent
-    const isSaved = innocentCount >= majority;
-
-    return { innocentCount, eligibleVoters, majority, isGuilty: !isSaved };
-  };
+  const resolveJudgment = () => pureResolveJudgment(players, trial, game.accusedId);
 
   // Kill accused player and check for neutral wins
   const executeAccused = () => {
@@ -778,6 +744,15 @@ export const GameEngineProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [game.isGameStarted, game.status, playroom_players.length, players]);
 
+  // --- AFK monitoring (host only, every 10s) ---
+  useEffect(() => {
+    if (!isHost() || !game.isGameStarted || game.status === STATUS.ENDED) return;
+    const interval = setInterval(() => {
+      handleAFKPlayers();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [game.isGameStarted, game.status, players]);
+
   // --- Wait for all players to load assets (host only) ---
   useEffect(() => {
     if (!isHost() || !game.isGameStarted || !game.waitingForPlayers) return;
@@ -835,6 +810,7 @@ export const GameEngineProvider = ({ children }) => {
         addChatSystem,
         readyPlayers,
         markReady,
+        updateActivity,
       }}
     >
       {children}
