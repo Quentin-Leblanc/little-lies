@@ -3,6 +3,7 @@ import {
   filterResolvableEvents,
   computeExecutionerConversions,
   resolveConversions,
+  aggregateCultVotes,
 } from '../nightResolution';
 
 const p = (id, {
@@ -376,5 +377,98 @@ describe('resolveConversions', () => {
     ];
     const result = resolveConversions([convert('leader', 'wolf')], { players });
     expect(result.convertedIds.wolf).toEqual({ by: 'leader' });
+  });
+
+  test('jailed converter cannot convert (self_jailed)', () => {
+    const players = [
+      p('leader', { team: 'cult', key: 'cult_leader' }),
+      p('victim'),
+    ];
+    const result = resolveConversions(
+      [convert('leader', 'victim')],
+      { players, jailedPlayers: { leader: 'jailor' } }
+    );
+    expect(result.convertedIds).toEqual({});
+    expect(result.failures[0]).toMatchObject({ reason: 'self_jailed' });
+  });
+});
+
+describe('aggregateCultVotes', () => {
+  const p = (id, { alive = true, team = 'town' } = {}) => ({
+    id,
+    isAlive: alive,
+    profile: { name: id },
+    character: { team },
+  });
+  const vote = (by, target) => ({
+    type: 'CULT_VOTE',
+    content: { by, target },
+  });
+
+  test('empty events → empty tally, null top', () => {
+    const players = [p('a'), p('b')];
+    const result = aggregateCultVotes([], players);
+    expect(result.tally).toEqual({});
+    expect(result.top).toBeNull();
+  });
+
+  test('single vote → top = that target with count 1', () => {
+    const players = [p('voter', { team: 'cult' }), p('target')];
+    const result = aggregateCultVotes([vote('voter', 'target')], players);
+    expect(result.tally).toEqual({ target: 1 });
+    expect(result.top).toBe('target');
+  });
+
+  test('multiple votes → top is the most-voted target', () => {
+    const players = [
+      p('v1', { team: 'cult' }),
+      p('v2', { team: 'cult' }),
+      p('v3', { team: 'cult' }),
+      p('alice'),
+      p('bob'),
+    ];
+    const result = aggregateCultVotes(
+      [vote('v1', 'alice'), vote('v2', 'alice'), vote('v3', 'bob')],
+      players
+    );
+    expect(result.tally).toEqual({ alice: 2, bob: 1 });
+    expect(result.top).toBe('alice');
+  });
+
+  test('dead voters are dropped', () => {
+    const players = [
+      p('v1', { alive: false, team: 'cult' }),
+      p('target'),
+    ];
+    const result = aggregateCultVotes([vote('v1', 'target')], players);
+    expect(result.tally).toEqual({});
+    expect(result.top).toBeNull();
+  });
+
+  test('dead targets are dropped', () => {
+    const players = [
+      p('v1', { team: 'cult' }),
+      p('target', { alive: false }),
+    ];
+    const result = aggregateCultVotes([vote('v1', 'target')], players);
+    expect(result.tally).toEqual({});
+  });
+
+  test('votes for existing cult members are dropped (defensive)', () => {
+    const players = [
+      p('v1', { team: 'cult' }),
+      p('cult2', { team: 'cult' }),
+    ];
+    const result = aggregateCultVotes([vote('v1', 'cult2')], players);
+    expect(result.tally).toEqual({});
+  });
+
+  test('ignores non-CULT_VOTE events', () => {
+    const players = [p('v1', { team: 'cult' }), p('target')];
+    const result = aggregateCultVotes(
+      [{ type: 'KILL', content: { by: 'v1', target: 'target' } }],
+      players
+    );
+    expect(result.tally).toEqual({});
   });
 });

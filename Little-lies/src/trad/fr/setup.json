@@ -22,9 +22,11 @@
   "team_counter": {
     "village": "Village: {{count}}",
     "mafia": "Mafia: {{count}}",
+    "cult": "Culte: {{count}}",
     "neutral": "Neutre: {{count}}",
     "unbalanced": "Déséquilibré"
   },
+  "unique_role_taken": "Rôle unique déjà sélectionné",
   "roles_available": "Rôles disponibles",
   "roles_selected": "Sélectionnés ({{current}}/{{total}})",
   "config": {

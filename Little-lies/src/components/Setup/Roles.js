@@ -23,10 +23,15 @@ const Roles = () => {
   });
 
   const addRole = (role) => {
-    if (rolesSelected.length < nbPlayers && isHost()) {
-      setRolesSelected([...rolesSelected, role]);
-    }
+    if (!isHost() || rolesSelected.length >= nbPlayers) return;
+    // Enforce role.unique: prevent adding duplicates of unique roles
+    // (e.g. Godfather, Cult Leader — only one per game).
+    if (role.unique && rolesSelected.some((r) => r.key === role.key)) return;
+    setRolesSelected([...rolesSelected, role]);
   };
+
+  const isUniqueTaken = (role) =>
+    role.unique && rolesSelected.some((r) => r.key === role.key);
 
   const removeRole = (index) => {
     if (isHost()) {
@@ -49,9 +54,9 @@ const Roles = () => {
                   <button
                     key={`${role.key}-${index}`}
                     className={`role-pick-btn ${!host ? 'is-viewer' : ''}`}
-                    disabled={rolesSelected.length >= nbPlayers || !host}
+                    disabled={rolesSelected.length >= nbPlayers || !host || isUniqueTaken(role)}
                     onClick={() => addRole(role)}
-                    title={role.description}
+                    title={isUniqueTaken(role) ? t('setup:unique_role_taken', { defaultValue: role.description + ' (unique)' }) : role.description}
                     style={{ borderColor: role.couleur }}
                   >
                     <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>

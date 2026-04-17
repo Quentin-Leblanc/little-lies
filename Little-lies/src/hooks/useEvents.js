@@ -7,6 +7,7 @@ import {
   filterResolvableEvents,
   computeExecutionerConversions,
   resolveConversions,
+  aggregateCultVotes,
 } from './nightResolution';
 
 const EventsContext = React.createContext();
@@ -430,6 +431,33 @@ export const EventsProvider = ({ children }) => {
         addNotif(f.by, i18n.t(`game:notifications.${key}`, { name }));
       }
     });
+
+    // === Priority 5b: Advisory Cult vote summary to the leader ===
+    // CULT_VOTE events are consumed here — they do NOT enforce anything,
+    // they just inform the leader (in the morning) what members voted for
+    // during the night. The leader still chooses CONVERT manually; this
+    // summary lets them align with members over successive nights.
+    const cultLeader = players.find(
+      (p) => p.isAlive && p.character?.key === 'cult_leader'
+    );
+    if (cultLeader) {
+      const { tally, top } = aggregateCultVotes(
+        activeEvents.filter((e) => e.type === 'CULT_VOTE'),
+        players
+      );
+      const voteCount = Object.values(tally).reduce((a, b) => a + b, 0);
+      if (voteCount > 0 && top) {
+        const topName = players.find((p) => p.id === top)?.profile?.name;
+        addNotif(
+          cultLeader.id,
+          i18n.t('game:notifications.cult_vote_summary', {
+            name: topName,
+            count: tally[top],
+            total: voteCount,
+          })
+        );
+      }
+    }
 
     // === Priority 6: Investigations (skip if roleblocked or target dead) ===
     activeEvents

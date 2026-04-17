@@ -179,6 +179,12 @@ export function resolveConversions(conversionEvents, context) {
     failures.push({ by: converter.id, reason: 'target_jailed', targetId: target.id });
     return { convertedIds, failures };
   }
+  // A jailed converter can't act either — jail blocks every night action,
+  // including CONVERT. Roleblock is handled separately below.
+  if (jailedPlayers[converter.id]) {
+    failures.push({ by: converter.id, reason: 'self_jailed' });
+    return { convertedIds, failures };
+  }
   if (roleblockedPlayers[converter.id]) {
     failures.push({ by: converter.id, reason: 'self_roleblocked' });
     return { convertedIds, failures };
@@ -186,4 +192,41 @@ export function resolveConversions(conversionEvents, context) {
 
   convertedIds[target.id] = { by: converter.id };
   return { convertedIds, failures };
+}
+
+/**
+ * Aggregate CULT_VOTE events into a ranked list of preferred conversion
+ * targets. Pure / advisory only — the leader still chooses the final
+ * CONVERT target manually, but receives a notification telling them what
+ * the members voted for.
+ *
+ * Ties are broken by first-encountered order (defensive — caller can
+ * display all tied targets if desired). Dead voters and dead targets
+ * are silently dropped.
+ *
+ * @param {Array} voteEvents — events (filters for type=='CULT_VOTE')
+ * @param {Array} players
+ * @returns {{ tally: Record<targetId, count>, top: targetId|null }}
+ */
+export function aggregateCultVotes(voteEvents, players) {
+  const byId = new Map((players || []).map((p) => [p.id, p]));
+  const tally = {};
+  (voteEvents || [])
+    .filter((e) => e?.type === 'CULT_VOTE')
+    .forEach((e) => {
+      const voter = byId.get(e.content?.by);
+      const target = byId.get(e.content?.target);
+      if (!voter?.isAlive || !target?.isAlive) return;
+      if (target.character?.team === 'cult') return;
+      tally[target.id] = (tally[target.id] || 0) + 1;
+    });
+  let top = null;
+  let topCount = 0;
+  Object.entries(tally).forEach(([id, count]) => {
+    if (count > topCount) {
+      topCount = count;
+      top = id;
+    }
+  });
+  return { tally, top };
 }

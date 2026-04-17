@@ -84,8 +84,10 @@ const Setup = () => {
   }, {});
   const townCount = teamCounts.town || 0;
   const mafiaCount = teamCounts.mafia || 0;
+  const cultCount = teamCounts.cult || 0;
   const neutralCount = teamCounts.neutral || 0;
-  const isUnbalanced = rolesSelected.length > 0 && mafiaCount >= townCount;
+  // Unbalanced if combined evil factions (mafia + cult) reach town count.
+  const isUnbalanced = rolesSelected.length > 0 && (mafiaCount + cultCount) >= townCount;
 
   return (
     <div className="setup-screen">
@@ -149,6 +151,11 @@ const Setup = () => {
           <span style={{ color: '#ff4444', opacity: rolesSelected.length > 0 ? 1 : 0.3 }}>
             <i className="fas fa-user-secret"></i> {t('setup:team_counter.mafia', { count: mafiaCount })}
           </span>
+          {cultCount > 0 && (
+            <span style={{ color: '#a96edd', opacity: 1 }}>
+              <i className="fas fa-hat-wizard"></i> {t('setup:team_counter.cult', { count: cultCount })}
+            </span>
+          )}
           <span style={{ color: '#9370db', opacity: rolesSelected.length > 0 ? 1 : 0.3 }}>
             <i className="fas fa-star"></i> {t('setup:team_counter.neutral', { count: neutralCount })}
           </span>
