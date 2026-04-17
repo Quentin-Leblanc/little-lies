@@ -65,3 +65,74 @@ export function resolveJudgment(players, trial, accusedId) {
   const isSaved = innocentCount >= majority;
   return { innocentCount, eligibleVoters, majority, isGuilty: !isSaved };
 }
+
+/**
+ * Strip impossible entries from trial state so malicious or stale client
+ * writes can't corrupt the vote. Pure function; keeps valid entries as-is
+ * (preserves vote order for Mayor weight) and drops the rest.
+ *
+ * Rules:
+ * - suspects[id].suspectedBy: voter must be alive + not a spectator + not
+ *   the suspect himself. Suspect must be alive + not a spectator.
+ * - votes[voterId]: voter must be alive + not a spectator + not the
+ *   accused. Vote value must be 'guilty' / 'innocent' / 'abstain'.
+ *
+ * The function is phase-agnostic — it only removes impossible entries,
+ * never legitimate ones. Safe to call on every host tick.
+ */
+export function sanitizeTrial(players, trial, accusedId) {
+  if (!trial) return { suspects: {}, votes: {} };
+  const playersArr = players || [];
+  const livingIds = new Set(
+    playersArr.filter((p) => p.isAlive && !p.isSpectator).map((p) => p.id)
+  );
+
+  const cleanSuspects = {};
+  Object.keys(trial.suspects || {}).forEach((suspectedId) => {
+    if (!livingIds.has(suspectedId)) return;
+    const entry = trial.suspects[suspectedId];
+    const validVoters = (entry?.suspectedBy || []).filter(
+      (vid) => livingIds.has(vid) && vid !== suspectedId
+    );
+    if (validVoters.length > 0) {
+      cleanSuspects[suspectedId] = { id: suspectedId, suspectedBy: validVoters };
+    }
+  });
+
+  const VALID_VERDICTS = new Set(['guilty', 'innocent', 'abstain']);
+  const cleanVotes = {};
+  Object.keys(trial.votes || {}).forEach((voterId) => {
+    if (!livingIds.has(voterId)) return;
+    if (voterId === accusedId) return;
+    const v = trial.votes[voterId];
+    if (VALID_VERDICTS.has(v)) cleanVotes[voterId] = v;
+  });
+
+  return { suspects: cleanSuspects, votes: cleanVotes };
+}
+
+/**
+ * Cheap structural equality check for trial payloads — used by the host
+ * to decide whether a sanitized trial is worth broadcasting back.
+ * Avoids a full JSON.stringify on every tick.
+ */
+export function trialsEqual(a, b) {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  const aSuspectKeys = Object.keys(a.suspects || {});
+  const bSuspectKeys = Object.keys(b.suspects || {});
+  if (aSuspectKeys.length !== bSuspectKeys.length) return false;
+  for (const k of aSuspectKeys) {
+    const av = a.suspects[k]?.suspectedBy || [];
+    const bv = b.suspects?.[k]?.suspectedBy || [];
+    if (av.length !== bv.length) return false;
+    for (let i = 0; i < av.length; i++) if (av[i] !== bv[i]) return false;
+  }
+  const aVoteKeys = Object.keys(a.votes || {});
+  const bVoteKeys = Object.keys(b.votes || {});
+  if (aVoteKeys.length !== bVoteKeys.length) return false;
+  for (const k of aVoteKeys) {
+    if (a.votes[k] !== b.votes?.[k]) return false;
+  }
+  return true;
+}

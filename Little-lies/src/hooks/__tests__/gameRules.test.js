@@ -2,12 +2,15 @@ import {
   checkWinCondition,
   checkVotingMajority,
   resolveJudgment,
+  sanitizeTrial,
+  trialsEqual,
 } from '../gameRules';
 
 // --- Helpers ---
-const p = (id, { team = 'town', alive = true, winCondition = null } = {}) => ({
+const p = (id, { team = 'town', alive = true, winCondition = null, spectator = false } = {}) => ({
   id,
   isAlive: alive,
+  isSpectator: spectator,
   character: { team, winCondition },
   profile: { name: id },
 });
@@ -160,5 +163,111 @@ describe('resolveJudgment', () => {
     // 3 eligible voters, majority = 2 — 1 innocent vote not enough
     expect(result.eligibleVoters).toBe(3);
     expect(result.majority).toBe(2);
+  });
+});
+
+describe('sanitizeTrial', () => {
+  const players = [p('a'), p('b'), p('c'), p('d'), p('e', { alive: false }), p('spec', { spectator: true })];
+
+  test('returns empty trial for nullish input', () => {
+    expect(sanitizeTrial(players, null, null)).toEqual({ suspects: {}, votes: {} });
+    expect(sanitizeTrial(players, undefined, null)).toEqual({ suspects: {}, votes: {} });
+  });
+
+  test('keeps valid suspects untouched', () => {
+    const trial = { suspects: { a: { id: 'a', suspectedBy: ['b', 'c'] } }, votes: {} };
+    expect(sanitizeTrial(players, trial, null)).toEqual(trial);
+  });
+
+  test('drops votes cast by dead voters', () => {
+    const trial = { suspects: { a: { id: 'a', suspectedBy: ['b', 'e'] } } };
+    expect(sanitizeTrial(players, trial, null).suspects.a.suspectedBy).toEqual(['b']);
+  });
+
+  test('drops votes cast by spectators', () => {
+    const trial = { suspects: { a: { id: 'a', suspectedBy: ['b', 'spec'] } } };
+    expect(sanitizeTrial(players, trial, null).suspects.a.suspectedBy).toEqual(['b']);
+  });
+
+  test('drops votes against dead targets', () => {
+    const trial = { suspects: { e: { id: 'e', suspectedBy: ['a', 'b', 'c'] } } };
+    expect(sanitizeTrial(players, trial, null).suspects).toEqual({});
+  });
+
+  test('drops votes against spectator targets', () => {
+    const trial = { suspects: { spec: { id: 'spec', suspectedBy: ['a', 'b', 'c'] } } };
+    expect(sanitizeTrial(players, trial, null).suspects).toEqual({});
+  });
+
+  test('drops self-vote (voter === suspect)', () => {
+    const trial = { suspects: { a: { id: 'a', suspectedBy: ['a', 'b'] } } };
+    expect(sanitizeTrial(players, trial, null).suspects.a.suspectedBy).toEqual(['b']);
+  });
+
+  test('drops suspect entry when all voters become invalid', () => {
+    const trial = { suspects: { a: { id: 'a', suspectedBy: ['a', 'e', 'spec'] } } };
+    expect(sanitizeTrial(players, trial, null).suspects).toEqual({});
+  });
+
+  test('preserves Mayor repeated votes (same voter id twice)', () => {
+    const trial = { suspects: { a: { id: 'a', suspectedBy: ['b', 'b', 'b'] } } };
+    expect(sanitizeTrial(players, trial, null).suspects.a.suspectedBy).toEqual(['b', 'b', 'b']);
+  });
+
+  test('drops judgment votes by dead voters', () => {
+    const trial = { votes: { b: 'innocent', e: 'innocent' } };
+    expect(sanitizeTrial(players, trial, 'a').votes).toEqual({ b: 'innocent' });
+  });
+
+  test('drops judgment votes by spectators', () => {
+    const trial = { votes: { b: 'guilty', spec: 'innocent' } };
+    expect(sanitizeTrial(players, trial, 'a').votes).toEqual({ b: 'guilty' });
+  });
+
+  test('drops judgment vote by the accused', () => {
+    const trial = { votes: { a: 'innocent', b: 'guilty' } };
+    expect(sanitizeTrial(players, trial, 'a').votes).toEqual({ b: 'guilty' });
+  });
+
+  test('drops invalid verdict strings', () => {
+    const trial = { votes: { b: 'innocent', c: 'plotTwist', d: null, e: 'guilty' } };
+    // 'e' is dead → dropped too
+    expect(sanitizeTrial(players, trial, 'a').votes).toEqual({ b: 'innocent' });
+  });
+
+  test('accepts abstain verdict', () => {
+    const trial = { votes: { b: 'abstain' } };
+    expect(sanitizeTrial(players, trial, 'a').votes).toEqual({ b: 'abstain' });
+  });
+});
+
+describe('trialsEqual', () => {
+  test('both nullish → true only if same reference', () => {
+    expect(trialsEqual(null, null)).toBe(true);
+    expect(trialsEqual(undefined, undefined)).toBe(true);
+    expect(trialsEqual(null, { suspects: {}, votes: {} })).toBe(false);
+  });
+
+  test('identical trials → true', () => {
+    const t = { suspects: { a: { suspectedBy: ['b', 'c'] } }, votes: { d: 'guilty' } };
+    expect(trialsEqual(t, { ...t, suspects: { ...t.suspects }, votes: { ...t.votes } })).toBe(true);
+  });
+
+  test('different suspect order in array → false', () => {
+    const a = { suspects: { x: { suspectedBy: ['a', 'b'] } }, votes: {} };
+    const b = { suspects: { x: { suspectedBy: ['b', 'a'] } }, votes: {} };
+    expect(trialsEqual(a, b)).toBe(false);
+  });
+
+  test('extra vote on one side → false', () => {
+    const a = { suspects: {}, votes: { b: 'guilty' } };
+    const b = { suspects: {}, votes: { b: 'guilty', c: 'innocent' } };
+    expect(trialsEqual(a, b)).toBe(false);
+  });
+
+  test('same vote keys but different values → false', () => {
+    const a = { suspects: {}, votes: { b: 'guilty' } };
+    const b = { suspects: {}, votes: { b: 'innocent' } };
+    expect(trialsEqual(a, b)).toBe(false);
   });
 });

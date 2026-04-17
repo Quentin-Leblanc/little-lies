@@ -6,6 +6,8 @@ import {
   checkWinCondition as pureCheckWinCondition,
   checkVotingMajority as pureCheckVotingMajority,
   resolveJudgment as pureResolveJudgment,
+  sanitizeTrial as pureSanitizeTrial,
+  trialsEqual,
 } from './gameRules';
 import { resolveDisconnects, resolveAFK } from './playerLifecycle';
 import i18n from '../trad/i18n';
@@ -489,10 +491,15 @@ export const GameEngineProvider = ({ children }) => {
     });
   };
 
+  // Sanitized trial — strips invalid votes (dead voters, dead targets,
+  // self-votes, accused-voting-themselves, invalid verdicts). Any host
+  // decision reads through this, so a malicious client can't sway the vote
+  // by writing garbage to the shared state.
+  const sanitizedTrial = () => pureSanitizeTrial(players, trial, game.accusedId);
   // Majority = strict >50% (like Town of Salem): Math.floor(n/2) + 1
-  const checkVotingMajority = () => pureCheckVotingMajority(players, trial);
+  const checkVotingMajority = () => pureCheckVotingMajority(players, sanitizedTrial());
   // Judgment: guilty by default — need >= 50% of voters to save (innocent)
-  const resolveJudgment = () => pureResolveJudgment(players, trial, game.accusedId);
+  const resolveJudgment = () => pureResolveJudgment(players, sanitizedTrial(), game.accusedId);
 
   // Kill accused player and check for neutral wins
   const executeAccused = () => {
@@ -752,6 +759,20 @@ export const GameEngineProvider = ({ children }) => {
     }, 10000);
     return () => clearInterval(interval);
   }, [game.isGameStarted, game.status, players]);
+
+  // --- Trial sanitization (host only) ---
+  // Whenever a client writes a vote or a death invalidates a prior vote,
+  // re-broadcast a cleaned trial. This is the authoritative anti-cheat:
+  // clients can only see data the host has validated. Runs on trial OR
+  // players change, but writes back only when the sanitized version
+  // actually differs (avoids a write loop).
+  useEffect(() => {
+    if (!isHost() || !game.isGameStarted || game.status === STATUS.ENDED) return;
+    const clean = pureSanitizeTrial(players, trial, game.accusedId);
+    if (!trialsEqual(trial, clean)) {
+      setTrial(clean);
+    }
+  }, [trial, players, game.accusedId, game.isGameStarted, game.status]);
 
   // --- Wait for all players to load assets (host only) ---
   useEffect(() => {

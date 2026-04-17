@@ -121,6 +121,12 @@ const PlayerActions = memo(function () {
 
   const handleVoteClick = (suspectedPlayerId) => {
     if (!me.isAlive || me.isSpectator || !isVotingPhase || hasVoted) return;
+    // Reject obviously invalid targets at source — the host sanitizer
+    // would drop them within 1s anyway, but filtering here avoids a flash
+    // of bad UI state and keeps the chat announcement honest.
+    if (suspectedPlayerId === me.id) return;
+    const target = players.find((p) => p.id === suspectedPlayerId);
+    if (!target || !target.isAlive || target.isSpectator) return;
     updateActivity(me.id);
     const voteWeight = me.voteWeight || 1;
     // Deep copy trial to avoid mutating shared references
@@ -150,6 +156,9 @@ const PlayerActions = memo(function () {
   const handleJudgmentVote = (vote) => {
     if (!me.isAlive || me.isSpectator || !isJudgmentPhase) return;
     if (me.id === game.accusedId) return;
+    // Only accept the three valid verdicts — defense in depth against UI
+    // bugs that might pass through something weird.
+    if (vote !== 'guilty' && vote !== 'innocent' && vote !== 'abstain') return;
     updateActivity(me.id);
     const latestTrial = trialRef.current || { suspects: {}, votes: {} };
     setTrial({ suspects: latestTrial.suspects || {}, votes: { ...(latestTrial.votes || {}), [me.id]: vote } });
