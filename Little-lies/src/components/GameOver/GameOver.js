@@ -289,8 +289,10 @@ const GameOver = () => {
             className="go-btn go-btn-primary"
             onClick={() => {
               const url = new URL(window.location.href);
+              const hadRoomCode = url.searchParams.has('r');
               url.searchParams.delete('r');
-              window.location.href = url.toString();
+              if (hadRoomCode) window.location.href = url.toString();
+              else window.location.reload();
             }}
           >
             <i className="fas fa-plus"></i> {t('common:new_lobby')}
