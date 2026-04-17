@@ -105,8 +105,12 @@ const AdminPanel = () => {
                 {p.profile?.name || 'Joueur'}
               </span>
               {p.isAlive && (
-                <button className="admin-kill-btn" onClick={() => killPlayer(p.id)}>
-                  <i className="fas fa-skull"></i>
+                <button
+                  className="admin-kill-btn"
+                  onClick={() => killPlayer(p.id)}
+                  aria-label={t('admin_kill_player', { defaultValue: 'Kill', name: p.profile?.name || '' })}
+                >
+                  <i className="fas fa-skull" aria-hidden="true"></i>
                 </button>
               )}
               {!p.isAlive && <span className="admin-dead-tag">{t('dead').toLowerCase()}</span>}

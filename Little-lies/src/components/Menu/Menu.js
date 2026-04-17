@@ -123,8 +123,13 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
           <div className="volume-section">
             <span className="room-code-label">{t('menu:volume')}</span>
             <div className="volume-controls">
-              <button className="volume-mute-btn" onClick={handleToggleMute}>
-                <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i>
+              <button
+                className="volume-mute-btn"
+                onClick={handleToggleMute}
+                aria-label={muted ? t('menu:unmute') : t('menu:mute')}
+                aria-pressed={muted}
+              >
+                <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
               </button>
               <input
                 type="range"

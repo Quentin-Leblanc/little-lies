@@ -192,10 +192,15 @@ function App() {
                     <AdminPanel />
 
                     {/* Sidebar toggle (mobile/tablet) */}
-                    <button className="sidebar-toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-user'}`}></i>
+                    <button
+                        className="sidebar-toggle-btn"
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        aria-label={sidebarOpen ? 'Fermer le panneau joueur' : 'Ouvrir le panneau joueur'}
+                        aria-expanded={sidebarOpen}
+                    >
+                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-user'}`} aria-hidden="true"></i>
                     </button>
-                    {sidebarOpen && <div className="sidebar-backdrop show" onClick={() => setSidebarOpen(false)} />}
+                    {sidebarOpen && <div className="sidebar-backdrop show" onClick={() => setSidebarOpen(false)} aria-hidden="true" />}
 
                     {/* Right — Role info + player list */}
                     <div className={`layout-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
