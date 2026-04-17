@@ -27,7 +27,7 @@ const GROUND_TEX_PATHS = [
   '/models/textures/ground_roughness.jpg',
 ];
 
-const GroundPlane = ({ isDay }) => {
+const GroundPlane = React.memo(function GroundPlane({ isDay }) {
   // Load only the albedo — normal & roughness maps produced specular
   // aliasing ("sparkle pixels") at grazing angles under the directional
   // light, which clashed with the stylised look. The albedo alone,
@@ -67,12 +67,12 @@ const GroundPlane = ({ isDay }) => {
           VillageCenter) — no more procedural stone disc. */}
     </group>
   );
-};
+});
 
 // ============================================================
 // Improved Torch with multi-layer flame
 // ============================================================
-const Torch = ({ position }) => {
+const Torch = React.memo(function Torch({ position }) {
   const lightRef = useRef();
   const flameRef = useRef();
 
@@ -126,12 +126,12 @@ const Torch = ({ position }) => {
       <pointLight ref={lightRef} position={[0, 1.85, 0]} intensity={0.8} color="#ff8833" distance={6} />
     </group>
   );
-};
+});
 
 // ============================================================
 // Low-Poly Procedural Buildings — flat-shaded, bright colors
 // ============================================================
-const LowPolyCottage = ({ position, rotation = [0, 0, 0], scale = 1, variant = 0 }) => {
+const LowPolyCottage = React.memo(function LowPolyCottage({ position, rotation = [0, 0, 0], scale = 1, variant = 0 }) {
   const wallColor = variant % 3 === 0 ? '#F5E6D0' : variant % 3 === 1 ? '#E8DCC8' : '#F0DEC0';
   const roofColor = variant % 2 === 0 ? '#E8734A' : '#D4613A';
   return (
@@ -163,9 +163,9 @@ const LowPolyCottage = ({ position, rotation = [0, 0, 0], scale = 1, variant = 0
       </mesh>
     </group>
   );
-};
+});
 
-const LowPolyForge = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+const LowPolyForge = React.memo(({ position, rotation = [0, 0, 0], scale = 1 }) => (
   <group position={position} rotation={rotation} scale={scale}>
     {/* Walls — darker stone */}
     <mesh position={[0, 1.1, 0]} castShadow receiveShadow>
@@ -195,9 +195,9 @@ const LowPolyForge = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
     {/* Forge glow */}
     <pointLight position={[0.8, 2, -0.6]} color="#ff6b35" intensity={0.5} distance={6} />
   </group>
-);
+));
 
-const LowPolyTavern = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+const LowPolyTavern = React.memo(({ position, rotation = [0, 0, 0], scale = 1 }) => (
   <group position={position} rotation={rotation} scale={scale}>
     {/* Main body — wider */}
     <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
@@ -237,9 +237,9 @@ const LowPolyTavern = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
       </mesh>
     ))}
   </group>
-);
+));
 
-const LowPolyChapel = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+const LowPolyChapel = React.memo(({ position, rotation = [0, 0, 0], scale = 1 }) => (
   <group position={position} rotation={rotation} scale={scale}>
     {/* Main body — taller */}
     <mesh position={[0, 1.5, 0]} castShadow receiveShadow>
@@ -280,10 +280,10 @@ const LowPolyChapel = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
       <meshBasicMaterial color="#FFD700" transparent opacity={0.4} />
     </mesh>
   </group>
-);
+));
 
 // Village well — central piece
-const LowPolyWell = ({ position = [0, 0, 0], scale = 1 }) => (
+const LowPolyWell = React.memo(({ position = [0, 0, 0], scale = 1 }) => (
   <group position={position} scale={scale}>
     {/* Stone base (cylinder) */}
     <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
@@ -336,9 +336,9 @@ const LowPolyWell = ({ position = [0, 0, 0], scale = 1 }) => (
       <meshStandardMaterial color="#5a3a1a" flatShading />
     </mesh>
   </group>
-);
+));
 
-const LowPolyMountain = ({ position, scale = 1, variant = 0 }) => (
+const LowPolyMountain = React.memo(({ position, scale = 1, variant = 0 }) => (
   <group position={position}>
     {/* Main peak */}
     <mesh position={[0, scale * 2, 0]} castShadow>
@@ -356,7 +356,7 @@ const LowPolyMountain = ({ position, scale = 1, variant = 0 }) => (
       <meshStandardMaterial color={variant % 2 === 0 ? '#6a7a5a' : '#7a8a6a'} flatShading />
     </mesh>
   </group>
-);
+));
 
 // Preload village center models
 useGLTF.preload('/models/Meshy_AI_potence_0415121815_texture.glb');
@@ -368,7 +368,7 @@ const GALLOWS_PATH = '/models/Meshy_AI_potence_0415121815_texture.glb';
 const PODIUM_POSITION = [7, 0, -6];
 const PODIUM_SCALE = 1.0;
 
-const VillageCenter = ({ isTrialPhase }) => (
+const VillageCenter = React.memo(({ isTrialPhase }) => (
   <group>
     {/* Ancient runic circle — flat on the plaza */}
     <RunicCircle position={[0, 0, 0]} scale={5.8} />
@@ -407,7 +407,7 @@ const VillageCenter = ({ isTrialPhase }) => (
       </>
     )}
   </group>
-);
+));
 
 // ============================================================
 // Defense Scene Camera — zooms in on the accused at the podium
@@ -426,7 +426,7 @@ const EXECUTION_CAMERA_LOOK = new THREE.Vector3(7, 0.5, -6);    // looking down 
 // ============================================================
 // Low-poly Tree
 // ============================================================
-const LowPolyTree = ({ position, scale = 1, variant = 0 }) => (
+const LowPolyTree = React.memo(({ position, scale = 1, variant = 0 }) => (
   <group position={position} scale={scale} rotation={[0, variant * 1.3, 0]}>
     {/* Trunk */}
     <mesh position={[0, 0.6, 0]} castShadow>
@@ -447,12 +447,12 @@ const LowPolyTree = ({ position, scale = 1, variant = 0 }) => (
       <meshStandardMaterial color="#66CC66" flatShading />
     </mesh>
   </group>
-);
+));
 
 // ============================================================
 // Low-poly Cart — wooden cart with wheels
 // ============================================================
-const LowPolyCart = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+const LowPolyCart = React.memo(({ position, rotation = [0, 0, 0], scale = 1 }) => (
   <group position={position} rotation={rotation} scale={scale}>
     {/* Cart bed */}
     <mesh position={[0, 0.45, 0]} castShadow>
@@ -499,12 +499,12 @@ const LowPolyCart = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
       <meshStandardMaterial color="#c4a44a" roughness={1} />
     </mesh>
   </group>
-);
+));
 
 // ============================================================
 // Low-poly Crates & Barrels stack
 // ============================================================
-const LowPolyCrates = ({ position, scale = 1 }) => (
+const LowPolyCrates = React.memo(({ position, scale = 1 }) => (
   <group position={position} scale={scale}>
     {/* Large crate */}
     <mesh position={[0, 0.3, 0]} rotation={[0, 0.3, 0]} castShadow>
@@ -531,22 +531,22 @@ const LowPolyCrates = ({ position, scale = 1 }) => (
       <meshStandardMaterial color="#3a3a3a" metalness={0.4} />
     </mesh>
   </group>
-);
+));
 
 // ============================================================
 // Low-poly Rock
 // ============================================================
-const LowPolyRock = ({ position, scale = 1, variant = 0 }) => (
+const LowPolyRock = React.memo(({ position, scale = 1, variant = 0 }) => (
   <mesh position={[position[0], position[1] + scale * 0.15, position[2]]} rotation={[variant * 0.3, variant * 1.1, variant * 0.2]} scale={[scale, scale * 0.6, scale * 0.9]} castShadow>
     <dodecahedronGeometry args={[0.35, 0]} />
     <meshStandardMaterial color={variant % 2 === 0 ? '#9a9585' : '#a8a090'} roughness={0.95} flatShading />
   </mesh>
-);
+));
 
 // ============================================================
 // Low-poly Bush
 // ============================================================
-const LowPolyBush = ({ position, scale = 1, variant = 0 }) => (
+const LowPolyBush = React.memo(({ position, scale = 1, variant = 0 }) => (
   <group position={position} scale={scale}>
     <mesh position={[0, 0.2, 0]} castShadow>
       <dodecahedronGeometry args={[0.35, 1]} />
@@ -557,12 +557,12 @@ const LowPolyBush = ({ position, scale = 1, variant = 0 }) => (
       <meshStandardMaterial color="#5BBF5E" roughness={0.9} flatShading />
     </mesh>
   </group>
-);
+));
 
 // ============================================================
 // Low-poly Fence segment
 // ============================================================
-const LowPolyFence = ({ start, end }) => {
+const LowPolyFence = React.memo(function LowPolyFence({ start, end }) {
   const dx = end[0] - start[0], dz = end[2] - start[2];
   const len = Math.sqrt(dx * dx + dz * dz);
   const angle = Math.atan2(dx, dz);
@@ -591,12 +591,12 @@ const LowPolyFence = ({ start, end }) => {
       })}
     </group>
   );
-};
+});
 
 // ============================================================
 // Low-poly River — sinuous water strip
 // ============================================================
-const LowPolyRiver = ({ isDay }) => {
+const LowPolyRiver = React.memo(function LowPolyRiver({ isDay }) {
   const meshRef = useRef();
   const points = useMemo(() => [
     new THREE.Vector3(25, 0.02, 10),
@@ -663,12 +663,12 @@ const LowPolyRiver = ({ isDay }) => {
       />
     </mesh>
   );
-};
+});
 
 // ============================================================
 // Low-poly Bridge over river
 // ============================================================
-const LowPolyBridge = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+const LowPolyBridge = React.memo(({ position, rotation = [0, 0, 0], scale = 1 }) => (
   <group position={position} rotation={rotation} scale={scale}>
     {/* Deck */}
     <mesh position={[0, 0.15, 0]} castShadow>
@@ -700,17 +700,17 @@ const LowPolyBridge = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
       </group>
     ))}
   </group>
-);
+));
 
 // ============================================================
 // Low-poly Hay Bale
 // ============================================================
-const LowPolyHayBale = ({ position, rotation = [0, 0, 0], scale = 1 }) => (
+const LowPolyHayBale = React.memo(({ position, rotation = [0, 0, 0], scale = 1 }) => (
   <mesh position={[position[0], position[1] + 0.25 * scale, position[2]]} rotation={rotation} scale={scale} castShadow>
     <cylinderGeometry args={[0.3, 0.3, 0.4, 8]} />
     <meshStandardMaterial color="#c4a44a" roughness={1} />
   </mesh>
-);
+));
 
 // ============================================================
 // Dark ambiance — blood, claw marks, skulls, warning signs
@@ -1004,7 +1004,7 @@ const RunicCircle = ({ position = [0, 0, 0], scale = 5.8 }) => {
 // with a lit lamp, so we add an emissive sphere + pointLight at
 // the top of the lantern post where the lamp sits).
 // ============================================================
-const SkullLantern = ({ position, rotation = [0, 0, 0], scale = 1.2 }) => {
+const SkullLantern = React.memo(function SkullLantern({ position, rotation = [0, 0, 0], scale = 1.2 }) {
   const lightRef = useRef();
   const glowRef = useRef();
 
@@ -1047,12 +1047,12 @@ const SkullLantern = ({ position, rotation = [0, 0, 0], scale = 1.2 }) => {
       />
     </group>
   );
-};
+});
 
-const BuildingRenderer = ({ type, position, rotation, scale }) => {
+const BuildingRenderer = React.memo(function BuildingRenderer({ type, position, rotation, scale }) {
   const path = type === 'chapel' ? MESHY_MANOR : MESHY_COTTAGE;
   return <MeshyModel path={path} position={position} rotation={rotation} scale={scale * 1.6} />;
-};
+});
 
 const Village = React.memo(({ isDay, isTrialPhase }) => (
   <group>
@@ -1604,7 +1604,7 @@ const MistSlab = ({ y, scale = 1, speed = 0.02, density = 0.55, color, seed = 0 
 // Thick fog wall encircling the village — hides empty sky/mountains
 // from low camera angles (trial/defense). Dense ring at radius 18-28
 // with multiple layers so it reads as an impenetrable wall of mist.
-const VillageFogWall = ({ isDay = true }) => {
+const VillageFogWall = React.memo(function VillageFogWall({ isDay = true }) {
   const color = isDay ? '#c8d4e0' : '#0a0e1c';
 
   const clouds = useMemo(() => {
@@ -1660,9 +1660,9 @@ const VillageFogWall = ({ isDay = true }) => {
       ))}
     </Clouds>
   );
-};
+});
 
-const GroundFog = ({ isDay = true }) => {
+const GroundFog = React.memo(function GroundFog({ isDay = true }) {
   // Stacked diffuse mist slabs at different heights & speeds
   // create a layered drifting volume — much softer and more organic
   // than billboard quads.
@@ -1722,7 +1722,7 @@ const GroundFog = ({ isDay = true }) => {
       </Clouds>
     </>
   );
-};
+});
 
 // ============================================================
 // Night prowler — dark shadow that roams behind buildings
