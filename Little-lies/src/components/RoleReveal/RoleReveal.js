@@ -227,7 +227,14 @@ const RoleReveal = ({ onComplete }) => {
               </motion.p>
             </AnimatePresence>
             <div className="loading-bar-track">
-              <div className="loading-bar-fill" style={{ width: `${Math.round(progress * 100)}%` }} />
+              {/* transition: none — JS already drives the animation via rAF
+                  lerp at 60fps. Letting the CSS transition (0.3s) layer on
+                  top created a visible lag where the text (no transition)
+                  raced ahead of the bar (easing behind). */}
+              <div
+                className="loading-bar-fill"
+                style={{ width: `${Math.round(progress * 100)}%`, transition: 'none' }}
+              />
             </div>
             <p className="loading-percent">{Math.round(progress * 100)}%</p>
           </motion.div>
