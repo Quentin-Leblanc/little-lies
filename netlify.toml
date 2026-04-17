@@ -3,6 +3,9 @@
   command = "npm run build"
   publish = "build"
 
+[build.environment]
+  NODE_VERSION = "20"
+
 # SPA fallback — all routes to index.html
 [[redirects]]
   from = "/*"
@@ -16,3 +19,22 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "microphone=(), camera=(), geolocation=()"
+    # CSP: 'unsafe-inline' for styles is required by react-scripts runtime
+    # CSS-in-JS and inline <style> from index.html. 'wasm-unsafe-eval' is
+    # needed by @react-three + @mediapipe. Data: URIs are allowed for the
+    # inline SVG avatars. connect-src covers PlayroomKit, Supabase and
+    # Google Fonts (CSS-font files are served from fonts.gstatic.com).
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://joinplayroom.com https://*.joinplayroom.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://joinplayroom.com https://*.joinplayroom.com wss://*.joinplayroom.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+
+# Long cache for hashed assets (react-scripts embeds content hash)
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Shorter cache for 3D models — they may be updated between releases
+[[headers]]
+  for = "/models/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

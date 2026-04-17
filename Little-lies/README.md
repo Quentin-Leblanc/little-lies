@@ -1,70 +1,89 @@
-# Getting Started with Create React App
+# Among Liars
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Multiplayer social-deduction game (mafia / werewolf style) — React 18 +
+React Three Fiber + PlayroomKit + Supabase. Plays in the browser, 2 to
+15 players, no download.
 
-## Available Scripts
+## Stack
 
-In the project directory, you can run:
+- **UI / logic** — React 18, SASS, i18next (FR/EN)
+- **3D scene** — React Three Fiber, three-stdlib, @react-three/drei
+- **Multiplayer** — PlayroomKit (rooms, sync, lobby)
+- **Auth / XP** — Supabase (optional — guest mode works without it)
+- **Deploy** — Netlify (see `netlify.toml` at repo root)
 
-### `npm start`
+## Local development
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+git clone https://github.com/Quentin-Leblanc/little-lies.git
+cd little-lies/Little-lies
+npm install
+cp .env.example .env.local      # then edit .env.local — see below
+npm start                       # http://localhost:3000
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Environment variables
 
-### `npm test`
+See `.env.example` for the full list and explanations. Three variables:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Variable | Required | Purpose |
+|---|---|---|
+| `REACT_APP_PLAYROOM_GAME_ID` | **yes** | PlayroomKit project id (rooms, sync). App throws at boot if missing. |
+| `REACT_APP_SUPABASE_URL` | no | Enables Supabase auth / XP / profile persistence. |
+| `REACT_APP_SUPABASE_ANON_KEY` | no | Same. Safe to expose client-side — RLS policies do the protecting. |
 
-### `npm run build`
+## Scripts
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm start            # dev server (http://localhost:3000)
+npm test             # Jest suite (run once: add `-- --watchAll=false`)
+npm run build        # production build → build/
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Deployment — Netlify
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`netlify.toml` lives at the **repo root** (one level above `Little-lies/`)
+and sets `base = "Little-lies"` so Netlify knows where to find the app.
 
-### `npm run eject`
+Steps:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. Connect the repo in Netlify — it auto-detects the config from `netlify.toml`.
+2. **Site settings → Build & deploy → Environment → Environment variables**
+   — add the three vars from `.env.example`. Don't commit them anywhere.
+3. Deploy. The SPA redirect, cache headers and CSP are already in the toml.
+4. (Optional) configure Supabase RLS policies *before* sending real users
+   — without RLS, the anon key leaks your tables.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Supabase setup (if you enable auth)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Minimum RLS policies recommended:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- `profiles` — `SELECT` and `UPDATE` allowed only when `auth.uid() = id`
+- `xp_log` — `INSERT` allowed only when `auth.uid() = user_id`
+- any game-history table — same scoped-by-owner pattern
 
-## Learn More
+The app gracefully falls back to guest mode if Supabase is unreachable,
+so you can ship without it and wire it in later.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Project layout
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+Little-lies/
+├── public/                  # static assets (GLB models, sounds, og-image)
+├── scripts/                 # dev/ops helpers (OG image generator, etc.)
+├── src/
+│   ├── components/          # React UI components
+│   ├── hooks/               # useGameEngine, useEvents, nightResolution, …
+│   ├── data/                # role definitions
+│   ├── trad/                # i18next namespaces (common, game, menu, …)
+│   └── utils/               # AudioManager, supabase client, metrics
+└── .env.example             # environment variable template
+```
 
-### Code Splitting
+## Notes
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Git conventions** — commit messages in French, format `Topic : details`.
+  `git push` only on explicit request. Never `--no-verify`.
+- **Tests** — 135 at the time of writing (pure logic: game rules, night
+  resolution, phase transitions, role data). Multiplayer flows aren't
+  unit-tested.
