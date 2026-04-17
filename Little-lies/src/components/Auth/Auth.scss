@@ -5,7 +5,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2500;
+  // Must win over drei's <Html> labels (z-index ≈ 16777271) rendered
+  // from in-game Canvas — aligned with Legal.scss.
+  z-index: 2147483000;
   backdrop-filter: blur(6px);
   animation: auth-fade 0.25s ease-out;
 }

@@ -129,7 +129,9 @@ const AuthModal = ({ onClose }) => {
           <button className="close-button" onClick={onClose}>X</button>
         </div>
 
-        {/* OAuth buttons */}
+        {/* OAuth buttons — désactivés tant que les providers Google/Discord ne
+            sont pas configurés dans Supabase (Auth > Providers > Client ID/Secret).
+            Voir aussi les apps à créer côté Google Cloud Console + Discord Dev Portal.
         <div className="auth-oauth">
           <button className="auth-oauth-btn google" onClick={() => handleOAuth('google')}>
             <i className="fab fa-google"></i> Google
@@ -140,6 +142,7 @@ const AuthModal = ({ onClose }) => {
         </div>
 
         <div className="auth-divider"><span>{t('or')}</span></div>
+        */}
 
         {/* Email form */}
         <form onSubmit={handleSubmit} className="auth-form">
