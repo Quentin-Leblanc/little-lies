@@ -131,6 +131,36 @@ const ROLE_DATA = [
     nightImmune: true, detectResult: 'non-suspect', attackLevel: 0, defenseLevel: 1,
     winCondition: 'getTargetLynched',
   },
+  // ============================================================
+  // Cult — inspired by Mafia SC2. The cult is a third evil faction
+  // that wins by conversion rather than killing. Cult members see each
+  // other at night, share a private chat, and vote on who to convert
+  // next (leader breaks ties). Converting one target / night.
+  // ============================================================
+  {
+    key: 'cult_leader', team: 'cult', category: 'cult_evil',
+    couleur: '#7a3d99', icon: 'fa-hat-wizard',
+    actions: [
+      // Leader submits or confirms the convert target each night.
+      // Priority 5 = after frame/blackmail but before investigations,
+      // so the target's team change is reflected in the same night.
+      { type: 'CONVERT', require: ['isNight'], targets: 'notMyTeam', priority: 5 },
+    ],
+    unique: true, nightImmune: false, detectResult: 'suspect',
+    attackLevel: 0, defenseLevel: 0,
+  },
+  {
+    key: 'cult_member', team: 'cult', category: 'cult_evil',
+    couleur: '#a96edd', icon: 'fa-user-tag',
+    // Cult members can also propose a convert target — the leader's vote
+    // breaks ties (see cultVote.js). No solo kill ability; the faction
+    // wins by converting, not by killing.
+    actions: [
+      { type: 'CULT_VOTE', require: ['isNight'], targets: 'notMyTeam', priority: 5 },
+    ],
+    nightImmune: false, detectResult: 'suspect',
+    attackLevel: 0, defenseLevel: 0,
+  },
 ];
 
 /**

@@ -145,5 +145,21 @@
     "description": "You are the Executioner. You have a secret town target that you must get lynched.",
     "objectif": "Your goal: get your target lynched by the town.",
     "actions": {}
+  },
+  "cult_leader": {
+    "label": "Cult Leader",
+    "description": "You lead the Cult. Each night you convert one non-cult player to your cause. Cult members see each other, chat at night, and vote on the next target. Ties break to your leader vote.",
+    "objectif": "Your goal: convert enough villagers so the Cult dominates the game.",
+    "actions": {
+      "CONVERT": { "label": "Convert", "description": "Convert a player to the Cult tonight (Mafia team or immune targets are rejected)" }
+    }
+  },
+  "cult_member": {
+    "label": "Cult Member",
+    "description": "You have been converted to the Cult. You see other members, can chat with them at night, and vote on the next conversion. The Cult Leader breaks ties.",
+    "objectif": "Your goal: help the Cult dominate the game through conversion.",
+    "actions": {
+      "CULT_VOTE": { "label": "Vote", "description": "Propose a target for the next night's conversion" }
+    }
   }
 }
