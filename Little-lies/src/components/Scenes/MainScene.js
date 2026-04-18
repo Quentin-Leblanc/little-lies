@@ -367,31 +367,54 @@ const MainScene = () => {
               all players see the same conditions each day. */}
           {(() => {
             const seed = game.dayCount * 7 + 3;
-            // Day weather: 0=clear, 1=cloudy, 2=misty, 3=rainy, 4=grey/overcast
-            const dayWeather = seed % 5;
+            // Day weather — 3 states only (no more in-between cloudy/grey
+            // that just looked like "always slightly foggy"):
+            //   roll 0        → sunny  (25%)
+            //   roll 1, 2     → misty  (50%)
+            //   roll 3        → rainy+thunder (25%)
+            // Modulo 4 with two mist slots hits the spec distribution while
+            // staying deterministic (same seed → same weather everywhere).
+            const dayRoll = seed % 4;
+            const isSunny = dayRoll === 0;
+            const isRainyDay = dayRoll === 3;
+            const isMisty = !isSunny && !isRainyDay;
             // Night weather: 0=clear, 1=rainy+thunder, 2=foggy
             const nightWeather = (seed * 13 + 5) % 3;
 
             if (game.isDay) {
-              const isCloudy = dayWeather === 1;
-              const isMisty = dayWeather === 2;
-              const isRainyDay = dayWeather === 3;
-              const isGrey = dayWeather === 4;
-              const isDark = isRainyDay || isGrey;
-              const skyColor = isRainyDay ? '#6a7a8a' : isGrey ? '#8090a0' : isCloudy ? '#8a9fb8' : isMisty ? '#909aa8' : '#7ab8d8';
+              // Sky color: warm blue sun, cold slate storm, mid grey mist.
+              const skyColor = isSunny ? '#8fcff0' : isRainyDay ? '#5a6878' : '#909aa8';
               return (
                 <>
                   <color attach="background" args={[skyColor]} />
-                  <fog attach="fog" args={[skyColor, isDark ? 10 : isMisty ? 10 : isCloudy ? 14 : 18, isDark ? 30 : isMisty ? 30 : isCloudy ? 38 : 42]} />
-                  <Sky sunPosition={[100, isDark ? 10 : isCloudy ? 20 : isMisty ? 25 : 50, 100]} turbidity={isDark ? 25 : isCloudy ? 20 : isMisty ? 12 : 8} rayleigh={isDark ? 6 : isCloudy ? 5 : 2} />
-                  <DayFireflies count={isDark ? 10 : isCloudy ? 20 : 50} />
-                  <FloatingDust count={isMisty ? 120 : 80} isDay />
-                  <WindLeaves count={isRainyDay ? 130 : isCloudy || isGrey ? 110 : 90} />
-                  <GroundFog isDay />
-                  <VillageFogWall isDay />
-                  {!isDark && !isCloudy && <DayRabbits count={5} />}
-                  {(isMisty || isDark) && <GroundFog isDay />}
-                  {isRainyDay && <NightRain count={200} />}
+                  {/* Fog only thickens when visibility is actually limited.
+                      Sunny days push the near-plane far out (50) and the
+                      far-plane to 120, so the mountain silhouettes stay
+                      visible instead of dissolving into a grey wall — that
+                      was the main reason every day felt identical. */}
+                  <fog
+                    attach="fog"
+                    args={[
+                      skyColor,
+                      isSunny ? 50 : isRainyDay ? 8 : 12,
+                      isSunny ? 120 : isRainyDay ? 26 : 32,
+                    ]}
+                  />
+                  <Sky
+                    sunPosition={[100, isRainyDay ? 8 : isSunny ? 60 : 22, 100]}
+                    turbidity={isRainyDay ? 26 : isSunny ? 4 : 12}
+                    rayleigh={isRainyDay ? 6 : isSunny ? 1.2 : 3}
+                  />
+                  <DayFireflies count={isRainyDay ? 8 : isSunny ? 70 : 40} />
+                  <FloatingDust count={isMisty ? 140 : isSunny ? 40 : 90} isDay />
+                  <WindLeaves count={isRainyDay ? 140 : isSunny ? 70 : 95} />
+                  {/* Ground + village fog: gated on actually-foggy weather
+                      so sunny afternoons don't carry the same oppressive
+                      low-visibility wall the old build always drew. */}
+                  {(isMisty || isRainyDay) && <GroundFog isDay />}
+                  {(isMisty || isRainyDay) && <VillageFogWall isDay />}
+                  {isSunny && <DayRabbits count={8} />}
+                  {isRainyDay && <NightRain count={220} />}
                   {isRainyDay && <NightLightning />}
                 </>
               );
