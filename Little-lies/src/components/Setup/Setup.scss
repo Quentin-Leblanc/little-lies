@@ -111,6 +111,28 @@
   i { margin-right: 0.176rem; }
 }
 
+/* Hard-block warning — appears when the selected roster has no threat
+   faction (mafia / cult / neutral killer) and the town would win at
+   match start. Impossible to miss: large, red, sits above the start btn. */
+.setup-block-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0.8rem 0 0;
+  padding: 0.7rem 1rem;
+  background: rgba(255, 68, 68, 0.12);
+  border: 1px solid rgba(255, 68, 68, 0.45);
+  border-radius: 0.5rem;
+  color: #ffb3b3;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.35;
+
+  i { color: #ff4444; font-size: 1.1rem; }
+}
+
 @keyframes setup-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }

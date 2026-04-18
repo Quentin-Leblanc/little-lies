@@ -70,6 +70,7 @@
     "conversion_failed_immune": "Impossible de convertir {{name}} — il est immunisé la nuit.",
     "conversion_failed_jailed": "Impossible de convertir {{name}} — il était en prison.",
     "conversion_failed_killed": "Impossible de convertir {{name}} — il est mort cette nuit.",
+    "conversion_failed_disagreement": "Les cultistes n'étaient pas d'accord sur la cible — personne n'a été converti cette nuit.",
     "cult_vote_summary": "Cette nuit, les adeptes ont majoritairement voté pour {{name}} ({{count}}/{{total}})."
   },
   "death_messages": {
@@ -147,8 +148,7 @@
     "FRAME": "Fait paraître un joueur suspect aux enquêteurs",
     "BLACKMAIL": "Empêche un joueur de parler le jour suivant",
     "REVEAL": "Révèle votre rôle de Maire (3 votes, mais plus de soins possibles)",
-    "CONVERT": "Convertit un joueur au Culte cette nuit (Mafia et immunisés rejetés)",
-    "CULT_VOTE": "Propose une cible au Chef de Culte pour la prochaine conversion"
+    "CULT_VOTE": "Vote pour convertir cette cible. Unanimité requise entre cultistes."
   },
   "chat": {
     "placeholder": "Entrez un message...",

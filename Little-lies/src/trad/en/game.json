@@ -70,6 +70,7 @@
     "conversion_failed_immune": "Cannot convert {{name}} — they are night-immune.",
     "conversion_failed_jailed": "Cannot convert {{name}} — they were in jail.",
     "conversion_failed_killed": "Cannot convert {{name}} — they died tonight.",
+    "conversion_failed_disagreement": "Cultists couldn't agree on a target — nobody was converted tonight.",
     "cult_vote_summary": "Tonight the followers mostly voted to convert {{name}} ({{count}}/{{total}})."
   },
   "death_messages": {
@@ -147,8 +148,7 @@
     "FRAME": "Make a player appear suspicious to investigators",
     "BLACKMAIL": "Prevent a player from speaking the next day",
     "REVEAL": "Reveal your Mayor role (3 votes, but no more healing)",
-    "CONVERT": "Convert a player to the Cult tonight (Mafia and immune targets are rejected)",
-    "CULT_VOTE": "Suggest a target to the Cult Leader for the next conversion"
+    "CULT_VOTE": "Vote to convert this target. All cultists must agree."
   },
   "chat": {
     "placeholder": "Type a message...",

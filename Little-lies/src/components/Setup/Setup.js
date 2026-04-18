@@ -74,7 +74,6 @@ const Setup = () => {
 
   const allSlotsFilled = rolesSelected.length === players.length;
   const MIN_PLAYERS = 4;
-  const canStart = allSlotsFilled && players.length >= MIN_PLAYERS;
 
   // Team counter
   const teamCounts = rolesSelected.reduce((acc, role) => {
@@ -88,6 +87,20 @@ const Setup = () => {
   const neutralCount = teamCounts.neutral || 0;
   // Unbalanced if combined evil factions (mafia + cult) reach town count.
   const isUnbalanced = rolesSelected.length > 0 && (mafiaCount + cultCount) >= townCount;
+
+  // Need at least ONE "threat" role — mafia, cult or a neutral killer
+  // (serial killer). Without one, the town's win condition is met at
+  // match start and the game ends immediately. Roles like jester,
+  // survivor or executioner don't count because they win with / alongside
+  // the town, not against it.
+  const hasThreatFaction = rolesSelected.some((r) => (
+    r?.team === 'mafia' ||
+    r?.team === 'cult' ||
+    r?.team === 'evil' ||
+    (r?.team === 'neutral' && r?.category === 'neutral_killing')
+  ));
+  const missingThreat = allSlotsFilled && !hasThreatFaction;
+  const canStart = allSlotsFilled && players.length >= MIN_PLAYERS && hasThreatFaction;
 
   return (
     <div className="setup-screen">
@@ -166,6 +179,15 @@ const Setup = () => {
           )}
         </div>
 
+        {/* Hard block: no threat faction -> town wins at start, so we
+            refuse to launch and tell the host exactly what's missing. */}
+        {missingThreat && (
+          <div className="setup-block-warning">
+            <i className="fas fa-ban"></i>
+            <span>{t('setup:team_counter.no_threat')}</span>
+          </div>
+        )}
+
         {/* Roles dual box — visible to all, interactive for host only */}
         <div className="dualBox">
           <Roles />
@@ -184,6 +206,8 @@ const Setup = () => {
                 ? t('common:roles_assigned', { current: rolesSelected.length, total: players.length })
                 : players.length < MIN_PLAYERS
                 ? t('common:min_players_required', { count: MIN_PLAYERS })
+                : missingThreat
+                ? t('setup:team_counter.no_threat_short')
                 : t('common:start_game')
               }
             </button>

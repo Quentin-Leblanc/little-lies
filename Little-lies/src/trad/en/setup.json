@@ -24,7 +24,9 @@
     "mafia": "Mafia: {{count}}",
     "cult": "Cult: {{count}}",
     "neutral": "Neutral: {{count}}",
-    "unbalanced": "Unbalanced"
+    "unbalanced": "Unbalanced",
+    "no_threat": "You need at least one Mafia, Cult or neutral killer (Serial Killer) role — otherwise the Town wins instantly at match start.",
+    "no_threat_short": "Add a Mafia / Cult / Serial Killer role"
   },
   "unique_role_taken": "Unique role already selected",
   "roles_available": "Available roles",

@@ -6,8 +6,7 @@ import {
   resolveKillAttempts,
   filterResolvableEvents,
   computeExecutionerConversions,
-  resolveConversions,
-  aggregateCultVotes,
+  resolveCultVoteConversion,
 } from './nightResolution';
 
 const EventsContext = React.createContext();
@@ -391,11 +390,13 @@ export const EventsProvider = ({ children }) => {
     });
 
     // === Priority 5: Cult conversion ===
-    // Resolution lives in nightResolution.resolveConversions (pure, unit-tested).
-    // Rules: mafia + night-immune targets blocked, jailed blocked, dead
-    // converter/target blocked, target killed earlier in the pass blocked.
-    const conversionResult = resolveConversions(
-      activeEvents.filter((e) => e.type === 'CONVERT'),
+    // No more leader/member split: every alive cultist submits a CULT_VOTE
+    // and the target is converted ONLY if all votes agree on the same
+    // player. Two cultists voting different targets = no conversion that
+    // night. All the classic immunities (mafia team, nightImmune, jail,
+    // killed-this-night) still apply.
+    const conversionResult = resolveCultVoteConversion(
+      activeEvents.filter((e) => e.type === 'CULT_VOTE'),
       {
         players,
         jailedPlayers,
@@ -409,12 +410,18 @@ export const EventsProvider = ({ children }) => {
       const target = players.find((p) => p.id === targetId);
       const targetName = target?.profile?.name;
       addNotif(targetId, i18n.t('game:notifications.converted_to_cult'), 'converted');
-      addNotif(by, i18n.t('game:notifications.conversion_success', { name: targetName }));
-      // Broadcast to other living cult members (exclude converter + new member)
+      // Broadcast to every living cultist (they all collectively converted
+      // the new member — no "solo converter" to credit anymore).
       players.forEach((p) => {
-        if (p.isAlive && p.id !== by && p.id !== targetId && p.character?.team === 'cult') {
-          addNotif(p.id, i18n.t('game:notifications.cult_new_member', { name: targetName }));
-        }
+        if (!p.isAlive || p.id === targetId) return;
+        if (p.character?.team !== 'cult') return;
+        const isVoter = p.id === by;
+        addNotif(
+          p.id,
+          isVoter
+            ? i18n.t('game:notifications.conversion_success', { name: targetName })
+            : i18n.t('game:notifications.cult_new_member', { name: targetName }),
+        );
       });
     });
 
@@ -426,38 +433,12 @@ export const EventsProvider = ({ children }) => {
         night_immune: 'conversion_failed_immune',
         target_jailed: 'conversion_failed_jailed',
         target_killed: 'conversion_failed_killed',
+        cult_disagreement: 'conversion_failed_disagreement',
       }[f.reason];
       if (key && f.by) {
         addNotif(f.by, i18n.t(`game:notifications.${key}`, { name }));
       }
     });
-
-    // === Priority 5b: Advisory Cult vote summary to the leader ===
-    // CULT_VOTE events are consumed here — they do NOT enforce anything,
-    // they just inform the leader (in the morning) what members voted for
-    // during the night. The leader still chooses CONVERT manually; this
-    // summary lets them align with members over successive nights.
-    const cultLeader = players.find(
-      (p) => p.isAlive && p.character?.key === 'cult_leader'
-    );
-    if (cultLeader) {
-      const { tally, top } = aggregateCultVotes(
-        activeEvents.filter((e) => e.type === 'CULT_VOTE'),
-        players
-      );
-      const voteCount = Object.values(tally).reduce((a, b) => a + b, 0);
-      if (voteCount > 0 && top) {
-        const topName = players.find((p) => p.id === top)?.profile?.name;
-        addNotif(
-          cultLeader.id,
-          i18n.t('game:notifications.cult_vote_summary', {
-            name: topName,
-            count: tally[top],
-            total: voteCount,
-          })
-        );
-      }
-    }
 
     // === Priority 6: Investigations (skip if roleblocked or target dead) ===
     activeEvents
@@ -522,7 +503,7 @@ export const EventsProvider = ({ children }) => {
 
     // === SINGLE ATOMIC setPlayers: kills + blackmail + Executioner→Jester + cult conversion ===
     const jesterRole = getRole('jester');
-    const cultMemberRole = getRole('cult_member');
+    const cultistRole = getRole('cultist');
     // Pure function decides which Executioners flip — see nightResolution.js.
     const executionerFlips = computeExecutionerConversions(players, new Set(killedIds));
 
@@ -540,8 +521,8 @@ export const EventsProvider = ({ children }) => {
         }
         // Conversion overrides executioner flip (target was alive at kill
         // resolution, so the exec flip wouldn't have fired anyway).
-        if (convertedMap[p.id] && cultMemberRole) {
-          updated.character = cultMemberRole;
+        if (convertedMap[p.id] && cultistRole) {
+          updated.character = cultistRole;
         }
         return updated;
       })

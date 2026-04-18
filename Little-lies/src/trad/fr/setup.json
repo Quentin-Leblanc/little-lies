@@ -24,7 +24,9 @@
     "mafia": "Mafia: {{count}}",
     "cult": "Culte: {{count}}",
     "neutral": "Neutre: {{count}}",
-    "unbalanced": "Déséquilibré"
+    "unbalanced": "Déséquilibré",
+    "no_threat": "Il faut obligatoirement un rôle Mafia, Culte ou Neutre tueur (Serial Killer) dans la partie — sinon le Village gagne au lancement.",
+    "no_threat_short": "Ajoute un rôle Mafia / Culte / Serial Killer"
   },
   "unique_role_taken": "Rôle unique déjà sélectionné",
   "roles_available": "Rôles disponibles",

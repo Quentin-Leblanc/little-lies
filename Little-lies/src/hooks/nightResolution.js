@@ -195,14 +195,105 @@ export function resolveConversions(conversionEvents, context) {
 }
 
 /**
- * Aggregate CULT_VOTE events into a ranked list of preferred conversion
- * targets. Pure / advisory only — the leader still chooses the final
- * CONVERT target manually, but receives a notification telling them what
- * the members voted for.
+ * Resolve cult conversion from unanimous CULT_VOTE votes.
  *
- * Ties are broken by first-encountered order (defensive — caller can
- * display all tied targets if desired). Dead voters and dead targets
- * are silently dropped.
+ * New rules (no more leader):
+ *  - Every alive cultist votes. Their votes carry equal weight.
+ *  - Conversion lands ONLY if every submitted vote points to the same
+ *    target (unanimous among those who voted). If any cultist votes for
+ *    a different target, no one is converted that night.
+ *  - Cultists who don't vote count as abstentions — they don't block the
+ *    other cultists' agreement but they don't force a conversion either
+ *    (at least one vote is still required).
+ *  - All the same immunities as before: mafia team, nightImmune,
+ *    jailed / killed-this-night target, converter jailed/roleblocked.
+ *
+ * Returns the same `{ convertedIds, failures }` shape as the legacy
+ * resolveConversions so the caller UI can keep reading it.
+ *
+ * @param {Array} voteEvents — events, filtered to CULT_VOTE by this fn
+ * @param {Object} context  — same shape as resolveConversions
+ */
+export function resolveCultVoteConversion(voteEvents, context) {
+  const {
+    players,
+    jailedPlayers = {},
+    roleblockedPlayers = {},
+    killedThisNight,
+  } = context;
+  const byId = new Map((players || []).map((p) => [p.id, p]));
+  const killedSet = killedThisNight instanceof Set
+    ? killedThisNight
+    : new Set(killedThisNight || []);
+  const convertedIds = {};
+  const failures = [];
+
+  // Keep only live cultist voters whose vote can actually count.
+  const valid = (voteEvents || [])
+    .filter((e) => e?.type === 'CULT_VOTE')
+    .map((e) => ({ e, voter: byId.get(e.content?.by), target: byId.get(e.content?.target) }))
+    .filter(({ voter }) => voter?.isAlive && !killedSet.has(voter.id));
+
+  if (valid.length === 0) return { convertedIds, failures };
+
+  // Disagreement check — all votes must land on the same target id.
+  const targetIds = new Set(valid.map(({ target }) => target?.id).filter(Boolean));
+  if (targetIds.size !== 1) {
+    valid.forEach(({ voter }) => {
+      failures.push({ by: voter.id, reason: 'cult_disagreement' });
+    });
+    return { convertedIds, failures };
+  }
+
+  const targetId = [...targetIds][0];
+  const target = byId.get(targetId);
+
+  // Pick any one voter as the "converter" for notification attribution —
+  // the target's new team doesn't care who flipped them, but the cult
+  // chat messages need a `by` to address.
+  const converter = valid[0].voter;
+
+  if (!target?.isAlive) {
+    failures.push({ by: converter.id, reason: 'target_dead' });
+    return { convertedIds, failures };
+  }
+  if (killedSet.has(target.id)) {
+    failures.push({ by: converter.id, reason: 'target_killed', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (target.character?.team === 'cult') {
+    failures.push({ by: converter.id, reason: 'already_cult', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (target.character?.team === 'mafia') {
+    failures.push({ by: converter.id, reason: 'mafia_immune', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (target.character?.nightImmune) {
+    failures.push({ by: converter.id, reason: 'night_immune', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  if (jailedPlayers[target.id]) {
+    failures.push({ by: converter.id, reason: 'target_jailed', targetId: target.id });
+    return { convertedIds, failures };
+  }
+  // If every cultist who voted is somehow blocked (jail + roleblock), no
+  // conversion. We only need at least one usable voter; if the chosen
+  // "converter" happens to be blocked, pick the next one.
+  const freeVoter = valid.find(({ voter }) => !jailedPlayers[voter.id] && !roleblockedPlayers[voter.id]);
+  if (!freeVoter) {
+    failures.push({ by: converter.id, reason: 'self_blocked' });
+    return { convertedIds, failures };
+  }
+
+  convertedIds[target.id] = { by: freeVoter.voter.id };
+  return { convertedIds, failures };
+}
+
+/**
+ * Aggregate CULT_VOTE events into a ranked list of preferred conversion
+ * targets. Kept for backwards compatibility with callers that want to
+ * display a tally (e.g. the nightly summary in the cult chat).
  *
  * @param {Array} voteEvents — events (filters for type=='CULT_VOTE')
  * @param {Array} players

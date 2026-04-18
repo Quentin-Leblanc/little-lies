@@ -146,20 +146,12 @@
     "objectif": "Ton objectif : faire lyncher ta cible par le village.",
     "actions": {}
   },
-  "cult_leader": {
-    "label": "Chef de Culte",
-    "description": "Tu diriges le Culte. Chaque nuit, tu convertis un joueur non-cult à ta cause. Les membres du Culte se voient, discutent entre eux la nuit, et votent sur la prochaine cible. En cas d'égalité, ton vote de leader tranche.",
+  "cultist": {
+    "label": "Cultiste",
+    "description": "Tu fais partie du Culte. Tu vois les autres cultistes et tu discutes avec eux la nuit. Chaque cultiste vote pour une cible à convertir : la conversion n'a lieu que si tous les cultistes votent la même personne. Si les votes divergent, personne n'est converti cette nuit.",
     "objectif": "Ton objectif : convertir suffisamment de villageois pour que le Culte domine la partie.",
     "actions": {
-      "CONVERT": { "label": "Convertir", "description": "Convertit un joueur au Culte cette nuit (sauf les rôles d'équipe Mafia ou immunisés)" }
-    }
-  },
-  "cult_member": {
-    "label": "Adepte du Culte",
-    "description": "Tu as été converti au Culte. Tu vois les autres membres, tu peux leur parler la nuit et voter sur la prochaine conversion. En cas d'égalité, c'est le Chef de Culte qui tranche.",
-    "objectif": "Ton objectif : aider le Culte à dominer la partie par la conversion.",
-    "actions": {
-      "CULT_VOTE": { "label": "Voter", "description": "Propose une cible pour la conversion de la nuit prochaine" }
+      "CULT_VOTE": { "label": "Convertir", "description": "Vote pour convertir cette cible cette nuit. La conversion n'a lieu que si tous les cultistes votent la même cible." }
     }
   }
 }
