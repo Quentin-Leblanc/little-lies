@@ -22,6 +22,7 @@ import './CustomLobby.scss';
 
 const GRADIENT_UNLOCK_LEVEL = 6;
 const GRADIENT_STORAGE_KEY = 'amongliars_gradient';
+const MANUAL_COLOR_STORAGE_KEY = 'amongliars_manual_color';
 
 // Gradient-equality check used to mark the active palette swatch.
 const gradientMatches = (a, b) => (
@@ -37,6 +38,20 @@ const saveGradient = (grad) => {
 };
 const loadGradient = () => {
   try { return JSON.parse(localStorage.getItem(GRADIENT_STORAGE_KEY)); } catch { return null; }
+};
+
+// Manual solid-color pick. Persisted so the slot-index auto-assign below
+// doesn't clobber a deliberate choice the next time the player list
+// reshuffles (e.g. another player joins/leaves and the sorted index
+// mapping produces a different slot).
+const saveManualColor = (color) => {
+  try {
+    if (color) localStorage.setItem(MANUAL_COLOR_STORAGE_KEY, color);
+    else localStorage.removeItem(MANUAL_COLOR_STORAGE_KEY);
+  } catch {}
+};
+const loadManualColor = () => {
+  try { return localStorage.getItem(MANUAL_COLOR_STORAGE_KEY); } catch { return null; }
 };
 
 // Get CSS color string from a color value (supports both solid and gradient)
@@ -570,51 +585,48 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     }
   }, []);
 
-  // Assign / re-assign a unique color.
+  // Auto-assign a unique color on lobby mount / roster change.
   //
-  // Runs on every playroom_players change (not just once) so that if our
-  // local state wasn't yet synced with other players at mount time, we still
-  // correct our color once we see them.
+  // Strategy: deterministic slot-index mapping. Sort the player list by
+  // id (every client agrees on the order), locate our own index, and map
+  // that to PLAYER_COLORS[index]. Since every client computes the same
+  // index→color map from the same sorted ids, two clients can never pick
+  // the same slot simultaneously — no race, no "first free" stale read.
   //
-  // Conflict rule: sort players deterministically by id (all clients agree
-  // on the same order), and the player with the HIGHER sorted index yields.
-  // Earlier players keep their color, later players pick a free one.
+  // Tradeoff: if someone leaves mid-lobby, everyone after them slides one
+  // slot and sees their color shift. Acceptable for short pre-game lobbies
+  // and a far lesser evil than two players spawning in the same color.
+  //
+  // Manual picks win: if the user clicked a swatch (persisted in
+  // localStorage), we respect it unchanged. Saved gradients likewise.
   useEffect(() => {
     if (!currentPlayer || useGradient) return;
-    // Respect saved gradient preference (palette or custom — levels don't
-    // decrease so any saved entry is still a legitimate pick).
-    const saved = loadGradient();
-    if (saved) return;
+    if (loadGradient()) return; // saved gradient preference
 
-    // Deterministic ordering shared across clients
+    const myColor = currentPlayer.getState?.()?.profile?.color;
+
+    // Honor a manual solid pick — skip auto-assign entirely. The color
+    // must still be a valid PLAYER_COLORS entry; a stale value from an
+    // older build gets discarded so we don't end up locked on a color
+    // that no longer exists in the palette.
+    const manual = loadManualColor();
+    if (manual && PLAYER_COLORS.includes(manual)) {
+      if (myColor !== manual) {
+        setSelectedColor(manual);
+        currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: manual });
+      }
+      return;
+    }
+
     const sorted = [...playroom_players].sort((a, b) => (a.id < b.id ? -1 : 1));
     const myIndex = sorted.findIndex(p => p.id === currentPlayer.id);
     if (myIndex === -1) return;
 
-    const myColor = currentPlayer.getState?.()?.profile?.color;
-    const hasValidSolid = typeof myColor === 'string' && PLAYER_COLORS.includes(myColor);
+    const slotColor = PLAYER_COLORS[myIndex % PLAYER_COLORS.length];
+    if (myColor === slotColor) return;
 
-    // Do we collide with a player that sorts BEFORE us? If yes we yield.
-    const earlierConflict = hasValidSolid && sorted.some((p, i) => {
-      if (i >= myIndex) return false;
-      const c = p.getState?.()?.profile?.color;
-      return typeof c === 'string' && c === myColor;
-    });
-
-    if (hasValidSolid && !earlierConflict) return; // nothing to do
-
-    // Pick the first color not taken by anyone else
-    const takenByOthers = new Set(
-      sorted
-        .filter(p => p.id !== currentPlayer.id)
-        .map(p => p.getState?.()?.profile?.color)
-        .filter(c => typeof c === 'string')
-    );
-    const freeColor = PLAYER_COLORS.find(c => !takenByOthers.has(c));
-    if (!freeColor || freeColor === myColor) return;
-
-    setSelectedColor(freeColor);
-    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: freeColor });
+    setSelectedColor(slotColor);
+    currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: slotColor });
   }, [currentPlayer, playroom_players, useGradient, canUseGradient]);
 
   // Sync Supabase username
@@ -646,6 +658,9 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const handleColorChange = (color) => {
     setSelectedColor(color);
     setUseGradient(false);
+    // Persist so the slot-index auto-assign below doesn't overwrite this
+    // deliberate pick the next time the player list re-sorts.
+    saveManualColor(color);
     currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color });
   };
 
@@ -659,6 +674,10 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     setGradColor1(c1);
     setGradColor2(c2);
     saveGradient({ color1: c1, color2: c2 });
+    // Switching to a gradient clears any old solid pick — otherwise
+    // removing the gradient later would snap back to that stale solid
+    // instead of the slot-based auto-assign.
+    saveManualColor(null);
     currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: grad });
   };
 

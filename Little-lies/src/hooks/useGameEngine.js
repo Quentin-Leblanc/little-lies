@@ -227,38 +227,72 @@ export const GameEngineProvider = ({ children }) => {
     setTrial,
   };
 
-  // Sync playroom players into game state (only before game starts)
-  // Assigns a unique color from PLAYER_COLORS to each player
+  // Sync playroom players into shared game state (only before the game
+  // has actually started — mid-game joiners go through the spectator
+  // effect below). Host-authoritative: only one client runs this, which
+  // eliminates the last-writer-wins race that used to let two clients
+  // assign the same color to different players when writes landed out
+  // of order. Additionally detects duplicate solid colors that may have
+  // slipped through from the lobby and reassigns the higher-id player
+  // to the next free slot so the in-game roster is always distinct.
   useEffect(() => {
-    if (playroom_players.length > 0 && !game.isGameStarted) {
-      setPlayers((prevPlayers) => {
-        const usedColors = new Set();
-        // First pass: collect colors already assigned to existing players that are still connected
-        const connectedIds = new Set(playroom_players.map((p) => p.id));
-        prevPlayers.forEach((p) => {
-          if (connectedIds.has(p.id) && p.profile?.color) {
-            usedColors.add(p.profile.color);
-          }
-        });
+    if (!isHost()) return;
+    if (playroom_players.length === 0 || game.isGameStarted) return;
+    setPlayers((prevPlayers) => {
+      const connectedIds = new Set(playroom_players.map((p) => p.id));
+      const existingById = new Map(prevPlayers.map((p) => [p.id, p]));
 
-        return playroom_players.map((playroom_player) => {
-          const existingPlayer = prevPlayers.find((p) => p.id === playroom_player.id);
-          if (existingPlayer) return existingPlayer;
+      // Iterate in sorted-id order so the dedup pass is deterministic
+      // (earlier id keeps, later id yields) across host re-runs.
+      const sortedIds = [...connectedIds].sort((a, b) => (a < b ? -1 : 1));
+      const usedSolids = new Set();
+      const assigned = new Map(); // id → resolved color
 
-          // Assign next available color
-          const color = PLAYER_COLORS.find((c) => !usedColors.has(c)) || '#888';
-          usedColors.add(color);
-          return {
-            id: playroom_player.id,
-            profile: {
-              ...playroom_player.getState().profile,
-              name: playroom_player.getState().profile.name || 'Unnamed Player',
-              color,
-            },
-          };
-        });
+      for (const id of sortedIds) {
+        const fromExisting = existingById.get(id)?.profile?.color;
+        const fromPlayroom = playroom_players.find((p) => p.id === id)
+          ?.getState?.()?.profile?.color;
+        const candidate = fromExisting ?? fromPlayroom;
+
+        // Gradients are cosmetic and allowed to repeat (two cultists can
+        // both rock the same palette). Skip the dedup pass for them.
+        if (candidate && typeof candidate === 'object') {
+          assigned.set(id, candidate);
+          continue;
+        }
+
+        const isValidSolid =
+          typeof candidate === 'string' && PLAYER_COLORS.includes(candidate);
+        if (isValidSolid && !usedSolids.has(candidate)) {
+          usedSolids.add(candidate);
+          assigned.set(id, candidate);
+        } else {
+          // Invalid, missing, or duplicate → pick first free slot.
+          const free = PLAYER_COLORS.find((c) => !usedSolids.has(c)) || '#888';
+          usedSolids.add(free);
+          assigned.set(id, free);
+        }
+      }
+
+      return playroom_players.map((playroom_player) => {
+        const existing = existingById.get(playroom_player.id);
+        const color = assigned.get(playroom_player.id);
+        if (existing) {
+          // No color change → keep the reference so React bails on the
+          // row. Color drift (dedup kicked in) → patched profile only.
+          if (existing.profile?.color === color) return existing;
+          return { ...existing, profile: { ...existing.profile, color } };
+        }
+        return {
+          id: playroom_player.id,
+          profile: {
+            ...playroom_player.getState().profile,
+            name: playroom_player.getState().profile.name || 'Unnamed Player',
+            color,
+          },
+        };
       });
-    }
+    });
   }, [playroom_players]);
 
   // Mid-game joiners: add them as spectators (isSpectator=true, isAlive=false).
