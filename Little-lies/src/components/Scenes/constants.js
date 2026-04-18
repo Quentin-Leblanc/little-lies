@@ -67,7 +67,7 @@ export const CAMERA_OBSTACLES = [
 export const WALK_OBSTACLES = [
   { x: 5.5, z: 3,    radius: 1.2 }, // bulletin board (MESHY_BOARD)
   { x: -5.5, z: -4,  radius: 1.1 }, // skull sign (MESHY_SKULL)
-  { x: -9, z: 5,     radius: 1.4 }, // rope ring (MESHY_RING)
+  { x: 5, z: -10,    radius: 1.4 }, // rope ring (MESHY_RING)
   { x: 7, z: -6,     radius: 1.3 }, // podium (MESHY_PODIUM)
   { x: 0, z: 0,      radius: 1.6 }, // gallows
 ];

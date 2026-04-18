@@ -421,23 +421,39 @@ const MainScene = () => {
             } else {
               const isRainy = nightWeather === 1;
               const isFoggy = nightWeather === 2;
+              // Night fog pass. The previous config stacked <fog> + always-
+              // on GroundFog + always-on NightDarkFog, and then doubled
+              // GroundFog + NightDarkFog again on foggy nights — result
+              // was that the plaza floor disappeared on ~every night.
+              // Now: only clear nights show a very light atmospheric fog;
+              // foggy/rainy nights still get the thick layer but without
+              // the double render. Near/far pushed out so the ground stays
+              // visible from the orbit camera (which sits ~14m up).
               return (
                 <>
                   <color attach="background" args={['#060818']} />
-                  <fog attach="fog" args={['#060818', isRainy ? 8 : isFoggy ? 8 : 12, isRainy ? 26 : isFoggy ? 28 : 34]} />
+                  <fog
+                    attach="fog"
+                    args={[
+                      '#060818',
+                      isRainy ? 14 : isFoggy ? 12 : 22,
+                      isRainy ? 36 : isFoggy ? 38 : 60,
+                    ]}
+                  />
                   <Stars radius={80} depth={50} count={isRainy ? 500 : 3000} factor={4} saturation={0} fade speed={1} />
                   <Moon />
                   <Fireflies count={isRainy ? 15 : 60} />
                   <FloatingDust count={60} isDay={false} />
                   <NightEmbers count={isRainy ? 30 : isFoggy ? 50 : 70} />
-                  <GroundFog isDay={false} />
+                  {/* Ground-level fog reserved for weather that actually
+                      justifies it — clear nights get starlight + a clean
+                      ground. */}
+                  {(isFoggy || isRainy) && <GroundFog isDay={false} />}
                   <VillageFogWall isDay={false} />
                   <NightCrows count={4} />
-                  <NightDarkFog count={isFoggy ? 30 : 20} />
+                  <NightDarkFog count={isFoggy ? 24 : isRainy ? 14 : 8} />
                   {isRainy && <NightRain count={300} />}
                   {isRainy && <NightLightning />}
-                  {isFoggy && <GroundFog isDay={false} />}
-                  {isFoggy && <NightDarkFog count={15} />}
                 </>
               );
             }

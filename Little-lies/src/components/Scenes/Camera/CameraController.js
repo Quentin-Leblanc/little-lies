@@ -105,13 +105,19 @@ const CameraController = ({ phase, CONSTANTS }) => {
       // Use accumulated delta (not Date.now) so the orbit pauses cleanly
       // when the tab is hidden rather than snapping forward when it comes
       // back — matches what everyone else is seeing if they're also active.
+      //
+      // Full 360° loop: orbitAngle is a strictly-increasing scalar, and
+      // sin/cos wrap naturally through 2π — no clamp, no flip, no reset.
+      // Pulled the camera ~15% closer (12→10 radius, 14→11.8 height) and
+      // raised the look target to torso height so players stay framed
+      // instead of dissolving into a ground-level dot from above.
       dayOrbitTimeRef.current += delta;
       const orbitAngle = dayOrbitTimeRef.current * 0.008;
-      const orbitRadius = 12;
+      const orbitRadius = 10;
       const orbitX = Math.sin(orbitAngle) * orbitRadius;
       const orbitZ = Math.cos(orbitAngle) * orbitRadius;
-      targetPos.current.set(orbitX, 14, orbitZ);
-      targetLookAt.current.set(0, 0, 0);
+      targetPos.current.set(orbitX, 11.8, orbitZ);
+      targetLookAt.current.set(0, 0.6, 0);
     }
 
     if (!isTrialCamera) {
