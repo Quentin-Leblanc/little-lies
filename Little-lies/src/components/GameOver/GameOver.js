@@ -420,7 +420,7 @@ const GameOver = () => {
 
             <div className="go-feedback-row">
               <button className="go-btn go-btn-feedback" onClick={() => setSurveyOpen(true)}>
-                <i className="fas fa-comment-dots"></i> {t('menu:survey.open_button', { defaultValue: 'Donner mon avis' })}
+                <i className="fas fa-comment-dots"></i> {t('menu:survey.open_button')}
               </button>
             </div>
 
