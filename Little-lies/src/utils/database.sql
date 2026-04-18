@@ -4,9 +4,13 @@
 -- ============================================================
 
 -- 1. Profiles table (auto-created on signup via trigger)
+-- NOTE: `username` is a display name only — it is NOT unique. Users are
+-- identified by `id` (UUID). Two accounts can share a display name, just
+-- like two guests can type the same pseudo in the lobby; the game has no
+-- lookup path that depends on username uniqueness.
 create table if not exists public.profiles (
   id uuid references auth.users on delete cascade primary key,
-  username text unique,
+  username text,
   xp integer default 0,
   level integer default 1,
   games_played integer default 0,
@@ -14,6 +18,10 @@ create table if not exists public.profiles (
   created_at timestamptz default now(),
   is_admin boolean default false
 );
+
+-- Drop the legacy UNIQUE constraint if it still exists on a live DB.
+-- Safe to re-run; no-op after first execution.
+alter table public.profiles drop constraint if exists profiles_username_key;
 
 -- 2. Game history
 create table if not exists public.game_history (
