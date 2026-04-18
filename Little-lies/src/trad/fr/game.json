@@ -24,7 +24,7 @@
   "day_label": "Jour {{count}}",
   "night_label": "Nuit {{count}}",
   "system": {
-    "game_start": "Début de la partie — Bonne chance à tous.",
+    "game_start": "Début de la partie — Bonne chance à tous. (/skip pour passer le jour)",
     "day_separator": "--- Jour {{day}} ---",
     "peaceful_night": "La nuit a été calme. Personne n'est mort.",
     "judgment_guilty": "Coupable ! ({{guilty}} vs {{innocent}})",

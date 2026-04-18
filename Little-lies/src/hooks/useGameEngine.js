@@ -633,13 +633,25 @@ export const GameEngineProvider = ({ children }) => {
   };
 
   // --- Skip day vote ---
+  // Per-player flag pattern: each client writes ONLY to its own playroom
+  // state (`wantsSkip`), which is race-free by construction — no more
+  // last-writer-wins on a shared `game.skipVotes` array where parallel
+  // /skip commands would overwrite each other and every vote showed up
+  // as 1/N. Value stored = the phase the vote was cast in, so votes
+  // auto-expire on phase transition (no host-side reset needed).
   const voteSkip = (playerId) => {
-    const currentSkips = game.skipVotes || [];
-    if (currentSkips.includes(playerId)) return { success: false };
-    const newSkips = [...currentSkips, playerId];
+    const self = me();
+    if (!self || self.id !== playerId) return { success: false };
+    const currentPhase = game.phase;
+    const already = self.getState?.('wantsSkip') === currentPhase;
+    if (already) return { success: false };
+    self.setState('wantsSkip', currentPhase);
+    // Count self in immediately — playroom_players hasn't propagated yet.
+    const otherSkips = playroom_players.filter(
+      (pp) => pp.id !== self.id && pp.getState?.('wantsSkip') === currentPhase
+    ).length;
     const aliveCount = players.filter((p) => p.isAlive).length;
-    setGame({ ...game, skipVotes: newSkips });
-    return { success: true, count: newSkips.length, total: aliveCount };
+    return { success: true, count: otherSkips + 1, total: aliveCount };
   };
 
   // --- Helper to get phase timer ---
@@ -848,13 +860,20 @@ export const GameEngineProvider = ({ children }) => {
   }, [readyPlayers.length, game.waitingForPlayers, game.isGameStarted]);
 
   // --- Skip day majority check (host only) ---
-  const skipVoteCount = (game.skipVotes || []).length;
+  // Counts from per-player `wantsSkip` state (see voteSkip above) scoped
+  // to the current phase — stale votes from an earlier phase are ignored
+  // automatically without a reset step. Host triggers NIGHT_TRANSITION
+  // as soon as the count passes (alive/2 + 1).
+  const aliveIds = players.filter((p) => p.isAlive).map((p) => p.id);
+  const skipVoteCount = playroom_players.filter((pp) =>
+    aliveIds.includes(pp.id) && pp.getState?.('wantsSkip') === game.phase
+  ).length;
   useEffect(() => {
     if (!isHost() || !game.isGameStarted || game.status === STATUS.ENDED) return;
     if (!game.isDay || (game.phase !== PHASE.DISCUSSION && game.phase !== PHASE.VOTING)) return;
     if (skipVoteCount === 0) return;
 
-    const aliveCount = players.filter((p) => p.isAlive).length;
+    const aliveCount = aliveIds.length;
     if (aliveCount === 0) return;
     const majority = Math.floor(aliveCount / 2) + 1;
 
