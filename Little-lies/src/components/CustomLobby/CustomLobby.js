@@ -189,29 +189,69 @@ const CampGround = () => {
   );
 };
 
-// Dark trees in background
+// Dark trees in background — low-poly firs (stacked cones + squat trunk)
+// instead of the old stick+single-cone shapes that read as lollipops on
+// the horizon. Each tree has its own height, rotation, foliage radius,
+// and slight gap ratios so the ring around the camp doesn't feel uniform.
 const BackgroundTrees = () => {
   const trees = useMemo(() =>
     Array.from({ length: 20 }, (_, i) => {
-      const angle = (i / 20) * Math.PI * 2;
+      const angle = (i / 20) * Math.PI * 2 + (Math.random() - 0.5) * 0.15;
       const r = 8 + Math.random() * 7;
-      return { x: Math.cos(angle) * r, z: Math.sin(angle) * r, h: 2 + Math.random() * 2, r: angle };
+      return {
+        x: Math.cos(angle) * r,
+        z: Math.sin(angle) * r,
+        h: 2.2 + Math.random() * 2.2,          // total height
+        rot: Math.random() * Math.PI * 2,       // yaw so cone facets vary
+        foliage: 0.78 + Math.random() * 0.3,    // base-cone radius
+        trunkCol: Math.random() < 0.5 ? '#2a1a0a' : '#32200c',
+        greenShift: Math.random() * 0.15,       // subtle color variance
+      };
     }), []);
 
   return (
     <group>
-      {trees.map((tree, i) => (
-        <group key={i} position={[tree.x, 0, tree.z]}>
-          <mesh position={[0, tree.h * 0.4, 0]} castShadow>
-            <cylinderGeometry args={[0.08, 0.12, tree.h * 0.8, 5]} />
-            <meshStandardMaterial color="#1a1008" />
-          </mesh>
-          <mesh position={[0, tree.h * 0.8, 0]}>
-            <coneGeometry args={[0.8 + Math.random() * 0.4, tree.h * 0.7, 6]} />
-            <meshStandardMaterial color="#0a1a0a" />
-          </mesh>
-        </group>
-      ))}
+      {trees.map((tree, i) => {
+        const trunkH = tree.h * 0.28;
+        // 3 stacked cones — wider base, narrower middle, thin tip.
+        const c1H = tree.h * 0.55; const c1R = tree.foliage;
+        const c2H = tree.h * 0.42; const c2R = tree.foliage * 0.78;
+        const c3H = tree.h * 0.30; const c3R = tree.foliage * 0.48;
+        const c1Y = trunkH + c1H * 0.5 - 0.05;
+        const c2Y = trunkH + c1H * 0.85;
+        const c3Y = trunkH + c1H * 0.85 + c2H * 0.75;
+        // Deep dark-greens for the firs — 3 tones that get incrementally
+        // lighter toward the tip so the silhouette reads as depthful.
+        // Variance per tree is just a yaw/scale/position perturbation,
+        // the color palette stays curated.
+        const foliageBase = tree.greenShift > 0.08 ? '#0f2010' : '#0b1a0a';
+        const foliageMid  = tree.greenShift > 0.08 ? '#0d1c0e' : '#091708';
+        const foliageTop  = tree.greenShift > 0.08 ? '#0a1a0c' : '#071306';
+        return (
+          <group key={i} position={[tree.x, 0, tree.z]} rotation={[0, tree.rot, 0]}>
+            {/* Trunk — squat and slightly tapered */}
+            <mesh position={[0, trunkH * 0.5, 0]} castShadow>
+              <cylinderGeometry args={[0.14, 0.22, trunkH, 6]} />
+              <meshStandardMaterial color={tree.trunkCol} roughness={0.95} />
+            </mesh>
+            {/* Base foliage — widest cone */}
+            <mesh position={[0, c1Y, 0]} castShadow>
+              <coneGeometry args={[c1R, c1H, 7]} />
+              <meshStandardMaterial color={foliageBase} roughness={0.9} />
+            </mesh>
+            {/* Middle foliage */}
+            <mesh position={[0, c2Y, 0]} castShadow>
+              <coneGeometry args={[c2R, c2H, 7]} />
+              <meshStandardMaterial color={foliageMid} roughness={0.9} />
+            </mesh>
+            {/* Tip — thin pointy cap */}
+            <mesh position={[0, c3Y, 0]} castShadow>
+              <coneGeometry args={[c3R, c3H, 6]} />
+              <meshStandardMaterial color={foliageTop} roughness={0.9} />
+            </mesh>
+          </group>
+        );
+      })}
     </group>
   );
 };
