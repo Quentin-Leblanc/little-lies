@@ -69,6 +69,7 @@ const GameOver = () => {
   const [showRecap, setShowRecap] = useState(false);
   const [xpGained, setXpGained] = useState(null);
   const metricsSaved = useRef(false);
+  const xpSaved = useRef(false);
   const winner = game.winner;
   const players = getPlayers();
   const mePlayer = getMe();
@@ -82,11 +83,10 @@ const GameOver = () => {
   const isNeutralWinner = neutralWinners.some((nw) => nw.id === mePlayer?.id);
   const isWinner = isTeamWinner || isNeutralWinner;
 
-  // Save metrics + XP once players have loaded. Previously the effect used
-  // `[]` deps, which meant if the first render hit with players.length===0
-  // (very common — playroom state lags the phase flip by a tick) the XP
-  // was never saved. Now we also watch players.length so it fires as soon
-  // as the roster shows up.
+  // Save metrics once players have loaded. Was `[]` deps before, which
+  // meant if the first render hit with players.length===0 (very common —
+  // playroom state lags the phase flip by a tick) nothing saved. Watching
+  // players.length makes it fire as soon as the roster shows up.
   useEffect(() => {
     if (metricsSaved.current || players.length === 0) return;
     metricsSaved.current = true;
@@ -100,15 +100,32 @@ const GameOver = () => {
       isAlive: mePlayer?.isAlive,
     });
     setXpGained(xpResult);
-
-    if (user) {
-      const totalXP = xpResult.total;
-      addXP(user.id, totalXP, xpResult.gains.map(g => g.reason).join(', ')).then(async () => {
-        await incrementGamesPlayed(user.id, isWinner || isNeutralWinner);
-        await refreshProfile();
-      }).catch(() => { /* guest / offline fallthrough */ });
-    }
   }, [players.length]);
+
+  // Persist XP to Supabase separately — this effect waits for BOTH the
+  // computed xpResult AND a logged-in user. Splitting it off from the
+  // metrics save protects against a race where the user's auth session
+  // loads a beat after the player roster does: in the old flow that was
+  // fatal because metricsSaved.current flipped to true on the first run,
+  // the `if (user)` branch was skipped, and the effect never re-fired.
+  // Now each piece has its own ref guard, so either side arriving late
+  // still triggers the save.
+  useEffect(() => {
+    if (xpSaved.current) return;
+    if (!xpGained || !user) return;
+    xpSaved.current = true;
+    const reasonLabel = xpGained.gains.map(g => g.reason).join(', ');
+    addXP(user.id, xpGained.total, reasonLabel)
+      .then(() => incrementGamesPlayed(user.id, isWinner || isNeutralWinner))
+      .then(() => refreshProfile())
+      .catch((err) => {
+        // Let the user retry on their next game — but log so we can spot
+        // RLS / network errors instead of silently swallowing them.
+        xpSaved.current = false;
+        // eslint-disable-next-line no-console
+        console.error('[GameOver] XP save failed', err);
+      });
+  }, [xpGained, user]);
 
   // Lobby music on the game-over screen — same playlist as the lobby so the
   // end-of-game mood carries over into the next session. Stops on unmount.
