@@ -82,14 +82,38 @@
   }
 }
 
-// HUD — fixed top center, above everything
+// HUD — pinned flush to the top edge so the day/phase pills form a
+// single block seated on the viewport ceiling. Warm diffuse glow behind
+// the pills pulses gently to keep the HUD feeling alive without drawing
+// hard attention away from the 3D scene.
 .hud-top {
   position: fixed;
-  top: 0.471rem;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   z-index: 12;
   pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -18px -60px -6px -60px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(255, 205, 130, 0.22),
+      rgba(255, 205, 130, 0.06) 55%,
+      rgba(255, 205, 130, 0) 80%
+    );
+    filter: blur(6px);
+    z-index: -1;
+    pointer-events: none;
+    animation: hud-top-pulse 3.6s ease-in-out infinite;
+  }
+}
+
+@keyframes hud-top-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.04); }
 }
 
 // Parchment noise texture (shared)

@@ -9,12 +9,13 @@ import {
 import { pushCameraOutOfObstacles } from '../utils';
 
 // Smooth follow based on phase:
-// - Night: 3-waypoint cinematic (overview → alley walk → rise to stars)
+// - Night: waypoint cinematic keyed to nightWeather (clear/rainy/foggy)
+//   so back-to-back nights don't replay the same shots.
 // - Trial (defense/judgment/last-words/execution): zoom on podium
 // - Day / other: continuous slow orbit around the plaza (~13 min/turn)
 // Pushes the target and interpolated position out of the church & gallows
 // obstacle spheres so the camera never ends up inside a model.
-const CameraController = ({ phase, CONSTANTS }) => {
+const CameraController = ({ phase, CONSTANTS, dayCount = 0 }) => {
   const { camera } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 8, 12));
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
@@ -52,19 +53,27 @@ const CameraController = ({ phase, CONSTANTS }) => {
       }
       nightTimeRef.current += delta;
 
+      // Mirror MainScene's nightWeather seed so the cinematic matches the
+      // atmosphere being rendered that same night. Keys: clear / rainy /
+      // foggy. The formula MUST stay in lockstep with MainScene.js.
+      const seed = dayCount * 7 + 3;
+      const nightWeather = (seed * 13 + 5) % 3;
+      const weatherKey = nightWeather === 1 ? 'rainy' : nightWeather === 2 ? 'foggy' : 'clear';
+      const waypoints = NIGHT_CAMERA_WAYPOINTS[weatherKey] || NIGHT_CAMERA_WAYPOINTS.clear;
+
       let elapsed = nightTimeRef.current;
       let wpIdx = 0;
       let totalBefore = 0;
-      for (let i = 0; i < NIGHT_CAMERA_WAYPOINTS.length; i++) {
-        if (elapsed < totalBefore + NIGHT_CAMERA_WAYPOINTS[i].duration) {
+      for (let i = 0; i < waypoints.length; i++) {
+        if (elapsed < totalBefore + waypoints[i].duration) {
           wpIdx = i;
           break;
         }
-        totalBefore += NIGHT_CAMERA_WAYPOINTS[i].duration;
-        if (i === NIGHT_CAMERA_WAYPOINTS.length - 1) wpIdx = i;
+        totalBefore += waypoints[i].duration;
+        if (i === waypoints.length - 1) wpIdx = i;
       }
 
-      const wp = NIGHT_CAMERA_WAYPOINTS[wpIdx];
+      const wp = waypoints[wpIdx];
       targetPos.current.set(...wp.pos);
       targetLookAt.current.set(...wp.lookAt);
 

@@ -44,13 +44,39 @@ export const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(7, 1.1, -6);
 export const EXECUTION_CAMERA_POS = new THREE.Vector3(7, 6, -10);
 export const EXECUTION_CAMERA_LOOK = new THREE.Vector3(7, 0.5, -6);
 
-// Night cinematic camera — slow alley walk then gentle rise to stars
-export const NIGHT_CAMERA_WAYPOINTS = [
-  { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 5 },
-  { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 18 },
-  { pos: [-1, 3.5, -1],   lookAt: [0, 12, -3],      duration: 20 },
-  { pos: [0, 4, 0],       lookAt: [0, 15, -2],      duration: 30, hold: true },
-];
+// Night cinematic camera — three weather-tied flavors so nights don't
+// feel identical. The `clear` variant (ex-default) is the calm stargaze
+// we've always had; `rainy` stays low and dramatic; `foggy` creeps at
+// ground level. Selected in CameraController from the same nightWeather
+// seed MainScene uses for atmosphere so cinematic + mood stay in sync.
+export const NIGHT_CAMERA_WAYPOINTS = {
+  clear: [
+    { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 5 },
+    { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 18 },
+    { pos: [-1, 3.5, -1],   lookAt: [0, 12, -3],      duration: 20 },
+    { pos: [0, 4, 0],       lookAt: [0, 15, -2],      duration: 30, hold: true },
+  ],
+  rainy: [
+    // Wide low-angle establishing shot — feels like a storm cell above.
+    { pos: [7, 2.4, 7],     lookAt: [0, 2.5, -6],     duration: 6 },
+    // Push forward through the plaza toward the church silhouette.
+    { pos: [3, 2, 3],       lookAt: [0, 3, -12],      duration: 16 },
+    // Side drift so the rain streaks catch the camera sideways.
+    { pos: [-5, 2.6, -1],   lookAt: [3, 3, -9],       duration: 16 },
+    // Hold low in front of the church — lightning flashes behind it.
+    { pos: [0, 2.2, -2],    lookAt: [0, 5, -15],      duration: 30, hold: true },
+  ],
+  foggy: [
+    // Start inside the fog at human height, looking into the murk.
+    { pos: [0, 1.6, 8],     lookAt: [0, 1.8, -2],     duration: 6 },
+    // Slow forward crawl through the village — claustrophobic pacing.
+    { pos: [0, 1.3, 3],     lookAt: [0, 1.6, -10],    duration: 18 },
+    // Sideways drift, lookAt off-axis so nothing resolves cleanly.
+    { pos: [-3, 1.4, -1],   lookAt: [2, 1.4, -9],     duration: 18 },
+    // Hold facing the church, swallowed by fog.
+    { pos: [0, 1.6, -5],    lookAt: [0, 2.4, -15],    duration: 30, hold: true },
+  ],
+};
 
 // Spherical obstacles the camera must stay outside of.
 // Church (rootbound_manor) at [0,0,-15] scale 4.8 → snug sphere.
@@ -88,6 +114,11 @@ export const BUILDING_POSITIONS = [
   { type: 'cottage', position: [7, 0, 9],     scale: 1.5, variant: 0, get rotation() { return [0, faceCenter(7, 9), 0]; } },
   { type: 'cottage', position: [-15, 0, -8],  scale: 1.4, variant: 2, get rotation() { return [0, faceCenter(-15, -8), 0]; } },
   { type: 'cottage', position: [15, 0, -8],   scale: 1.4, variant: 0, get rotation() { return [0, faceCenter(15, -8), 0]; } },
+  // Fills the gap on the left of the church — the rear corner used to
+  // read as empty ground because the nearest cottage was all the way out
+  // at (-15, -8). Positioned clear of the (-11, -13) tree and of the
+  // church body (sphere radius ~4m at scale 4.8).
+  { type: 'cottage', position: [-8, 0, -12],  scale: 1.5, variant: 1, get rotation() { return [0, faceCenter(-8, -12), 0]; } },
   { type: 'cottage', position: [-14, 0, 5],   scale: 1.4, variant: 1, get rotation() { return [0, faceCenter(-14, 5), 0]; } },
   { type: 'cottage', position: [14, 0, 6],    scale: 1.4, variant: 2, get rotation() { return [0, faceCenter(14, 6), 0]; } },
   { type: 'cottage', position: [-3, 0, 11],   scale: 1.4, variant: 0, get rotation() { return [0, faceCenter(-3, 11), 0]; } },

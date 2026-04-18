@@ -10,51 +10,56 @@
   white-space: nowrap;
 }
 
-// Day/Night pill — left side
+// Day/Night pill — left side. Top-left corner kept square so the pill
+// sits flush against the viewport ceiling when the HUD is pinned to
+// top: 0 (no visual gap above the rounded corner).
 .day-label {
   font-family: 'Cinzel', serif;
-  font-size: 0.765rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.118rem;
   text-transform: uppercase;
-  padding: 0.471rem 0.824rem;
+  padding: 0.65rem 1.05rem;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
-  border-radius: 0.471rem 0 0 0.471rem;
+  border-radius: 0 0 0 0.55rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: none;
   border-right: none;
   display: flex;
   align-items: center;
-  gap: 0.471rem;
-  height: 2.118rem;
+  gap: 0.5rem;
+  height: 2.55rem;
   box-sizing: border-box;
 
   i {
-    font-size: 0.706rem;
+    font-size: 0.85rem;
     color: #ffcc44;
   }
 }
 
-// Phase info — right side
+// Phase info — right side. Top-right corner also kept square so both
+// pills form a clean shelf against the top of the screen.
 .phase-info {
   display: flex;
   align-items: center;
-  gap: 0.588rem;
-  padding: 0.471rem 0.941rem;
+  gap: 0.65rem;
+  padding: 0.65rem 1.2rem;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0 0.471rem 0.471rem 0;
-  min-width: 8.235rem;
-  height: 2.118rem;
+  border-top: none;
+  border-radius: 0 0 0.55rem 0;
+  min-width: 9.5rem;
+  height: 2.55rem;
   box-sizing: border-box;
 }
 
 // Phase name
 .progress-content {
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 0.824rem;
+  font-size: 0.98rem;
   font-weight: 600;
   letter-spacing: 0.059rem;
   color: rgba(255, 255, 255, 0.9);
@@ -63,20 +68,20 @@
   white-space: nowrap;
 
   i {
-    margin-right: 0.353rem;
-    font-size: 0.647rem;
-    opacity: 0.6;
+    margin-right: 0.4rem;
+    font-size: 0.78rem;
+    opacity: 0.7;
   }
 }
 
 // Countdown number
 .timer {
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 0.941rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.059rem;
-  min-width: 1.882rem;
+  min-width: 2.2rem;
   text-align: right;
 }
 
@@ -105,19 +110,19 @@
 // ── Responsive ──
 @media (max-width: 768px) {
   .day-label {
-    font-size: 0.647rem;
-    padding: 0.353rem 0.588rem;
-    height: 1.765rem;
+    font-size: 0.75rem;
+    padding: 0.45rem 0.75rem;
+    height: 2.1rem;
   }
   .phase-info {
-    padding: 0.353rem 0.706rem;
-    min-width: 6.471rem;
-    height: 1.765rem;
+    padding: 0.45rem 0.85rem;
+    min-width: 7.2rem;
+    height: 2.1rem;
   }
   .progress-content {
-    font-size: 0.706rem;
+    font-size: 0.8rem;
   }
   .timer {
-    font-size: 0.824rem;
+    font-size: 0.95rem;
   }
 }

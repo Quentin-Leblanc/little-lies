@@ -358,7 +358,7 @@ const MainScene = () => {
               otherPlayerPositions={alivePlayers.filter(p => p.id !== me?.id).map(p => playerPositions[p.id]?.position || [0,0,0])}
             />
           ) : (
-            <CameraController phase={phase} CONSTANTS={CONSTANTS} />
+            <CameraController phase={phase} CONSTANTS={CONSTANTS} dayCount={game.dayCount || 0} />
           )}
 
           <SceneLighting isDay={game.isDay} isSunset={isSunset} />
