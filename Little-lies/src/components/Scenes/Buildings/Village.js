@@ -70,7 +70,7 @@ const Village = React.memo(({ isDay, isTrialPhase }) => (
       position={[-5.5, 0, -4]} scale={1.3}
       rotation={[0, faceCenter(-5.5, -4), 0]} />
     <MeshyModel path={MESHY_RING}
-      position={[-7, 0, 5]} scale={1.6}
+      position={[-9, 0, 5]} scale={1.6}
       rotation={[0, 0.5, 0]}
       halfHeight={0.38} />
 
