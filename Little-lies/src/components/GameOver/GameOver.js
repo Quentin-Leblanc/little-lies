@@ -289,16 +289,17 @@ const GameOver = () => {
                 >
                   <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
                 </button>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.02"
-                  value={muted ? 0 : volume}
-                  onChange={handleVolumeChange}
-                  className="go-volume-slider"
-                  orient="vertical"
-                />
+                <div className="go-volume-slider-wrap">
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.02"
+                    value={muted ? 0 : volume}
+                    onChange={handleVolumeChange}
+                    className="go-volume-slider"
+                  />
+                </div>
                 <span className="go-volume-value">{Math.round((muted ? 0 : volume) * 100)}</span>
               </div>
             )}

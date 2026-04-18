@@ -73,19 +73,35 @@
   &:hover { color: #fff; }
 }
 
-.lobby-volume-slider {
-  -webkit-appearance: slider-vertical;
-  appearance: slider-vertical;
-  writing-mode: bt-lr; /* Firefox vertical */
+// Vertical volume slider built from a horizontal <input type="range">
+// rotated -90°. Chrome dropped `-webkit-appearance: slider-vertical` and
+// the old `margin-left` thumb hack misaligns it; rotation works identically
+// across Chrome/Firefox/Safari and keeps the thumb perfectly on-axis.
+.lobby-volume-slider-wrap {
   width: 1.2rem;
   height: 7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Clip the rotated slider's bounding box so it doesn't blow up the flex */
+  overflow: hidden;
+  position: relative;
+}
+
+.lobby-volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 7rem;
+  height: 1.2rem;
   background: transparent;
   cursor: pointer;
   padding: 0;
   margin: 0;
+  transform: rotate(-90deg);
+  transform-origin: center;
 
   &::-webkit-slider-runnable-track {
-    width: 0.28rem;
+    height: 0.28rem;
     background: rgba(255, 255, 255, 0.15);
     border-radius: 0.14rem;
   }
@@ -95,11 +111,12 @@
     height: 0.85rem;
     border-radius: 50%;
     background: #ddd;
-    margin-left: -0.3rem;
+    /* Center the thumb on the 0.28rem track (half the height difference). */
+    margin-top: calc((0.28rem - 0.85rem) / 2);
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
   }
   &::-moz-range-track {
-    width: 0.28rem;
+    height: 0.28rem;
     background: rgba(255, 255, 255, 0.15);
     border-radius: 0.14rem;
   }

@@ -789,16 +789,17 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             >
               <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
             </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.02"
-              value={muted ? 0 : volume}
-              onChange={handleVolumeChange}
-              className="lobby-volume-slider"
-              orient="vertical"
-            />
+            <div className="lobby-volume-slider-wrap">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.02"
+                value={muted ? 0 : volume}
+                onChange={handleVolumeChange}
+                className="lobby-volume-slider"
+              />
+            </div>
             <span className="lobby-volume-value">{Math.round((muted ? 0 : volume) * 100)}</span>
           </div>
         )}
