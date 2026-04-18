@@ -492,7 +492,15 @@ function Chat(props) {
         <div ref={messagesEndRef}></div>
       </div>
       </div>
-      {inputVisible ? (
+      {isDefensePhase && !isAccused && !isDead ? (
+        // Defense / last-words: jurors can't type. Hide the input entirely
+        // (not just disable it) so the UI clearly communicates "this phase
+        // is locked" instead of showing a grayed-out teasing text box.
+        <div className="chat-input-locked">
+          <i className="fas fa-lock" aria-hidden="true"></i>
+          <span>{t('game:chat.placeholder_muted')}</span>
+        </div>
+      ) : inputVisible ? (
         <div className="chat-input-outside">
           <span className="chat-input-name" style={{ color: myColor || '#ccc' }}>{myName}:</span>
           <input

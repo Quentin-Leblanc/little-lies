@@ -319,6 +319,26 @@
   }
 }
 
+// Defense / mute phase: input is removed entirely and replaced by a
+// non-interactive lock banner. Matches the surrounding chat container
+// so it doesn't feel like a pop-in but is unmistakably inert.
+.chat-input-locked {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  margin-top: 0.235rem;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.471rem;
+  color: #aaa;
+  font-size: 0.75rem;
+  font-style: italic;
+  letter-spacing: 0.02rem;
+  user-select: none;
+  i { color: #888; font-size: 0.75rem; }
+}
+
 .chat-input {
   flex-grow: 1;
   background: rgba(0, 0, 0, 0.9);

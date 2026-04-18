@@ -60,13 +60,15 @@ export function checkVotingMajority(players, trial) {
 export function resolveJudgment(players, trial, accusedId) {
   const votes = trial?.votes || {};
   let innocentCount = 0;
+  let guiltyCount = 0;
   Object.values(votes).forEach((vote) => {
     if (vote === 'innocent') innocentCount++;
+    else if (vote === 'guilty') guiltyCount++;
   });
   const eligibleVoters = (players || []).filter((p) => p.isAlive && p.id !== accusedId).length;
   const majority = Math.floor(eligibleVoters / 2) + 1;
   const isSaved = innocentCount >= majority;
-  return { innocentCount, eligibleVoters, majority, isGuilty: !isSaved };
+  return { innocentCount, guiltyCount, eligibleVoters, majority, isGuilty: !isSaved };
 }
 
 /**

@@ -164,9 +164,20 @@ const PlayerActions = memo(function () {
     // Only accept the three valid verdicts — defense in depth against UI
     // bugs that might pass through something weird.
     if (vote !== 'guilty' && vote !== 'innocent' && vote !== 'abstain') return;
-    updateActivity(me.id);
+    // Block re-votes: once a verdict is cast it's final. We already gray out
+    // the buttons on the UI, but this guards against a stale client that
+    // somehow bypasses the disabled state (or a Cult sprinkling latencies).
     const latestTrial = trialRef.current || { suspects: {}, votes: {} };
+    if (latestTrial.votes?.[me.id]) return;
+    updateActivity(me.id);
     setTrial({ suspects: latestTrial.suspects || {}, votes: { ...(latestTrial.votes || {}), [me.id]: vote } });
+    // Public tally — each verdict is announced so everyone can follow the
+    // running count. Abstain is kept silent on purpose (less chat noise,
+    // and it doesn't move the majority math either way).
+    if (vote === 'guilty' || vote === 'innocent') {
+      const label = i18n.t(`common:${vote}`);
+      addChatSystem(`${me.profile.name} → ${label}`, 'vote');
+    }
   };
 
   // --- Day action handler (Jailor jail) ---
@@ -291,7 +302,6 @@ const PlayerActions = memo(function () {
               aria-pressed={myJudgmentVote === 'innocent'}
               aria-label={t('common:innocent')}
             >
-              <i className="fas fa-shield" aria-hidden="true"></i>
               <span>{t('common:innocent')}</span>
             </button>
             <button
@@ -301,7 +311,6 @@ const PlayerActions = memo(function () {
               aria-pressed={myJudgmentVote === 'guilty'}
               aria-label={t('common:guilty')}
             >
-              <i className="fas fa-gavel" aria-hidden="true"></i>
               <span>{t('common:guilty')}</span>
             </button>
           </div>
@@ -343,7 +352,7 @@ const PlayerActions = memo(function () {
                   aria-pressed={myJudgmentVote === 'innocent'}
                   aria-label={t('common:innocent')}
                 >
-                  <i className="fas fa-shield" aria-hidden="true"></i> {t('common:innocent')}
+                  {t('common:innocent')}
                 </button>
                 <button
                   className={`primaryBtn judgment-guilty ${myJudgmentVote === 'guilty' ? 'active' : ''}`}
@@ -352,7 +361,7 @@ const PlayerActions = memo(function () {
                   aria-pressed={myJudgmentVote === 'guilty'}
                   aria-label={t('common:guilty')}
                 >
-                  <i className="fas fa-gavel" aria-hidden="true"></i> {t('common:guilty')}
+                  {t('common:guilty')}
                 </button>
               </div>
               <p className="judgment-hint">{t('game:judgment_default_guilty', { defaultValue: 'Guilty by default — vote Innocent to save' })}</p>

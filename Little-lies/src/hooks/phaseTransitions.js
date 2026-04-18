@@ -24,7 +24,7 @@ export function computeNextPhase(currentPhase, context) {
     game,
     trial,
     accusedIfMajority,       // result of checkVotingMajority on sanitized trial
-    judgmentResult,          // { innocentCount, isGuilty } from resolveJudgment, or null
+    judgmentResult,          // { innocentCount, guiltyCount, isGuilty } from resolveJudgment, or null
     PHASE,
     DURATIONS,
     MAX_TRIALS_PER_DAY,
@@ -110,9 +110,10 @@ export function computeNextPhase(currentPhase, context) {
     case PHASE.JUDGMENT: {
       const isGuilty = !!judgmentResult?.isGuilty;
       const innocentCount = judgmentResult?.innocentCount ?? 0;
+      const guiltyCount = judgmentResult?.guiltyCount ?? 0;
       const resultMsg = isGuilty
-        ? (t ? t('game:system.judgment_guilty', { guilty: '-', innocent: innocentCount }) : '')
-        : (t ? t('game:system.judgment_acquitted', { guilty: '-', innocent: innocentCount }) : '');
+        ? (t ? t('game:system.judgment_guilty', { guilty: guiltyCount, innocent: innocentCount }) : '')
+        : (t ? t('game:system.judgment_acquitted', { guilty: guiltyCount, innocent: innocentCount }) : '');
       const sideEffects = [
         { kind: 'addChat', content: resultMsg, color: isGuilty ? '#ff4444' : '#78ff78' },
         { kind: 'addEvent', event: { type: 'JUDGMENT_RESULT', content: { chatMessage: resultMsg }, displayed: true } },

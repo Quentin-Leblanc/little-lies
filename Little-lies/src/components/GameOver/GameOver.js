@@ -21,10 +21,10 @@ const TEAM_STYLES = {
 
 const TEAM_ORDER = ['town', 'mafia', 'evil', 'cult', 'neutral'];
 
-// Timings (ms) for the staged reveal → panel transition. Bumped from
-// 5 s / 0.9 s so players actually have time to read the faction + roster
-// before the panel takes over.
-const INTERMEDIATE_VISIBLE_MS = 8000;
+// Timings (ms) for the staged reveal → panel transition. 7s on the
+// intermediate card is enough to read the faction + roster without
+// dragging the end-of-game flow — earlier 8s felt sluggish.
+const INTERMEDIATE_VISIBLE_MS = 7000;
 const FADE_BETWEEN_MS = 1400;
 
 // Particules flottantes selon victoire/defaite

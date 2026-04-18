@@ -135,8 +135,14 @@ function App() {
     // Main game - Grid layout
     return (
         <div className="App">
-            {/* Game over overlay */}
-            {isGameOver && <GameOver />}
+            {/* Game over overlay — held back while the initial RoleReveal
+                is still animating in, otherwise a game that ends during
+                the reveal (short round, lucky first-night kill) would
+                skip the reveal entirely and cut straight to the end
+                screen. RoleReveal calls handleRoleRevealComplete when
+                done, which flips showRoleReveal to false and lets
+                GameOver take over. */}
+            {isGameOver && !showRoleReveal && <GameOver />}
 
             {/* Curtain — persists across role reveal → game transition */}
             {curtainVisible && (
@@ -147,8 +153,13 @@ function App() {
                 </div>
             )}
 
-            {/* Role reveal (loader + card) — shown only after curtain is fully closed */}
-            {isGameStarted && showRoleReveal && curtainReady && (
+            {/* Role reveal (loader + card) — shown only after curtain is
+                fully closed. Keeps rendering even after the game has
+                ended, so a very short round (e.g. first-night sweep)
+                still shows each player their role before cutting to
+                GameOver. `isGameStarted` flips to false on endGame(),
+                which is why we also accept isGameOver here. */}
+            {(isGameStarted || isGameOver) && showRoleReveal && curtainReady && (
                 <RoleReveal onComplete={handleRoleRevealComplete} />
             )}
 

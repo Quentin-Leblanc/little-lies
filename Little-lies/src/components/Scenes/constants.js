@@ -34,8 +34,13 @@ export const PODIUM_SCALE = 1.0;
 // Trial camera targets (relative to podium at [7, 0, -6])
 // ============================================================
 export const DEFENSE_CAMERA_LOOK = new THREE.Vector3(7, 0.6, -6);
-export const JUDGMENT_CAMERA_POS = new THREE.Vector3(5.5, 5, -4.2);
-export const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(7, 0.8, -6);
+// Defense + judgment share this target. Pulled back and lowered to ~20°
+// above horizontal: the defender at the podium stays the focal point but
+// the plaza behind them is now visible, which matters because that's
+// where the jury (the other players) is standing during the trial. Going
+// lower than this starts clipping the distant mountain skyline.
+export const JUDGMENT_CAMERA_POS = new THREE.Vector3(3, 3.2, -0.5);
+export const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(7, 1.1, -6);
 export const EXECUTION_CAMERA_POS = new THREE.Vector3(7, 6, -10);
 export const EXECUTION_CAMERA_LOOK = new THREE.Vector3(7, 0.5, -6);
 
