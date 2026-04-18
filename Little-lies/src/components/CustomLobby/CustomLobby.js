@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import { Stars, Html, ContactShadows } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette, HueSaturation } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { Character, skinForPlayer } from '../Character/Character';
 import GameConfig from '../GameConfig/GameConfig';
@@ -734,7 +734,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     <div className="custom-lobby-container">
       {/* 3D Campfire Scene */}
       <Canvas shadows camera={{ position: [6, 3.5, 0], fov: 50 }} dpr={[1, 1.5]}
-        gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.8 }}>
+        gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.92 }}>
         <color attach="background" args={['#050810']} />
         <fog attach="fog" args={['#050810', 10, 25]} />
         <ambientLight intensity={0.18} color="#5a6a90" />
@@ -777,6 +777,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
 
           <EffectComposer>
             <Bloom intensity={0.8} luminanceThreshold={0.4} luminanceSmoothing={0.5} mipmapBlur />
+            <HueSaturation saturation={0.18} />
             <Vignette offset={0.15} darkness={0.8} />
           </EffectComposer>
         </Suspense>

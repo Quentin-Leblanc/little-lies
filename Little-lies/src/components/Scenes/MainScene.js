@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, Stars } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette, HueSaturation } from '@react-three/postprocessing';
 import { useMultiplayerState } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
@@ -344,7 +344,7 @@ const MainScene = () => {
       <Canvas
         shadows="soft"
         camera={{ position: [0, 9, 14], fov: 50 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.65 }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.78 }}
       >
         <Suspense fallback={null}>
           {/* Camera — pause: follows player, normal: cinematic */}
@@ -488,7 +488,11 @@ const MainScene = () => {
             );
           })}
 
-          {/* Post-processing — minimal to avoid white artifacts */}
+          {/* Post-processing — minimal to avoid white artifacts.
+              HueSaturation pushes color punch without touching hue; kept
+              at +0.18 so greens/reds feel vivid but skin tones don't
+              cartoon out. Bumping exposure from 0.65 to 0.78 matches the
+              new saturation so the image doesn't feel flat. */}
           <EffectComposer>
             <Bloom
               intensity={game.isDay ? 0.08 : 0.1}
@@ -496,6 +500,7 @@ const MainScene = () => {
               luminanceSmoothing={0.2}
               mipmapBlur
             />
+            <HueSaturation saturation={0.18} />
             <Vignette
               offset={game.isDay ? 0.3 : 0.1}
               darkness={game.isDay ? 0.35 : 0.85}
