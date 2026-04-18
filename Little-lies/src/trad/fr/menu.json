@@ -47,10 +47,21 @@
     "roles_neutral": "Neutres"
   },
   "survey": {
-    "question": "Comment était cette partie ?",
-    "comment_placeholder": "Un commentaire ? (optionnel)",
+    "title": "Ton avis sur la partie",
+    "subtitle": "Quelques questions rapides pour améliorer le jeu.",
+    "question": "Globalement, tu as aimé cette partie ?",
+    "q_pace": "Le rythme te convenait ?",
+    "q_clarity": "Tu as compris ton rôle et les actions ?",
+    "q_recommend": "Tu recommanderais le jeu ?",
+    "answer_yes": "Oui",
+    "answer_meh": "Bof",
+    "answer_no": "Non",
+    "comment_title": "Commentaire (optionnel)",
+    "comment_placeholder": "Dis-nous ce qui pourrait être mieux…",
     "submit": "Envoyer",
+    "submit_failed": "Envoi impossible — réessaie.",
     "skip": "Passer",
-    "thanks": "Merci !"
+    "thanks": "Merci, ton retour est précieux !",
+    "open_button": "Donner mon avis"
   }
 }

@@ -4,8 +4,26 @@ import { Html } from '@react-three/drei';
 import { Character, skinForPlayer } from '../../Character/Character';
 import ChatBubble from './ChatBubble';
 import PhaseEmote from './PhaseEmote';
-import { IDLE_VARIANTS, DANCE_VARIANTS } from '../constants';
+import { IDLE_VARIANTS, DANCE_VARIANTS, WALK_OBSTACLES } from '../constants';
 import { pickForPlayer } from '../utils';
+
+// Apply radial "push" away from each obstacle so the walker curves around
+// plaza props (bulletin board, podium, gallows…) instead of clipping
+// through them. Returns {dx, dz} to add to the straight-line position.
+const obstaclePush = (x, z) => {
+  let dx = 0, dz = 0;
+  for (const obs of WALK_OBSTACLES) {
+    const ox = x - obs.x;
+    const oz = z - obs.z;
+    const dist = Math.sqrt(ox * ox + oz * oz);
+    if (dist > 0 && dist < obs.radius) {
+      const strength = (obs.radius - dist) / obs.radius;
+      dx += (ox / dist) * strength * obs.radius;
+      dz += (oz / dist) * strength * obs.radius;
+    }
+  }
+  return { dx, dz };
+};
 
 // Character model + walk-transition + death/victory anim + name label
 // + vote counter + accused ring + phase emote + chat bubble.
@@ -74,9 +92,14 @@ const PlayerFigure = ({
       const t = Math.min(elapsed / transitionDuration, 1);
       const eased = t * t * (3 - 2 * t); // smoothstep
 
-      groupRef.current.position.x = startPosition[0] + (position[0] - startPosition[0]) * eased;
+      const baseX = startPosition[0] + (position[0] - startPosition[0]) * eased;
+      const baseZ = startPosition[2] + (position[2] - startPosition[2]) * eased;
+      // Steer around plaza obstacles — players used to clip through the
+      // bulletin board and podium during the walk-home transition.
+      const push = obstaclePush(baseX, baseZ);
+      groupRef.current.position.x = baseX + push.dx;
       groupRef.current.position.y = position[1];
-      groupRef.current.position.z = startPosition[2] + (position[2] - startPosition[2]) * eased;
+      groupRef.current.position.z = baseZ + push.dz;
 
       // Face walk direction (fixed, computed from start→end — not from
       // current position, which would rotate mid-walk).

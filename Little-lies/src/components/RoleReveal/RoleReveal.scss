@@ -63,7 +63,12 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: #000;
+  // Transparent with a soft radial vignette so the starry 3D canvas
+  // behind stays visible through the reveal. A fully opaque #000 was
+  // hiding the Stars/Moon/night sky entirely.
+  background:
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.7) 55%, rgba(0, 0, 0, 0.88) 100%);
+  backdrop-filter: blur(3px);
   display: flex;
   flex-direction: column;
   align-items: center;

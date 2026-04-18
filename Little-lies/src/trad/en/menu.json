@@ -47,10 +47,21 @@
     "roles_neutral": "Neutrals"
   },
   "survey": {
-    "question": "How was this game?",
-    "comment_placeholder": "Any feedback? (optional)",
+    "title": "Your thoughts on this game",
+    "subtitle": "A few quick questions to help us improve.",
+    "question": "Overall, did you enjoy this game?",
+    "q_pace": "Was the pacing good?",
+    "q_clarity": "Did you understand your role and actions?",
+    "q_recommend": "Would you recommend the game?",
+    "answer_yes": "Yes",
+    "answer_meh": "Meh",
+    "answer_no": "No",
+    "comment_title": "Comment (optional)",
+    "comment_placeholder": "Tell us what could be better…",
     "submit": "Submit",
+    "submit_failed": "Submission failed — try again.",
     "skip": "Skip",
-    "thanks": "Thanks!"
+    "thanks": "Thanks, your feedback matters!",
+    "open_button": "Give feedback"
   }
 }

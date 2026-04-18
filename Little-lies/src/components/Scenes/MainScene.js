@@ -78,23 +78,10 @@ const MainScene = () => {
   const [showDeathReport, setShowDeathReport] = useState(false);
   const [showBloodEffect, setShowBloodEffect] = useState(false);
   const [showExecutionFlash, setShowExecutionFlash] = useState(false);
-  const [fadingDead, setFadingDead] = useState(false);
-  const [hideDead, setHideDead] = useState(false);
-  const prevPhaseForDead = useRef(null);
-
-  // Dead bodies: show during DEATH_REPORT, fade out when it ends, hide after fade
-  useEffect(() => {
-    const prev = prevPhaseForDead.current;
-    prevPhaseForDead.current = phase;
-    if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
-      setFadingDead(false);
-      setHideDead(false);
-    } else if (prev === CONSTANTS.PHASE.DEATH_REPORT) {
-      setFadingDead(true);
-      const t = setTimeout(() => { setFadingDead(false); setHideDead(true); }, 2500);
-      return () => clearTimeout(t);
-    }
-  }, [phase]);
+  // Dead bodies used to fade out after DEATH_REPORT. They now persist as
+  // set dressing in the plaza center — makes the losses feel real and
+  // gives the scene more life between phases. These state vars are kept
+  // only to preserve the existing render branch until we simplify further.
 
   const lastPhaseForFade = useRef(phase);
 
@@ -325,8 +312,18 @@ const MainScene = () => {
       });
     }
 
+    // Dead players: scatter around the plaza center in a tight ring, with
+    // a deterministic rotation per body so corpses don't all lie the same
+    // way. Using the player id to seed both position and yaw keeps the
+    // placement stable across re-renders and across clients.
     deadPlayers.forEach((p, i) => {
-      positions[p.id] = { position: [-12 + i * 2, PLAYER_Y, -12], rotation: [0, 0, 0] };
+      const seed = (p.id?.charCodeAt(0) || 0) + i * 37;
+      const angle = ((i * 2.399) + (seed % 17) * 0.1) % (Math.PI * 2); // golden-angle spread
+      const r = 1.2 + ((seed % 7) * 0.12);
+      const px = Math.cos(angle) * r;
+      const pz = Math.sin(angle) * r;
+      const yaw = (seed * 0.37) % (Math.PI * 2);
+      positions[p.id] = { position: [px, PLAYER_Y, pz], rotation: [0, yaw, 0] };
     });
 
     return positions;
@@ -476,15 +473,17 @@ const MainScene = () => {
             );
           })}
 
-          {/* Dead players — visible during DEATH_REPORT, fade out after */}
-          {!hideDead && deadPlayers.map((player) => {
+          {/* Dead players — persist as corpses in the plaza center (no label,
+              no highlight, no fade). Hidden at night so the villagers are
+              alone in the streets during the action phase. */}
+          {phase !== CONSTANTS.PHASE.NIGHT && deadPlayers.map((player) => {
             const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
             return (
               <DeadPlayerFigure
                 key={player.id}
                 player={player}
                 position={pData.position}
-                fading={fadingDead}
+                rotation={pData.rotation}
               />
             );
           })}

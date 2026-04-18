@@ -28,7 +28,7 @@ const DURATIONS = {
   JUDGMENT: 15000,
   LAST_WORDS: 5000,
   EXECUTION: 3000,
-  EXECUTION_REVEAL: 5000,   // suspense reveal of the lynched player's role
+  EXECUTION_REVEAL: 8000,   // suspense reveal of the lynched player's role
   NO_LYNCH: 6000,
   SPARED: 5000,
 };

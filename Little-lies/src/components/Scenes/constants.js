@@ -55,6 +55,18 @@ export const CAMERA_OBSTACLES = [
   { center: new THREE.Vector3(0, 2, 0), radius: 2.8 },   // gallows
 ];
 
+// 2D obstacles that player walks (day→house, morning→circle) should steer
+// around. Radius is generous — characters are ~0.6m wide and we want a
+// small buffer so the model doesn't clip into the prop. These correspond
+// to the dark-theme plaza props declared in Village.js.
+export const WALK_OBSTACLES = [
+  { x: 5.5, z: 3,    radius: 1.2 }, // bulletin board (MESHY_BOARD)
+  { x: -5.5, z: -4,  radius: 1.1 }, // skull sign (MESHY_SKULL)
+  { x: -7, z: 5,     radius: 1.4 }, // rope ring (MESHY_RING)
+  { x: 7, z: -6,     radius: 1.3 }, // podium (MESHY_PODIUM)
+  { x: 0, z: 0,      radius: 1.6 }, // gallows
+];
+
 // ============================================================
 // Village layout — positions, variants, building types
 // ============================================================

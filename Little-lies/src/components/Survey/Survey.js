@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { getGameCount } from '../../utils/GameMetrics';
+import { useAuth } from '../Auth/Auth';
+import { submitSurvey } from '../../utils/supabase';
 import './Survey.scss';
 
 const SURVEY_STORAGE_KEY = 'amongliars_survey_responses';
-const SURVEY_FREQUENCY = 3; // Show every N games
 
 const RATING_ICONS = [
   { value: 1, labelKey: 'survey_terrible', icon: 'fa-face-frown-open', color: '#ff4444' },
@@ -14,95 +15,146 @@ const RATING_ICONS = [
   { value: 5, labelKey: 'survey_great', icon: 'fa-face-grin-stars', color: '#ffd700' },
 ];
 
-const saveSurveyResponse = (response) => {
+// Extra Y/N questions — we ship the prompt + keys and let i18n pick the text.
+const EXTRA_QUESTIONS = [
+  { id: 'pace', labelKey: 'survey_q_pace' },
+  { id: 'clarity', labelKey: 'survey_q_clarity' },
+  { id: 'recommend', labelKey: 'survey_q_recommend' },
+];
+
+// Local cache so the dev can inspect offline — belt and braces alongside
+// the Supabase insert in case the network was flaky.
+const saveLocal = (response) => {
   try {
     const existing = JSON.parse(localStorage.getItem(SURVEY_STORAGE_KEY) || '[]');
     existing.push({ ...response, timestamp: Date.now() });
     localStorage.setItem(SURVEY_STORAGE_KEY, JSON.stringify(existing));
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Survey]', response);
-    }
   } catch (e) {
-    console.warn('[Survey] Failed to save:', e);
+    // storage blocked — fine, we already pushed to Supabase
   }
 };
 
-const shouldShowSurvey = () => {
-  const count = getGameCount();
-  // Show on every Nth game (3rd, 6th, 9th...)
-  return count > 0 && count % SURVEY_FREQUENCY === 0;
-};
-
-const Survey = () => {
-  const { t } = useTranslation(['menu', 'common']);
+// Standalone modal — use <SurveyModal context={...} onClose={...} /> from
+// anywhere (GameOver, menu, etc.). Renders nothing unless `open` is true.
+const SurveyModal = ({ open, onClose, context }) => {
+  const { t, i18n } = useTranslation(['menu', 'common']);
+  const { user } = useAuth();
   const [rating, setRating] = useState(null);
+  const [answers, setAnswers] = useState({}); // { pace: 'yes'|'no'|'meh' }
   const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  const [show] = useState(() => shouldShowSurvey());
+  const [error, setError] = useState('');
 
-  if (!show || dismissed) return null;
+  if (!open) return null;
 
-  const handleSubmit = () => {
-    if (rating) {
-      saveSurveyResponse({ rating, comment: comment.trim() || null });
+  const handleSubmit = async () => {
+    if (!rating) return;
+    setSubmitting(true);
+    setError('');
+    const payload = {
+      userId: user?.id || null,
+      rating,
+      comment: comment.trim() || null,
+      answers,
+      context: { ...context, language: i18n.language || 'fr' },
+    };
+    const { error: err } = await submitSurvey(payload);
+    setSubmitting(false);
+    if (err) {
+      // Keep a local copy even if Supabase failed so feedback isn't lost.
+      saveLocal(payload);
+      setError(err.message || t('menu:survey.submit_failed'));
+      return;
     }
+    saveLocal(payload);
     setSubmitted(true);
-    setTimeout(() => setDismissed(true), 1500);
+    setTimeout(() => onClose?.(), 1400);
   };
 
-  const handleSkip = () => {
-    setDismissed(true);
-  };
-
-  if (submitted) {
-    return (
-      <div className="survey-container survey-thanks">
-        <i className="fas fa-heart" style={{ color: '#ff69b4' }}></i> {t('menu:survey.thanks')}
-      </div>
-    );
-  }
-
-  return (
-    <div className="survey-container">
-      <div className="survey-header">
-        <span className="survey-title">{t('menu:survey.question')}</span>
-        <button className="survey-close" onClick={handleSkip}>
+  return createPortal(
+    <div className="survey-modal-overlay" onClick={onClose}>
+      <div className="survey-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="survey-modal-close" onClick={onClose} aria-label={t('common:close')}>
           <i className="fas fa-times"></i>
         </button>
-      </div>
 
-      <div className="survey-ratings">
-        {RATING_ICONS.map((r) => (
-          <button
-            key={r.value}
-            className={`survey-rating-btn ${rating === r.value ? 'selected' : ''}`}
-            onClick={() => setRating(r.value)}
-            style={{ '--rating-color': r.color }}
-            title={t(`common:${r.labelKey}`)}
-          >
-            <i className={`fas ${r.icon}`}></i>
-          </button>
-        ))}
-      </div>
+        {submitted ? (
+          <div className="survey-modal-thanks">
+            <i className="fas fa-heart" style={{ color: '#ff69b4' }}></i>
+            <span>{t('menu:survey.thanks')}</span>
+          </div>
+        ) : (
+          <>
+            <h3 className="survey-modal-title">{t('menu:survey.title')}</h3>
+            <p className="survey-modal-subtitle">{t('menu:survey.subtitle')}</p>
 
-      <input
-        type="text"
-        className="survey-comment"
-        placeholder={t('menu:survey.comment_placeholder')}
-        value={comment}
-        onChange={(e) => setComment(e.target.value.slice(0, 200))}
-        maxLength={200}
-      />
+            <div className="survey-modal-block">
+              <div className="survey-modal-label">{t('menu:survey.question')}</div>
+              <div className="survey-ratings">
+                {RATING_ICONS.map((r) => (
+                  <button
+                    key={r.value}
+                    className={`survey-rating-btn ${rating === r.value ? 'selected' : ''}`}
+                    onClick={() => setRating(r.value)}
+                    style={{ '--rating-color': r.color }}
+                    title={t(`common:${r.labelKey}`)}
+                  >
+                    <i className={`fas ${r.icon}`}></i>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      <div className="survey-actions">
-        <button className="survey-skip" onClick={handleSkip}>{t('menu:survey.skip')}</button>
-        <button className="survey-submit" onClick={handleSubmit} disabled={!rating}>
-          {t('menu:survey.submit')}
-        </button>
+            {EXTRA_QUESTIONS.map((q) => (
+              <div key={q.id} className="survey-modal-block">
+                <div className="survey-modal-label">{t(`menu:survey.${q.labelKey}`)}</div>
+                <div className="survey-yn">
+                  {['yes', 'meh', 'no'].map((v) => (
+                    <button
+                      key={v}
+                      className={`survey-yn-btn ${answers[q.id] === v ? 'selected' : ''}`}
+                      onClick={() => setAnswers((a) => ({ ...a, [q.id]: v }))}
+                    >
+                      {t(`menu:survey.answer_${v}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <div className="survey-modal-block">
+              <div className="survey-modal-label">{t('menu:survey.comment_title')}</div>
+              <textarea
+                className="survey-comment-area"
+                placeholder={t('menu:survey.comment_placeholder')}
+                value={comment}
+                onChange={(e) => setComment(e.target.value.slice(0, 500))}
+                maxLength={500}
+                rows={3}
+              />
+            </div>
+
+            {error && <p className="survey-modal-error"><i className="fas fa-exclamation-circle"></i> {error}</p>}
+
+            <div className="survey-modal-actions">
+              <button className="survey-skip" onClick={onClose} disabled={submitting}>
+                {t('menu:survey.skip')}
+              </button>
+              <button
+                className="survey-submit"
+                onClick={handleSubmit}
+                disabled={!rating || submitting}
+              >
+                {submitting ? <i className="fas fa-spinner fa-spin"></i> : t('menu:survey.submit')}
+              </button>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
-export default Survey;
+export default SurveyModal;

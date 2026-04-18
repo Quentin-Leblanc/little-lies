@@ -48,6 +48,23 @@ create table if not exists public.xp_log (
   created_at timestamptz default now()
 );
 
+-- 4. Post-game survey responses
+-- Anonymous allowed: user_id can be null so guests can leave feedback too.
+-- rating is 1..5, comment is short free-text, answers is a jsonb bag so
+-- we can evolve the questionnaire without DDL every time.
+create table if not exists public.surveys (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles(id) on delete set null,
+  rating integer,
+  comment text,
+  answers jsonb,
+  game_length_days integer,
+  player_count integer,
+  winning_team text,
+  language text,
+  created_at timestamptz default now()
+);
+
 -- ============================================================
 -- Row Level Security (RLS)
 -- ============================================================
@@ -55,6 +72,7 @@ create table if not exists public.xp_log (
 alter table public.profiles enable row level security;
 alter table public.game_history enable row level security;
 alter table public.xp_log enable row level security;
+alter table public.surveys enable row level security;
 
 -- Profiles: anyone can read, only owner can update (except is_admin)
 create policy "Profiles are viewable by everyone"
@@ -77,6 +95,18 @@ create policy "Users can view own XP log"
 
 create policy "Authenticated users can insert XP log"
   on public.xp_log for insert with check (auth.uid() = user_id);
+
+-- Surveys: anyone (incl. guest) can submit. Only the admin dashboard reads.
+-- user_id must match auth.uid() when signed-in; guests submit with null.
+drop policy if exists "Anyone can submit a survey" on public.surveys;
+create policy "Anyone can submit a survey"
+  on public.surveys for insert
+  with check (user_id is null or auth.uid() = user_id);
+
+drop policy if exists "Admins can view all surveys" on public.surveys;
+create policy "Admins can view all surveys"
+  on public.surveys for select
+  using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin = true));
 
 -- ============================================================
 -- Auto-create profile on signup (trigger)

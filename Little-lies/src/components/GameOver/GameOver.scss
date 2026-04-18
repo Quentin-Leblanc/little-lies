@@ -623,6 +623,32 @@
   }
 }
 
+// Feedback row — sits just above the main button row
+.go-feedback-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.8rem;
+}
+
+.go-btn-feedback {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  color: #bbb;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.85rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  i { margin-right: 0.4rem; color: #8fb5ff; }
+
+  &:hover {
+    background: rgba(47, 130, 255, 0.08);
+    color: #fff;
+    border-color: rgba(47, 130, 255, 0.3);
+  }
+}
+
 // === PARTICLES ===
 .go-particles {
   position: absolute;

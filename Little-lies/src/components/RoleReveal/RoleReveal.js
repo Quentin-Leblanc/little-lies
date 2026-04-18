@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
@@ -37,16 +37,22 @@ const useTypewriter = (text, speed = 40, startDelay = 0) => {
   return displayed;
 };
 
-// Card glow particles
+// Card glow particles. Positions/sizes/delays MUST be memoized once per
+// mount — previously they were recomputed on every parent re-render so
+// particles teleported around the card mid-reveal (typewriter text + ready
+// state changes were triggering the jumps).
 const CardParticles = ({ color }) => {
-  const particles = Array.from({ length: 12 }, (_, i) => ({
-    id: i,
-    x: (Math.random() - 0.5) * 280,
-    y: (Math.random() - 0.5) * 400,
-    size: 2 + Math.random() * 4,
-    delay: Math.random() * 2,
-    duration: 2 + Math.random() * 3,
-  }));
+  const particles = useMemo(
+    () => Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      x: (Math.random() - 0.5) * 280,
+      y: (Math.random() - 0.5) * 400,
+      size: 2 + Math.random() * 4,
+      delay: Math.random() * 2,
+      duration: 2 + Math.random() * 3,
+    })),
+    [],
+  );
 
   return (
     <div className="card-particles">

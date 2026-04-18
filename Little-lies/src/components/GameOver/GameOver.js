@@ -7,7 +7,7 @@ import { calculateGameXP } from '../../utils/xpSystem';
 import { useAuth } from '../Auth/Auth';
 import { addXP, incrementGamesPlayed } from '../../utils/supabase';
 import Audio from '../../utils/AudioManager';
-import Survey from '../Survey/Survey';
+import SurveyModal from '../Survey/Survey';
 import './GameOver.scss';
 
 const TEAM_STYLES = {
@@ -21,9 +21,11 @@ const TEAM_STYLES = {
 
 const TEAM_ORDER = ['town', 'mafia', 'evil', 'cult', 'neutral'];
 
-// Timings (ms) for the staged reveal → panel transition
-const INTERMEDIATE_VISIBLE_MS = 5000;
-const FADE_BETWEEN_MS = 900;
+// Timings (ms) for the staged reveal → panel transition. Bumped from
+// 5 s / 0.9 s so players actually have time to read the faction + roster
+// before the panel takes over.
+const INTERMEDIATE_VISIBLE_MS = 8000;
+const FADE_BETWEEN_MS = 1400;
 
 // Particules flottantes selon victoire/defaite
 const Particles = ({ type }) => {
@@ -70,6 +72,7 @@ const GameOver = () => {
   const [xpGained, setXpGained] = useState(null);
   const metricsSaved = useRef(false);
   const xpSaved = useRef(false);
+  const [surveyOpen, setSurveyOpen] = useState(false);
   const winner = game.winner;
   const players = getPlayers();
   const mePlayer = getMe();
@@ -109,23 +112,29 @@ const GameOver = () => {
   // fatal because metricsSaved.current flipped to true on the first run,
   // the `if (user)` branch was skipped, and the effect never re-fired.
   // Now each piece has its own ref guard, so either side arriving late
-  // still triggers the save.
+  // still triggers the save. Supabase errors are surfaced via returned
+  // { error } (the builders don't throw), so we pattern-match on that.
   useEffect(() => {
     if (xpSaved.current) return;
-    if (!xpGained || !user) return;
+    if (!xpGained || !user?.id) return;
     xpSaved.current = true;
     const reasonLabel = xpGained.gains.map(g => g.reason).join(', ');
-    addXP(user.id, xpGained.total, reasonLabel)
-      .then(() => incrementGamesPlayed(user.id, isWinner || isNeutralWinner))
-      .then(() => refreshProfile())
-      .catch((err) => {
-        // Let the user retry on their next game — but log so we can spot
-        // RLS / network errors instead of silently swallowing them.
-        xpSaved.current = false;
+    (async () => {
+      try {
+        const xpRes = await addXP(user.id, xpGained.total, reasonLabel);
+        if (xpRes?.error) throw xpRes.error;
+        const gpRes = await incrementGamesPlayed(user.id, isWinner || isNeutralWinner);
+        if (gpRes?.error) throw gpRes.error;
+        await refreshProfile();
+        // eslint-disable-next-line no-console
+        console.info('[GameOver] XP saved', { total: xpGained.total, newXP: xpRes?.newXP });
+      } catch (err) {
+        xpSaved.current = false; // allow retry on next render
         // eslint-disable-next-line no-console
         console.error('[GameOver] XP save failed', err);
-      });
-  }, [xpGained, user]);
+      }
+    })();
+  }, [xpGained, user?.id]);
 
   // Lobby music on the game-over screen — same playlist as the lobby so the
   // end-of-game mood carries over into the next session. Stops on unmount.
@@ -409,7 +418,11 @@ const GameOver = () => {
               })}
             </div>
 
-            <Survey />
+            <div className="go-feedback-row">
+              <button className="go-btn go-btn-feedback" onClick={() => setSurveyOpen(true)}>
+                <i className="fas fa-comment-dots"></i> {t('menu:survey.open_button', { defaultValue: 'Donner mon avis' })}
+              </button>
+            </div>
 
             <div className="go-buttons">
               <button className="go-btn go-btn-secondary" onClick={() => setDismissed(true)}>
@@ -425,6 +438,16 @@ const GameOver = () => {
           </div>
         </div>
       )}
+
+      <SurveyModal
+        open={surveyOpen}
+        onClose={() => setSurveyOpen(false)}
+        context={{
+          days: game.dayCount,
+          playerCount: players.length,
+          winningTeam: winner,
+        }}
+      />
     </>
   );
 };
