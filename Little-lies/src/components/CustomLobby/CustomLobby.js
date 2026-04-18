@@ -176,7 +176,7 @@ const CampGround = () => {
   <group>
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
       <circleGeometry args={[20, 32]} />
-      <meshStandardMaterial map={albedo} color="#ffffff" roughness={1} metalness={0} />
+      <meshStandardMaterial map={albedo} color="#5a534e" roughness={1} metalness={0} />
     </mesh>
     {/* Stone circle around fire */}
     {Array.from({ length: 10 }).map((_, i) => {
@@ -381,7 +381,7 @@ const LobbyMysticText = () => {
   useEffect(() => {
     if (!lines) return;
     const FADE_MS = 600;
-    const HOLD_MS = 7000;
+    const HOLD_MS = 8500;
     const tick = () => {
       setVisible(false);
       setTimeout(() => {
