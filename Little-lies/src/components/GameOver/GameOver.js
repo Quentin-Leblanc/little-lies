@@ -137,9 +137,11 @@ const GameOver = () => {
   }, [xpGained, user?.id]);
 
   // Lobby music on the game-over screen — same playlist as the lobby so the
-  // end-of-game mood carries over into the next session. Stops on unmount.
+  // end-of-game mood carries over into the next session, but starting at
+  // track 2 (tavern ambient) instead of medieval so end ≠ fresh-lobby.
+  // Stops on unmount. null first arg = unused URL slot for back-compat.
   useEffect(() => {
-    Audio.playLobbyMusic();
+    Audio.playLobbyMusic(null, 0.5, 1);
     return () => Audio.stopLobbyMusic();
   }, []);
 

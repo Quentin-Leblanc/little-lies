@@ -23,13 +23,34 @@ import i18n from './trad/i18n';
 import './styles/global.scss';
 import './styles/App.scss';
 
+// Persisted across F5 (sessionStorage = lives within the tab). When the
+// player has already cleared the RoleReveal card once, we skip it on
+// subsequent reloads within the same session so they don't get the
+// "La nuit tombe sur le village..." intro replayed every refresh. Wiped
+// when the game resets to ROLE_SELECTION (new game starts) and when the
+// tab closes.
+const ROLE_REVEAL_SEEN_KEY = 'amongliars_role_reveal_seen';
+const readRoleRevealSeen = () => {
+    try { return sessionStorage.getItem(ROLE_REVEAL_SEEN_KEY) === 'true'; }
+    catch { return false; }
+};
+const writeRoleRevealSeen = (seen) => {
+    try {
+        if (seen) sessionStorage.setItem(ROLE_REVEAL_SEEN_KEY, 'true');
+        else sessionStorage.removeItem(ROLE_REVEAL_SEEN_KEY);
+    } catch { /* storage blocked — accept degraded behavior */ }
+};
+
 function App() {
     const { game: { isGameStarted, status, phase }, CONSTANTS, getMe } = useGameEngine();
     const me = getMe();
     const isSpectator = !!me?.isSpectator;
     const isNight = phase === CONSTANTS.PHASE.NIGHT || phase === CONSTANTS.PHASE.NIGHT_TRANSITION;
     const [isSelectingRoles, setIsSelectingRoles] = useState(false);
-    const [showRoleReveal, setShowRoleReveal] = useState(true);
+    // showRoleReveal starts false if this tab already saw the reveal, so
+    // F5 during a game drops the player straight into the match instead
+    // of replaying the card + "la nuit tombe" intro.
+    const [showRoleReveal, setShowRoleReveal] = useState(() => !readRoleRevealSeen());
     const prevPhaseRef = useRef(null);
 
     const isGameOver = status === CONSTANTS.GAME_ENDED;
@@ -40,6 +61,7 @@ function App() {
         if (status === CONSTANTS.GAME_ROLE_SELECTION && !isGameStarted && !isGameOver) {
             setIsSelectingRoles(true);
             setShowRoleReveal(true);
+            writeRoleRevealSeen(false); // next game should show reveal again
             setCurtainVisible(false);
             setCurtainClosed(false);
             setCurtainReady(false);
@@ -65,6 +87,7 @@ function App() {
     // RoleReveal is done → remove overlay and open curtain immediately
     const handleRoleRevealComplete = () => {
         setShowRoleReveal(false);
+        writeRoleRevealSeen(true); // remember across F5 in this tab
         // Open curtain right away
         requestAnimationFrame(() => setCurtainClosed(false));
         // Remove curtain element after opening animation (1s)

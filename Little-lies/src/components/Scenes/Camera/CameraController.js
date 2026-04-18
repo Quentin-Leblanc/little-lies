@@ -9,8 +9,9 @@ import {
 import { pushCameraOutOfObstacles } from '../utils';
 
 // Smooth follow based on phase:
-// - Night: waypoint cinematic keyed to nightWeather (clear/rainy/foggy)
-//   so back-to-back nights don't replay the same shots.
+// - Night: one of 6 cinematics rotated by dayCount with a coprime step,
+//   so back-to-back nights never replay the same shot and the whole pool
+//   is used before anything repeats.
 // - Trial (defense/judgment/last-words/execution): zoom on podium
 // - Day / other: continuous slow orbit around the plaza (~13 min/turn)
 // Pushes the target and interpolated position out of the church & gallows
@@ -53,13 +54,15 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0 }) => {
       }
       nightTimeRef.current += delta;
 
-      // Mirror MainScene's nightWeather seed so the cinematic matches the
-      // atmosphere being rendered that same night. Keys: clear / rainy /
-      // foggy. The formula MUST stay in lockstep with MainScene.js.
-      const seed = dayCount * 7 + 3;
-      const nightWeather = (seed * 13 + 5) % 3;
-      const weatherKey = nightWeather === 1 ? 'rainy' : nightWeather === 2 ? 'foggy' : 'clear';
-      const waypoints = NIGHT_CAMERA_WAYPOINTS[weatherKey] || NIGHT_CAMERA_WAYPOINTS.clear;
+      // Deterministic rotation over the 6-cinematic pool. 5 is coprime
+      // with 6, so (dayCount * 5) % 6 visits all 6 indices in a cycle of
+      // 6 without consecutive repeats. +2 shifts the cycle so day 0 and
+      // day 1 don't start on identical or symmetric picks. Every client
+      // computes the same pick from the same dayCount → no networking
+      // needed for multiplayer sync.
+      const pool = NIGHT_CAMERA_WAYPOINTS;
+      const idx = ((dayCount * 5 + 2) % pool.length + pool.length) % pool.length;
+      const waypoints = pool[idx].waypoints;
 
       let elapsed = nightTimeRef.current;
       let wpIdx = 0;

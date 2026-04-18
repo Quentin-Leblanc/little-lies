@@ -229,10 +229,15 @@ const _playLobbyTrack = async (token, index, volume) => {
   }
 };
 
-export const playLobbyMusic = async (_unusedUrl, volume = 0.5) => {
+// startIndex lets callers enter the playlist at a specific track — the
+// GameOver screen uses this to lead with tavern ambient (index 1) instead
+// of the default medieval opener so the end-of-game mood doesn't feel
+// like a lobby replay. Wraps around the array length defensively.
+export const playLobbyMusic = async (_unusedUrl, volume = 0.5, startIndex = 0) => {
   if (_lobbySource) return;
   const myToken = ++_lobbyToken;
-  _playLobbyTrack(myToken, 0, volume);
+  const safeStart = ((startIndex % LOBBY_PLAYLIST.length) + LOBBY_PLAYLIST.length) % LOBBY_PLAYLIST.length;
+  _playLobbyTrack(myToken, safeStart, volume);
 };
 
 export const stopLobbyMusic = () => {

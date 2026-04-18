@@ -44,39 +44,63 @@ export const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(7, 1.1, -6);
 export const EXECUTION_CAMERA_POS = new THREE.Vector3(7, 6, -10);
 export const EXECUTION_CAMERA_LOOK = new THREE.Vector3(7, 0.5, -6);
 
-// Night cinematic camera — three weather-tied flavors so nights don't
-// feel identical. The `clear` variant (ex-default) is the calm stargaze
-// we've always had; `rainy` stays low and dramatic; `foggy` creeps at
-// ground level. Selected in CameraController from the same nightWeather
-// seed MainScene uses for atmosphere so cinematic + mood stay in sync.
-export const NIGHT_CAMERA_WAYPOINTS = {
-  clear: [
+// Night cinematic pool — 6 distinct shots the CameraController rotates
+// through so back-to-back nights don't replay the same camera moves.
+// Selected by dayCount with a coprime step (5 mod 6) so consecutive
+// nights ALWAYS land on different cinematics and the full pool is hit
+// once before any repeat. Every player computes the same pick from the
+// same dayCount → all clients stay in sync without extra networking.
+//
+// Each entry is { name, waypoints }. `name` is for debugging/logging,
+// the waypoints shape matches what the consumer walks through.
+export const NIGHT_CAMERA_WAYPOINTS = [
+  // 0 — stargaze: calm, climbs from the plaza up into the stars.
+  { name: 'stargaze', waypoints: [
     { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 5 },
     { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 18 },
     { pos: [-1, 3.5, -1],   lookAt: [0, 12, -3],      duration: 20 },
     { pos: [0, 4, 0],       lookAt: [0, 15, -2],      duration: 30, hold: true },
-  ],
-  rainy: [
-    // Wide low-angle establishing shot — feels like a storm cell above.
+  ]},
+  // 1 — stormlow: low-angle wide shot, push toward the church, lateral
+  // drift, hold in front of the church so lightning flashes land clean.
+  { name: 'stormlow', waypoints: [
     { pos: [7, 2.4, 7],     lookAt: [0, 2.5, -6],     duration: 6 },
-    // Push forward through the plaza toward the church silhouette.
     { pos: [3, 2, 3],       lookAt: [0, 3, -12],      duration: 16 },
-    // Side drift so the rain streaks catch the camera sideways.
     { pos: [-5, 2.6, -1],   lookAt: [3, 3, -9],       duration: 16 },
-    // Hold low in front of the church — lightning flashes behind it.
     { pos: [0, 2.2, -2],    lookAt: [0, 5, -15],      duration: 30, hold: true },
-  ],
-  foggy: [
-    // Start inside the fog at human height, looking into the murk.
+  ]},
+  // 2 — fogdrift: ground-level claustrophobic creep through the village.
+  { name: 'fogdrift', waypoints: [
     { pos: [0, 1.6, 8],     lookAt: [0, 1.8, -2],     duration: 6 },
-    // Slow forward crawl through the village — claustrophobic pacing.
     { pos: [0, 1.3, 3],     lookAt: [0, 1.6, -10],    duration: 18 },
-    // Sideways drift, lookAt off-axis so nothing resolves cleanly.
     { pos: [-3, 1.4, -1],   lookAt: [2, 1.4, -9],     duration: 18 },
-    // Hold facing the church, swallowed by fog.
     { pos: [0, 1.6, -5],    lookAt: [0, 2.4, -15],    duration: 30, hold: true },
-  ],
-};
+  ]},
+  // 3 — plazaspin: tight orbit around the plaza center, always looking
+  // in at the gallows — reveals the village in slow rotation.
+  { name: 'plazaspin', waypoints: [
+    { pos: [0, 5, 8],       lookAt: [0, 1, 0],        duration: 5 },
+    { pos: [8, 4, 2],       lookAt: [0, 1, 0],        duration: 15 },
+    { pos: [0, 4, -8],      lookAt: [0, 1, 0],        duration: 18 },
+    { pos: [-7, 3.5, 2],    lookAt: [0, 1, 0],        duration: 30, hold: true },
+  ]},
+  // 4 — highdrone: cold high-altitude slow pan, stars overhead. Fewer
+  // lookAt changes so it feels glacial and detached.
+  { name: 'highdrone', waypoints: [
+    { pos: [0, 12, 0],      lookAt: [0, 0, -5],       duration: 5 },
+    { pos: [10, 10, 6],     lookAt: [0, 0, -5],       duration: 16 },
+    { pos: [0, 11, 14],     lookAt: [0, 0, -5],       duration: 16 },
+    { pos: [-10, 10, 6],    lookAt: [0, 0, -5],       duration: 30, hold: true },
+  ]},
+  // 5 — churchapproach: long slow push from the plaza toward the church
+  // silhouette. Hold low, looking up — ominous.
+  { name: 'churchapproach', waypoints: [
+    { pos: [0, 6, 9],       lookAt: [0, 4, -10],      duration: 5 },
+    { pos: [0, 4, 3],       lookAt: [0, 4.5, -12],    duration: 15 },
+    { pos: [-2, 3, -3],     lookAt: [0, 5, -14],      duration: 16 },
+    { pos: [0, 2.6, -6],    lookAt: [0, 4.5, -15],    duration: 30, hold: true },
+  ]},
+];
 
 // Spherical obstacles the camera must stay outside of.
 // Church (rootbound_manor) at [0,0,-15] scale 4.8 → snug sphere.
