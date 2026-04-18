@@ -277,6 +277,43 @@ const PlayerActions = memo(function () {
         document.body
       )}
 
+      {/* Big centered judgment buttons overlay (jurors only) */}
+      {isJudgmentPhase && accusedPlayer && me.id !== game.accusedId && me.isAlive && createPortal(
+        <div className="judgment-center-overlay">
+          <div className="judgment-center-title">
+            {t('game:gameover.is_accused', { name: accusedPlayer.profile.name })}
+          </div>
+          <div className="judgment-center-buttons">
+            <button
+              className={`judgment-center-btn judgment-center-innocent ${myJudgmentVote === 'innocent' ? 'active' : ''}`}
+              onClick={() => handleJudgmentVote('innocent')}
+              disabled={!!myJudgmentVote}
+              aria-pressed={myJudgmentVote === 'innocent'}
+              aria-label={t('common:innocent')}
+            >
+              <i className="fas fa-shield" aria-hidden="true"></i>
+              <span>{t('common:innocent')}</span>
+            </button>
+            <button
+              className={`judgment-center-btn judgment-center-guilty ${myJudgmentVote === 'guilty' ? 'active' : ''}`}
+              onClick={() => handleJudgmentVote('guilty')}
+              disabled={!!myJudgmentVote}
+              aria-pressed={myJudgmentVote === 'guilty'}
+              aria-label={t('common:guilty')}
+            >
+              <i className="fas fa-gavel" aria-hidden="true"></i>
+              <span>{t('common:guilty')}</span>
+            </button>
+          </div>
+          {myJudgmentVote && (
+            <div className="judgment-center-hint">
+              {t('game:judgment_vote_cast', { defaultValue: 'Your verdict has been cast.' })}
+            </div>
+          )}
+        </div>,
+        document.body
+      )}
+
       <div className={`player-list-container ${isVotingPhase ? 'highlight-vote' : ''}`}>
         {/* Mayor reveal button */}
         {canReveal && (
@@ -294,7 +331,7 @@ const PlayerActions = memo(function () {
 
         {/* Phase context panel — fixed height container to prevent layout shift */}
         <div className="phase-context-slot">
-          {/* Judgment phase */}
+          {/* Judgment phase — sidebar recap (buttons also shown as big center overlay) */}
           {isJudgmentPhase && accusedPlayer && me.id !== game.accusedId && me.isAlive && (
             <div className="judgment-panel">
               <p>{t('game:gameover.is_accused', { name: accusedPlayer.profile.name })}</p>
@@ -307,6 +344,15 @@ const PlayerActions = memo(function () {
                   aria-label={t('common:innocent')}
                 >
                   <i className="fas fa-shield" aria-hidden="true"></i> {t('common:innocent')}
+                </button>
+                <button
+                  className={`primaryBtn judgment-guilty ${myJudgmentVote === 'guilty' ? 'active' : ''}`}
+                  onClick={() => handleJudgmentVote('guilty')}
+                  disabled={!!myJudgmentVote}
+                  aria-pressed={myJudgmentVote === 'guilty'}
+                  aria-label={t('common:guilty')}
+                >
+                  <i className="fas fa-gavel" aria-hidden="true"></i> {t('common:guilty')}
                 </button>
               </div>
               <p className="judgment-hint">{t('game:judgment_default_guilty', { defaultValue: 'Guilty by default — vote Innocent to save' })}</p>

@@ -20,7 +20,7 @@ const GameEngineContext = React.createContext();
 // Phase durations (ms) — tuned for real multiplayer gameplay
 const DURATIONS = {
   NIGHT: 30000,
-  NIGHT_TRANSITION: 2000,   // visual fade between day/night
+  NIGHT_TRANSITION: 3000,   // visual fade between day/night (covers 1.5s black fade + breather)
   DEATH_REPORT: 7000,       // 7s to read deaths (was 5s)
   DISCUSSION: 30000,        // 30s to discuss (was 15s)
   VOTING: 30000,
@@ -414,8 +414,12 @@ export const GameEngineProvider = ({ children }) => {
   };
 
   // --- AFK detection ---
-  const AFK_TIMEOUT_MS = 180000; // 3 min before marking AFK
-  const AFK_WRITE_THROTTLE_MS = 5000; // don't spam network
+  // 6 min before marking AFK — long enough that players silently
+  // following a phase (no chat, no clicks) don't get flagged. Pointer /
+  // key activity also resets this globally (see GameEngineProvider effect
+  // below), so any interaction on the page counts.
+  const AFK_TIMEOUT_MS = 360000;
+  const AFK_WRITE_THROTTLE_MS = 15000; // don't spam network
 
   const updateActivity = (playerId) => {
     if (!playerId) return;
@@ -738,6 +742,29 @@ export const GameEngineProvider = ({ children }) => {
       handleAFKPlayers();
     }, 10000);
     return () => clearInterval(interval);
+  }, [game.isGameStarted, game.status, players]);
+
+  // --- Global activity listener (all clients) ---
+  // Any pointer / key / focus event resets the local player's AFK timer.
+  // Previously only votes and chat did, which flagged quiet-but-present
+  // players after one phase. The write throttle upstream keeps the network
+  // traffic minimal.
+  useEffect(() => {
+    if (!game.isGameStarted || game.status === STATUS.ENDED) return;
+    const ping = () => {
+      try {
+        const myId = me()?.id;
+        if (myId) updateActivity(myId);
+      } catch { /* no-op */ }
+    };
+    window.addEventListener('pointerdown', ping);
+    window.addEventListener('keydown', ping);
+    window.addEventListener('focus', ping);
+    return () => {
+      window.removeEventListener('pointerdown', ping);
+      window.removeEventListener('keydown', ping);
+      window.removeEventListener('focus', ping);
+    };
   }, [game.isGameStarted, game.status, players]);
 
   // --- Trial sanitization (host only) ---

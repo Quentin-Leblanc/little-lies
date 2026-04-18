@@ -120,8 +120,14 @@
     "xp_hint": "Connecte-toi pour sauvegarder ton XP",
     "is_accused": "{{name}} est-il coupable ?",
     "accused_defense": "{{name}} est accusé ! C'est le moment de se défendre.",
-    "last_words": "{{name}} — Derniers mots..."
+    "last_words": "{{name}} — Derniers mots...",
+    "winning_faction": "Faction gagnante"
   },
+  "lynch_reveal": {
+    "verdict": "{{name}} a été jugé coupable",
+    "role_was": "Son rôle était :"
+  },
+  "judgment_vote_cast": "Ton verdict est scellé.",
   "action_tooltips": {
     "KILL": "Élimine un joueur cette nuit",
     "MAFIA_KILL": "La mafia élimine un joueur cette nuit",

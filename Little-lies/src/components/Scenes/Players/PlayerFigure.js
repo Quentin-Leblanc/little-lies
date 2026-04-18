@@ -176,7 +176,7 @@ const PlayerFigure = ({
         <PhaseEmote phase={phase} isAccused={isAccused} CONSTANTS={CONSTANTS} />
       )}
       {!isTransitioning && (
-        <ChatBubble playerId={player.id} chatMessages={chatMessages} dayCount={dayCount} />
+        <ChatBubble playerId={player.id} chatMessages={chatMessages} dayCount={dayCount} phase={phase} />
       )}
     </group>
   );

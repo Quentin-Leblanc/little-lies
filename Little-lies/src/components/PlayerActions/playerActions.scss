@@ -545,6 +545,137 @@
   margin: 0.235rem 0 0;
 }
 
+/* ── Big centered judgment verdict overlay ── */
+.judgment-center-overlay {
+  position: fixed;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  pointer-events: none;
+  animation: judgment-center-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+.judgment-center-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.15rem;
+  padding: 0.7rem 1.8rem;
+  background: rgba(8, 8, 18, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.6rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+}
+
+.judgment-center-buttons {
+  display: flex;
+  gap: 2.2rem;
+  pointer-events: auto;
+}
+
+.judgment-center-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 11rem;
+  padding: 1.6rem 2.2rem;
+  border-radius: 1rem;
+  border: 2px solid;
+  font-family: 'Cinzel', serif;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: 0.18rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.18s ease, box-shadow 0.2s ease, background 0.2s ease, filter 0.2s ease;
+  backdrop-filter: blur(6px);
+
+  i {
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    filter: saturate(0.6);
+  }
+
+  &.active {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55), 0 0 30px currentColor;
+    filter: brightness(1.1);
+  }
+}
+
+.judgment-center-innocent {
+  background: linear-gradient(160deg, rgba(40, 170, 80, 0.85), rgba(25, 130, 55, 0.92));
+  border-color: #44ff88;
+  box-shadow: 0 10px 30px rgba(40, 170, 80, 0.45), 0 0 22px rgba(68, 255, 136, 0.25);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(160deg, rgba(60, 200, 100, 0.95), rgba(30, 150, 65, 1));
+    box-shadow: 0 14px 40px rgba(40, 170, 80, 0.6), 0 0 38px rgba(68, 255, 136, 0.45);
+  }
+}
+
+.judgment-center-guilty {
+  background: linear-gradient(160deg, rgba(190, 40, 50, 0.88), rgba(140, 22, 32, 0.95));
+  border-color: #ff5a5a;
+  box-shadow: 0 10px 30px rgba(190, 40, 50, 0.5), 0 0 22px rgba(255, 90, 90, 0.3);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(160deg, rgba(220, 60, 70, 0.95), rgba(165, 25, 40, 1));
+    box-shadow: 0 14px 40px rgba(200, 50, 60, 0.6), 0 0 38px rgba(255, 90, 90, 0.5);
+  }
+}
+
+.judgment-center-hint {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.18rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 0.4rem 1rem;
+  background: rgba(8, 8, 18, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.4rem;
+}
+
+@keyframes judgment-center-in {
+  0% { opacity: 0; transform: translate(-50%, -42%) scale(0.9); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (max-width: 768px) {
+  .judgment-center-title { font-size: 1.2rem; padding: 0.5rem 1rem; }
+  .judgment-center-buttons { gap: 1rem; }
+  .judgment-center-btn {
+    min-width: 7.5rem;
+    padding: 1rem 1.3rem;
+    font-size: 1.1rem;
+    i { font-size: 1.6rem; }
+  }
+}
+
 // Disabled action hint (e.g. Vigilante night 1)
 .action-hint-disabled {
   font-size: 0.706rem;

@@ -98,10 +98,13 @@ const MainScene = () => {
 
   const lastPhaseForFade = useRef(phase);
 
-  // Phases that lead directly to night (last phases before night falls)
+  // Phases that lead directly to night (last phases before night falls).
+  // EXECUTION_REVEAL is intentionally excluded so the 5s role-reveal
+  // card isn't drowned out by a fade-to-black — the fade happens during
+  // the subsequent NIGHT_TRANSITION phase instead.
   const PRE_NIGHT_PHASES = [
     CONSTANTS.PHASE.NO_LYNCH, CONSTANTS.PHASE.SPARED,
-    CONSTANTS.PHASE.EXECUTION, CONSTANTS.PHASE.EXECUTION_REVEAL,
+    CONSTANTS.PHASE.EXECUTION,
     CONSTANTS.PHASE.NIGHT_TRANSITION,
   ];
   const fadeTimers = useRef([]);
@@ -118,15 +121,20 @@ const MainScene = () => {
 
     if (PRE_NIGHT_PHASES.includes(phase)) {
       setIsSunset(true);
-      // Delay fade so sunset animation is fully visible (~5s)
+      // Delay fade so sunset animation is fully visible (~5s), except for
+      // NIGHT_TRANSITION which follows an already-completed reveal —
+      // start the black fade immediately there so the short 2s phase
+      // actually has time to go dark before NIGHT kicks in.
+      const fadeDelay = phase === CONSTANTS.PHASE.NIGHT_TRANSITION ? 0 : 4000;
+      const textDelay = phase === CONSTANTS.PHASE.NIGHT_TRANSITION ? 0 : 3500;
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
-      }, 4000));
+      }, fadeDelay));
       // Show "La nuit tombe..." late enough that the SPARED / NO_LYNCH /
       // EXECUTION announcement has finished fading out.
       fadeTimers.current.push(setTimeout(() => {
         setShowNightText(true);
-      }, 3500));
+      }, textDelay));
       // Trigger walk-away (separate timer, not cleared on phase change).
       // IMPORTANT: only reveal players when we *start* the walk.
       // Re-entering a PRE_NIGHT phase (e.g. EXECUTION → NIGHT_TRANSITION)
@@ -518,7 +526,10 @@ const MainScene = () => {
         );
       })()}
 
-      {/* Lynch role reveal overlay — post-execution suspense moment */}
+      {/* Lynch role reveal overlay — post-execution suspense moment.
+          5s dedicated phase so the room has time to read the verdict
+          ("X was judged guilty") and the role reveal ("Their role was…")
+          before the screen fades to night. */}
       {phase === CONSTANTS.PHASE.EXECUTION_REVEAL && (() => {
         const executed = players.find((p) => p.id === game.accusedId);
         if (!executed?.character) return null;
@@ -540,12 +551,17 @@ const MainScene = () => {
                 boxShadow: `0 0 40px ${role.couleur}55, 0 0 100px ${role.couleur}2a`,
               }}
             >
-              <div className="lynch-reveal-name">{executed.profile?.name || 'Player'}</div>
-              <div className="lynch-reveal-team" style={{ color: role.couleur }}>{teamLabel}</div>
+              <div className="lynch-reveal-verdict">
+                {i18n.t('game:lynch_reveal.verdict', { name: executed.profile?.name || '?', defaultValue: '{{name}} has been found guilty' })}
+              </div>
+              <div className="lynch-reveal-role-label">
+                {i18n.t('game:lynch_reveal.role_was', { defaultValue: 'Their role was:' })}
+              </div>
               <div className="lynch-reveal-icon" style={{ color: role.couleur }}>
                 <i className={`fas ${role.icon}`}></i>
               </div>
               <div className="lynch-reveal-role" style={{ color: role.couleur }}>{roleLabel}</div>
+              <div className="lynch-reveal-team" style={{ color: role.couleur }}>{teamLabel}</div>
             </div>
           </div>
         );

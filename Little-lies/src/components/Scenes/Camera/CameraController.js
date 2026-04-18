@@ -1,12 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
   NIGHT_CAMERA_WAYPOINTS,
-  DEFENSE_CAMERA_LOOK,
   JUDGMENT_CAMERA_POS, JUDGMENT_CAMERA_LOOK,
   EXECUTION_CAMERA_POS, EXECUTION_CAMERA_LOOK,
-  PODIUM_POSITION,
 } from '../constants';
 import { pushCameraOutOfObstacles } from '../utils';
 
@@ -23,12 +21,29 @@ const CameraController = ({ phase, CONSTANTS }) => {
   const nightTimeRef = useRef(0);
   const prevPhaseRef = useRef(phase);
   const defenseTimeRef = useRef(0);
+  const snapOnNextFrame = useRef(false);
+  const dayOrbitTimeRef = useRef(0);
 
   const isDefensePhase = phase === CONSTANTS.PHASE.DEFENSE;
   const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
   const isLastWords = phase === CONSTANTS.PHASE.LAST_WORDS;
   const isExecution = phase === CONSTANTS.PHASE.EXECUTION;
   const isTrialCamera = isDefensePhase || isJudgmentPhase || isLastWords || isExecution;
+
+  // When the tab regains focus after being hidden, snap the camera to its
+  // target on the next frame instead of lerping from a stale position —
+  // otherwise users see the camera "catch up" to where the phase moved on.
+  useEffect(() => {
+    const onVisible = () => {
+      if (!document.hidden) snapOnNextFrame.current = true;
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, []);
 
   useFrame((_, delta) => {
     if (phase === CONSTANTS.PHASE.NIGHT) {
@@ -71,18 +86,10 @@ const CameraController = ({ phase, CONSTANTS }) => {
       }
       defenseTimeRef.current += delta;
 
-      if (isDefensePhase) {
-        // Slow orbit around the accused at the podium — dramatic reveal.
-        // Higher Y + tighter radius = more top-down framing, less horizon.
-        const orbitT = defenseTimeRef.current * 0.15;
-        const radius = 3.2;
-        const px = PODIUM_POSITION[0];
-        const pz = PODIUM_POSITION[2];
-        const cx = px + Math.sin(orbitT) * radius;
-        const cz = pz + Math.cos(orbitT) * radius * 0.6;
-        targetPos.current.set(cx, 5.2, cz);
-        targetLookAt.current.copy(DEFENSE_CAMERA_LOOK);
-      } else if (isJudgmentPhase) {
+      if (isDefensePhase || isJudgmentPhase) {
+        // Defense AND judgment: same fixed camera on the podium, no orbit.
+        // Keeping them identical means the cut from defense → judgment is
+        // invisible (no camera travel), which is what we want.
         targetPos.current.copy(JUDGMENT_CAMERA_POS);
         targetLookAt.current.copy(JUDGMENT_CAMERA_LOOK);
       } else if (isLastWords) {
@@ -95,7 +102,11 @@ const CameraController = ({ phase, CONSTANTS }) => {
       }
     } else {
       // Day phases: continuous very slow orbit (~13 min per full turn).
-      const orbitAngle = Date.now() * 0.000008;
+      // Use accumulated delta (not Date.now) so the orbit pauses cleanly
+      // when the tab is hidden rather than snapping forward when it comes
+      // back — matches what everyone else is seeing if they're also active.
+      dayOrbitTimeRef.current += delta;
+      const orbitAngle = dayOrbitTimeRef.current * 0.008;
       const orbitRadius = 12;
       const orbitX = Math.sin(orbitAngle) * orbitRadius;
       const orbitZ = Math.cos(orbitAngle) * orbitRadius;
@@ -112,6 +123,13 @@ const CameraController = ({ phase, CONSTANTS }) => {
     if (comingFromNight) {
       camera.position.copy(targetPos.current);
       camera.lookAt(0, 0, 0);
+    }
+    // When returning from a hidden tab, snap instead of lerping so the
+    // view matches what everyone else has already been seeing.
+    if (snapOnNextFrame.current) {
+      snapOnNextFrame.current = false;
+      camera.position.copy(targetPos.current);
+      camera.lookAt(targetLookAt.current);
     }
     prevPhaseRef.current = phase;
 

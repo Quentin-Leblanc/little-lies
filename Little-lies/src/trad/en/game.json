@@ -120,8 +120,14 @@
     "xp_hint": "Log in to save your XP",
     "is_accused": "Is {{name}} guilty?",
     "accused_defense": "{{name}} is accused! Time to defend yourself.",
-    "last_words": "{{name}} — Last words..."
+    "last_words": "{{name}} — Last words...",
+    "winning_faction": "Winning faction"
   },
+  "lynch_reveal": {
+    "verdict": "{{name}} has been found guilty",
+    "role_was": "Their role was:"
+  },
+  "judgment_vote_cast": "Your verdict is cast.",
   "action_tooltips": {
     "KILL": "Eliminate a player tonight",
     "MAFIA_KILL": "The mafia eliminates a player tonight",
