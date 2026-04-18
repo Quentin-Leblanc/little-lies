@@ -79,6 +79,7 @@
   "edit": "Edit",
   "save": "Save",
   "username_too_long": "Username too long (20 chars max)",
+  "username_taken": "That username is already taken, pick another.",
   "games_played_label": "Games",
   "wins": "Wins",
   "win_rate": "Win rate",

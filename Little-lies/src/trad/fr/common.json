@@ -79,6 +79,7 @@
   "edit": "Modifier",
   "save": "Enregistrer",
   "username_too_long": "Pseudo trop long (20 caractères max)",
+  "username_taken": "Ce pseudo est déjà pris, choisis-en un autre.",
   "games_played_label": "Parties",
   "wins": "Victoires",
   "win_rate": "Victoires %",

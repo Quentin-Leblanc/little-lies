@@ -107,7 +107,13 @@ const ProfilePanel = ({ onClose }) => {
     const { error } = await updateProfile(user.id, { username: trimmed });
     setSavingName(false);
     if (error) {
-      setNameError(error.message);
+      // Postgres unique_violation (23505) on profiles.username means someone
+      // else already took that handle. Surface a friendly message instead of
+      // the raw "duplicate key value violates unique constraint" noise.
+      const isTaken =
+        error.code === '23505' ||
+        /duplicate key|profiles_username_key/i.test(error.message || '');
+      setNameError(isTaken ? t('username_taken') : error.message);
     } else {
       await refreshProfile();
       setEditingName(false);
