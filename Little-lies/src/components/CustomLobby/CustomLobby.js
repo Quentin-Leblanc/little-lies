@@ -154,9 +154,12 @@ const Embers = () => {
   );
 };
 
-// Ground — textured sand
+// Ground — rocky terrain (Poly Haven rocky_terrain_02 downsampled to
+// 1024² JPG q85, ~210KB) tiled 4x. Replaces the old sand texture to
+// fit the darker campfire mood. Tint kept neutral so the rocky albedo
+// reads as-is under the moonlight.
 const CampGround = () => {
-  const albedo = useLoader(TextureLoader, '/models/textures/lobby_sand_albedo.jpg');
+  const albedo = useLoader(TextureLoader, '/models/textures/lobby_rocky_albedo.jpg');
 
   useMemo(() => {
     if (!albedo) return;
@@ -173,7 +176,7 @@ const CampGround = () => {
   <group>
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
       <circleGeometry args={[20, 32]} />
-      <meshStandardMaterial map={albedo} color="#a89880" roughness={1} metalness={0} />
+      <meshStandardMaterial map={albedo} color="#ffffff" roughness={1} metalness={0} />
     </mesh>
     {/* Stone circle around fire */}
     {Array.from({ length: 10 }).map((_, i) => {
