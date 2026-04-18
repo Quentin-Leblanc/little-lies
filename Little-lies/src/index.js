@@ -26,13 +26,13 @@ const avatars = [
 ];
 
 // PlayroomKit gameId — required. Set REACT_APP_PLAYROOM_GAME_ID in
-// .env.local (dev) and in Netlify env vars (prod). No fallback on
-// purpose: a silent shared gameId means rooms live on someone else's
+// .env.local (dev) and in Cloudflare Pages env vars (prod). No fallback
+// on purpose: a silent shared gameId means rooms live on someone else's
 // quota and break when that quota runs out.
 const PLAYROOM_GAME_ID = process.env.REACT_APP_PLAYROOM_GAME_ID;
 if (!PLAYROOM_GAME_ID) {
   throw new Error(
-    'REACT_APP_PLAYROOM_GAME_ID is not set. Define it in .env.local for development or in the Netlify environment variables for production.'
+    'REACT_APP_PLAYROOM_GAME_ID is not set. Define it in .env.local for development or in the Cloudflare Pages environment variables for production.'
   );
 }
 
