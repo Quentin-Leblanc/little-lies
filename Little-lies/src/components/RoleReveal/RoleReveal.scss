@@ -222,20 +222,22 @@
   gap: 0.235rem;
 }
 
+// Person icon instead of the round dot — reads immediately as "a player
+// slot" at a glance. Pending stays muted grey, ready lights up green
+// with the same pop animation as before.
 .waiting-dot-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  transition: all 0.4s ease;
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: color 0.4s ease, text-shadow 0.4s ease, transform 0.3s ease;
 
   .pending & {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: none;
+    color: rgba(255, 255, 255, 0.35);
+    text-shadow: none;
   }
 
   .ready & {
-    background: #78ff78;
-    box-shadow: 0 0 8px rgba(120, 255, 120, 0.5);
+    color: #78ff78;
+    text-shadow: 0 0 10px rgba(120, 255, 120, 0.55);
     animation: dot-pop 0.3s ease-out;
   }
 }

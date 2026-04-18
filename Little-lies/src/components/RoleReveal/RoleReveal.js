@@ -262,7 +262,7 @@ const RoleReveal = ({ onComplete }) => {
                 const isReady = readyPlayers.includes(p.id);
                 return (
                   <div key={p.id} className={`waiting-dot ${isReady ? 'ready' : 'pending'}`} title={p.profile?.name}>
-                    <span className="waiting-dot-indicator" />
+                    <i className="fas fa-user waiting-dot-indicator" aria-hidden="true" />
                     <span className="waiting-dot-name">{p.profile?.name?.slice(0, 8)}</span>
                   </div>
                 );
