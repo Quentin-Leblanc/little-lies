@@ -160,7 +160,7 @@ const PlayerFigure = ({
         </mesh>
       )}
       {!isTransitioning && (
-        <Html position={[0, 2.0, 0]} center distanceFactor={8} zIndexRange={[15, 1]}>
+        <Html position={[0, 2.0, 0]} center distanceFactor={8} zIndexRange={[5, 0]}>
           <div style={{
             display: 'flex',
             alignItems: 'center',

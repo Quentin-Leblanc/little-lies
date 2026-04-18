@@ -49,7 +49,8 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0 }) => {
 
   useFrame((_, delta) => {
     if (phase === CONSTANTS.PHASE.NIGHT) {
-      if (prevPhaseRef.current !== CONSTANTS.PHASE.NIGHT) {
+      const enteringNight = prevPhaseRef.current !== CONSTANTS.PHASE.NIGHT;
+      if (enteringNight) {
         nightTimeRef.current = 0;
       }
       nightTimeRef.current += delta;
@@ -57,12 +58,23 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0 }) => {
       // Deterministic rotation over the 6-cinematic pool. 5 is coprime
       // with 6, so (dayCount * 5) % 6 visits all 6 indices in a cycle of
       // 6 without consecutive repeats. +2 shifts the cycle so day 0 and
-      // day 1 don't start on identical or symmetric picks. Every client
-      // computes the same pick from the same dayCount → no networking
-      // needed for multiplayer sync.
+      // day 1 don't start on identical or symmetric picks. Every player
+      // computes the same pick from the same dayCount → all clients
+      // stay synchronized without extra networking.
       const pool = NIGHT_CAMERA_WAYPOINTS;
       const idx = ((dayCount * 5 + 2) % pool.length + pool.length) % pool.length;
       const waypoints = pool[idx].waypoints;
+
+      // Snap on night entry when the first waypoint asks for it. Without
+      // this, the sub-0.01 lerp speed below means ~10s of invisible
+      // drift from the day-orbit position before the cinematic actually
+      // begins — so every night looked identical for the first third.
+      if (enteringNight && waypoints[0]?.snap) {
+        camera.position.set(...waypoints[0].pos);
+        camera.lookAt(...waypoints[0].lookAt);
+        targetPos.current.set(...waypoints[0].pos);
+        targetLookAt.current.set(...waypoints[0].lookAt);
+      }
 
       let elapsed = nightTimeRef.current;
       let wpIdx = 0;

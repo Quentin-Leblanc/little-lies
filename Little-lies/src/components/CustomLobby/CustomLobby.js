@@ -291,7 +291,7 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
       {isMe && (
         <pointLight position={[0, 0.3 - yOffset, 0]} color={color} intensity={1.5} distance={4} />
       )}
-      <Html position={[0, nameY, 0]} center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+      <Html position={[0, nameY, 0]} center distanceFactor={6} zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
         {(() => {
           const rawColor = player.getState?.()?.profile?.color;
           const isGrad = rawColor && typeof rawColor === 'object' && rawColor.type === 'gradient';

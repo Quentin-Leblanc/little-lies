@@ -12,7 +12,7 @@ const PhaseEmote = ({ phase, isAccused, CONSTANTS }) => {
   if (!iconClass) return null;
 
   return (
-    <Html position={[0, 2.8, 0]} center distanceFactor={8} zIndexRange={[15, 1]} style={{ pointerEvents: 'none' }}>
+    <Html position={[0, 2.8, 0]} center distanceFactor={8} zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
       <div style={{
         fontSize: '16px',
         color,

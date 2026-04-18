@@ -44,61 +44,65 @@ export const JUDGMENT_CAMERA_LOOK = new THREE.Vector3(7, 1.1, -6);
 export const EXECUTION_CAMERA_POS = new THREE.Vector3(7, 6, -10);
 export const EXECUTION_CAMERA_LOOK = new THREE.Vector3(7, 0.5, -6);
 
-// Night cinematic pool — 6 distinct shots the CameraController rotates
-// through so back-to-back nights don't replay the same camera moves.
-// Selected by dayCount with a coprime step (5 mod 6) so consecutive
-// nights ALWAYS land on different cinematics and the full pool is hit
-// once before any repeat. Every player computes the same pick from the
-// same dayCount → all clients stay in sync without extra networking.
-//
-// Each entry is { name, waypoints }. `name` is for debugging/logging,
-// the waypoints shape matches what the consumer walks through.
+// Night cinematic pool — 6 shots with deliberately distinct opening
+// positions, motion patterns, and final hold views. CameraController
+// rotates through them via (dayCount * 5 + 2) % 6 — 5 is coprime with 6
+// so consecutive nights land on different shots and every night within
+// a 6-night cycle is unique. `snap: true` on the first waypoint tells
+// the controller to teleport there on NIGHT entry instead of a 10s lerp
+// from the day-orbit position (otherwise every night feels the same
+// because the recognizable part of the cinematic only starts after the
+// slow ease-in).
 export const NIGHT_CAMERA_WAYPOINTS = [
-  // 0 — stargaze: calm, climbs from the plaza up into the stars.
+  // 0 — STARGAZE: start low in the plaza, rise gradually, end looking
+  // straight up at stars. Vertical motion is the signature move.
   { name: 'stargaze', waypoints: [
-    { pos: [0, 8, 8],       lookAt: [0, 0, 0],        duration: 5 },
-    { pos: [-2, 1.8, 2],    lookAt: [-2, 1.6, -8],    duration: 18 },
-    { pos: [-1, 3.5, -1],   lookAt: [0, 12, -3],      duration: 20 },
-    { pos: [0, 4, 0],       lookAt: [0, 15, -2],      duration: 30, hold: true },
+    { pos: [0, 2, 6],       lookAt: [0, 1, 0],         duration: 5, snap: true },
+    { pos: [1, 5, 4],       lookAt: [0, 3, -3],        duration: 18 },
+    { pos: [-1, 9, 2],      lookAt: [0, 8, -5],        duration: 20 },
+    { pos: [0, 11, 0],      lookAt: [0, 20, -3],       duration: 30, hold: true },
   ]},
-  // 1 — stormlow: low-angle wide shot, push toward the church, lateral
-  // drift, hold in front of the church so lightning flashes land clean.
-  { name: 'stormlow', waypoints: [
-    { pos: [7, 2.4, 7],     lookAt: [0, 2.5, -6],     duration: 6 },
-    { pos: [3, 2, 3],       lookAt: [0, 3, -12],      duration: 16 },
-    { pos: [-5, 2.6, -1],   lookAt: [3, 3, -9],       duration: 16 },
-    { pos: [0, 2.2, -2],    lookAt: [0, 5, -15],      duration: 30, hold: true },
+  // 1 — STORMSWEEP: low ground-hugging lateral tracking shot, east →
+  // west across the plaza. The camera stays at the same low altitude
+  // the whole way — feels like storm wind rolling through the village.
+  { name: 'stormsweep', waypoints: [
+    { pos: [12, 2, 4],      lookAt: [0, 3, -4],        duration: 5, snap: true },
+    { pos: [6, 2.2, -2],    lookAt: [-2, 3, -8],       duration: 18 },
+    { pos: [-4, 2.4, -6],   lookAt: [-6, 3.5, -10],    duration: 18 },
+    { pos: [-12, 2.6, -2],  lookAt: [-2, 4, -12],      duration: 30, hold: true },
   ]},
-  // 2 — fogdrift: ground-level claustrophobic creep through the village.
+  // 2 — FOGDRIFT: ground-level slow forward push from far south to
+  // deep into the village, ending right at the church doors. Low and
+  // oppressive, no height change.
   { name: 'fogdrift', waypoints: [
-    { pos: [0, 1.6, 8],     lookAt: [0, 1.8, -2],     duration: 6 },
-    { pos: [0, 1.3, 3],     lookAt: [0, 1.6, -10],    duration: 18 },
-    { pos: [-3, 1.4, -1],   lookAt: [2, 1.4, -9],     duration: 18 },
-    { pos: [0, 1.6, -5],    lookAt: [0, 2.4, -15],    duration: 30, hold: true },
+    { pos: [0, 1.3, 14],    lookAt: [0, 1.3, 0],       duration: 5, snap: true },
+    { pos: [0, 1.3, 6],     lookAt: [0, 1.3, -6],      duration: 20 },
+    { pos: [0, 1.3, -2],    lookAt: [0, 1.3, -12],     duration: 20 },
+    { pos: [0, 1.3, -9],    lookAt: [0, 2, -15],       duration: 28, hold: true },
   ]},
-  // 3 — plazaspin: tight orbit around the plaza center, always looking
-  // in at the gallows — reveals the village in slow rotation.
+  // 3 — PLAZASPIN: full 360° orbit around the gallows at mid height.
+  // Four cardinal directions so you clearly see rotation happening.
   { name: 'plazaspin', waypoints: [
-    { pos: [0, 5, 8],       lookAt: [0, 1, 0],        duration: 5 },
-    { pos: [8, 4, 2],       lookAt: [0, 1, 0],        duration: 15 },
-    { pos: [0, 4, -8],      lookAt: [0, 1, 0],        duration: 18 },
-    { pos: [-7, 3.5, 2],    lookAt: [0, 1, 0],        duration: 30, hold: true },
+    { pos: [0, 4, 9],       lookAt: [0, 1, 0],         duration: 5, snap: true },
+    { pos: [9, 4, 0],       lookAt: [0, 1, 0],         duration: 20 },
+    { pos: [0, 4, -9],      lookAt: [0, 1, 0],         duration: 20 },
+    { pos: [-9, 4, 0],      lookAt: [0, 1, 0],         duration: 28, hold: true },
   ]},
-  // 4 — highdrone: cold high-altitude slow pan, stars overhead. Fewer
-  // lookAt changes so it feels glacial and detached.
+  // 4 — HIGHDRONE: very high near-topdown view. Camera barely moves,
+  // just a slow drift. Gives a map-like perspective on the village.
   { name: 'highdrone', waypoints: [
-    { pos: [0, 12, 0],      lookAt: [0, 0, -5],       duration: 5 },
-    { pos: [10, 10, 6],     lookAt: [0, 0, -5],       duration: 16 },
-    { pos: [0, 11, 14],     lookAt: [0, 0, -5],       duration: 16 },
-    { pos: [-10, 10, 6],    lookAt: [0, 0, -5],       duration: 30, hold: true },
+    { pos: [0, 16, 2],      lookAt: [0, 0, -5],        duration: 5, snap: true },
+    { pos: [5, 15, 0],      lookAt: [0, 0, -5],        duration: 20 },
+    { pos: [0, 14, -3],     lookAt: [0, 0, -7],        duration: 20 },
+    { pos: [-5, 15, 0],     lookAt: [0, 0, -5],        duration: 28, hold: true },
   ]},
-  // 5 — churchapproach: long slow push from the plaza toward the church
-  // silhouette. Hold low, looking up — ominous.
+  // 5 — CHURCHAPPROACH: starts far south, pushes in on the church in a
+  // straight line, ending close to the doorway looking up at the roof.
   { name: 'churchapproach', waypoints: [
-    { pos: [0, 6, 9],       lookAt: [0, 4, -10],      duration: 5 },
-    { pos: [0, 4, 3],       lookAt: [0, 4.5, -12],    duration: 15 },
-    { pos: [-2, 3, -3],     lookAt: [0, 5, -14],      duration: 16 },
-    { pos: [0, 2.6, -6],    lookAt: [0, 4.5, -15],    duration: 30, hold: true },
+    { pos: [0, 3, 16],      lookAt: [0, 6, -10],       duration: 5, snap: true },
+    { pos: [0, 3, 6],       lookAt: [0, 6, -12],       duration: 18 },
+    { pos: [0, 2.5, -2],    lookAt: [0, 7, -14],       duration: 20 },
+    { pos: [0, 2.2, -8],    lookAt: [0, 9, -15],       duration: 30, hold: true },
   ]},
 ];
 

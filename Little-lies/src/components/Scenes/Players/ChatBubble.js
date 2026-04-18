@@ -75,7 +75,7 @@ const ChatBubble = ({ playerId, chatMessages, dayCount, phase }) => {
       position={[0, 2.9, 0]}
       center
       distanceFactor={7}
-      zIndexRange={[15, 1]}
+      zIndexRange={[5, 0]}
       style={{ pointerEvents: 'none' }}
     >
       <div className={`chat-bubble-3d ${fading ? 'chat-bubble-3d-fade' : ''}`}>
