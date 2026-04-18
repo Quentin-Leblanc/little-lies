@@ -320,6 +320,53 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
   );
 };
 
+// Mystical lobby ambiance text — cycles through flavored one-liners
+// (campfire, crow, someone-is-lying) every ~7s. Centered near the top
+// of the screen, white, no background, soft fade between phrases so it
+// stays atmospheric instead of feeling like a notification.
+const LobbyMysticText = () => {
+  const { t } = useTranslation('common');
+  const lines = useMemo(() => {
+    const arr = t('lobby_ambiance', { returnObjects: true });
+    return Array.isArray(arr) && arr.length > 0 ? arr : null;
+  }, [t]);
+  const [idx, setIdx] = useState(() =>
+    lines ? Math.floor(Math.random() * lines.length) : 0,
+  );
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (!lines) return;
+    const FADE_MS = 600;
+    const HOLD_MS = 7000;
+    const tick = () => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx((prev) => {
+          // Avoid picking the same line back-to-back (feels more alive).
+          if (lines.length <= 1) return prev;
+          let next = Math.floor(Math.random() * lines.length);
+          if (next === prev) next = (next + 1) % lines.length;
+          return next;
+        });
+        setVisible(true);
+      }, FADE_MS);
+    };
+    const interval = setInterval(tick, HOLD_MS);
+    return () => clearInterval(interval);
+  }, [lines]);
+
+  if (!lines) return null;
+  return (
+    <div
+      className={`lobby-mystic-text ${visible ? 'is-visible' : 'is-fading'}`}
+      aria-live="polite"
+    >
+      {lines[idx]}
+    </div>
+  );
+};
+
 // ── Main Lobby Component ──
 
 // Lobby chat component with /votehost and /votekick commands
@@ -782,6 +829,9 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           </EffectComposer>
         </Suspense>
       </Canvas>
+
+      {/* Ambient flavor text — floats above the 3D scene, below the UI */}
+      <LobbyMysticText />
 
       {/* Auth modal */}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}

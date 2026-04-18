@@ -5,6 +5,48 @@
   overflow: hidden;
 }
 
+/* Ambient flavor phrase — floats upper-center, above the 3D Canvas but
+   under the real UI (sidebar, chat, volume). White, no background box,
+   soft shadow for readability over the campfire scene. Cycles every ~7s
+   with a 0.6s crossfade handled by the is-visible / is-fading classes. */
+.lobby-mystic-text {
+  position: fixed;
+  top: 22vh;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 70vw;
+  text-align: center;
+  z-index: 6;
+  pointer-events: none;
+  color: #fff;
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.08rem;
+  line-height: 1.4;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85), 0 0 18px rgba(0, 0, 0, 0.55);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  opacity: 0;
+
+  &.is-visible {
+    opacity: 0.92;
+    transform: translateX(-50%) translateY(0);
+  }
+  &.is-fading {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+}
+
+@media (max-width: 768px) {
+  .lobby-mystic-text {
+    top: 18vh;
+    font-size: 0.95rem;
+    max-width: 86vw;
+  }
+}
+
 /* ── Volume control (floating top-left) ── */
 .lobby-volume {
   position: fixed;

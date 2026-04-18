@@ -241,5 +241,23 @@
     "A crow caws in the distance...",
     "The torch flames dance nervously...",
     "The air is thick with tension tonight..."
+  ],
+  "day_rising_variants": [
+    "The village awakens...",
+    "Dawn burns away the fog...",
+    "The bells ring in the morning...",
+    "Shutters open, one by one...",
+    "The sun pierces between the rooftops...",
+    "The village wakes up, wary...",
+    "A new day begins...",
+    "The streets stir back to life..."
+  ],
+  "peaceful_night_variants": [
+    "The night was peaceful. Nobody died.",
+    "Not a drop of blood this night.",
+    "The village woke up whole.",
+    "No cry broke the silence.",
+    "A night without incident — for once.",
+    "The doors stayed shut, and so did the graves."
   ]
 }

@@ -78,6 +78,11 @@ const MainScene = () => {
   const [showDeathReport, setShowDeathReport] = useState(false);
   const [showBloodEffect, setShowBloodEffect] = useState(false);
   const [showExecutionFlash, setShowExecutionFlash] = useState(false);
+  // Random variants for DAY_RISING and peaceful_night — picked per DEATH
+  // REPORT entry so the phrase rotates instead of being the same every
+  // morning. Reset to null on leaving the phase so the next one re-rolls.
+  const [dayRisingText, setDayRisingText] = useState(null);
+  const [peacefulNightText, setPeacefulNightText] = useState(null);
   // Dead bodies used to fade out after DEATH_REPORT. They now persist as
   // set dressing in the plaza center — makes the losses feel real and
   // gives the scene more life between phases. These state vars are kept
@@ -191,9 +196,21 @@ const MainScene = () => {
   }, [phase]);
 
   // Death report sequence: "Le village se lève..." during day fade-in,
-  // then reveal deaths once the text has played out.
+  // then reveal deaths once the text has played out. Re-rolls a random
+  // variant for both the day-rise line and the peaceful-night fallback
+  // on each DEATH_REPORT entry so mornings don't feel copy-pasted.
   useEffect(() => {
     if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
+      const pickRandom = (key, fallback) => {
+        const arr = i18n.t(key, { returnObjects: true });
+        if (Array.isArray(arr) && arr.length > 0) {
+          return arr[Math.floor(Math.random() * arr.length)];
+        }
+        return fallback;
+      };
+      setDayRisingText(pickRandom('game:day_rising_variants', i18n.t('game:phases.DAY_RISING')));
+      setPeacefulNightText(pickRandom('game:peaceful_night_variants', i18n.t('game:system.peaceful_night')));
+
       const t0 = setTimeout(() => setShowDayText(true), 800);
       const t1 = setTimeout(() => setShowDayText(false), 3000);
       const t2 = setTimeout(() => setShowBloodEffect(true), 3000);
@@ -680,7 +697,7 @@ const MainScene = () => {
                   );
                 })
               ) : (
-                <div className="death-report-safe">{i18n.t('game:system.peaceful_night')}</div>
+                <div className="death-report-safe">{peacefulNightText || i18n.t('game:system.peaceful_night')}</div>
               )}
             </div>
           </div>
@@ -746,7 +763,7 @@ const MainScene = () => {
       )}
       {showDayText && (
         <div className="night-text-overlay is-day-text">
-          <div className="night-text-content">{i18n.t('game:phases.DAY_RISING')}</div>
+          <div className="night-text-content">{dayRisingText || i18n.t('game:phases.DAY_RISING')}</div>
         </div>
       )}
       {nightAmbianceMsg && (

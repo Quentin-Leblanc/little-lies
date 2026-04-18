@@ -569,10 +569,17 @@ export const EventsProvider = ({ children }) => {
     );
 
     if (deathEvents.length === 0) {
+      // Rotate through peaceful-night variants so quiet mornings don't
+      // read as the same line every time. Fallback to the original
+      // string if the array is missing (older builds, partial trad).
+      const variants = i18n.t('game:peaceful_night_variants', { returnObjects: true });
+      const picked = Array.isArray(variants) && variants.length > 0
+        ? variants[Math.floor(Math.random() * variants.length)]
+        : i18n.t('game:system.peaceful_night');
       newMessages.push({
         player: 'system',
         color: '#78ff78',
-        content: i18n.t('game:system.peaceful_night'),
+        content: picked,
         type: 'system',
         dayCount: game.dayCount,
         chat: 'default',

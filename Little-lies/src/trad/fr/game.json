@@ -241,5 +241,23 @@
     "Un corbeau croasse au loin...",
     "Les flammes des torches dansent nerveusement...",
     "L'air est chargé de tension cette nuit..."
+  ],
+  "day_rising_variants": [
+    "Le village se lève...",
+    "L'aube chasse la brume...",
+    "Les cloches sonnent le matin...",
+    "Les volets s'ouvrent un par un...",
+    "Le soleil perce entre les toits...",
+    "Le village s'éveille, méfiant...",
+    "Un nouveau jour commence...",
+    "Les rues reprennent vie..."
+  ],
+  "peaceful_night_variants": [
+    "La nuit a été calme. Personne n'est mort.",
+    "Pas une goutte de sang cette nuit.",
+    "Le village s'est réveillé au complet.",
+    "Aucun cri n'a troublé le silence.",
+    "Une nuit sans incident — pour cette fois.",
+    "Les portes sont restées closes, les morts aussi."
   ]
 }

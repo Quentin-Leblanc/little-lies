@@ -96,5 +96,22 @@
   "match_history": "Historique",
   "achievements": "Succès",
   "role_stats": "Stats par rôle",
-  "wip": "WIP"
+  "wip": "WIP",
+  "lobby_ambiance": [
+    "Les joueurs se réchauffent près du feu...",
+    "Quelqu'un fait griller un marshmallow...",
+    "Le loup guette dans l'ombre...",
+    "On murmure autour du brasier...",
+    "La lune observe, impassible...",
+    "Un corbeau vient se poser sur un toit...",
+    "Qui sera le premier à mentir ce soir ?",
+    "Les cartes de rôles attendent d'être tirées...",
+    "Un bois craque dans le feu...",
+    "Le village retient son souffle...",
+    "Les dernières préparations s'achèvent...",
+    "Quelqu'un gratte une guitare au loin...",
+    "Le ciel se couvre de nuages...",
+    "Un chat passe entre les jambes...",
+    "On aiguise les couteaux... pour la cuisine, sans doute."
+  ]
 }
