@@ -211,6 +211,145 @@
   i { font-size: 1.4rem; }
 }
 
+/* Thanks screen — big heading + confetti + action buttons */
+.survey-thanks-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.2rem 1rem 1.6rem;
+  text-align: center;
+  overflow: hidden;
+  min-height: 18rem;
+}
+
+.survey-thanks-heart {
+  font-size: 2.6rem;
+  color: #ff4da6;
+  filter: drop-shadow(0 0 14px rgba(255, 77, 166, 0.5));
+  margin-bottom: 0.6rem;
+  animation: survey-heart-pop 0.6s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+
+.survey-thanks-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.12rem;
+  color: #fff;
+  margin: 0 0 0.4rem;
+  text-shadow: 0 2px 14px rgba(255, 77, 166, 0.35), 0 0 30px rgba(255, 215, 0, 0.18);
+  animation: survey-title-in 0.7s cubic-bezier(0.2, 1.3, 0.4, 1) 0.1s both;
+}
+
+.survey-thanks-sub {
+  font-size: 0.95rem;
+  color: #bbb;
+  margin: 0 0 1.5rem;
+  max-width: 26rem;
+  line-height: 1.4;
+  animation: survey-title-in 0.6s ease-out 0.3s both;
+}
+
+.survey-thanks-warning {
+  font-size: 0.78rem;
+  color: #ffba66;
+  margin: 0 0 0.8rem;
+  background: rgba(255, 186, 102, 0.08);
+  border: 1px solid rgba(255, 186, 102, 0.25);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+
+  i { margin-right: 0.4rem; }
+}
+
+.survey-thanks-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.4rem;
+  animation: survey-title-in 0.6s ease-out 0.5s both;
+}
+
+.survey-thanks-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.3rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+
+  i { font-size: 0.85rem; }
+}
+
+.survey-thanks-btn-primary {
+  background: linear-gradient(135deg, #2f82ff 0%, #0d5fcc 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(47, 130, 255, 0.35);
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(47, 130, 255, 0.5);
+    transform: translateY(-1px);
+  }
+}
+
+.survey-thanks-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+}
+
+@keyframes survey-heart-pop {
+  0% { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+  70% { transform: scale(1.2) rotate(10deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes survey-title-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Confetti burst — 40 CSS-only pieces falling + drifting + rotating */
+.survey-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.survey-confetti-piece {
+  position: absolute;
+  top: -15%;
+  border-radius: 2px;
+  opacity: 0;
+  animation-name: survey-confetti-fall;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+@keyframes survey-confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0);
+  }
+  15% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(var(--confetti-drift, 0), 110vh) rotate(var(--confetti-rotate, 180deg));
+  }
+}
+
 @keyframes survey-slide-in {
   from { opacity: 0; transform: translateY(10px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
