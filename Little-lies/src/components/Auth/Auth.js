@@ -9,6 +9,8 @@ import {
   signOut,
   getProfile,
   updateProfile,
+  uploadAvatar,
+  removeAvatar,
 } from '../../utils/supabase';
 import { TIERS, COLOR_REWARDS, getTierForLevel, getNextTier, getTierProgress } from '../../data/progression';
 import './Auth.scss';
@@ -85,6 +87,10 @@ const ProfilePanel = ({ onClose }) => {
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState('');
 
+  const avatarInputRef = React.useRef(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
+
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en';
   const level = profile?.level || 1;
   const xp = profile?.xp || 0;
@@ -96,6 +102,39 @@ const ProfilePanel = ({ onClose }) => {
   const tierProgress = getTierProgress(level);
   const xpInLevel = xp % 100;
   const initial = (profile?.username || '?').trim().charAt(0).toUpperCase();
+
+  const handleAvatarPick = () => {
+    if (uploadingAvatar) return;
+    avatarInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow picking the same file again after an error
+    if (!file) return;
+    setUploadingAvatar(true);
+    setAvatarError('');
+    const { url, error } = await uploadAvatar(user.id, file);
+    setUploadingAvatar(false);
+    if (error) {
+      setAvatarError(error.message || t('avatar_upload_failed'));
+      return;
+    }
+    if (url) await refreshProfile();
+  };
+
+  const handleAvatarRemove = async () => {
+    if (uploadingAvatar || !profile?.avatar_url) return;
+    setUploadingAvatar(true);
+    setAvatarError('');
+    const { error } = await removeAvatar(user.id);
+    setUploadingAvatar(false);
+    if (error) {
+      setAvatarError(error.message || t('avatar_upload_failed'));
+      return;
+    }
+    await refreshProfile();
+  };
 
   const handleSaveName = async () => {
     const trimmed = nameDraft.trim();
@@ -129,14 +168,45 @@ const ProfilePanel = ({ onClose }) => {
           <button className="close-button profile-close" onClick={onClose}>X</button>
 
           <div
-            className="profile-avatar"
-            style={{ background: `linear-gradient(135deg, ${tier.gradient[0]}, ${tier.gradient[1]})` }}
+            className={`profile-avatar ${uploadingAvatar ? 'is-uploading' : ''}`}
+            style={profile?.avatar_url ? null : { background: `linear-gradient(135deg, ${tier.gradient[0]}, ${tier.gradient[1]})` }}
+            onClick={handleAvatarPick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAvatarPick(); }}
+            title={t('change_avatar')}
           >
-            <span className="profile-avatar-initial">{initial}</span>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="profile-avatar-img" />
+            ) : (
+              <span className="profile-avatar-initial">{initial}</span>
+            )}
+            <div className="profile-avatar-overlay">
+              <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-camera'}`}></i>
+            </div>
             <div className="profile-avatar-tier" title={tier.name[lang]}>
               <i className={`fas ${tier.icon}`}></i>
             </div>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={handleAvatarChange}
+              style={{ display: 'none' }}
+            />
           </div>
+          {profile?.avatar_url && (
+            <button
+              type="button"
+              className="profile-avatar-remove"
+              onClick={handleAvatarRemove}
+              disabled={uploadingAvatar}
+              title={t('remove_avatar')}
+            >
+              <i className="fas fa-trash"></i>
+            </button>
+          )}
+          {avatarError && <p className="auth-error profile-avatar-error"><i className="fas fa-exclamation-circle"></i> {avatarError}</p>}
 
           <div className="profile-hero-info">
             {editingName ? (
@@ -260,11 +330,10 @@ const ProfilePanel = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Color skins — unlockable */}
+        {/* Color skins — unlockable palettes, available in the lobby */}
         <div className="profile-section">
           <h3 className="profile-section-title">
             <i className="fas fa-palette"></i> {t('color_skins')}
-            <span className="profile-section-hint">{t('coming_soon_short')}</span>
           </h3>
           <div className="profile-skins-grid">
             {COLOR_REWARDS.map((c) => {
@@ -488,9 +557,13 @@ export const ProfileBadge = ({ onClick }) => {
     <button className="profile-badge profile-badge-logged" onClick={onClick}>
       <div
         className="profile-badge-avatar"
-        style={{ background: `linear-gradient(135deg, ${tier.gradient[0]}, ${tier.gradient[1]})` }}
+        style={profile.avatar_url ? null : { background: `linear-gradient(135deg, ${tier.gradient[0]}, ${tier.gradient[1]})` }}
       >
-        <span>{initial}</span>
+        {profile.avatar_url ? (
+          <img src={profile.avatar_url} alt="" className="profile-badge-avatar-img" />
+        ) : (
+          <span>{initial}</span>
+        )}
         <div className="profile-badge-tier-icon" title={tier.name[lang]}>
           <i className={`fas ${tier.icon}`}></i>
         </div>

@@ -17,10 +17,19 @@ import Audio from '../../utils/AudioManager';
 import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import { getLevel } from '../../utils/xpSystem';
+import { COLOR_REWARDS } from '../../data/progression';
 import './CustomLobby.scss';
 
 const GRADIENT_UNLOCK_LEVEL = 6;
 const GRADIENT_STORAGE_KEY = 'amongliars_gradient';
+
+// Gradient-equality check used to mark the active palette swatch.
+const gradientMatches = (a, b) => (
+  a && b && typeof a === 'object' && typeof b === 'object' &&
+  a.type === 'gradient' && b.type === 'gradient' &&
+  a.color1?.toLowerCase?.() === b.color1?.toLowerCase?.() &&
+  a.color2?.toLowerCase?.() === b.color2?.toLowerCase?.()
+);
 
 // Save/load gradient preference
 const saveGradient = (grad) => {
@@ -542,10 +551,14 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const playerLevel = profile ? getLevel(profile.xp) : 1;
   const canUseGradient = playerLevel >= GRADIENT_UNLOCK_LEVEL;
 
-  // Load saved gradient on mount
+  // Load saved gradient on mount. This used to be gated on canUseGradient,
+  // but palettes now unlock at level 1+ so a saved gradient might legitimately
+  // come from a palette pick even when the custom picker is still locked.
+  // Level never decreases, so anything saved was valid at save-time and
+  // remains valid now.
   useEffect(() => {
     const saved = loadGradient();
-    if (saved && canUseGradient) {
+    if (saved) {
       setUseGradient(true);
       setGradColor1(saved.color1 || '#e74c3c');
       setGradColor2(saved.color2 || '#3498db');
@@ -555,7 +568,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
         currentPlayer.setState('profile', { ...currentPlayer.getState().profile, color: grad });
       }
     }
-  }, [canUseGradient]);
+  }, []);
 
   // Assign / re-assign a unique color.
   //
@@ -568,9 +581,10 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   // Earlier players keep their color, later players pick a free one.
   useEffect(() => {
     if (!currentPlayer || useGradient) return;
-    // Respect saved gradient preference
+    // Respect saved gradient preference (palette or custom — levels don't
+    // decrease so any saved entry is still a legitimate pick).
     const saved = loadGradient();
-    if (saved && canUseGradient) return;
+    if (saved) return;
 
     // Deterministic ordering shared across clients
     const sorted = [...playroom_players].sort((a, b) => (a.id < b.id ? -1 : 1));
@@ -637,6 +651,10 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
 
   const handleGradientChange = (c1, c2) => {
     const grad = { type: 'gradient', color1: c1, color2: c2 };
+    // Flip into gradient mode so the auto solid-color reassign effect
+    // doesn't immediately overwrite our choice. Also needed for palette
+    // picks from low-level players where canUseGradient is false.
+    setUseGradient(true);
     setSelectedColor(grad);
     setGradColor1(c1);
     setGradColor2(c2);
@@ -839,7 +857,35 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
               })}
             </div>
 
-            {/* Gradient option — unlocked at level 6 */}
+            {/* Unlocked palettes (gradient presets) — shareable across players
+                unlike solid colors. Each one applies a fixed 2-color gradient
+                from COLOR_REWARDS; locked ones stay visible but disabled. */}
+            <div className="lobby-palettes-section">
+              <div className="lobby-palettes-label">
+                <i className="fas fa-palette"></i> {t('common:palettes_title', { defaultValue: 'Palettes' })}
+              </div>
+              <div className="lobby-palettes-grid">
+                {COLOR_REWARDS.map((palette) => {
+                  const unlocked = playerLevel >= palette.unlockLevel;
+                  const paletteValue = { type: 'gradient', color1: palette.gradient[0], color2: palette.gradient[1] };
+                  const isActive = useGradient && gradientMatches(selectedColor, paletteValue);
+                  return (
+                    <button
+                      key={palette.id}
+                      className={`lobby-palette-dot ${isActive ? 'selected' : ''} ${unlocked ? '' : 'locked'}`}
+                      style={{ '--palette-bg': `linear-gradient(135deg, ${palette.gradient[0]}, ${palette.gradient[1]})` }}
+                      onClick={() => unlocked && handleGradientChange(palette.gradient[0], palette.gradient[1])}
+                      disabled={!unlocked}
+                      title={unlocked ? palette.name[i18n.language?.startsWith('fr') ? 'fr' : 'en'] : t('common:palettes_locked_hint', { level: palette.unlockLevel })}
+                    >
+                      {!unlocked && <i className="fas fa-lock"></i>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom gradient picker — unlocked at level 6 */}
             <div className="lobby-gradient-section">
               <button
                 className={`lobby-gradient-toggle ${useGradient ? 'active' : ''} ${!canUseGradient ? 'locked' : ''}`}

@@ -11,6 +11,7 @@
 create table if not exists public.profiles (
   id uuid references auth.users on delete cascade primary key,
   username text,
+  avatar_url text,
   xp integer default 0,
   level integer default 1,
   games_played integer default 0,
@@ -22,6 +23,9 @@ create table if not exists public.profiles (
 -- Drop the legacy UNIQUE constraint if it still exists on a live DB.
 -- Safe to re-run; no-op after first execution.
 alter table public.profiles drop constraint if exists profiles_username_key;
+
+-- Add avatar_url on existing deployments. Safe to re-run.
+alter table public.profiles add column if not exists avatar_url text;
 
 -- 2. Game history
 create table if not exists public.game_history (
@@ -95,3 +99,44 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- ============================================================
+-- Avatars storage bucket (public read, owner-only write)
+-- ============================================================
+-- Run once to provision the `avatars` bucket. The bucket is public so
+-- <img src="..."> works without signed URLs. Writes are scoped to the
+-- user's own folder: objects live at `<user_id>/avatar-<ts>.<ext>`, and
+-- the policies below only let `auth.uid()` touch files whose first path
+-- segment matches their ID.
+insert into storage.buckets (id, name, public)
+  values ('avatars', 'avatars', true)
+  on conflict (id) do update set public = true;
+
+drop policy if exists "Avatars are publicly readable" on storage.objects;
+create policy "Avatars are publicly readable"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
+
+drop policy if exists "Users upload their own avatar" on storage.objects;
+create policy "Users upload their own avatar"
+  on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "Users update their own avatar" on storage.objects;
+create policy "Users update their own avatar"
+  on storage.objects for update to authenticated
+  using (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "Users delete their own avatar" on storage.objects;
+create policy "Users delete their own avatar"
+  on storage.objects for delete to authenticated
+  using (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );

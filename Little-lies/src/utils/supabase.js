@@ -133,3 +133,55 @@ export const isAdmin = async (userId) => {
   const profile = await getProfile(userId);
   return profile?.is_admin === true;
 };
+
+// --- Avatar (profile picture) ---
+
+const AVATAR_BUCKET = 'avatars';
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024; // 2 MB hard cap
+const ALLOWED_AVATAR_MIME = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+
+// Uploads a File/Blob to the `avatars` bucket under `<userId>/avatar.<ext>`,
+// overwriting any previous avatar for that user. Returns { url, error }.
+// Expects the bucket to exist and be marked public; the RLS policy on
+// storage.objects must allow authenticated users to INSERT/UPDATE rows
+// where `bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]`.
+export const uploadAvatar = async (userId, file) => {
+  if (!supabase) return { error: { message: 'Supabase not configured' } };
+  if (!file) return { error: { message: 'No file provided' } };
+  if (file.size > MAX_AVATAR_BYTES) {
+    return { error: { message: `File too large (max ${Math.round(MAX_AVATAR_BYTES / 1024 / 1024)}MB)` } };
+  }
+  if (file.type && !ALLOWED_AVATAR_MIME.includes(file.type)) {
+    return { error: { message: 'Unsupported format (PNG, JPEG, WebP, GIF)' } };
+  }
+
+  // Derive extension from MIME (client-reported filename ext is unreliable).
+  const extByMime = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' };
+  const ext = extByMime[file.type] || 'png';
+  // Cache-bust via timestamp so the CDN doesn't serve a stale image after replace.
+  const path = `${userId}/avatar-${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type || 'image/png', cacheControl: '3600' });
+  if (uploadError) return { error: uploadError };
+
+  const { data: pub } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
+  const url = pub?.publicUrl;
+  if (!url) return { error: { message: 'Failed to resolve public URL' } };
+
+  const { error: updateError } = await updateProfile(userId, { avatar_url: url });
+  if (updateError) return { error: updateError };
+
+  return { url };
+};
+
+export const removeAvatar = async (userId) => {
+  if (!supabase) return { error: { message: 'Supabase not configured' } };
+  // Note: we don't currently sweep old files from the bucket here — the
+  // timestamped path means each upload writes a fresh object, and wiping
+  // older ones would require a list() + remove() round-trip that is fine
+  // to leave to a future cleanup job. This just detaches the URL.
+  const { error } = await updateProfile(userId, { avatar_url: null });
+  return { error };
+};

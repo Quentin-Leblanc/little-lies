@@ -631,7 +631,66 @@
   }
 }
 
-// Gradient section
+// Palettes (unlockable gradient presets, shareable across players)
+.lobby-palettes-section {
+  margin-top: 0.55rem;
+}
+
+.lobby-palettes-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+  color: #888;
+  margin-bottom: 0.25rem;
+
+  i { margin-right: 0.25rem; font-size: 0.55rem; color: #aaa; }
+}
+
+.lobby-palettes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.294rem;
+}
+
+.lobby-palette-dot {
+  width: 1.412rem;
+  height: 1.412rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--palette-bg) !important;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.55rem;
+
+  &:hover:not(:disabled) {
+    transform: scale(1.2);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  &.selected {
+    border-color: #fff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    transform: scale(1.15);
+  }
+
+  &.locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(65%);
+
+    &:hover { transform: none; border-color: transparent; }
+  }
+}
+
+// Gradient section (custom picker)
 .lobby-gradient-section {
   margin-top: 0.353rem;
   display: flex;
