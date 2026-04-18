@@ -102,6 +102,8 @@
     "vigilante_suicide": "{{name}} committed suicide from guilt. Their role was: Vigilante.",
     "death_role_reveal": "{{name}} {{flavor}} Their role was: {{role}}.",
     "death_with_will": "\n📜 Last Will: \"{{will}}\"",
+    "death_announce": "{{name}} {{flavor}}",
+    "will_label": "Last will",
     "protection_success": "{{name}} was attacked, but was saved by the doctor."
   },
   "teams": {

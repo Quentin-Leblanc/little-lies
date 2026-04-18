@@ -100,7 +100,7 @@ describe('resolveAFK', () => {
     expect(result.changed).toBe(false);
   });
 
-  test('marks inactive player AFK', () => {
+  test('marks inactive player AFK without chat message', () => {
     const players = [player('a', { lastActivityAt: 1000 })];
     const result = resolveAFK({
       players,
@@ -110,7 +110,8 @@ describe('resolveAFK', () => {
     });
     expect(result.changed).toBe(true);
     expect(result.updated[0].isAFK).toBe(true);
-    expect(result.newMessages).toHaveLength(1);
+    // AFK flip is silent — the roster already shows the AFK badge.
+    expect(result.newMessages).toEqual([]);
   });
 
   test('already AFK stays AFK (no duplicate message)', () => {

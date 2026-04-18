@@ -341,7 +341,11 @@ export const EventsProvider = ({ children }) => {
       return i18n.t('game:death_messages.unknown');
     };
 
-    // Build chat messages for kills
+    // Build chat messages for kills. `chatMessage` stays as a single
+    // flattened string for the chat log. Structured fields live alongside
+    // it so the morning overlay can render name/flavor/role/will as
+    // distinct styled blocks (role card, testament block) without
+    // regex-parsing the chat message back apart.
     killedIds.forEach((targetId) => {
       const target = players.find((p) => p.id === targetId);
       const killInfo = killed[targetId];
@@ -352,7 +356,18 @@ export const EventsProvider = ({ children }) => {
       }
       addEvent({
         type: 'KILL_RESULT',
-        content: { target: targetId, chatMessage: deathMsg },
+        content: {
+          target: targetId,
+          chatMessage: deathMsg,
+          victimName: target?.profile?.name,
+          flavor,
+          roleKey: target?.character?.key,
+          roleLabel: target?.character?.label,
+          roleIcon: target?.character?.icon,
+          roleColor: target?.character?.couleur,
+          roleTeam: target?.character?.team,
+          lastWill: target?.lastWill || null,
+        },
         displayed: false,
       });
     });

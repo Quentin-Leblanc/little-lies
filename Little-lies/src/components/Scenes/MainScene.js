@@ -548,13 +548,20 @@ const MainScene = () => {
         </Suspense>
       </Canvas>
 
-      {/* Blood effect — plays before death report text */}
+      {/* Blood effect — only shown to the player who actually died.
+          Before, every living villager got the bloody teeth vignette
+          each morning someone was killed, which flattened the "it's
+          YOU" punch of the effect. Now it fires exclusively for the
+          victim (and ignores disconnect-as-kill events that don't
+          have the same narrative weight). */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && showBloodEffect && (() => {
-        // Language-agnostic: check events for kills, not chat text
-        const killEvents = (events || []).filter(
-          e => (e.type === 'KILL_RESULT' || e.type === 'disconnect') && e.dayCount === game.dayCount
+        if (!me?.id) return null;
+        const wasKilled = (events || []).some(
+          (e) => e.type === 'KILL_RESULT'
+            && e.dayCount === game.dayCount
+            && e.content?.target === me.id,
         );
-        if (killEvents.length === 0) return null;
+        if (!wasKilled) return null;
         return (
           <div className="blood-overlay">
             <div className="blood-overlay-inner">
@@ -610,9 +617,15 @@ const MainScene = () => {
         );
       })()}
 
-      {/* Death report overlay */}
+      {/* Death report overlay — structured layout:
+          1) narrative line: "<victim> n'a pas survécu… <flavor>"
+          2) role card: icon + role label, highlighted in the role color
+          3) testament block (if the victim wrote a last will)
+          The old single-string regex approach concatenated everything
+          on one line, making the role reveal easy to miss. Disconnect
+          events still fall back to the plain chatMessage since they
+          don't carry structured role fields. */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && showDeathReport && (() => {
-        // Language-agnostic: use events with chat messages as display text
         const killEvents = (events || []).filter(
           e => (e.type === 'KILL_RESULT' || e.type === 'disconnect') && e.dayCount === game.dayCount && e.content?.chatMessage
         );
@@ -622,21 +635,50 @@ const MainScene = () => {
           <div className={`death-report-overlay ${hasDead ? 'has-dead' : 'no-dead'}`}>
             <div className="death-report-card">
               {hasDead ? (
-                <>
-                  {killEvents.map((entry, i) => {
-                    const msg = entry.content.chatMessage || '';
-                    // Try to split at role marker (works in both FR and EN)
-                    const roleMatch = msg.match(/(.*?)((?:Son rôle était|Their role was)\s*:\s*.+)/s);
-                    const beforeRole = roleMatch ? roleMatch[1] : msg;
-                    const roleText = roleMatch ? roleMatch[2] : null;
-                    return (
-                      <div key={i} className="death-report-name">
-                        <span className="death-desc">{beforeRole}</span>
-                        {roleText && <span className="death-role-reveal">{roleText}</span>}
-                      </div>
-                    );
-                  })}
-                </>
+                killEvents.map((entry, i) => {
+                  const c = entry.content;
+                  const roleLabelI18n = c.roleKey
+                    ? i18n.t(`roles:${c.roleKey}.label`, { defaultValue: c.roleLabel })
+                    : c.roleLabel;
+                  // Build the narrative line without the role reveal so
+                  // the role is isolated in its own card below.
+                  const narrative = c.victimName && c.flavor
+                    ? i18n.t('game:death_messages.death_announce', {
+                        name: c.victimName,
+                        flavor: c.flavor,
+                        defaultValue: `${c.victimName} n'a pas survécu à la nuit... ${c.flavor}`,
+                      })
+                    : (c.chatMessage || '').split(/\n|📜/)[0];
+                  return (
+                    <div key={i} className="death-report-entry">
+                      <div className="death-desc">{narrative}</div>
+                      {c.roleKey && (
+                        <div
+                          className="death-role-card"
+                          style={{
+                            borderColor: c.roleColor || '#aaa',
+                            boxShadow: `0 0 22px ${(c.roleColor || '#aaa')}44`,
+                          }}
+                        >
+                          <div className="death-role-label">
+                            {i18n.t('game:lynch_reveal.role_was', { defaultValue: 'Son rôle était :' })}
+                          </div>
+                          <div className="death-role-body" style={{ color: c.roleColor || '#fff' }}>
+                            {c.roleIcon && <i className={`fas ${c.roleIcon}`}></i>}
+                            <span>{roleLabelI18n}</span>
+                          </div>
+                        </div>
+                      )}
+                      {c.lastWill && (
+                        <div className="death-will">
+                          <i className="fas fa-scroll" aria-hidden="true"></i>
+                          <span className="death-will-label">{i18n.t('game:death_messages.will_label', { defaultValue: 'Testament' })}</span>
+                          <span className="death-will-text">«&nbsp;{c.lastWill}&nbsp;»</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               ) : (
                 <div className="death-report-safe">{i18n.t('game:system.peaceful_night')}</div>
               )}

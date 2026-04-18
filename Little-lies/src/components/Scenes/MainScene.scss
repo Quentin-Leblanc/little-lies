@@ -311,7 +311,7 @@
   padding-bottom: 10%;
   z-index: 35;
   pointer-events: none;
-  animation: death-report-anim 5s ease-in-out forwards;
+  animation: death-report-anim 6.2s ease-in-out forwards;
 }
 
 /* ── Lynch reveal (post-execution role reveal) ── */
@@ -511,6 +511,89 @@
   letter-spacing: 0.059rem;
   opacity: 0;
   animation: role-reveal-fade 1s ease-out 2s forwards;
+}
+
+/* Single death entry — stacks narrative, role card, and testament. */
+.death-report-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+  &:last-child { margin-bottom: 0; }
+}
+
+/* Role card — distinct block that makes the role reveal unmissable. */
+.death-role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.75rem 1.6rem;
+  background: rgba(10, 6, 10, 0.72);
+  border: 1.5px solid;
+  border-radius: 0.65rem;
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  animation: role-reveal-fade 0.9s ease-out 1.8s forwards;
+}
+
+.death-role-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.16rem;
+  text-transform: uppercase;
+  color: rgba(230, 220, 220, 0.7);
+}
+
+.death-role-body {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: 'Cinzel', serif;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  i {
+    font-size: 1.55rem;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+}
+
+/* Testament — quieter, below the role card. */
+.death-will {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: 34rem;
+  padding: 0.55rem 1rem;
+  background: rgba(45, 32, 15, 0.55);
+  border-left: 3px solid rgba(200, 170, 90, 0.65);
+  border-radius: 0 0.35rem 0.35rem 0;
+  color: rgba(240, 225, 200, 0.92);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  opacity: 0;
+  animation: role-reveal-fade 0.9s ease-out 2.3s forwards;
+
+  i { color: rgba(200, 170, 90, 0.85); margin-top: 0.15rem; flex-shrink: 0; }
+}
+
+.death-will-label {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: rgba(200, 170, 90, 0.9);
+  margin-right: 0.25rem;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.death-will-text {
+  font-style: italic;
 }
 
 @keyframes role-reveal-fade {

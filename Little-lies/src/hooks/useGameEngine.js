@@ -21,7 +21,7 @@ const GameEngineContext = React.createContext();
 const DURATIONS = {
   NIGHT: 30000,
   NIGHT_TRANSITION: 3000,   // visual fade between day/night (covers 1.5s black fade + breather)
-  DEATH_REPORT: 7000,       // 7s to read deaths (was 5s)
+  DEATH_REPORT: 9500,       // 9.5s — role card + testament needs breathing room
   DISCUSSION: 30000,        // 30s to discuss (was 15s)
   VOTING: 30000,
   DEFENSE: 20000,

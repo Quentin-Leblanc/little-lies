@@ -101,15 +101,10 @@ export function resolveAFK({ players, now, dayCount, timeoutMs }) {
     if (player.isAFK) return player;
     if (!player.lastActivityAt) return player;
     if (now - player.lastActivityAt > timeoutMs) {
+      // Silently flip the AFK flag — the player roster already shows
+      // an "AFK" badge next to the name, so spamming the chat with
+      // "X est inactif..." just adds noise players can't act on.
       changed = true;
-      newMessages.push({
-        player: 'system',
-        color: '#888',
-        content: i18n.t('game:system.player_afk', { name: player.profile?.name || '?' }),
-        type: 'system',
-        dayCount,
-        chat: 'default',
-      });
       return { ...player, isAFK: true };
     }
     return player;
