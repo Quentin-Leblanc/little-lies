@@ -8,6 +8,8 @@ import { useAuth } from '../Auth/Auth';
 import { addXP, incrementGamesPlayed } from '../../utils/supabase';
 import Audio from '../../utils/AudioManager';
 import SurveyModal from '../Survey/Survey';
+import { toTextCss } from '../../utils/playerColor';
+import { recordGame as recordRoleGame } from '../../utils/roleStats';
 import './GameOver.scss';
 
 const TEAM_STYLES = {
@@ -95,6 +97,14 @@ const GameOver = () => {
     metricsSaved.current = true;
     const metrics = collectGameMetrics({ game, players, events });
     saveMetrics(metrics);
+
+    // Persist per-role stats locally for the lobby "My stats" view. Fires
+    // once per game thanks to the metricsSaved guard — same trigger as
+    // the XP pipeline, so the record matches whatever is shown as the
+    // game's winner state.
+    if (mePlayer?.character?.key) {
+      recordRoleGame(mePlayer.character.key, isTeamWinner || isNeutralWinner);
+    }
 
     const xpResult = calculateGameXP({
       isWinner: isTeamWinner,
@@ -256,7 +266,7 @@ const GameOver = () => {
                 const roleLabel = t(`roles:${p.character?.key}.label`, { defaultValue: p.character?.label || '?' });
                 return (
                   <div key={p.id} className={`go-intermediate-row ${p.isAlive ? '' : 'is-dead'}`}>
-                    <span className="go-intermediate-name" style={{ color: p.profile?.color || '#ddd' }}>
+                    <span className="go-intermediate-name" style={{ color: toTextCss(p.profile?.color, '#ddd') }}>
                       {p.character?.icon && <i className={`fas ${p.character.icon}`} style={{ color: rColor, marginRight: '0.35rem' }}></i>}
                       {p.profile?.name || '?'}
                     </span>
@@ -398,7 +408,7 @@ const GameOver = () => {
                           className={`go-player-row ${!player.isAlive ? 'go-player-dead' : ''} ${isNeutralW ? 'go-player-neutral-win' : ''}`}
                           style={{ animationDelay: showRecap ? `${idx * 0.08}s` : '0s' }}
                         >
-                          <span className="go-player-name" style={{ color: player.profile?.color || '#ccc' }}>
+                          <span className="go-player-name" style={{ color: toTextCss(player.profile?.color) }}>
                             {player.character?.icon && <i className={`fas ${player.character.icon}`} style={{ color: player.character.couleur }}></i>}
                             {player.profile.name}
                             {player.id === mePlayer?.id && <span className="go-me-badge">{t('common:you')}</span>}

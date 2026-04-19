@@ -13,6 +13,8 @@ import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import Legal from '../Legal/Legal';
+import Tutorial from '../Tutorial/Tutorial';
+import RoleStats from '../RoleStats/RoleStats';
 import Audio from '../../utils/AudioManager';
 import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
@@ -113,18 +115,21 @@ const CampfireFlame = () => {
   );
 };
 
-// Embers rising from fire
+// Embers rising from fire. Speeds + sizes trimmed so the lobby reads as
+// slow-drifting campfire cinders rather than racing sparks: speeds cut
+// ~60% (was 0.4 + rand*0.6 → now 0.15 + rand*0.2) and sizes ~55% (was
+// 0.02 + rand*0.03 → now 0.008 + rand*0.014).
 const Embers = () => {
   const meshRef = useRef();
   const count = 20;
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const offsets = useMemo(() =>
     Array.from({ length: count }, () => ({
-      speed: 0.4 + Math.random() * 0.6,
+      speed: 0.15 + Math.random() * 0.2,
       drift: (Math.random() - 0.5) * 1.5,
       driftZ: (Math.random() - 0.5) * 1.5,
       phase: Math.random() * Math.PI * 2,
-      size: 0.02 + Math.random() * 0.03,
+      size: 0.008 + Math.random() * 0.014,
     })), []);
 
   useFrame((state) => {
@@ -598,6 +603,8 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   };
   const [showAuth, setShowAuth] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [showRoleStats, setShowRoleStats] = useState(false);
   const [muted, setMuted] = useState(Audio.isMuted());
   const [roomCode, setRoomCode] = useState('');
   const [copied, setCopied] = useState(false);
@@ -804,12 +811,38 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
       .filter(Boolean)
   );
 
+  const writeToClipboard = (text) => {
+    // Clipboard API needs a secure context and window focus — both fail in
+    // some embedded previews and fullscreen/canvas workflows. Fall back to
+    // the legacy execCommand path before giving up so the user still gets
+    // the code copied even when the modern API rejects.
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        } catch (_) {}
+      });
+    }
+  };
+
   const copyCode = () => {
-    navigator.clipboard.writeText(roomCode).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    if (!roomCode) return;
+    writeToClipboard(roomCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    writeToClipboard(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
   };
 
   const newLobby = () => {
@@ -1033,11 +1066,12 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
 
           <div className="lobby-section">
             <label className="lobby-label">{t('setup:room_code')}</label>
-            <div className="room-code-row">
+            <div className={`room-code-row ${copied ? 'is-copied' : ''}`} onClick={copyCode} role="button" tabIndex={0}>
               <span className="room-code">{roomCode || '...'}</span>
-              <button className="lobby-btn-icon" onClick={copyCode} title={t('setup:room_code')}>
+              <button className="lobby-btn-icon" onClick={(e) => { e.stopPropagation(); copyCode(); }} title={t('setup:room_code')}>
                 <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`}></i>
               </button>
+              {copied && <span className="room-code-tooltip">{t('common:copied')}</span>}
             </div>
           </div>
 
@@ -1090,9 +1124,22 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             </button>
           </div>
 
+          {/* Tutorial button for first-time players — separate from the
+              full in-game guide, this is a fast 4-step walkthrough. */}
+          <button className="lobby-tutorial-link" onClick={() => setShowTutorial(true)}>
+            <i className="fas fa-graduation-cap" aria-hidden="true"></i> {t('menu:tutorial.open_button', { defaultValue: 'Tutoriel' })}
+          </button>
+
+          <button className="lobby-stats-link" onClick={() => setShowRoleStats(true)}>
+            <i className="fas fa-chart-line" aria-hidden="true"></i> {t('menu:role_stats.open_button', { defaultValue: 'Mes stats' })}
+          </button>
+
           <button className="lobby-legal-link" onClick={() => setShowLegal(true)}>
             {t('common:legal', { defaultValue: 'Mentions légales & crédits' })}
           </button>
+
+          {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
+          {showRoleStats && <RoleStats onClose={() => setShowRoleStats(false)} />}
 
         </div>
       </div>

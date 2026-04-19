@@ -34,6 +34,16 @@ export function computeNextPhase(currentPhase, context) {
   const dur = (k) => DURATIONS[k] ?? 0;
 
   switch (currentPhase) {
+    // One-shot opening cinematic at game start. Feeds directly into the
+    // first DISCUSSION; the day counter is already 1 by the time we
+    // reach here (setGame in startGame() seeded dayCount=1), so we only
+    // bump the timer and flip the phase.
+    case PHASE.INTRO_CINEMATIC:
+      return {
+        gameDelta: { phase: PHASE.DISCUSSION, timer: dur('DISCUSSION') },
+        sideEffects: [],
+      };
+
     case PHASE.NIGHT:
       return {
         gameDelta: {

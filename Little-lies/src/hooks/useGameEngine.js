@@ -19,6 +19,7 @@ const GameEngineContext = React.createContext();
 
 // Phase durations (ms) — tuned for real multiplayer gameplay
 const DURATIONS = {
+  INTRO_CINEMATIC: 6000,    // once-per-game opening camera pan, no countdown UI
   NIGHT: 30000,
   NIGHT_TRANSITION: 3000,   // visual fade between day/night (covers 1.5s black fade + breather)
   DEATH_REPORT: 9500,       // 9.5s — role card + testament needs breathing room
@@ -33,8 +34,11 @@ const DURATIONS = {
   SPARED: 5000,
 };
 
-// All game phases in order
+// All game phases in order. INTRO_CINEMATIC only fires once, at game
+// start — it's a 6s wordless camera fly-over meant to show a new player
+// what the village looks like before the first discussion round kicks in.
 const PHASE = {
+  INTRO_CINEMATIC: 'INTRO_CINEMATIC',
   NIGHT: 'NIGHT',
   NIGHT_TRANSITION: 'NIGHT_TRANSITION',
   DEATH_REPORT: 'DEATH_REPORT',
@@ -59,6 +63,7 @@ const STATUS = {
 
 // Phase labels for UI display
 const PHASE_LABELS = {
+  [PHASE.INTRO_CINEMATIC]: '',
   [PHASE.NIGHT]: 'Nuit',
   [PHASE.NIGHT_TRANSITION]: 'La nuit tombe...',
   [PHASE.DEATH_REPORT]: 'Annonce des morts',
@@ -75,6 +80,7 @@ const PHASE_LABELS = {
 
 // Phase icons for HUD
 const PHASE_ICONS = {
+  [PHASE.INTRO_CINEMATIC]: 'fa-film',
   [PHASE.NIGHT]: 'fa-moon',
   [PHASE.NIGHT_TRANSITION]: 'fa-moon',
   [PHASE.DEATH_REPORT]: 'fa-skull',
@@ -89,8 +95,11 @@ const PHASE_ICONS = {
   [PHASE.SPARED]: 'fa-dove',
 };
 
-const DAY_PHASES = [PHASE.DEATH_REPORT, PHASE.DISCUSSION, PHASE.VOTING, PHASE.DEFENSE, PHASE.JUDGMENT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.EXECUTION_REVEAL, PHASE.NO_LYNCH, PHASE.SPARED];
-const INFO_PHASES = [PHASE.DEATH_REPORT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.EXECUTION_REVEAL, PHASE.NO_LYNCH, PHASE.SPARED, PHASE.NIGHT_TRANSITION];
+const DAY_PHASES = [PHASE.INTRO_CINEMATIC, PHASE.DEATH_REPORT, PHASE.DISCUSSION, PHASE.VOTING, PHASE.DEFENSE, PHASE.JUDGMENT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.EXECUTION_REVEAL, PHASE.NO_LYNCH, PHASE.SPARED];
+// INFO_PHASES are phases where player controls / actions are suppressed
+// (pure presentation moments). The cinematic intro belongs here so UI
+// like the countdown timer and action panel stay hidden during its 6s.
+const INFO_PHASES = [PHASE.INTRO_CINEMATIC, PHASE.DEATH_REPORT, PHASE.LAST_WORDS, PHASE.EXECUTION, PHASE.EXECUTION_REVEAL, PHASE.NO_LYNCH, PHASE.SPARED, PHASE.NIGHT_TRANSITION];
 
 // Exported constants
 const CONSTANTS = {
@@ -388,13 +397,16 @@ export const GameEngineProvider = ({ children }) => {
     setPlayers(newPlayers);
     setReadyPlayers([]);
 
-    // Game starts at Day 1 (Discussion) — players have no info yet, can /skip to night
-    // First day discussion is shorter (15s) since there's no info to discuss
+    // Game opens on INTRO_CINEMATIC — a 6s wordless camera fly-over so
+    // new players can see the village they're about to debate in before
+    // the first Discussion kicks in. The cinematic feeds straight into
+    // DISCUSSION via phaseTransitions; we deliberately skip the usual
+    // 15s shortened day-1 window since the intro already buys that time.
     setGame({
       ...game,
       status: STATUS.STARTED,
-      phase: PHASE.DISCUSSION,
-      timer: 15000,
+      phase: PHASE.INTRO_CINEMATIC,
+      timer: DURATIONS.INTRO_CINEMATIC,
       phaseStartedAt: Date.now(),
       gameStartedAt: Date.now(),
       isGameStarted: true,

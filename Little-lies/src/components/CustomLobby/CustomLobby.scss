@@ -376,6 +376,7 @@
 
 /* ── Room code ── */
 .room-code-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.471rem;
@@ -383,6 +384,49 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.353rem;
   padding: 0.471rem 0.706rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+
+  &:hover { background: rgba(255, 255, 255, 0.07); }
+
+  &.is-copied {
+    border-color: rgba(120, 255, 120, 0.4);
+    background: rgba(120, 255, 120, 0.06);
+    .lobby-btn-icon { color: #78ff78; }
+  }
+}
+
+.room-code-tooltip {
+  position: absolute;
+  top: calc(100% + 0.353rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 28, 20, 0.96);
+  color: #78ff78;
+  font-size: 0.765rem;
+  font-weight: 600;
+  padding: 0.294rem 0.706rem;
+  border-radius: 0.294rem;
+  border: 1px solid rgba(120, 255, 120, 0.35);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  animation: lobby-copied-in 0.2s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: rgba(120, 255, 120, 0.35);
+  }
+}
+
+@keyframes lobby-copied-in {
+  from { opacity: 0; transform: translate(-50%, -4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 .room-code {
