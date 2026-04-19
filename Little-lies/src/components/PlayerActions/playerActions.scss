@@ -78,7 +78,7 @@
   margin-bottom: 0.353rem;
   color: #ffa502;
   font-family: 'Cinzel', serif;
-  font-size: 0.765rem;
+  font-size: 0.828rem;
   font-weight: 700;
   letter-spacing: 0.059rem;
   animation: vote-pulse 1.5s ease-in-out infinite;
@@ -136,7 +136,7 @@
   border-radius: 0.235rem;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   font-weight: bold;
-  font-size: 0.941rem;
+  font-size: 1.004rem;
   background: rgba(0, 0, 0, 0.75);
   min-height: 2.471rem;
   transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
@@ -175,7 +175,7 @@
 
   button {
     padding: 0.353rem 0.824rem;
-    font-size: 0.824rem;
+    font-size: 0.887rem;
     margin: 0;
   }
 }
@@ -183,7 +183,7 @@
 .vote-count-num {
   min-width: 1.176rem;
   text-align: center;
-  font-size: 0.941rem;
+  font-size: 1.004rem;
   font-weight: bold;
   color: #fff;
 }
@@ -257,7 +257,7 @@
   p {
     margin: 0 0 0.471rem 0;
     font-family: 'Cinzel', serif;
-    font-size: 0.882rem;
+    font-size: 0.945rem;
   }
 }
 
@@ -269,7 +269,7 @@
 
   button {
     padding: 0.4rem 0.9rem;
-    font-size: 0.8rem;
+    font-size: 0.863rem;
     font-weight: 900;
     letter-spacing: 0.08rem;
     text-transform: uppercase;
@@ -305,7 +305,7 @@
 
   p {
     margin: 0;
-    font-size: 0.824rem;
+    font-size: 0.887rem;
   }
 }
 
@@ -317,7 +317,7 @@
   border: 1px solid rgba(0, 185, 106, 0.3);
   border-radius: 0.235rem;
   color: #00b96a;
-  font-size: 0.824rem;
+  font-size: 0.887rem;
   font-weight: bold;
 
   i {
@@ -325,19 +325,22 @@
   }
 }
 
-// Mayor reveal
+// Mayor reveal — the label used to read at 0.647rem and was easy to
+// miss inside the action stack. Pulled up to 0.882rem so it reads as a
+// proper CTA next to the player list row heights.
 .reveal-btn {
   width: 100%;
-  font-size: 0.647rem;
-  padding: 0.294rem 0.353rem;
+  font-size: 0.882rem;
+  padding: 0.412rem 0.471rem;
   background: rgba(255, 215, 0, 0.15);
   border: 1px solid rgba(255, 215, 0, 0.4);
   border-radius: 0.235rem;
   color: #ffd700;
   cursor: pointer;
   box-sizing: border-box;
+  font-weight: 600;
 
-  i { margin-right: 0.235rem; }
+  i { margin-right: 0.294rem; }
 
   &:hover {
     background: rgba(255, 215, 0, 0.3);
@@ -351,7 +354,7 @@
   border: 1px solid rgba(255, 215, 0, 0.3);
   border-radius: 0.235rem;
   color: #ffd700;
-  font-size: 0.765rem;
+  font-size: 0.828rem;
   font-weight: bold;
 
   i { margin-right: 0.235rem; }
@@ -380,18 +383,18 @@
 }
 
 .player-color-icon {
-  font-size: 0.706rem;
+  font-size: 0.769rem;
   flex-shrink: 0;
 }
 
 .revealed-badge {
   color: #ffd700;
-  font-size: 0.706rem;
+  font-size: 0.769rem;
 }
 
 .vote-btn {
   padding: 0.235rem 0.706rem;
-  font-size: 0.706rem;
+  font-size: 0.769rem;
   margin: 0;
   background: #111;
   color: #eee;
@@ -439,14 +442,14 @@
   align-items: center;
   gap: 0.353rem;
   font-family: 'Cinzel', serif;
-  font-size: 0.647rem;
+  font-size: 0.71rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.088rem;
   padding: 0.235rem 0;
   opacity: 0.8;
 
-  i { font-size: 0.588rem; }
+  i { font-size: 0.651rem; }
 }
 
 // Action feedback
@@ -457,7 +460,7 @@
   border: 1px solid rgba(0, 185, 106, 0.25);
   border-radius: 0.235rem;
   color: #00b96a;
-  font-size: 0.765rem;
+  font-size: 0.828rem;
   font-weight: 600;
   animation: feedback-in 0.3s ease-out;
 
@@ -472,7 +475,7 @@
 // Blackmailed badge
 .blackmailed-badge {
   color: #ff6666;
-  font-size: 0.647rem;
+  font-size: 0.71rem;
   margin-left: 0.118rem;
   animation: blink-slow 2s ease-in-out infinite;
 }
@@ -485,7 +488,7 @@
 // Disconnecting badge
 .disconnecting-badge {
   color: #ff8800;
-  font-size: 0.647rem;
+  font-size: 0.71rem;
   margin-left: 0.118rem;
   animation: dc-blink 1s ease-in-out infinite;
 }
@@ -498,7 +501,7 @@
 // AFK badge
 .afk-badge {
   color: #999;
-  font-size: 0.58rem;
+  font-size: 0.643rem;
   margin-left: 0.25rem;
   padding: 0.05rem 0.3rem;
   background: rgba(255, 255, 255, 0.06);
@@ -519,7 +522,7 @@
 
 .action-btn {
   padding: 0.294rem 0.706rem;
-  font-size: 0.765rem;
+  font-size: 0.828rem;
   margin: 0;
   border-radius: 0.235rem;
   cursor: pointer;
@@ -562,7 +565,7 @@
 // Judgment hint
 .judgment-hint {
   text-align: center;
-  font-size: 0.647rem;
+  font-size: 0.71rem;
   color: #888;
   font-style: italic;
   margin: 0.235rem 0 0;
@@ -689,20 +692,20 @@
 
 // Disabled action hint (e.g. Vigilante night 1)
 .action-hint-disabled {
-  font-size: 0.706rem;
+  font-size: 0.769rem;
   color: #666;
   padding: 0.235rem 0.588rem;
   border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 0.235rem;
   opacity: 0.5;
 
-  i { margin-right: 0.235rem; font-size: 0.588rem; }
+  i { margin-right: 0.235rem; font-size: 0.651rem; }
 }
 
 .dead-label {
   color: #555;
   font-style: italic;
-  font-size: 0.647rem;
+  font-size: 0.71rem;
 }
 
 .player-list-item.is-dead {

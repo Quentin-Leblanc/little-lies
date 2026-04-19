@@ -300,32 +300,35 @@
   flex-shrink: 0;
 }
 
-// Input outside the chat bloc
+// Input outside the chat bloc. Transparent wrapper so the input chip
+// reads as floating above the 3D scene — the dark shell on the input
+// itself provides all the contrast needed.
 .chat-input-outside {
   display: flex;
   align-items: center;
   gap: 0.353rem;
-  padding: 0.471rem 0.588rem;
+  padding: 0.235rem 0;
   margin-top: 0.235rem;
-  background: rgba(0, 0, 0, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 0.471rem;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 .chat-input-hint-outside {
   text-align: left;
-  font-size: 0.706rem;
+  font-size: 0.882rem;
   color: #ddd;
   padding: 0.353rem 0.235rem;
   margin-top: 0.235rem;
+  background: transparent;
   kbd {
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 0.176rem;
     padding: 0.059rem 0.294rem;
-    font-size: 0.647rem;
+    font-size: 0.824rem;
     color: #888;
   }
 }
@@ -356,8 +359,8 @@
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 0.235rem;
-  padding: 0.47rem 0.65rem;
-  font-size: 0.92rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 1.12rem;
   font-family: inherit;
   transition: border-color 0.2s;
 
