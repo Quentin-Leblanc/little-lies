@@ -288,6 +288,21 @@
   margin: 0.235rem 0;
 }
 
+// Big title above the card — "Votre rôle est" / "Your role is"
+.reveal-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.35rem;
+  text-transform: uppercase;
+  margin: 0 0 1.4rem 0;
+  text-align: center;
+  text-shadow:
+    0 0 18px rgba(255, 255, 255, 0.25),
+    0 0 42px rgba(120, 170, 255, 0.18);
+}
+
 // Card
 .reveal-card {
   perspective: 800px;
@@ -312,95 +327,92 @@
   50%      { opacity: 1;    transform: scale(1.06); }
 }
 
+// The "card" is now a transparent title-card stage. Previous design had
+// a 2px hard border + opaque gradient panel + fixed 17x25rem frame that
+// felt like a trading-card pop-up glued on top of the scene. New design
+// lets the 3D starfield bleed through and uses the halo + particles to
+// frame the reveal. No background, no border, no min-height.
 .card-inner {
-  width: 17.647rem;
-  min-height: 25.294rem;
-  background: linear-gradient(145deg, rgba(20, 20, 30, 0.95), rgba(10, 10, 20, 0.98));
-  border: 2px solid #444;
-  border-radius: 0.941rem;
-  padding: 1.765rem 1.412rem;
+  max-width: 30rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
   text-align: center;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(0, 0, 0, 0.3);
   position: relative;
-  overflow: hidden;
-
-  // Subtle glow behind card
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at center, var(--glow-color, rgba(100, 100, 255, 0.05)) 0%, transparent 60%);
-    pointer-events: none;
-  }
+  gap: 0.588rem;
 }
 
-.card-team {
-  font-size: 0.647rem;
+// Team faction as a subtle pill — was a tiny text label before, now a
+// colored chip (accent = role color) so the faction identity lands
+// immediately without the old card border telling the whole story.
+.card-team-pill {
+  font-family: 'Cinzel', serif;
+  font-size: 0.824rem;
   text-transform: uppercase;
-  letter-spacing: 0.176rem;
-  font-weight: bold;
-  margin-bottom: 0.941rem;
+  letter-spacing: 0.2rem;
+  font-weight: 700;
+  padding: 0.294rem 0.941rem;
+  border: 1px solid;
+  border-radius: 1rem;
+  backdrop-filter: blur(6px);
+  text-shadow: 0 0 12px currentColor;
 }
 
+// Oversized role icon — now the centerpiece of the reveal. Big glow
+// drops the need for a card frame to anchor the eye.
 .card-icon {
-  font-size: 3.5rem;
-  margin-bottom: 0.941rem;
-  filter: drop-shadow(0 0 10px currentColor);
+  font-size: 6.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 18px currentColor) drop-shadow(0 0 36px currentColor);
+  margin: 0.235rem 0;
 }
 
 .card-name-wrapper {
   text-align: center;
-  margin-bottom: 0.941rem;
-}
-
-.card-assigned-label {
-  font-size: 0.647rem;
-  text-transform: uppercase;
-  letter-spacing: 0.118rem;
-  color: #889;
-  margin-bottom: 0.353rem;
 }
 
 .card-name {
   font-family: 'Cinzel', serif;
-  font-size: 2.4rem;
-  font-weight: bold;
-  text-shadow: 0 0 20px currentColor;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.12rem;
+  text-shadow:
+    0 0 18px currentColor,
+    0 0 42px currentColor,
+    0 0 2px rgba(0, 0, 0, 0.9);
 }
 
 .card-details {
   width: 100%;
+  max-width: 28rem;
+  margin-top: 0.235rem;
 }
 
 .card-description {
-  font-size: 0.706rem;
-  color: #aaa;
+  font-size: 0.824rem;
+  color: #c5c5c5;
   margin: 0.471rem 0;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .card-objective {
-  font-size: 0.824rem;
-  color: #ccc;
+  font-size: 1rem;
+  color: #e0e0e0;
   font-style: italic;
-  margin: 0.588rem 0;
-  padding: 0.471rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 0.588rem auto;
+  padding: 0 0.706rem;
+  max-width: 26rem;
   line-height: 1.5;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 
 .card-exec-target {
-  color: #ff6666;
-  font-size: 0.765rem;
+  color: #ff7a7a;
+  font-size: 0.88rem;
   font-weight: bold;
   margin-top: 0.471rem;
+  text-shadow: 0 0 10px rgba(255, 80, 80, 0.45);
 
   i { margin-right: 0.235rem; }
 }
@@ -408,32 +420,20 @@
 .card-abilities {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.353rem;
+  gap: 0.471rem;
   justify-content: center;
-  margin-top: 0.588rem;
+  margin-top: 0.706rem;
 }
 
 .card-ability {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.235rem 0.706rem;
-  border-radius: 0.706rem;
-  font-size: 0.765rem;
-  color: #ddd;
-}
-
-// Card glow ring
-.card-glow-ring {
-  position: absolute;
-  inset: -2px;
-  border-radius: 1.059rem;
-  pointer-events: none;
-  z-index: 0;
-  animation: glow-pulse 3s ease-in-out infinite;
-}
-
-@keyframes glow-pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  background: rgba(20, 20, 30, 0.55);
+  backdrop-filter: blur(6px);
+  padding: 0.294rem 0.824rem;
+  border-radius: 0.941rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.824rem;
+  color: #ebebeb;
+  letter-spacing: 0.03em;
 }
 
 // Card particles

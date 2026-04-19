@@ -302,43 +302,75 @@ const RoleReveal = ({ onComplete }) => {
         )}
       </AnimatePresence>
 
-      {/* Card flip */}
+      {/* Big title above the card — stays visible for the whole card reveal */}
+      {(phase === 'flip' || phase === 'details') && role && (
+        <motion.h2
+          className="reveal-title"
+          data-text={t('setup:reveal.your_role_is')}
+          initial={{ opacity: 0, y: -24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+        >
+          {t('setup:reveal.your_role_is')}
+        </motion.h2>
+      )}
+
+      {/* Cinematic reveal — replaces the old card frame (hard border +
+          opaque panel) with a transparent "title card" that floats over
+          the scene. Halo + particles + huge icon do the framing instead
+          of a border. The inner block has no background so the starry
+          3D backdrop stays part of the composition. */}
       {(phase === 'flip' || phase === 'details') && role && (
         <motion.div
           className="reveal-card"
-          initial={{ rotateY: 180, opacity: 0, scale: 0.85 }}
-          animate={{ rotateY: 0, opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.9, ease: 'easeOut' }}
         >
-          {/* Diffuse halo behind the card, colored by role */}
+          {/* Diffuse halo behind the icon, colored by role */}
           <div
             className="card-halo"
             style={{
-              background: `radial-gradient(ellipse at center, ${role.couleur}88 0%, ${role.couleur}44 25%, ${role.couleur}1c 50%, transparent 75%)`,
+              background: `radial-gradient(ellipse at center, ${role.couleur}99 0%, ${role.couleur}55 22%, ${role.couleur}22 46%, transparent 72%)`,
             }}
           />
           <CardParticles color={role.couleur} />
-          <div className="card-inner" style={{ borderColor: role.couleur, '--glow-color': `${role.couleur}20` }}>
-            <div className="card-glow-ring" style={{ boxShadow: `0 0 60px ${role.couleur}30, 0 0 120px ${role.couleur}15` }} />
-            <div className="card-team" style={{ color: role.couleur }}>
+          <div className="card-inner" style={{ '--accent': role.couleur }}>
+            <motion.div
+              className="card-team-pill"
+              style={{ color: role.couleur, borderColor: `${role.couleur}66`, background: `${role.couleur}14` }}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+            >
               {teamLabel}
-            </div>
-            <div className="card-icon" style={{ color: role.couleur }}>
+            </motion.div>
+            <motion.div
+              className="card-icon"
+              style={{ color: role.couleur }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.25, duration: 0.7, ease: 'easeOut' }}
+            >
               <i className={`fas ${role.icon}`}></i>
-            </div>
+            </motion.div>
             <motion.div
               className="card-name-wrapper"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.55 }}
             >
-              <div className="card-assigned-label">{t('setup:reveal.role_assigned')}</div>
               <div className="card-name" style={{ color: role.couleur }}>
                 {t(`roles:${role.key}.label`, { defaultValue: role.label })}
               </div>
             </motion.div>
 
-            <div className="card-details">
+            <motion.div
+              className="card-details"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.85, duration: 0.6 }}
+            >
               <p className="card-objective">{t(`roles:${role.key}.objectif`, { defaultValue: role.objectif })}</p>
               {execTarget && (
                 <p className="card-exec-target">
@@ -348,11 +380,11 @@ const RoleReveal = ({ onComplete }) => {
               {role.actions?.length > 0 && (
                 <div className="card-abilities">
                   {role.actions.map((a, i) => (
-                    <span key={i} className="card-ability">{a.label}</span>
+                    <span key={i} className="card-ability" style={{ borderColor: `${role.couleur}55` }}>{a.label}</span>
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
           </div>
         </motion.div>
       )}

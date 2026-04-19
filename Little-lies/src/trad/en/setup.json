@@ -42,6 +42,7 @@
     "waiting_players": "Waiting for players...",
     "intro_text": "Night falls on the village...",
     "intro_sub": "Your fate is sealed.",
+    "your_role_is": "Your role is",
     "role_assigned": "Role assigned:",
     "game_starting": "The game begins..."
   },

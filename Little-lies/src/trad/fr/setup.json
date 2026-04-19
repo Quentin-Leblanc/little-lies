@@ -42,6 +42,7 @@
     "waiting_players": "En attente des joueurs...",
     "intro_text": "La nuit tombe sur le village...",
     "intro_sub": "Votre destin est scellé.",
+    "your_role_is": "Votre rôle est",
     "role_assigned": "Rôle assigné :",
     "game_starting": "La partie commence..."
   },
