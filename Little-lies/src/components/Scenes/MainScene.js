@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky, Stars } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, HueSaturation } from '@react-three/postprocessing';
-import { useMultiplayerState } from 'playroomkit';
+import { useMultiplayerState, getRoomCode } from 'playroomkit';
 import * as THREE from 'three';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import Audio from '../../utils/AudioManager';
@@ -11,7 +11,7 @@ import i18n from '../../trad/i18n';
 // Scene sub-modules (extracted from the old 3400-line file).
 import './preloads';
 import { PLAYER_Y, PODIUM_POSITION } from './constants';
-import { getNightAmbiance } from './utils';
+import { getNightAmbiance, getGameSeed, LOBBY_MOODS, MOOD_DAY_ROLLS, MOOD_NIGHT_ROLLS } from './utils';
 import CameraController from './Camera/CameraController';
 import SceneLighting from './Lighting/SceneLighting';
 import GroundPlane from './Environment/GroundPlane';
@@ -32,6 +32,7 @@ import TrialStormLighting from './Weather/TrialStormLighting';
 import NightDarkFog from './Weather/NightDarkFog';
 import NightCrows from './Wildlife/NightCrows';
 import DayRabbits from './Wildlife/DayRabbits';
+import ExecutionCrows from './Wildlife/ExecutionCrows';
 import DistantWindmill from './Environment/DistantWindmill';
 import CirclingBirds from './Atmosphere/CirclingBirds';
 import CandleRack from './Props/CandleRack';
@@ -83,6 +84,23 @@ const MainScene = () => {
   const deathsCount = deadPlayers.length;
   const totalPlayers = Math.max(players.length, 1);
   const deathsRatio = Math.min(deathsCount / totalPlayers, 1) * 0.6;
+
+  // Per-game seed — roomCode is stable across replays in the same room
+  // (not useful for anti-repetition alone), but mixing in gameStartedAt
+  // (set once by startGame) rotates the seed every match. All clients
+  // compute the same value from shared state so village variance / moon
+  // phase / mood stay synchronized without extra networking.
+  const gameSeed = useMemo(
+    () => getGameSeed(getRoomCode() || '', game?.gameStartedAt || 0),
+    [game?.gameStartedAt],
+  );
+  // Lobby weather mood picked once at game start. Biases daily weather
+  // rolls toward a consistent feel (CLEAR / STORM / FOG / DUSK) so a
+  // whole game has an identity. DUSK doesn't lock weather but tints the
+  // sky toward warm sunset colors on top of the normal rolls.
+  const lobbyMood = LOBBY_MOODS[gameSeed % LOBBY_MOODS.length];
+  // Moon phase (0=new, 1=crescent, 2=half, 3=full). Rotates per game.
+  const moonPhase = (gameSeed >> 3) % 4;
 
   // Pause mode — local player position, animation, rotation
   const [pausePos, setPausePos] = useState(null);
@@ -471,8 +489,10 @@ const MainScene = () => {
     }
   }, [isPaused]);
 
+  const isExecutionShake = phase === CONSTANTS.PHASE.EXECUTION;
+
   return (
-    <div className="main-scene-3d">
+    <div className={`main-scene-3d${isExecutionShake ? ' main-scene-3d--execution-shake' : ''}`}>
       <Canvas
         shadows="soft"
         camera={{ position: [0, 9, 14], fov: 50 }}
@@ -496,6 +516,7 @@ const MainScene = () => {
               dayCount={game.dayCount || 0}
               deathFocusPos={deathFocusPos}
               playerCount={players.length}
+              gameSeed={gameSeed}
             />
           )}
 
@@ -515,29 +536,34 @@ const MainScene = () => {
             }
           />
 
-          {/* Sky & atmosphere — deterministic weather based on dayCount so
-              all players see the same conditions each day. */}
+          {/* Sky & atmosphere — deterministic weather driven by the
+              per-game lobbyMood (CLEAR / STORM / FOG / DUSK) rather than
+              a pure dayCount roll. Each mood has a 4-length rotation
+              that skews the daily weather toward a theme while keeping
+              at least one "break" day so the sequence isn't monotonic.
+              All clients derive the mood from the same gameSeed, so
+              they stay synchronized without extra multiplayer state. */}
           {(() => {
-            const seed = game.dayCount * 7 + 3;
-            // Day weather — 3 states only (no more in-between cloudy/grey
-            // that just looked like "always slightly foggy"):
-            //   roll 0        → sunny  (25%)
-            //   roll 1, 2     → misty  (50%)
-            //   roll 3        → rainy+thunder (25%)
-            // Modulo 4 with two mist slots hits the spec distribution while
-            // staying deterministic (same seed → same weather everywhere).
-            const dayRoll = seed % 4;
+            const day = game.dayCount || 0;
+            const dayIdx = ((day % 4) + 4) % 4;
+            const dayRoll = MOOD_DAY_ROLLS[lobbyMood][dayIdx];
             const isSunny = dayRoll === 0;
             const isRainyDay = dayRoll === 3;
             const isMisty = !isSunny && !isRainyDay;
-            // Night weather: 0=clear, 1=rainy+thunder, 2=foggy
-            const nightWeather = (seed * 13 + 5) % 3;
+            const nightWeather = MOOD_NIGHT_ROLLS[lobbyMood][dayIdx];
+            // DUSK: warm-tint the sky all day regardless of roll. Keeps
+            // the weather rolls doing their thing, just colorgraded like
+            // a sunset game.
+            const isDusk = lobbyMood === 'DUSK';
 
             if (game.isDay) {
               // Sky color: warm blue sun, cold slate storm, mid grey mist.
               // Blood-tinted progressively toward #4a1e1e as deaths pile
-              // up — the sky turns the color of dried blood late-game.
-              const baseSky = isSunny ? '#8fcff0' : isRainyDay ? '#5a6878' : '#909aa8';
+              // up. DUSK lobby stacks a warm #e59c5f tint on top so the
+              // whole game feels "golden hour" — applied before the
+              // deaths tint so late-game DUSK goes blood-orange.
+              let baseSky = isSunny ? '#8fcff0' : isRainyDay ? '#5a6878' : '#909aa8';
+              if (isDusk) baseSky = lerpHex(baseSky, '#e59c5f', 0.55);
               const skyColor = lerpHex(baseSky, '#4a1e1e', deathsRatio);
               // Fog closes in as deaths accumulate — far plane shrinks
               // up to ~35%. Sunny days still breathe at day 1, but at
@@ -603,7 +629,7 @@ const MainScene = () => {
                     ]}
                   />
                   <Stars radius={80} depth={50} count={isRainy ? 500 : 3000} factor={4} saturation={0} fade speed={1} />
-                  <Moon />
+                  <Moon phase={moonPhase} />
                   <FloatingDust count={60} isDay={false} />
                   <NightEmbers count={isRainy ? 30 : isFoggy ? 50 : 70} />
                   {/* Ground-level fog reserved for weather that actually
@@ -623,7 +649,7 @@ const MainScene = () => {
           })()}
 
           <GroundPlane isDay={game.isDay} />
-          <Village isDay={game.isDay} isTrialPhase={isTrialPhase} />
+          <Village isDay={game.isDay} isTrialPhase={isTrialPhase} gameSeed={gameSeed} />
 
           {/* Background decor — procedural landmarks placed between the
               cottage ring (r ≈ 18) and the mountain ring (r ≈ 42). Both
@@ -701,6 +727,14 @@ const MainScene = () => {
               />
             );
           })}
+
+          {/* Execution crow scatter — 5 birds burst upward + outward
+              from above the gallows on EXECUTION entry. Mounted only
+              during the 3s EXECUTION phase so the instanced mesh is
+              absent otherwise. */}
+          {phase === CONSTANTS.PHASE.EXECUTION && (
+            <ExecutionCrows origin={[PODIUM_POSITION[0], 3.5, PODIUM_POSITION[2]]} />
+          )}
 
           {/* Post-processing — minimal to avoid white artifacts.
               HueSaturation pushes color punch without touching hue; kept

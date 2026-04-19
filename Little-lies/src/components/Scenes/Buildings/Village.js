@@ -15,18 +15,43 @@ import {
   MESHY_TREE, MESHY_BOARD, MESHY_SKULL, MESHY_RING,
   MESHY_OBELISK,
 } from '../constants';
-import { faceCenter } from '../utils';
+import { faceCenter, mulberry32 } from '../utils';
 
 // Aggregates the full village — center landmarks, buildings, lanterns,
 // mountains, trees, rocks, dark props, fences, river + bridge, and
 // night-only blood splatter clusters.
-const Village = React.memo(({ isDay, isTrialPhase }) => (
+//
+// gameSeed (int, defaults to 0) drives small procedural variations so
+// back-to-back matches in the same lobby don't show the identical
+// village: cottage rotations get ±10° of variance, and the first cottage
+// the seed lands on gets a slightly larger rotation jitter (up to ±20°)
+// so at least one landmark feels clearly different between games. All
+// variance is deterministic by seed — every client renders the same
+// layout because they all hash the same roomCode + gameStartedAt.
+const Village = React.memo(({ isDay, isTrialPhase, gameSeed = 0 }) => {
+  const rng = mulberry32(gameSeed || 1);
+  // Chapel (index 0) stays rotationally locked — it's THE landmark and
+  // its rotation affects trial camera composition. Cottages (index 1+)
+  // get variance.
+  const buildingVariance = BUILDING_POSITIONS.map((_, i) => {
+    if (i === 0) return 0;
+    // Most cottages ±10°, one "accent" cottage ±22° for a clearly
+    // different silhouette each game.
+    const r = rng();
+    const isAccent = rng() < 0.12;
+    const spread = isAccent ? 0.38 : 0.17; // radians (~22° vs ~10°)
+    return (r - 0.5) * 2 * spread;
+  });
+  return (
   <group>
     <VillageCenter isTrialPhase={isTrialPhase} />
 
-    {BUILDING_POSITIONS.map((b, i) => (
-      <BuildingRenderer key={`bld-${i}`} {...b} />
-    ))}
+    {BUILDING_POSITIONS.map((b, i) => {
+      const jitter = buildingVariance[i];
+      const baseRot = b.rotation;
+      const rotation = jitter === 0 ? baseRot : [baseRot[0], baseRot[1] + jitter, baseRot[2]];
+      return <BuildingRenderer key={`bld-${i}`} {...b} rotation={rotation} />;
+    })}
 
     {TORCH_POS.map((pos, i) => (
       <SkullLantern key={`lantern-${i}`} position={pos} rotation={[0, i * Math.PI / 2, 0]} scale={1.2} />
@@ -125,6 +150,7 @@ const Village = React.memo(({ isDay, isTrialPhase }) => (
       ))}
     </>}
   </group>
-));
+  );
+});
 
 export default Village;

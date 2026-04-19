@@ -26,7 +26,7 @@ import { pushCameraOutOfObstacles } from '../utils';
 //   single angle.
 // Pushes the target and interpolated position out of the church & gallows
 // obstacle spheres so the camera never ends up inside a model.
-const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null, playerCount = 0 }) => {
+const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null, playerCount = 0, gameSeed = 0 }) => {
   const { camera } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 8, 12));
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
@@ -44,17 +44,18 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
   // a ref so we don't allocate a Vector3 per frame.
   const introOut = useRef({ pos: new THREE.Vector3(), lookAt: new THREE.Vector3(), shot: 0 });
 
-  // Hash the room code into a stable integer so day 0 / night 0 start on
-  // a different cinematic each game. Without this, every first night
-  // showed the same shot (dayCount=0 always resolved to the same pool
-  // index). All clients in the same room compute the same seed, so they
-  // stay synchronized with no extra networking.
-  const roomSeed = useMemo(() => {
+  // Stable per-game seed. Prefer the parent-passed gameSeed (derived
+  // from roomCode + game.gameStartedAt) — this rotates every match so
+  // back-to-back games in the same lobby get distinct shot picks. Fall
+  // back to a pure roomCode hash if the parent didn't pass one (early
+  // render, pre-start, etc.) so nothing breaks.
+  const fallbackSeed = useMemo(() => {
     const code = getRoomCode() || '';
     let h = 0;
     for (let i = 0; i < code.length; i++) h = (h * 31 + code.charCodeAt(i)) >>> 0;
     return h;
   }, []);
+  const roomSeed = gameSeed || fallbackSeed;
 
   const isDefensePhase = phase === CONSTANTS.PHASE.DEFENSE;
   const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;

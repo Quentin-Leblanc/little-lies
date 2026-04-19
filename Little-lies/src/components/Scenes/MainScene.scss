@@ -87,6 +87,24 @@
     width: 100% !important;
     height: 100% !important;
   }
+
+  // Quick camera-shake on EXECUTION entry. 0.45s stutter that reads as
+  // "the gallows dropped" — paired with the existing blood-flash vignette.
+  // Applied to the Canvas via the wrapper so transforms affect the whole
+  // rendered frame (post-processing included) instead of just an overlay.
+  &--execution-shake canvas {
+    animation: main-scene-execution-shake 0.45s ease-out;
+  }
+}
+
+@keyframes main-scene-execution-shake {
+  0%   { transform: translate(0, 0); }
+  15%  { transform: translate(-5px, 2px); }
+  30%  { transform: translate(4px, -3px); }
+  45%  { transform: translate(-3px, 3px); }
+  60%  { transform: translate(3px, -1px); }
+  75%  { transform: translate(-2px, 2px); }
+  100% { transform: translate(0, 0); }
 }
 
 .scene-overlay {
