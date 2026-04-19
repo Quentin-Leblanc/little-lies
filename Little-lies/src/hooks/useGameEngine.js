@@ -209,6 +209,13 @@ export const GameEngineProvider = ({ children }) => {
   trialRef.current = trial;
   const [_readyPlayers, setReadyPlayers] = useMultiplayerState('readyPlayers', []);
   const readyPlayers = _readyPlayers || [];
+  // Separate from readyPlayers: this list tracks which clients have
+  // finished their on-screen role-reveal animation. The game timer for
+  // INTRO_CINEMATIC only starts ticking once every player has closed
+  // their card, so the 6s cinematic actually plays after the curtain
+  // opens instead of silently elapsing behind it.
+  const [_revealedPlayers, setRevealedPlayers] = useMultiplayerState('revealedPlayers', []);
+  const revealedPlayers = _revealedPlayers || [];
 
   const playroom_players = usePlayersList(true);
 
@@ -356,6 +363,12 @@ export const GameEngineProvider = ({ children }) => {
     }
   };
 
+  const markRevealDone = (playerId) => {
+    if (!revealedPlayers.includes(playerId)) {
+      setRevealedPlayers([...revealedPlayers, playerId]);
+    }
+  };
+
   const startGame = () => {
     const shuffledRoles = [...rolesSelected].sort(() => Math.random() - 0.5);
     const newPlayers = playroom_players
@@ -396,6 +409,7 @@ export const GameEngineProvider = ({ children }) => {
 
     setPlayers(newPlayers);
     setReadyPlayers([]);
+    setRevealedPlayers([]);
 
     // Game opens on INTRO_CINEMATIC — a 6s wordless camera fly-over so
     // new players can see the village they're about to debate in before
@@ -853,23 +867,32 @@ export const GameEngineProvider = ({ children }) => {
     }
   }, [_game, players]);
 
-  // --- Wait for all players to load assets (host only) ---
+  // --- Wait for all players to load assets AND finish role reveal (host only) ---
+  // Two-stage gate:
+  //   1. readyPlayers — every client finished preloading character models.
+  //      Drives the RoleReveal card animation start (synced across clients).
+  //   2. revealedPlayers — every client closed their role-reveal card.
+  //      Holds the game timer so INTRO_CINEMATIC's 6s plays visibly AFTER
+  //      the curtain opens, not silently behind the reveal card.
   useEffect(() => {
     if (!isHost() || !game.isGameStarted || !game.waitingForPlayers) return;
 
     const allReady = players.length > 0 && players.every(p => readyPlayers.includes(p.id));
-    if (allReady) {
+    const allRevealed = players.length > 0 && players.every(p => revealedPlayers.includes(p.id));
+    if (allReady && allRevealed) {
       setGame(prev => ({ ...prev, waitingForPlayers: false }));
       return;
     }
 
-    // Timeout: start anyway after 15s
+    // Timeout: start anyway after 20s so a single stuck client can't
+    // freeze the whole lobby forever. Bumped from 15s to 20s to cover
+    // the full reveal (9.5s) + a slow loader margin.
     const timeout = setTimeout(() => {
       setGame(prev => ({ ...prev, waitingForPlayers: false }));
-    }, 15000);
+    }, 20000);
 
     return () => clearTimeout(timeout);
-  }, [readyPlayers.length, game.waitingForPlayers, game.isGameStarted]);
+  }, [readyPlayers.length, revealedPlayers.length, game.waitingForPlayers, game.isGameStarted]);
 
   // --- Skip day majority check (host only) ---
   // Counts from per-player `wantsSkip` state (see voteSkip above) scoped
@@ -917,6 +940,8 @@ export const GameEngineProvider = ({ children }) => {
         addChatSystem,
         readyPlayers,
         markReady,
+        revealedPlayers,
+        markRevealDone,
         updateActivity,
       }}
     >

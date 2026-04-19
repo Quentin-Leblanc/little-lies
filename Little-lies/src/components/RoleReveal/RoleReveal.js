@@ -94,7 +94,7 @@ const CardParticles = ({ color }) => {
 
 const RoleReveal = ({ onComplete }) => {
   const { t } = useTranslation(['setup', 'game', 'roles']);
-  const { getMe, getPlayers, game, markReady, readyPlayers } = useGameEngine();
+  const { getMe, getPlayers, markReady, markRevealDone, readyPlayers } = useGameEngine();
   const me = getMe();
   const players = getPlayers();
   const [phase, setPhase] = useState('loading');
@@ -168,11 +168,17 @@ const RoleReveal = ({ onComplete }) => {
     if (realLoaded && me) markReady(me.id);
   }, [realLoaded]);
 
-  // Start reveal when all players ready
+  // Start reveal when every client has finished loading. Gates on
+  // readyPlayers directly (not game.waitingForPlayers) because that flag
+  // now stays true until ALL reveals complete — it's what holds the
+  // INTRO_CINEMATIC game timer so the 6s cinematic plays after the
+  // curtain opens. The load-sync is a separate step and lives here.
   useEffect(() => {
     if (phase !== 'waiting-players') return;
-    if (!game.waitingForPlayers) setPhase('waiting');
-  }, [phase, game.waitingForPlayers]);
+    if (players.length === 0) return;
+    const allLoaded = players.every((p) => readyPlayers.includes(p.id));
+    if (allLoaded) setPhase('waiting');
+  }, [phase, readyPlayers, players]);
 
   // Role reveal sequence — uses rAF-aware delays to survive tab throttling
   const sequenceStarted = useRef(false);
@@ -199,11 +205,19 @@ const RoleReveal = ({ onComplete }) => {
     // Timings pushed out to give the player time to read the card.
     // Previous 6s total felt rushed — now 10s with the details block
     // visible for ~6s (3500ms → 9500ms).
+    //
+    // onComplete fires markRevealDone so the host knows THIS client is
+    // done. Once every client has signalled, the game timer unfreezes
+    // and INTRO_CINEMATIC's 6s fly-over plays with UI hidden.
+    const finish = () => {
+      if (me) markRevealDone(me.id);
+      onComplete?.();
+    };
     const cancels = [];
     cancels.push(rafDelay(() => setPhase('intro'), 300));
     cancels.push(rafDelay(() => setPhase('flip'), 2500));
     cancels.push(rafDelay(() => setPhase('details'), 3500));
-    cancels.push(rafDelay(() => onComplete?.(), 9500));
+    cancels.push(rafDelay(finish, 9500));
     sequenceTimers.current = cancels;
   }, [phase]);
 

@@ -68,21 +68,26 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
     };
   }, []);
 
-  // One-shot 6s intro cinematic: two static-ish waypoints that frame the
-  // village from above, then a low plaza-sweep. No UI (timer + actions
-  // are hidden via INFO_PHASES). Two waypoints of 3s each so a new
-  // player sees (1) "this is a village with a church" and (2) "this is
-  // the ritual circle at the centre where debates will happen".
+  // One-shot 6s intro cinematic: two ground-level "walking tour" shots
+  // that show off the village before the first discussion starts. No UI
+  // — the .intro-cinematic-hide class on the HUD + game-layout fades
+  // every overlay to 0 opacity for the duration.
+  //
+  //   Shot 1 (0-3s): low glide between the west cottages ([-10,1] and
+  //   [-7,8]), looking across the plaza toward the blood circle. Sells
+  //   "you live in this village".
+  //
+  //   Shot 2 (3-6s): push from the south plaza up toward the church
+  //   ([0,0,-15]) with the belfry dominating frame. Sells "and there's
+  //   a darker building you'll keep coming back to".
   const INTRO_WAYPOINTS = useMemo(() => [
-    // 0-3s — high three-quarter over the whole village
     {
-      pos: new THREE.Vector3(12, 10, 14),
-      lookAt: new THREE.Vector3(0, 0.5, -4),
+      pos: new THREE.Vector3(-8.5, 2.4, 4.5),
+      lookAt: new THREE.Vector3(0, 0.6, -1),
     },
-    // 3-6s — close tilt-down on the blood circle + plaza props
     {
-      pos: new THREE.Vector3(-4, 4.5, 7),
-      lookAt: new THREE.Vector3(0, 0.4, 0),
+      pos: new THREE.Vector3(1.5, 2.6, 4),
+      lookAt: new THREE.Vector3(0, 4.5, -15),
     },
   ], []);
 

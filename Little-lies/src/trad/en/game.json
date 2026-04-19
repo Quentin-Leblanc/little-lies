@@ -1,5 +1,6 @@
 {
   "phases": {
+    "INTRO_CINEMATIC": "",
     "NIGHT": "Night",
     "NIGHT_TRANSITION": "Night falls...",
     "DAY_RISING": "The village awakens...",
