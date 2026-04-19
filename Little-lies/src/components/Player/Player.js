@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
@@ -16,6 +16,20 @@ const Player = () => {
 
     const [lastWill, setLastWill] = useState(me?.lastWill || '');
     const [showLwDialog, setShowLwDialog] = useState(false);
+    // Details-tooltip toggle: hover on desktop opens it, click works too so
+    // it's usable on touch devices. Outside-click closes — handled via the
+    // wrapper's onMouseLeave plus an Escape key effect below.
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    useEffect(() => {
+        if (!detailsOpen) return;
+        const onKey = (e) => { if (e.key === 'Escape') setDetailsOpen(false); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [detailsOpen]);
+    const toggleDetails = useCallback((e) => {
+        e.stopPropagation();
+        setDetailsOpen((v) => !v);
+    }, []);
 
     // White pulse around the role description block at game start (~3s) so
     // players notice their role after the role reveal card closes. Fires
@@ -79,7 +93,7 @@ const Player = () => {
                 (mafia, cult). Members see each other and their roles. */}
             {me.character && (me.character.team === 'mafia' || me.character.team === 'cult') && (
                 <div className="team-block">
-                    <h4 className="team-block-title">{t(`game:teams.${me.character.team}.short`)}</h4>
+                    <h4 className="team-block-title">{t('game:team_block_title', { team: t(`game:teams.${me.character.team}.short`) })}</h4>
                     {players.filter(p => p.character?.team === me.character.team).map(p => (
                         <div key={p.id} className="team-member" style={{ opacity: p.isAlive ? 1 : 0.4 }}>
                             <span style={{ color: toTextCss(p.profile?.color) }}>{p.profile?.name}</span>
@@ -120,6 +134,46 @@ const Player = () => {
                         <div className="role-name" style={{ color: me.character.couleur }}>
                             {me.character.icon && <i className={`fas ${me.character.icon}`}></i>}
                             <h2>{roleLabel}</h2>
+                            {/* Details tooltip trigger — info icon at the top-right
+                                of the role block. Opens a 2-column tooltip with
+                                the role's mechanical nuances (framing duration,
+                                sheriff binary result, vigilante suicide…). Kept
+                                out of the main grid so the base block stays
+                                compact; anchored top-right so the tooltip opens
+                                down-left and doesn't clip offscreen. */}
+                            {Array.isArray(me.character.details) && me.character.details.length > 0 && (
+                                <div
+                                    className={`role-details-toggle ${detailsOpen ? 'open' : ''}`}
+                                    onMouseEnter={() => setDetailsOpen(true)}
+                                    onMouseLeave={() => setDetailsOpen(false)}
+                                >
+                                    <button
+                                        type="button"
+                                        className="role-details-btn"
+                                        aria-label={t('game:role_sections.details_aria', { defaultValue: 'Détails du rôle' })}
+                                        aria-expanded={detailsOpen}
+                                        onClick={toggleDetails}
+                                    >
+                                        <i className="fas fa-info"></i>
+                                    </button>
+                                    {detailsOpen && (
+                                        <div className="role-details-tooltip" role="tooltip">
+                                            <div className="role-details-tooltip-title">
+                                                <i className="fas fa-scroll" aria-hidden="true"></i>
+                                                <span>{t('game:role_sections.details', { defaultValue: 'Détails du rôle' })}</span>
+                                            </div>
+                                            <ul className="role-details-list role-details-list-grid">
+                                                {me.character.details.map((line, i) => (
+                                                    <li
+                                                        key={i}
+                                                        dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+                                                    />
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Role info split into a 2-column grid so the block
@@ -168,26 +222,6 @@ const Player = () => {
                                 </div>
                             </section>
 
-                            {/* Rich mechanics detail — the "why does it matter" bullets
-                                the 1-line description can't convey (framing persistence,
-                                sheriff binary result, vigilante suicide rule, etc.).
-                                Mirrors the role cards in the help dialog so the in-game
-                                block shows the same level of nuance a player would look
-                                up mid-debate. Supports **markdown bold** inline via the
-                                same regex as the help dialog. */}
-                            {Array.isArray(me.character.details) && me.character.details.length > 0 && (
-                                <section className="role-info-cell">
-                                    <h4 className="role-section-title role-section-title-details"><i className="fas fa-scroll" aria-hidden="true"></i> {t('game:role_sections.details', { defaultValue: 'Détails' })}</h4>
-                                    <ul className="role-details-list">
-                                        {me.character.details.map((line, i) => (
-                                            <li
-                                                key={i}
-                                                dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
-                                            />
-                                        ))}
-                                    </ul>
-                                </section>
-                            )}
                         </div>
                     </>
                     );

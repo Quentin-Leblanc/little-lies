@@ -5,10 +5,14 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
   height: 100%;
   gap: 0.353rem;
-  padding-top: 0;
+  // Top-align the role block with the left-side Graveyard / Roles row.
+  // Left column stacks Menu (≈1.765rem) + wrapper margin (0.235rem) +
+  // players-row margin-top (0.941rem) before Graveyard starts, so we
+  // mirror that total here to put the role block on the same line.
+  padding-top: 2.941rem;
 }
 
 .role-team-row {
@@ -21,6 +25,7 @@
 }
 
 .role-container {
+  position: relative; // anchor for the details tooltip popover
   padding: 0.588rem;
   padding-bottom: 0.706rem;
   margin-bottom: 0.353rem;
@@ -31,10 +36,11 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  // Widened from 18.824rem so the new 2-column info grid has enough room
-  // per cell to stay readable (~12rem each). Still caps below a third of
-  // the sidebar on wide screens, responsive grid collapses to 1 col.
-  max-width: 26rem;
+  // Widened from 26rem so the 3 cells (description / objective / abilities)
+  // each have room to breathe now that they have their own card framing.
+  // Still caps below the sidebar (40vw ≈ 32rem at 1440w) and the inner
+  // grid collapses to 1 column under 820px.
+  max-width: 32rem;
 
   // White pulse that fires once at game start so players notice their role
   // description block and have time to read it. Class is toggled by Player.js
@@ -90,9 +96,107 @@
   }
 }
 
-.role-name i {
+.role-name > i {
   font-size: 1.294rem; // was 1.059rem — icon tracks the h2
-  filter: drop-shadow(0 0 6px currentColor);
+}
+
+// Info-circle trigger for the role-details tooltip. Lives at the tail end
+// of the role-name flex row (margin-left: auto) so it sits top-right of
+// the role block without absolute positioning — means it moves naturally
+// if the role label wraps on a narrow viewport.
+.role-details-toggle {
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  z-index: 5;
+
+  .role-details-btn {
+    // Explicit box-sizing + padding:0 so the default user-agent button
+    // padding (asymmetric L/R vs T/B) doesn't stretch the circle into an
+    // oval. Flex:none locks the circle against being squished by the
+    // parent flex row on narrow viewports.
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    padding: 0;
+    line-height: 1;
+    width: 1.529rem;
+    height: 1.529rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+
+    &:hover,
+    .role-details-toggle.open & {
+      background: rgba(255, 255, 255, 0.24);
+      border-color: #ffffff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+      transform: scale(1.06);
+    }
+  }
+
+  // Tooltip opens DOWN and toward the LEFT (right:0 anchor) so it never
+  // clips off the right side of the sidebar. max-width collapses to the
+  // viewport width on narrow screens to avoid horizontal overflow.
+  .role-details-tooltip {
+    position: absolute;
+    top: calc(100% + 0.47rem);
+    right: 0;
+    width: 32rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.824rem 0.941rem;
+    background: linear-gradient(180deg, rgba(22, 22, 32, 0.98), rgba(14, 14, 22, 0.98));
+    border: 1px solid rgba(255, 215, 120, 0.32);
+    border-radius: 0.412rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    animation: role-tooltip-fade 0.2s ease-out;
+    text-align: left;
+    color: #e6e6e6;
+
+    // Small triangle notch pointing up to the trigger button.
+    &::before {
+      content: '';
+      position: absolute;
+      top: -0.4rem;
+      right: 0.412rem;
+      width: 0.706rem;
+      height: 0.706rem;
+      background: rgba(22, 22, 32, 0.98);
+      border-left: 1px solid rgba(255, 215, 120, 0.32);
+      border-top: 1px solid rgba(255, 215, 120, 0.32);
+      transform: rotate(45deg);
+    }
+  }
+}
+
+.role-details-tooltip-title {
+  display: flex;
+  align-items: center;
+  gap: 0.353rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.824rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #ffcc66;
+  padding-bottom: 0.294rem;
+  margin-bottom: 0.47rem;
+  border-bottom: 1px solid rgba(255, 215, 120, 0.18);
+
+  i { font-size: 0.765rem; }
+}
+
+@keyframes role-tooltip-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .role-section-title {
@@ -131,8 +235,8 @@
 }
 
 .role-description {
-  margin-top: 2px;
-  font-size: 0.941rem; // was 0.765rem
+  margin: 0;
+  font-size: 0.941rem;
   color: #f0f0f0;
   line-height: 1.55;
 
@@ -143,44 +247,82 @@
 }
 
 .role-objective {
-  font-size: 0.882rem; // was 0.765rem
+  // Card owns the accent border-left + padding now, so this drops to a
+  // plain italic block for the objective copy. Size matches description
+  // so the two top cells read as siblings.
+  font-size: 0.941rem;
   color: #f0f0f0;
   font-style: italic;
-  margin: 0.353rem 0 0.471rem;
-  border-left: 2px solid rgba(255, 255, 255, 0.25);
-  padding-left: 0.588rem;
+  line-height: 1.5;
+  margin: 0;
 }
 
-// 2-column grid that halves the role block's vertical footprint. Cells
-// align to the top (so a short objective next to a long description
-// doesn't grow a weird gap) and collapse to 1 column on narrow layouts.
+// 2-column grid that halves the role block's vertical footprint.
+//   row 1  : description | objective     (top cells, stretched equal height)
+//   row 2  : abilities spans both columns (the cell with the most content)
+// Cells collapse to a single column under 820px so text stays legible.
 .role-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 0.706rem;
-  row-gap: 0.235rem;
-  margin-top: 0.353rem;
+  column-gap: 0.588rem;
+  row-gap: 0.588rem;
+  margin-top: 0.588rem;
+  align-items: stretch;
 
   @media (max-width: 820px) {
     grid-template-columns: 1fr;
   }
 }
 
+// Card-style cell: subtle dark chip with a coloured left accent that
+// signals the cell's purpose at a glance
+//   · description → cool steel-blue (info)
+//   · objective   → warm amber       (goal)
+//   · abilities   → gold             (power, matches the role-reveal)
+// The abilities cell spans both columns because its content is always
+// the tallest — keeping it full-width prevents a short right-column
+// empty stub next to it.
 .role-info-cell {
-  min-width: 0; // let long words wrap instead of pushing the grid wider
+  min-width: 0;
+  padding: 0.529rem 0.706rem 0.588rem;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.353rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.294rem;
 
-  // Avoid duplicating the top margin now that section-titles sit inside
-  // cells side-by-side — the grid row-gap handles vertical rhythm.
-  > .role-section-title:first-child {
-    margin-top: 0;
+  &:nth-child(1) {
+    border-left-color: #7eb3ff;
+    > .role-section-title { color: #a9c8ff; i { color: inherit; } }
+  }
+  &:nth-child(2) {
+    border-left-color: #ffb05a;
+    > .role-section-title { color: #ffc890; i { color: inherit; } }
+  }
+  &:nth-child(3) {
+    grid-column: 1 / -1;
+    border-left-color: #ffc857;
+    background: rgba(255, 200, 87, 0.05);
+  }
+
+  // Section titles in cells don't need a top margin — the cell padding
+  // handles vertical rhythm and the flex gap spaces title ↔ body.
+  > .role-section-title {
+    margin: 0;
+  }
+
+  @media (max-width: 820px) {
+    &:nth-child(3) { grid-column: 1; }
   }
 }
 
 // Bullet list — one line per mechanic (1-night framing, SK immunity,
-// vigilante suicide, etc.). Mirrors the help dialog formatting so a
-// player seeing their own role block recognises the same layout as the
-// guide. Accents on **bold** runs use the same gold as the abilities
-// panel for visual consistency.
+// vigilante suicide, etc.). Used inside the details tooltip popover.
+// Variant `.role-details-list-grid` splits into 2 columns so the
+// tooltip stays wider than it is tall — better use of screen space
+// than a vertical wall of bullets.
 .role-details-list {
   list-style: none;
   padding: 0;
@@ -198,7 +340,7 @@
       position: absolute;
       left: 0.176rem;
       top: 0.118rem;
-      color: rgba(160, 200, 255, 0.7);
+      color: rgba(255, 215, 120, 0.75);
       font-size: 0.941rem;
       line-height: 1;
     }
@@ -207,6 +349,17 @@
       color: #ffd280;
       font-weight: 600;
     }
+  }
+}
+
+.role-details-list-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1.176rem;
+  row-gap: 0;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -247,24 +400,24 @@
   }
 }
 
-// Highlighted ability panel — bigger, gold-accented so the player's
-// capacities stand out against the description/objective above.
+// Abilities copy — the card wrapper (.role-info-cell:nth-child(3)) now
+// owns the gold accent and background, so this class only carries inner
+// list spacing/typography.
 .role-actions-highlight {
-  padding: 0.55rem 0.7rem;
-  background: rgba(255, 215, 0, 0.06);
-  border-left: 3px solid #ffc857;
-  border-radius: 0.3rem;
-
-  font-size: 0.88rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  font-size: 0.882rem;
 
   ul li {
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.294rem;
     line-height: 1.5;
   }
 
   strong {
     color: #ffd97a;
-    margin-right: 0.25rem;
+    margin-right: 0.235rem;
   }
 
   .no-ability {
@@ -351,17 +504,22 @@
 .last-will-section {
   flex-shrink: 0;
   margin-top: auto;
-  width: 45%;
+  // Was 45% — too wide, dominated the bottom edge of the sidebar. 32%
+  // keeps the "scroll" widget distinct without crowding the night-info
+  // panel above.
+  width: 32%;
 }
 
 .last-will-trigger {
   padding: 0.824rem 0.941rem;
   min-height: 3.529rem;
-  background: rgba(15, 12, 8, 0.7);
-  backdrop-filter: blur(4px);
-  border: 2px solid rgba(200, 169, 110, 0.4);
+  // Was rgba(15,12,8,0.7) with blur — translucent enough that the 3D
+  // scene behind bled through and made the testament strip hard to
+  // read. Now near-opaque so the widget sits as a solid UI chip.
+  background: linear-gradient(180deg, rgba(22, 18, 12, 0.96), rgba(14, 11, 7, 0.98));
+  border: 2px solid rgba(200, 169, 110, 0.45);
   border-radius: 0.471rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -369,7 +527,8 @@
   transition: background 0.2s;
 
   &:hover {
-    background: rgba(200, 169, 110, 0.15);
+    background: linear-gradient(180deg, rgba(40, 32, 20, 0.96), rgba(28, 22, 14, 0.98));
+    border-color: rgba(200, 169, 110, 0.65);
   }
 
   .lw-label {

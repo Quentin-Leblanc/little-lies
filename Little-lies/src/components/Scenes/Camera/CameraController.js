@@ -30,6 +30,7 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
   const deathCamTimeRef = useRef(0);
   const prevDeathFocusRef = useRef(null);
   const introTimeRef = useRef(0);
+  const prevShotRef = useRef(0);
 
   // Hash the room code into a stable integer so day 0 / night 0 start on
   // a different cinematic each game. Without this, every first night
@@ -91,20 +92,40 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
       // the phase duration on the game engine (keeps camera in sync).
       if (prevPhaseRef.current !== CONSTANTS.PHASE.INTRO_CINEMATIC) {
         introTimeRef.current = 0;
+        prevShotRef.current = 0;
         // Snap to the first waypoint — no long lerp from the lobby camera.
         camera.position.copy(INTRO_WAYPOINTS[0].pos);
         camera.lookAt(INTRO_WAYPOINTS[0].lookAt);
       }
       introTimeRef.current += delta;
       const t = introTimeRef.current;
-      // Lerp from wp0 → wp1 over the whole 6s for a single smooth fly
-      // rather than two hard cuts.
-      const progress = Math.min(t / 6, 1);
-      const eased = progress < 0.5
-        ? 2 * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 2) / 2; // easeInOut
-      targetPos.current.lerpVectors(INTRO_WAYPOINTS[0].pos, INTRO_WAYPOINTS[1].pos, eased);
-      targetLookAt.current.lerpVectors(INTRO_WAYPOINTS[0].lookAt, INTRO_WAYPOINTS[1].lookAt, eased);
+      // Two discrete shots, 3s each, with a hard cut at t=3s. Inside
+      // each shot, a very slow drift + orbit keeps the frame from
+      // looking like a stuck screenshot. Snap-teleport the camera at
+      // the cut (handled by the onEnter snap + raising targets) so the
+      // smoothing lerp in the outer updater lands on the shot-2 pose
+      // almost instantly.
+      const shot = t < 3 ? 0 : 1;
+      const localT = t < 3 ? t : t - 3; // 0..3 within each shot
+      const wp = INTRO_WAYPOINTS[shot];
+      // Gentle orbital drift on the horizontal plane — radius 0.4 units,
+      // one full revolution over ~18s so 3s = ~60° of travel, just enough
+      // to feel alive.
+      const drift = new THREE.Vector3(
+        Math.sin(localT * 0.35) * 0.35,
+        Math.sin(localT * 0.22) * 0.10,
+        Math.cos(localT * 0.35) * 0.35,
+      );
+      targetPos.current.copy(wp.pos).add(drift);
+      targetLookAt.current.copy(wp.lookAt);
+      // Hard cut between shot 0 and shot 1: on the frame we cross t=3s,
+      // teleport the camera (and its smoothing anchor) straight to the
+      // shot-2 anchor so the outer lerp doesn't glide between them.
+      if (shot === 1 && prevShotRef.current === 0) {
+        camera.position.copy(wp.pos).add(drift);
+        camera.lookAt(wp.lookAt);
+      }
+      prevShotRef.current = shot;
     } else if (phase === CONSTANTS.PHASE.NIGHT) {
       const enteringNight = prevPhaseRef.current !== CONSTANTS.PHASE.NIGHT;
       if (enteringNight) {

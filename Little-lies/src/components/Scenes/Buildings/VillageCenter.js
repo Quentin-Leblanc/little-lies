@@ -11,7 +11,7 @@ const VillageCenter = React.memo(({ isTrialPhase }) => (
   <group>
     <RunicCircle position={[0, 0, 0]} scale={5.8} />
     <BloodCircle
-      position={[0, 0.05, 0]}
+      position={[0, -0.22, 0]}
       rotation={[0, Math.PI * 0.15, 0]}
       scale={3.5}
     />

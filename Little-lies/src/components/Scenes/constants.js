@@ -134,9 +134,12 @@ export const DAY_ORBIT_CAMERAS = [
   //   tilt = atan2(12.5 - 0.2, 10) ≈ 51°
   { name: 'far-wide',  radius: 10,   height: 12.5, lookY: 0.2, speed: 0.008, phaseOffset: 0 },
   // 1 — LOW SWEEP: closer look at plaza life, still angled steeply down
-  // so mountains don't creep back into frame.
-  //   tilt = atan2(7.0 - 0.4, 6.0) ≈ 48°
-  { name: 'low-sweep', radius: 6,    height: 7,    lookY: 0.4, speed: 0.010, phaseOffset: 1.8 },
+  // so mountains don't creep back into frame. Pulled back from r=6/h=7
+  // (still felt on top of the players during debate) to r=8/h=8.5 — the
+  // shot still reads as "low and close" but gives breathing room around
+  // the character sprites.
+  //   tilt = atan2(8.5 - 0.4, 8.0) ≈ 45°
+  { name: 'low-sweep', radius: 8,    height: 8.5,  lookY: 0.4, speed: 0.010, phaseOffset: 1.8 },
   // 2 — SHOULDER: mid-distance high-shoulder tilt onto the plaza — used
   // to be a near-horizontal three-quarter view at h=5.2 / lookY=1.0.
   //   tilt = atan2(8.5 - 0.4, 7.0) ≈ 49°
@@ -144,12 +147,12 @@ export const DAY_ORBIT_CAMERAS = [
   // 3 — TOPDOWN: near top-down, map-like perspective.
   //   tilt = atan2(13.5 - 0, 4.5) ≈ 72°
   { name: 'topdown',   radius: 4.5,  height: 13.5, lookY: 0,   speed: 0.013, phaseOffset: 4.5 },
-  // 4 — INTIMATE: close orbit around the blood circle. Was almost
-  // parallel to the ground (h=3.8 / lookY=2.2 → ~15° tilt) which cropped
-  // the player heads and filled the top of frame with distant mountains.
-  // Now steeply tilted so the altar + nearby players dominate.
-  //   tilt = atan2(7.5 - 0.4, 5.0) ≈ 55°
-  { name: 'intimate',  radius: 5,    height: 7.5,  lookY: 0.4, speed: 0.012, phaseOffset: 2.2 },
+  // 4 — INTIMATE: close orbit around the blood circle. Pulled back from
+  // r=5 / h=7.5 (too tight on players' heads) to r=7 / h=9 so the shot
+  // still reads as "close to the action" but the plaza breathes and
+  // player faces aren't cropped. Tilt stays ~55°.
+  //   tilt = atan2(9 - 0.4, 7) ≈ 51°
+  { name: 'intimate',  radius: 7,    height: 9,    lookY: 0.4, speed: 0.011, phaseOffset: 2.2 },
 ];
 
 // Spherical obstacles the camera must stay outside of.

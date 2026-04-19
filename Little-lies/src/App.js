@@ -202,51 +202,63 @@ function App() {
                 </div>
             )}
 
-            {/* Game UI — pre-mounts behind curtain during role reveal, stays after curtain opens */}
+            {/* Game UI — pre-mounts behind curtain during role reveal, stays after curtain opens.
+                During INTRO_CINEMATIC (6s village fly-over right after the curtain opens) every
+                UI surface except the 3D scene + the spectator/phase banners is hidden so the
+                camera shots read as a cinematic. The .intro-cinematic-hide class fades them out
+                and back in when the phase flips to DISCUSSION. */}
             {(curtainReady || !showRoleReveal) && <GameComponent>
-                {/* 3D Scene — fullscreen background */}
+                {/* 3D Scene — fullscreen background, always on */}
                 <div className="layout-center">
                     <MainScene />
                 </div>
 
-                {/* HUD — fixed top center */}
-                <div className="hud-top">
-                    <Time />
-                </div>
+                {(() => {
+                    const hideUi = isGameStarted && phase === CONSTANTS.PHASE.INTRO_CINEMATIC;
+                    const uiClass = hideUi ? 'intro-cinematic-hide' : 'intro-cinematic-reveal';
+                    return (
+                        <>
+                            {/* HUD — fixed top center */}
+                            <div className={`hud-top ${uiClass}`}>
+                                <Time />
+                            </div>
 
-                <div className="game-layout">
-                    {/* Top-left — Menu + (Graveyard | Roles) */}
-                    <div className="layout-players">
-                        <Menu />
-                        <div className="players-row">
-                            <Graveyard />
-                            <Roles />
-                        </div>
-                    </div>
-                    <AdminPanel />
+                            <div className={`game-layout ${uiClass}`}>
+                                {/* Top-left — Menu + (Graveyard | Roles) */}
+                                <div className="layout-players">
+                                    <Menu />
+                                    <div className="players-row">
+                                        <Graveyard />
+                                        <Roles />
+                                    </div>
+                                </div>
+                                <AdminPanel />
 
-                    {/* Sidebar toggle (mobile/tablet) */}
-                    <button
-                        className="sidebar-toggle-btn"
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        aria-label={sidebarOpen ? 'Fermer le panneau joueur' : 'Ouvrir le panneau joueur'}
-                        aria-expanded={sidebarOpen}
-                    >
-                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-user'}`} aria-hidden="true"></i>
-                    </button>
-                    {sidebarOpen && <div className="sidebar-backdrop show" onClick={() => setSidebarOpen(false)} aria-hidden="true" />}
+                                {/* Sidebar toggle (mobile/tablet) */}
+                                <button
+                                    className="sidebar-toggle-btn"
+                                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                                    aria-label={sidebarOpen ? 'Fermer le panneau joueur' : 'Ouvrir le panneau joueur'}
+                                    aria-expanded={sidebarOpen}
+                                >
+                                    <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-user'}`} aria-hidden="true"></i>
+                                </button>
+                                {sidebarOpen && <div className="sidebar-backdrop show" onClick={() => setSidebarOpen(false)} aria-hidden="true" />}
 
-                    {/* Right — Role info + player list */}
-                    <div className={`layout-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
-                        <Player />
-                    </div>
+                                {/* Right — Role info + player list */}
+                                <div className={`layout-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+                                    <Player />
+                                </div>
 
-                    {/* Bottom-left — Chat */}
-                    <div className="layout-chat">
-                        <Chat night={isNight} highlight={phase === CONSTANTS.PHASE.DISCUSSION} />
-                    </div>
-                    <LagIndicator />
-                </div>
+                                {/* Bottom-left — Chat */}
+                                <div className="layout-chat">
+                                    <Chat night={isNight} highlight={phase === CONSTANTS.PHASE.DISCUSSION} />
+                                </div>
+                                <LagIndicator />
+                            </div>
+                        </>
+                    );
+                })()}
                 <AmbientEffects />
             </GameComponent>}
         </div>

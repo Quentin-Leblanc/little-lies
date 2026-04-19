@@ -228,8 +228,12 @@ const MainScene = () => {
   // then reveal deaths once the text has played out. Re-rolls a random
   // variant for both the day-rise line and the peaceful-night fallback
   // on each DEATH_REPORT entry so mornings don't feel copy-pasted.
+  // Gated on dayCount > 1: day 1 has no prior night (INTRO_CINEMATIC
+  // feeds straight into DISCUSSION), so if we ever land on DEATH_REPORT
+  // with dayCount=1 it's a stale/transient state — don't play the "pas
+  // une goutte de sang cette nuit" fallback or ring the death bell.
   useEffect(() => {
-    if (phase === CONSTANTS.PHASE.DEATH_REPORT) {
+    if (phase === CONSTANTS.PHASE.DEATH_REPORT && (game?.dayCount || 0) > 1) {
       const pickRandom = (key, fallback) => {
         const arr = i18n.t(key, { returnObjects: true });
         if (Array.isArray(arr) && arr.length > 0) {
@@ -716,7 +720,7 @@ const MainScene = () => {
           on one line, making the role reveal easy to miss. Disconnect
           events still fall back to the plain chatMessage since they
           don't carry structured role fields. */}
-      {phase === CONSTANTS.PHASE.DEATH_REPORT && showDeathReport && (() => {
+      {phase === CONSTANTS.PHASE.DEATH_REPORT && showDeathReport && (game?.dayCount || 0) > 1 && (() => {
         const killEvents = (events || []).filter(
           e => (e.type === 'KILL_RESULT' || e.type === 'disconnect') && e.dayCount === game.dayCount && e.content?.chatMessage
         );

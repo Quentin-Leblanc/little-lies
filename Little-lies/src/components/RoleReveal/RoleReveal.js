@@ -41,31 +41,48 @@ const useTypewriter = (text, speed = 40, startDelay = 0) => {
 // mount — previously they were recomputed on every parent re-render so
 // particles teleported around the card mid-reveal (typewriter text + ready
 // state changes were triggering the jumps).
+//
+// Two particle types mixed together give the reveal more "magical" depth:
+//  - round dots (the original glow) for ambient drift
+//  - cross-shape sparkles (CSS ::before/::after on `.card-sparkle`) that
+//    twinkle with a scale+rotate animation, echoing the star-cross flares
+//    you get in cinematic sword reveals.
 const CardParticles = ({ color }) => {
-  const particles = useMemo(
-    () => Array.from({ length: 12 }, (_, i) => ({
-      id: i,
-      x: (Math.random() - 0.5) * 280,
-      y: (Math.random() - 0.5) * 400,
+  const particles = useMemo(() => {
+    const dots = Array.from({ length: 18 }, (_, i) => ({
+      id: `dot-${i}`,
+      kind: 'dot',
+      x: (Math.random() - 0.5) * 320,
+      y: (Math.random() - 0.5) * 440,
       size: 2 + Math.random() * 4,
       delay: Math.random() * 2,
       duration: 2 + Math.random() * 3,
-    })),
-    [],
-  );
+    }));
+    const sparkles = Array.from({ length: 10 }, (_, i) => ({
+      id: `spark-${i}`,
+      kind: 'sparkle',
+      x: (Math.random() - 0.5) * 340,
+      y: (Math.random() - 0.5) * 460,
+      size: 6 + Math.random() * 10,
+      delay: Math.random() * 2.5,
+      duration: 1.8 + Math.random() * 2,
+    }));
+    return [...dots, ...sparkles];
+  }, []);
 
   return (
     <div className="card-particles">
       {particles.map(p => (
         <div
           key={p.id}
-          className="card-particle"
+          className={p.kind === 'sparkle' ? 'card-sparkle' : 'card-particle'}
           style={{
             left: `calc(50% + ${p.x}px)`,
             top: `calc(50% + ${p.y}px)`,
             width: p.size,
             height: p.size,
-            backgroundColor: color,
+            '--sparkle-color': color,
+            backgroundColor: p.kind === 'sparkle' ? undefined : color,
             animationDelay: `${p.delay}s`,
             animationDuration: `${p.duration}s`,
           }}
@@ -179,11 +196,14 @@ const RoleReveal = ({ onComplete }) => {
   useEffect(() => {
     if (phase !== 'waiting' || sequenceStarted.current) return;
     sequenceStarted.current = true;
+    // Timings pushed out to give the player time to read the card.
+    // Previous 6s total felt rushed — now 10s with the details block
+    // visible for ~6s (3500ms → 9500ms).
     const cancels = [];
     cancels.push(rafDelay(() => setPhase('intro'), 300));
-    cancels.push(rafDelay(() => setPhase('flip'), 2200));
-    cancels.push(rafDelay(() => setPhase('details'), 3000));
-    cancels.push(rafDelay(() => onComplete?.(), 6000));
+    cancels.push(rafDelay(() => setPhase('flip'), 2500));
+    cancels.push(rafDelay(() => setPhase('details'), 3500));
+    cancels.push(rafDelay(() => onComplete?.(), 9500));
     sequenceTimers.current = cancels;
   }, [phase]);
 

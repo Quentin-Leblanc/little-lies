@@ -360,11 +360,12 @@
 }
 
 // Oversized role icon — now the centerpiece of the reveal. Big glow
-// drops the need for a card frame to anchor the eye.
+// drops the need for a card frame to anchor the eye. Size trimmed from
+// 6.5rem to 4.5rem so the icon doesn't dwarf the role name next to it.
 .card-icon {
-  font-size: 6.5rem;
+  font-size: 4.5rem;
   line-height: 1;
-  filter: drop-shadow(0 0 18px currentColor) drop-shadow(0 0 36px currentColor);
+  filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor);
   margin: 0.235rem 0;
 }
 
@@ -450,14 +451,59 @@
   border-radius: 50%;
   opacity: 0;
   animation: card-particle-float ease-in-out infinite;
+  box-shadow: 0 0 8px currentColor;
 }
 
 @keyframes card-particle-float {
   0% { opacity: 0; transform: translateY(0) scale(0.5); }
-  25% { opacity: 0.8; }
-  50% { opacity: 0.4; transform: translateY(-20px) scale(1); }
-  75% { opacity: 0.6; }
+  25% { opacity: 0.9; }
+  50% { opacity: 0.5; transform: translateY(-20px) scale(1); }
+  75% { opacity: 0.7; }
   100% { opacity: 0; transform: translateY(-40px) scale(0.3); }
+}
+
+// Cross-shape sparkle — two rotated rectangles (::before + ::after) make
+// a plus/star glyph that twinkles in and out. Inherits `--sparkle-color`
+// from the inline style so each sparkle picks up the role color.
+.card-sparkle {
+  position: absolute;
+  opacity: 0;
+  animation: card-sparkle-twinkle ease-in-out infinite;
+  pointer-events: none;
+  transform-origin: center;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: var(--sparkle-color, #fff);
+    box-shadow:
+      0 0 10px var(--sparkle-color, #fff),
+      0 0 20px var(--sparkle-color, #fff);
+    border-radius: 1px;
+  }
+
+  // Horizontal beam
+  &::before {
+    width: 100%;
+    height: 18%;
+    transform: translate(-50%, -50%);
+  }
+  // Vertical beam
+  &::after {
+    width: 18%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes card-sparkle-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+  20% { opacity: 0.9; transform: scale(1) rotate(45deg); }
+  50% { opacity: 0.6; transform: scale(1.25) rotate(120deg); }
+  80% { opacity: 0.9; transform: scale(0.9) rotate(200deg); }
 }
 
 .reveal-hint {

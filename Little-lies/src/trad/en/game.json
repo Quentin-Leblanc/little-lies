@@ -114,6 +114,7 @@
     "neutral": { "name": "Neutral", "short": "Neutral" },
     "neutral_killing": { "name": "The Serial Killer", "short": "Serial Killer" }
   },
+  "team_block_title": "Team {{team}}",
   "gameover": {
     "won": "has won the game",
     "victory": "Victory",
