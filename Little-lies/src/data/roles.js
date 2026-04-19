@@ -160,12 +160,18 @@ export const getRoles = () => {
   return ROLE_DATA.map(role => {
     const t = (key) => i18n.t(`roles:${role.key}.${key}`, { defaultValue: '' });
     const tAction = (actionType, field) => i18n.t(`roles:${role.key}.actions.${actionType}.${field}`, { defaultValue: '' });
+    // `details` is a bulleted list of role-mechanics notes surfaced in the
+    // help dialog ("does framing last?", "does Sheriff see exact role?"...).
+    // Comes back as an array when defined; fall back to empty when absent.
+    const rawDetails = i18n.t(`roles:${role.key}.details`, { returnObjects: true, defaultValue: [] });
+    const details = Array.isArray(rawDetails) ? rawDetails : [];
 
     return {
       ...role,
       label: t('label') || role.key,
       description: t('description'),
       objectif: t('objectif'),
+      details,
       actions: role.actions.map(action => ({
         ...action,
         label: tAction(action.type, 'label') || action.type,

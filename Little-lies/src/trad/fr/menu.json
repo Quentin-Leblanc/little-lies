@@ -14,6 +14,7 @@
   "help_dialog": {
     "title": "Guide du jeu",
     "how_to_play": "Comment jouer ?",
+    "intro_summary": "Among Liars est un jeu de déduction sociale multijoueur. Chaque joueur reçoit un rôle secret appartenant au Village, à la Mafia, au Culte ou aux Neutres — chacun avec ses pouvoirs, ses objectifs et ses interactions. Les nuits, tout le monde agit en parallèle dans un ordre de priorité précis ; les jours, on débat, on accuse, on vote. La partie alterne jour/nuit jusqu'à ce qu'une faction remplisse sa condition de victoire. La profondeur vient de l'enchaînement : qui bloque qui, qui détecte quoi, qui survit à quelle attaque.",
     "intro": "Among Liars est un jeu de déduction sociale. Chaque joueur reçoit un rôle secret.",
     "town_desc": "Le Village doit identifier et éliminer les menaces.",
     "mafia_desc": "La Mafia élimine les villageois la nuit en restant discrète.",
@@ -45,6 +46,33 @@
     "roles_mafia": "Rôles de la Mafia",
     "roles_cult": "Rôles du Culte",
     "roles_neutral": "Neutres"
+  },
+  "role_stats": {
+    "open_button": "Mes stats",
+    "title": "Tes statistiques par rôle",
+    "games": "Parties",
+    "wins": "Victoires",
+    "win_rate": "Taux de réussite",
+    "empty": "Aucune partie enregistrée pour l'instant. Joue quelques parties pour voir tes stats par rôle ici.",
+    "clear": "Réinitialiser",
+    "hint": "Stats enregistrées localement sur ce navigateur."
+  },
+  "tutorial": {
+    "open_button": "Tutoriel",
+    "title": "Bienvenue dans Among Liars",
+    "step1_title": "Quatre factions, un rôle secret",
+    "step1_body": "Chaque joueur reçoit un rôle secret : Village (gentils), Mafia (tueurs coordonnés), Culte (convertisseurs) ou Neutre (objectifs solos). Seule ta propre équipe connaît ton rôle.",
+    "step2_title": "La nuit : tout le monde agit en même temps",
+    "step2_body": "Tu choisis une cible pour utiliser ton pouvoir : tuer, soigner, enquêter, bloquer... Les actions se résolvent dans un ordre de priorité précis (bloqueurs d'abord, tueurs ensuite, investigateurs à la fin). Le matin révèle qui est mort.",
+    "step3_title": "Le jour : débat, accusations, vote",
+    "step3_body": "Parlez, accusez, défendez-vous. Un vote majoritaire envoie un joueur au procès. L'accusé se défend puis est jugé coupable ou innocent. Un coupable est exécuté — attention aux lynchages d'innocents.",
+    "step4_title": "Condition de victoire propre à chaque camp",
+    "step4_body": "Le Village gagne en éliminant toutes les menaces. La Mafia/Culte en devenant majoritaires. Les Neutres ont chacun leur propre condition (le Jester veut être lynché, le Survivor veut juste rester en vie). Vise la condition de TON rôle.",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "done": "C'est parti !",
+    "guide_hint": "Une fois en jeu, ouvre le menu → « Guide du jeu » pour le détail de chaque rôle.",
+    "step_aria": "Étape {{n}}"
   },
   "survey": {
     "title": "Donne-moi ton avis",

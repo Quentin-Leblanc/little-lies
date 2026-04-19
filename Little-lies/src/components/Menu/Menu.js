@@ -19,6 +19,7 @@ const Menu = () => {
   const [showLegal, setShowLegal] = useState(false);
   const [roomCode, setRoomCode] = useState('');
   const [muted, setMuted] = useState(Audio.isMuted());
+  const [barCopied, setBarCopied] = useState(false);
 
   const [messages = []] = useMultiplayerState('chatMessages', []);
 
@@ -40,16 +41,37 @@ const Menu = () => {
   const filteredLogs = messages?.filter((message) => message.chat !== 'mafia' && message.chat !== 'whisper' && message.chat !== 'dead') || [];
 
   const copyCode = () => {
-    navigator.clipboard.writeText(roomCode);
+    if (!roomCode) return;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(roomCode).catch(() => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = roomCode;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        } catch (_) {}
+      });
+    }
+    setBarCopied(true);
+    setTimeout(() => setBarCopied(false), 1600);
   };
 
   return (
     <div className="menu-wrapper">
       <div className="menu-bar">
         <h1 className="menu-game-title" data-text="AMONG LIARS">AMONG LIARS</h1>
-        <div className="menu-lobby-code" onClick={copyCode} title={t('menu:copy_tooltip')}>
+        <div
+          className={`menu-lobby-code ${barCopied ? 'is-copied' : ''}`}
+          onClick={copyCode}
+          title={t('menu:copy_tooltip')}
+        >
           <span className="menu-code-value">{roomCode || '...'}</span>
-          <i className="fas fa-copy menu-code-copy"></i>
+          <i className={`fas ${barCopied ? 'fa-check' : 'fa-copy'} menu-code-copy`}></i>
+          {barCopied && <span className="menu-code-tooltip">{t('common:copied')}</span>}
         </div>
         <button className="menu-btn-icon" onClick={() => setShowMenu(true)} title={t('menu:menu')} aria-label={t('menu:menu')} aria-expanded={showMenu}>
           <i className="fas fa-bars" aria-hidden="true"></i>
@@ -88,7 +110,21 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
   useEscapeKey(onClose);
 
   const copyCode = () => {
-    navigator.clipboard.writeText(roomCode);
+    if (!roomCode) return;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(roomCode).catch(() => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = roomCode;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        } catch (_) {}
+      });
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -215,10 +251,13 @@ const HelpDialog = ({ onClose }) => {
           <button className="close-button" onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}>X</button>
         </div>
         <div className="help-dialog-content">
+          {/* Big-picture summary at the top: one paragraph describing the
+              game, the factions and the depth angle so a new player knows
+              what they're signing up for before scrolling into phases/roles. */}
+          <p className="help-intro-summary">{t('menu:help_dialog.intro_summary')}</p>
+
           <h3>{t('menu:help_dialog.how_to_play')}</h3>
-          <p style={{color:'#bbb',fontSize:'13px',lineHeight:'1.6',marginBottom:'12px'}}>
-            {t('menu:help_dialog.intro')}
-          </p>
+          <p>{t('menu:help_dialog.intro')}</p>
 
           <h3>{t('menu:help_dialog.turn_flow')}</h3>
           <div className="help-phases">
@@ -256,40 +295,67 @@ const HelpDialog = ({ onClose }) => {
           </ul>
 
           <h3 style={{ color: '#78ff78' }}>{t('menu:help_dialog.roles_town')}</h3>
-          {rolesByTeam.town.map((role) => (
-            <div key={role.key} className="help-role">
-              <div className="help-role-header">
-                <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
-                <strong style={{ color: role.couleur }}>{role.label}</strong>
+          <div className="help-role-grid">
+            {rolesByTeam.town.map((role) => (
+              <div key={role.key} className="help-role">
+                <div className="help-role-header">
+                  <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
+                  <strong style={{ color: role.couleur }}>{role.label}</strong>
+                </div>
+                <p>{role.description}</p>
+                {Array.isArray(role.details) && role.details.length > 0 && (
+                  <ul className="help-role-details">
+                    {role.details.map((line, i) => (
+                      <li key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
+                    ))}
+                  </ul>
+                )}
+                <span className="help-objective">{role.objectif}</span>
               </div>
-              <p>{role.description}</p>
-              <span className="help-objective">{role.objectif}</span>
-            </div>
-          ))}
+            ))}
+          </div>
 
-          <h3 style={{ color: '#ff0000' }}>{t('menu:help_dialog.roles_mafia')}</h3>
-          {rolesByTeam.mafia.map((role) => (
-            <div key={role.key} className="help-role">
-              <div className="help-role-header">
-                <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
-                <strong style={{ color: role.couleur }}>{role.label}</strong>
+          <h3 style={{ color: '#ff4444' }}>{t('menu:help_dialog.roles_mafia')}</h3>
+          <div className="help-role-grid">
+            {rolesByTeam.mafia.map((role) => (
+              <div key={role.key} className="help-role">
+                <div className="help-role-header">
+                  <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
+                  <strong style={{ color: role.couleur }}>{role.label}</strong>
+                </div>
+                <p>{role.description}</p>
+                {Array.isArray(role.details) && role.details.length > 0 && (
+                  <ul className="help-role-details">
+                    {role.details.map((line, i) => (
+                      <li key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
+                    ))}
+                  </ul>
+                )}
+                <span className="help-objective">{role.objectif}</span>
               </div>
-              <p>{role.description}</p>
-              <span className="help-objective">{role.objectif}</span>
-            </div>
-          ))}
+            ))}
+          </div>
 
           <h3 style={{ color: '#9370db' }}>{t('menu:help_dialog.roles_neutral')}</h3>
-          {rolesByTeam.neutral.map((role) => (
-            <div key={role.key} className="help-role">
-              <div className="help-role-header">
-                <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
-                <strong style={{ color: role.couleur }}>{role.label}</strong>
+          <div className="help-role-grid">
+            {rolesByTeam.neutral.map((role) => (
+              <div key={role.key} className="help-role">
+                <div className="help-role-header">
+                  <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
+                  <strong style={{ color: role.couleur }}>{role.label}</strong>
+                </div>
+                <p>{role.description}</p>
+                {Array.isArray(role.details) && role.details.length > 0 && (
+                  <ul className="help-role-details">
+                    {role.details.map((line, i) => (
+                      <li key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
+                    ))}
+                  </ul>
+                )}
+                <span className="help-objective">{role.objectif}</span>
               </div>
-              <p>{role.description}</p>
-              <span className="help-objective">{role.objectif}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

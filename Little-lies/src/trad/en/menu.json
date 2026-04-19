@@ -14,6 +14,7 @@
   "help_dialog": {
     "title": "Game guide",
     "how_to_play": "How to play?",
+    "intro_summary": "Among Liars is a multiplayer social deduction game. Each player is dealt a secret role from one of four factions — Town, Mafia, Cult, Neutrals — each with its own abilities, objectives and interactions. At night every role acts in parallel in a strict priority order; during the day players debate, accuse and vote. The game alternates day/night cycles until one faction meets its win condition. The depth comes from the chain: who blocks whom, who detects what, who survives which attack.",
     "intro": "Among Liars is a social deduction game. Each player receives a secret role.",
     "town_desc": "The Town must identify and eliminate threats.",
     "mafia_desc": "The Mafia eliminates villagers at night while staying hidden.",
@@ -45,6 +46,33 @@
     "roles_mafia": "Mafia roles",
     "roles_cult": "Cult roles",
     "roles_neutral": "Neutrals"
+  },
+  "role_stats": {
+    "open_button": "My stats",
+    "title": "Your role statistics",
+    "games": "Games",
+    "wins": "Wins",
+    "win_rate": "Win rate",
+    "empty": "No games recorded yet. Play a few rounds to see your per-role stats here.",
+    "clear": "Reset",
+    "hint": "Stats are stored locally on this browser."
+  },
+  "tutorial": {
+    "open_button": "Tutorial",
+    "title": "Welcome to Among Liars",
+    "step1_title": "Four factions, a secret role",
+    "step1_body": "Every player is dealt a secret role: Town (good guys), Mafia (coordinated killers), Cult (converters) or Neutral (solo goals). Only your own team knows your role.",
+    "step2_title": "Night: everyone acts in parallel",
+    "step2_body": "You pick a target to use your ability: kill, heal, investigate, block... Actions resolve in a strict priority order (blockers first, killers next, investigators last). The morning reveals who died.",
+    "step3_title": "Day: debate, accuse, vote",
+    "step3_body": "Talk, accuse, defend yourself. A majority vote sends a player to trial. The accused defends then is judged guilty or innocent. A guilty verdict = execution — careful with innocents.",
+    "step4_title": "Each faction has its own win condition",
+    "step4_body": "Town wins by eliminating every threat. Mafia/Cult win by becoming the majority. Neutrals each have their own condition (the Jester wants to get lynched, the Survivor just wants to stay alive). Aim for YOUR role's condition.",
+    "prev": "Back",
+    "next": "Next",
+    "done": "Let's go!",
+    "guide_hint": "Once in-game, open the menu → \"Game guide\" for role-by-role details.",
+    "step_aria": "Step {{n}}"
   },
   "survey": {
     "title": "Give me your feedback",

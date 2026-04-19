@@ -107,17 +107,23 @@
 }
 
 .menu-lobby-code {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.235rem;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, border-color 0.15s;
   background: rgba(0, 0, 0, 0.8);
   padding: 0.176rem 0.471rem;
   border-radius: 0.235rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
 
   &:hover { opacity: 0.7; }
+
+  &.is-copied {
+    border-color: rgba(120, 255, 120, 0.45);
+    .menu-code-copy { color: #78ff78; }
+  }
 }
 
 .menu-code-value {
@@ -134,6 +140,39 @@
   color: #555;
 }
 
+.menu-code-tooltip {
+  position: absolute;
+  top: calc(100% + 0.353rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 28, 20, 0.96);
+  color: #78ff78;
+  font-size: 0.647rem;
+  font-weight: 600;
+  padding: 0.235rem 0.588rem;
+  border-radius: 0.235rem;
+  border: 1px solid rgba(120, 255, 120, 0.35);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  animation: menu-copied-in 0.2s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-bottom-color: rgba(120, 255, 120, 0.35);
+  }
+}
+
+@keyframes menu-copied-in {
+  from { opacity: 0; transform: translate(-50%, -4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
 
 /* Dialog fade-in animation */
 @keyframes dialog-fade-in {
@@ -145,166 +184,194 @@
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* Styles pour la boîte de dialogue des logs */
-.log-dialog-overlay {
+/* ==========================================================================
+ * Shared dialog look — quit / help / log. Portal-rendered so they sit
+ * outside .App and don't inherit the white body text color; every piece of
+ * typography gets an explicit color here.
+ * ========================================================================== */
+%ll-dialog-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(3px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 1000;
   animation: dialog-fade-in 0.25s ease-out;
 }
 
-.log-dialog {
-  background: rgba(12, 12, 20, 0.98);
-  width: 75%;
-  max-width: 52.941rem;
-  max-height: 70vh;
-  padding: 1.412rem;
+%ll-dialog-panel {
+  background: linear-gradient(180deg, rgba(22, 22, 32, 0.98) 0%, rgba(14, 14, 22, 0.98) 100%);
+  border: 1px solid rgba(255, 205, 130, 0.22);
+  border-radius: 0.706rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.4) inset;
+  font-family: 'Inter', 'Chakra Petch', sans-serif;
+  color: #d6d6d6;
+  text-align: left;
   animation: dialog-slide-in 0.3s ease-out;
   display: flex;
   flex-direction: column;
-  border-radius: 0.706rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  text-align: left;
-  z-index: 9999;
+  max-height: 82vh;
 
   h2 {
     font-family: 'Cinzel', serif;
-    font-size: 1.059rem;
+    font-size: 1.176rem;
     margin: 0;
-    color: #ddd;
+    color: #f3cc74;
+    letter-spacing: 0.082rem;
   }
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.941rem;
+    margin: 1.059rem 0 0.471rem;
+    color: #e5c37b;
+    letter-spacing: 0.047rem;
+    padding-bottom: 0.235rem;
+    border-bottom: 1px solid rgba(255, 205, 130, 0.15);
+  }
+
+  p, li, span, div, label, strong { color: inherit; }
 }
 
-.log-dialog-header {
+%ll-dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.706rem;
-  padding-bottom: 0.588rem;
+  padding: 1.059rem 1.412rem 0.706rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.log-dialog-content {
-  flex: 1;
-  overflow-y: auto;
+%ll-dialog-content {
+  flex: 1 1 auto;
   min-height: 0;
-  padding-right: 0.235rem;
+  // Horizontal overflow was landing a big ugly scrollbar in the menu/quit
+  // dialog when long-wrapping content (room code row, role-detail bullets)
+  // pushed beyond the panel width. `overflow-x: hidden` + word-break keeps
+  // everything inside the dialog frame.
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 1.059rem 1.412rem 1.412rem;
+  line-height: 1.5;
+  font-size: 0.824rem;
+  word-break: break-word;
 
-  &::-webkit-scrollbar { width: 5px; }
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 205, 130, 0.35) transparent;
+
+  // Chromium-based — single-track 4px band instead of the old 8px gradient,
+  // so it reads as a discrete scroll hint and not a UI element of its own.
+  &::-webkit-scrollbar { width: 4px; height: 0; }
   &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 205, 130, 0.35);
+    border-radius: 2px;
+    &:hover { background: rgba(255, 205, 130, 0.6); }
+  }
 }
+
+/* Close button — shared */
+.quit-dialog .close-button,
+.log-dialog .close-button,
+.help-dialog .close-button {
+  background: rgba(255, 68, 68, 0.12);
+  border: 1px solid rgba(255, 68, 68, 0.35);
+  color: #ff8080;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.824rem;
+  font-weight: 600;
+  padding: 0.235rem 0.647rem;
+  cursor: pointer;
+  border-radius: 0.294rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  margin: 0;
+
+  &:hover {
+    background: rgba(255, 68, 68, 0.25);
+    color: #ffb0b0;
+    border-color: rgba(255, 68, 68, 0.55);
+  }
+}
+
+/* ── Logs dialog ── */
+.log-dialog-overlay { @extend %ll-dialog-overlay; z-index: 9999; }
+.log-dialog {
+  @extend %ll-dialog-panel;
+  width: 80%;
+  max-width: 55rem;
+  z-index: 9999;
+}
+.log-dialog-header { @extend %ll-dialog-header; }
+.log-dialog-content { @extend %ll-dialog-content; }
 
 .log-message {
   margin: 0;
-  padding: 0.235rem 0.471rem;
-  font-size: 0.765rem;
-  line-height: 1.4;
-  border-radius: 0.176rem;
-
-  &:nth-child(odd) {
-    background: rgba(255, 255, 255, 0.03);
-  }
-
-  strong {
-    font-size: 0.765rem;
-  }
-}
-
-.help-dialog-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: dialog-fade-in 0.25s ease-out;
-}
-
-.help-dialog {
-  background: rgba(0, 0, 0, 0.9);
-  padding: 1.176rem;
-  border-radius: 0.588rem;
-  animation: dialog-slide-in 0.3s ease-out;
-  width: 80%;
-  max-width: 47.059rem;
-  max-height: 80%;
-  overflow-y: auto;
-  text-align: left;
-  z-index: 1000;
-}
-
-.help-dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.help-dialog-content {
-  margin-top: 1.176rem;
-}
-
-.close-button {
-  background: red;
-  color: white;
-  border: none;
   padding: 0.294rem 0.588rem;
-  cursor: pointer;
-  border-radius: 0.294rem;
-}
-.quit-dialog-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: dialog-fade-in 0.25s ease-out;
+  font-size: 0.824rem;
+  line-height: 1.45;
+  border-radius: 0.235rem;
+  color: #d0d0d0;
+
+  &:nth-child(odd) { background: rgba(255, 255, 255, 0.03); }
+
+  strong { font-size: 0.824rem; }
 }
 
+.log-empty {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 1.765rem 0;
+}
+
+/* ── Help dialog — wider, 2-column content ── */
+.help-dialog-overlay { @extend %ll-dialog-overlay; }
+.help-dialog {
+  @extend %ll-dialog-panel;
+  width: 92%;
+  max-width: 64rem;
+}
+.help-dialog-header { @extend %ll-dialog-header; }
+.help-dialog-content {
+  @extend %ll-dialog-content;
+
+  > p {
+    color: #b8b8b8;
+    font-size: 0.824rem;
+    line-height: 1.6;
+    margin: 0 0 0.706rem;
+  }
+
+  /* Big-picture summary paragraph at the top of the guide — a bit larger
+     and gold-accented so it reads as the game's elevator pitch, not just
+     another piece of body copy. */
+  > .help-intro-summary {
+    color: #e6d9b8;
+    font-size: 0.941rem;
+    line-height: 1.65;
+    margin: 0 0 1rem;
+    padding: 0.706rem 0.941rem;
+    background: rgba(255, 205, 130, 0.06);
+    border-left: 3px solid rgba(255, 205, 130, 0.4);
+    border-radius: 0.294rem;
+  }
+
+  /* h3 are full-width section headings, content below them is gridded */
+  > h3 { grid-column: 1 / -1; }
+}
+
+/* ── Quit/Menu dialog ── */
+.quit-dialog-overlay { @extend %ll-dialog-overlay; }
 .quit-dialog {
-  background-color: rgba(10, 10, 18, 0.98);
-  border-radius: 0.706rem;
-  padding: 1.765rem;
-  min-width: 23.529rem;
-  animation: dialog-slide-in 0.3s ease-out;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  font-family: 'Inter', sans-serif;
-  border: 1px solid rgba(255,255,255,0.1);
-  z-index: 1000;
-
-  h2 { font-family: 'Cinzel', serif; }
+  @extend %ll-dialog-panel;
+  width: 92%;
+  min-width: 21rem;
+  max-width: 26rem;
 }
-
-.quit-dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.quit-dialog-header h2 {
-  margin: 0;
-}
-
-.quit-dialog-content {
-  margin-top: 1.176rem;
-}
+.quit-dialog-header { @extend %ll-dialog-header; }
+.quit-dialog-content { @extend %ll-dialog-content; }
 
 .room-code-section {
   text-align: center;
@@ -497,80 +564,136 @@
   }
 }
 
-.close-button {
-  background: #555;
-  border: none;
-  cursor: pointer;
-  font-size: 0.824rem;
-  color: #fff;
-  padding: 0.235rem 0.588rem;
-  border-radius: 0.235rem;
+/* ── Help content — 2-column grids where it reads better ── */
+.help-phases {
+  margin: 0.353rem 0 0.706rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.353rem 0.941rem;
 
-  &:hover {
-    background: #777;
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
   }
 }
 
-/* Help content styles */
-.help-phases {
-  margin: 0.588rem 0;
-}
-
 .help-phase {
-  padding: 0.235rem 0;
-  font-size: 0.765rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.353rem 0.588rem;
+  font-size: 0.824rem;
+  line-height: 1.4;
+  color: #ccc;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.294rem;
+
+  strong { color: inherit; font-weight: 700; }
 }
 
 .help-commands {
   list-style: none;
   padding: 0;
+  margin: 0.353rem 0 0.706rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.235rem 0.941rem;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
 
   li {
-    padding: 0.176rem 0;
-    font-size: 0.765rem;
+    padding: 0.235rem 0;
+    font-size: 0.824rem;
+    color: #ccc;
+    line-height: 1.4;
   }
 
   code {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 205, 130, 0.1);
+    color: #f3cc74;
     padding: 2px 0.353rem;
+    margin-right: 0.235rem;
     border-radius: 0.176rem;
-    font-size: 0.706rem;
+    border: 1px solid rgba(255, 205, 130, 0.18);
+    font-family: 'Courier New', monospace;
+    font-size: 0.765rem;
   }
 }
 
-.help-role {
+/* Each team's role section is wrapped in .help-role-grid, which lays out
+   the cards in a responsive 2-column grid (collapses to 1 col on narrow
+   viewports). */
+.help-role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.588rem;
   margin-bottom: 0.706rem;
-  padding: 0.471rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 0.294rem;
+
+  @media (max-width: 720px) { grid-template-columns: 1fr; }
+}
+
+.help-role {
+  padding: 0.588rem 0.706rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.353rem;
+  display: flex;
+  flex-direction: column;
 
   .help-role-header {
     display: flex;
     align-items: center;
     gap: 0.471rem;
-    margin-bottom: 0.235rem;
+    margin-bottom: 0.294rem;
 
-    i { font-size: 0.824rem; }
-    strong { font-size: 0.824rem; }
+    i { font-size: 0.941rem; }
+    strong { font-size: 0.882rem; }
   }
 
   p {
     margin: 0.235rem 0;
-    font-size: 0.706rem;
-    color: #ccc;
+    font-size: 0.765rem;
+    color: #c8c8c8;
+    line-height: 1.45;
+  }
+
+  // Detail bullet list — key mechanics the tooltip-sized description
+  // can't convey. Small font, tighter leading than the description; gold
+  // accent on **strong** markup (the JSON uses **…** for keywords, which
+  // Menu.js converts to <strong> at render time).
+  .help-role-details {
+    list-style: none;
+    padding: 0;
+    margin: 0.353rem 0 0;
+    flex: 1;
+
+    li {
+      position: relative;
+      font-size: 0.706rem;
+      color: #c0c0c0;
+      line-height: 1.4;
+      padding: 0.176rem 0 0.176rem 0.824rem;
+
+      &::before {
+        content: '•';
+        position: absolute;
+        left: 0.118rem;
+        top: 0.176rem;
+        color: rgba(255, 205, 130, 0.55);
+        font-size: 0.824rem;
+        line-height: 1;
+      }
+
+      strong { color: #ffd280; font-weight: 600; }
+    }
   }
 
   .help-objective {
-    font-size: 0.647rem;
-    color: #888;
+    display: block;
+    margin-top: 0.294rem;
+    font-size: 0.706rem;
+    color: #999;
     font-style: italic;
+    padding-top: 0.235rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
   }
-}
-
-.log-empty {
-  color: #666;
-  font-style: italic;
 }
 
 // === RESPONSIVE ===

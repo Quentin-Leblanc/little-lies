@@ -3,12 +3,24 @@
     "label": "Villageois",
     "description": "Tu es un simple villageois sans pouvoir spécial.",
     "objectif": "Ton objectif : identifier et éliminer les membres de la mafia et les menaces neutres.",
+    "details": [
+      "Aucune action de nuit, aucun pouvoir.",
+      "Apparais **non-suspect** au Sheriff.",
+      "Ton atout : le nombre. Les villageois gagnent par déduction et par le vote du jour."
+    ],
     "actions": {}
   },
   "sheriff": {
     "label": "Sheriff",
     "description": "Tu es le Sheriff. Chaque nuit, tu interroges un joueur pour savoir s'il est suspect.",
     "objectif": "Ton objectif : découvrir les membres de la mafia et aider le village.",
+    "details": [
+      "Résultat **binaire** : « suspect » ou « non-suspect ». Tu ne découvres **pas** le rôle exact.",
+      "Le **Parrain** apparaît **non-suspect** (immunité de chef). Le Serial Killer et les cultistes apparaissent suspects.",
+      "Le Jester, le Survivant et l'Exécuteur apparaissent non-suspects (prudence avec les innocents apparents).",
+      "Un **Piégeur** peut faire apparaître un villageois comme suspect — **uniquement** pour cette nuit, pas les suivantes.",
+      "**Une** interrogation par nuit, choix verrouillé dès le premier clic. Rapport au matin."
+    ],
     "actions": {
       "INVESTIGATE": { "label": "Interroger", "description": "Investigue un joueur pour découvrir s'il est suspect" }
     }
@@ -17,6 +29,13 @@
     "label": "Docteur",
     "description": "Tu es le Docteur. Chaque nuit, tu soignes un joueur pour le protéger.",
     "objectif": "Ton objectif : protéger les villageois en empêchant leur élimination.",
+    "details": [
+      "Ton soin protège ta cible d'**une** attaque basique cette nuit.",
+      "Tu peux te soigner toi-même, mais cela consomme ton action de la nuit.",
+      "**Inefficace** contre une attaque « unstoppable » (exécution du Geôlier).",
+      "Tu reçois une notification au matin si ton soin a servi.",
+      "Soigner le Maire révélé n'a aucun effet : une fois révélé, il n'est plus soignable."
+    ],
     "actions": {
       "PROTECT": { "label": "Soigner", "description": "Protège un joueur d'une attaque cette nuit" }
     }
@@ -25,6 +44,12 @@
     "label": "Lookout",
     "description": "Tu es le Guetteur. Chaque nuit, tu surveilles un joueur pour voir qui lui rend visite.",
     "objectif": "Ton objectif : identifier les visiteurs nocturnes pour aider le village.",
+    "details": [
+      "Tu vois la **liste des joueurs** qui ont visité ta cible cette nuit.",
+      "Les visiteurs bloqués (roleblock) ou déjà morts n'apparaissent pas dans ta liste.",
+      "Tu ne peux pas te surveiller toi-même.",
+      "Utile pour repérer le tueur de la mafia ou identifier qui a été visité par qui."
+    ],
     "actions": {
       "LOOKOUT": { "label": "Surveiller", "description": "Observe un joueur pour voir qui le visite cette nuit" }
     }
@@ -33,6 +58,13 @@
     "label": "Vigilante",
     "description": "Tu es le Vigilante. Tu peux tirer sur un joueur la nuit, mais tu te suicides si tu tues un innocent.",
     "objectif": "Ton objectif : éliminer les menaces du village par la force.",
+    "details": [
+      "**2 balles maximum** sur toute la partie.",
+      "**Interdit** de tirer la **première nuit** — pas encore d'informations fiables.",
+      "Si tu tues un joueur de l'équipe **village**, tu meurs de culpabilité la nuit suivante.",
+      "Ton attaque est de niveau basique : un Docteur peut sauver ta cible.",
+      "Tuer un neutre (Jester, Survivor, Executioner) ne déclenche **pas** la culpabilité."
+    ],
     "actions": {
       "VIGILANTE_KILL": { "label": "Tirer", "description": "Tire sur un joueur cette nuit (attention aux innocents !)" }
     }
@@ -41,6 +73,12 @@
     "label": "Maire",
     "description": "Tu es le Maire. Tu peux te révéler pour obtenir 3 votes, mais tu ne pourras plus être soigné.",
     "objectif": "Ton objectif : utiliser ton influence pour guider le village.",
+    "details": [
+      "Révélation **en journée uniquement**, une seule fois dans la partie.",
+      "Après révélation : tes votes comptent **triple** (3 votes au lieu d'1).",
+      "Une fois révélé, tu deviens une **cible prioritaire** pour la mafia et tu n'es plus soignable par le Docteur.",
+      "Choix stratégique : te révéler tard c'est moins utile, te révéler tôt c'est risqué."
+    ],
     "actions": {
       "REVEAL": { "label": "Se révéler", "description": "Révèle votre rôle de Maire (3 votes, mais plus de soins possibles)" }
     }
@@ -49,6 +87,13 @@
     "label": "Escort",
     "description": "Tu es l'Escort. Chaque nuit, tu bloques un joueur pour l'empêcher d'utiliser son pouvoir.",
     "objectif": "Ton objectif : bloquer les pouvoirs ennemis pour protéger le village.",
+    "details": [
+      "Empêche la cible **d'agir cette nuit** (son action ne se résout pas).",
+      "Le roleblock s'applique **avant** toutes les autres actions de la nuit.",
+      "Fonctionne sur le **Parrain** (il n'est pas immunisé contre le roleblock).",
+      "Bloquer le Geôlier empêche la prison de s'activer.",
+      "**Attention** : bloquer un Serial Killer le retourne contre toi (il t'attaque en représailles selon les parties)."
+    ],
     "actions": {
       "ROLEBLOCK": { "label": "Bloquer", "description": "Empêche un joueur d'agir cette nuit" }
     }
@@ -57,22 +102,42 @@
     "label": "Bodyguard",
     "description": "Tu es le Garde du corps. Tu protèges un joueur la nuit. Si ta cible est attaquée, tu tues l'attaquant mais tu meurs aussi.",
     "objectif": "Ton objectif : protéger le village au prix de ta vie.",
+    "details": [
+      "Si ta cible est attaquée, **tu interceptes** : tu tues l'attaquant et tu meurs avec lui.",
+      "Ton attaque de représailles est **puissante** (niveau 2) — ignore l'immunité basique.",
+      "Si aucune attaque n'a lieu sur ta cible, tu survis et tu reviens la nuit suivante.",
+      "Tu ne peux pas te garder toi-même.",
+      "Un seul sacrifice : si plusieurs attaquants frappent la même cible, tu n'en prends qu'un."
+    ],
     "actions": {
       "BODYGUARD": { "label": "Protéger", "description": "Se sacrifie pour protéger un joueur et tuer son attaquant" }
     }
   },
   "spy": {
     "label": "Spy",
-    "description": "Tu es l'Espion. Tu peux lire le chat mafia la nuit et voir qui la mafia visite.",
+    "description": "Tu es l'Espion. Chaque nuit, tu apprends qui la mafia a visité.",
     "objectif": "Ton objectif : infiltrer la mafia pour obtenir des informations cruciales.",
+    "details": [
+      "Tu apprends **qui la mafia a visité** cette nuit (nom de la cible).",
+      "Tu ne vois **pas** les cibles du Culte ni du Serial Killer.",
+      "Tu n'apprends **pas** l'identité des mafias, seulement leurs actions.",
+      "Si la mafia ne tue personne (roleblock, prison…), tu reçois une notification « aucune visite »."
+    ],
     "actions": {
-      "SPY": { "label": "Espionner", "description": "Écoute le chat mafia et voit qui ils visitent" }
+      "SPY": { "label": "Espionner", "description": "Apprends qui la mafia a visité cette nuit" }
     }
   },
   "jailor": {
     "label": "Jailor",
     "description": "Tu es le Geôlier. Tu choisis un joueur pendant le jour pour l'emprisonner la nuit. Tu peux l'exécuter (3 utilisations).",
     "objectif": "Ton objectif : interroger et éliminer les suspects de manière contrôlée.",
+    "details": [
+      "Tu choisis ta cible **en journée**, pas la nuit.",
+      "Le prisonnier est **roleblocké** et **protégé** des attaques tant qu'il est en cellule.",
+      "Tu peux l'**exécuter** : 3 exécutions max sur la partie, attaque **unstoppable** (ignore docteur, immunité, gilet).",
+      "Tu discutes avec ton prisonnier pendant la nuit de façon **anonyme** (il ne voit pas ton nom).",
+      "Le prisonnier n'est pas visible au Spy comme cible mafia, puisqu'il ne sort pas."
+    ],
     "actions": {
       "JAIL": { "label": "Emprisonner", "description": "Emprisonne un joueur cette nuit (choisi pendant le jour)" },
       "JAILOR_EXECUTE": { "label": "Exécuter", "description": "Exécute le prisonnier cette nuit (3 utilisations max)" }
@@ -82,6 +147,13 @@
     "label": "Godfather",
     "description": "Tu es le Parrain. Tu diriges la mafia et apparais non-suspect au Sheriff.",
     "objectif": "Ton objectif : éliminer tous ceux qui s'opposent à la mafia.",
+    "details": [
+      "**Unique** : un seul Parrain par partie.",
+      "**Immunité nocturne basique** : tu survis aux attaques de niveau 1 (Vigilante, Mafioso, SK).",
+      "Apparais **non-suspect** au Sheriff — tu te fonds dans le village.",
+      "Le **Consigliere** voit quand même ton rôle réel.",
+      "Tu peux être **roleblocké** par l'Escort et **emprisonné** par le Geôlier."
+    ],
     "actions": {
       "KILL": { "label": "Tuer", "description": "Ordonne l'élimination d'un joueur cette nuit" }
     }
@@ -90,6 +162,12 @@
     "label": "Mafioso",
     "description": "Tu es l'exécutant de la mafia. Tu exécutes les ordres du Parrain.",
     "objectif": "Ton objectif : éliminer tous ceux qui s'opposent à la mafia.",
+    "details": [
+      "Tu tues **une cible par nuit** (action coordonnée avec le reste de la mafia dans le chat).",
+      "Apparais **suspect** au Sheriff — contrairement au Parrain.",
+      "Attaque de niveau basique : un Docteur ou un Bodyguard peut sauver ta cible.",
+      "Pas d'immunité nocturne : tu meurs d'une attaque basique."
+    ],
     "actions": {
       "KILL": { "label": "Tuer", "description": "Tue un joueur cette nuit sur ordre de la mafia" }
     }
@@ -98,14 +176,27 @@
     "label": "Framer",
     "description": "Tu es le Piégeur. Tu peux faire apparaître un joueur comme suspect au Sheriff.",
     "objectif": "Ton objectif : semer la confusion pour protéger la mafia.",
+    "details": [
+      "Ta cible apparaît **suspect** au Sheriff — **uniquement pour cette nuit**.",
+      "Tu ne changes **pas** le rôle réel ni le statut permanent de la cible : l'effet disparaît au matin.",
+      "Le **Consigliere** voit toujours le rôle **réel** de la cible — tu ne le trompes pas.",
+      "Idéal pour piéger un villageois alors qu'un Sheriff est connu ou soupçonné.",
+      "Apparais **suspect** toi-même au Sheriff."
+    ],
     "actions": {
-      "FRAME": { "label": "Piéger", "description": "Fait apparaître un joueur comme suspect au Sheriff" }
+      "FRAME": { "label": "Piéger", "description": "Fait apparaître un joueur comme suspect au Sheriff (1 nuit)" }
     }
   },
   "blackmailer": {
     "label": "Blackmailer",
     "description": "Tu es le Maître-chanteur. Tu peux empêcher un joueur de parler le jour suivant.",
     "objectif": "Ton objectif : réduire au silence les menaces pour la mafia.",
+    "details": [
+      "Ta cible ne peut **pas parler** dans le chat public le jour suivant.",
+      "Elle peut toujours **voter**, **agir** et consulter le chat — seul l'envoi de messages est bloqué.",
+      "Effet d'**un jour seulement** : le bâillon disparaît à la nuit suivante.",
+      "Excellente pour faire taire un Sheriff qui allait révéler ses infos."
+    ],
     "actions": {
       "BLACKMAIL": { "label": "Bâillonner", "description": "Empêche un joueur de parler pendant le jour suivant" }
     }
@@ -114,6 +205,13 @@
     "label": "Consigliere",
     "description": "Tu es le Consigliere. Tu peux découvrir le rôle exact d'un joueur.",
     "objectif": "Ton objectif : fournir des informations précieuses à la mafia.",
+    "details": [
+      "Tu découvres le **rôle exact** de ta cible (pas juste « suspect / non-suspect »).",
+      "Le **Piégeur ne te trompe pas** : tu vois toujours le vrai rôle.",
+      "**Une** cible par nuit, choix verrouillé dès le premier clic.",
+      "Tu ne peux pas enquêter sur un coéquipier mafia (ils te sont déjà connus).",
+      "Apparais **suspect** au Sheriff."
+    ],
     "actions": {
       "INVESTIGATE_ROLE": { "label": "Enquêter", "description": "Découvre le rôle exact d'un joueur" }
     }
@@ -122,6 +220,13 @@
     "label": "Serial Killer",
     "description": "Tu es le Serial Killer, un tueur solitaire. Tu élimines un joueur chaque nuit. Tu as l'immunité nocturne.",
     "objectif": "Ton objectif : être le dernier survivant.",
+    "details": [
+      "Tue **une cible par nuit**, dès la première nuit.",
+      "**Immunité nocturne** : tu survis à toutes les attaques basiques (mafia, vigilante).",
+      "Apparais **suspect** au Sheriff.",
+      "**Unstoppable** sur la cible : ton attaque reste efficace même contre un Docteur (sauf le Bodyguard qui t'intercepte).",
+      "Tu gagnes si tu es le dernier en vie ou si seuls d'autres neutres cohabitent avec toi."
+    ],
     "actions": {
       "KILL": { "label": "Poignarder", "description": "Tue un joueur cette nuit" }
     }
@@ -130,26 +235,54 @@
     "label": "Jester",
     "description": "Tu es le Bouffon. Tu veux te faire lyncher par le village. Tu n'as aucun pouvoir.",
     "objectif": "Ton objectif : te faire lyncher par le village.",
+    "details": [
+      "**Aucune action de nuit**. Aucun pouvoir offensif ou défensif.",
+      "Tu ne gagnes **que** si tu es **lynché au procès** — mourir la nuit ne compte **pas**.",
+      "Apparais **non-suspect** au Sheriff — parfait pour paraître innocent… ou trop innocent.",
+      "Objectif : jouer suspect juste assez pour déclencher un vote contre toi."
+    ],
     "actions": {}
   },
   "survivor": {
     "label": "Survivor",
     "description": "Tu es le Survivant. Tu veux juste rester en vie. Tu possèdes un gilet pare-balles limité.",
     "objectif": "Ton objectif : survivre jusqu'à la fin de la partie.",
+    "details": [
+      "Tu gagnes si tu es **vivant à la fin**, peu importe qui remporte la partie.",
+      "**3 gilets pare-balles** au total : une utilisation par nuit, protège d'une attaque basique.",
+      "Le gilet ne protège pas contre une attaque unstoppable (Geôlier, Serial Killer sur toi).",
+      "Apparais **non-suspect** au Sheriff — utilise ça pour survivre au vote.",
+      "Aucune action offensive : tu ne peux que te protéger."
+    ],
     "actions": {
-      "VEST": { "label": "Gilet", "description": "Enfile un gilet pare-balles pour cette nuit (limité)" }
+      "VEST": { "label": "Gilet", "description": "Enfile un gilet pare-balles pour cette nuit (3 utilisations max)" }
     }
   },
   "executioner": {
     "label": "Executioner",
     "description": "Tu es l'Exécuteur. Tu as une cible secrète du village que tu dois faire lyncher.",
     "objectif": "Ton objectif : faire lyncher ta cible par le village.",
+    "details": [
+      "Une **cible secrète** (un joueur du village) t'est révélée en début de partie.",
+      "Tu gagnes si ta cible est **lynchée au procès** — pas tuée la nuit.",
+      "**Immunité nocturne** + **défense basique** : difficile à éliminer.",
+      "Si ta cible meurt d'une **autre manière** (nuit, autre vote), tu deviens automatiquement **Jester**.",
+      "Apparais **non-suspect** au Sheriff."
+    ],
     "actions": {}
   },
   "cultist": {
     "label": "Cultiste",
     "description": "Tu fais partie du Culte. Tu vois les autres cultistes et tu discutes avec eux la nuit. Chaque cultiste vote pour une cible à convertir : la conversion n'a lieu que si tous les cultistes votent la même personne. Si les votes divergent, personne n'est converti cette nuit.",
     "objectif": "Ton objectif : convertir suffisamment de villageois pour que le Culte domine la partie.",
+    "details": [
+      "Tu vois les autres cultistes et tu discutes avec eux dans un chat privé la nuit.",
+      "Conversion : **tous** les cultistes vivants doivent voter la **même cible**. Votes divergents = aucune conversion.",
+      "La cible convertie rejoint le Culte **au matin** et gagne l'accès au chat cult.",
+      "Les joueurs du Culte ne peuvent **pas** convertir un joueur mafia ou SK.",
+      "Apparais **suspect** au Sheriff.",
+      "Le Culte gagne quand il égale ou dépasse le reste des vivants."
+    ],
     "actions": {
       "CULT_VOTE": { "label": "Convertir", "description": "Vote pour convertir cette cible cette nuit. La conversion n'a lieu que si tous les cultistes votent la même cible." }
     }

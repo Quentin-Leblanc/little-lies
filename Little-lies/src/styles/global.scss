@@ -102,10 +102,19 @@ button {
     }
 }
 
-/* Minimal scrollbar */
+/* Minimal scrollbar. 3px band, transparent track, just a hint on hover.
+   Firefox uses the scrollbar-width/color pair (no finer control). Height
+   forced to 0 so horizontal scroll never renders a visible bar anywhere —
+   combined with `overflow-x: hidden` at the container level this is the
+   belt-and-braces "no ugly horizontal bar" solution the user asked for. */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
 ::-webkit-scrollbar {
     width: 3px;
-    height: 3px;
+    height: 0;
 }
 
 ::-webkit-scrollbar-track {

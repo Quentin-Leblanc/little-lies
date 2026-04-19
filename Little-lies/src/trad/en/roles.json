@@ -3,12 +3,24 @@
     "label": "Villager",
     "description": "You are a simple villager with no special powers.",
     "objectif": "Your goal: identify and eliminate mafia members and neutral threats.",
+    "details": [
+      "No night action, no ability.",
+      "Appears **non-suspicious** to the Sheriff.",
+      "Your strength: numbers. Villagers win through deduction and the day vote."
+    ],
     "actions": {}
   },
   "sheriff": {
     "label": "Sheriff",
     "description": "You are the Sheriff. Each night, you interrogate a player to find out if they're suspicious.",
     "objectif": "Your goal: discover mafia members and help the town.",
+    "details": [
+      "**Binary** result: \"suspicious\" or \"not suspicious\". You do **not** learn the exact role.",
+      "The **Godfather** appears **non-suspicious** (leader immunity). Serial Killers and cultists appear suspicious.",
+      "Jester, Survivor and Executioner appear non-suspicious — don't trust innocents blindly.",
+      "A **Framer** can make a villager appear suspicious — **only for that night**, the effect doesn't persist.",
+      "**One** interrogation per night, locked in on first click. The report arrives in the morning."
+    ],
     "actions": {
       "INVESTIGATE": { "label": "Interrogate", "description": "Investigate a player to find out if they're suspicious" }
     }
@@ -17,6 +29,13 @@
     "label": "Doctor",
     "description": "You are the Doctor. Each night, you heal a player to protect them.",
     "objectif": "Your goal: protect villagers by preventing their elimination.",
+    "details": [
+      "Your heal protects your target from **one** basic attack tonight.",
+      "You can heal yourself — but it uses your action for the night.",
+      "**Ineffective** against an \"unstoppable\" attack (Jailor execute).",
+      "You get a notification in the morning if your heal mattered.",
+      "Healing a revealed Mayor does nothing: once revealed, the Mayor can no longer be healed."
+    ],
     "actions": {
       "PROTECT": { "label": "Heal", "description": "Protect a player from an attack tonight" }
     }
@@ -25,6 +44,12 @@
     "label": "Lookout",
     "description": "You are the Lookout. Each night, you watch a player to see who visits them.",
     "objectif": "Your goal: identify night visitors to help the town.",
+    "details": [
+      "You see the **list of players** who visited your target tonight.",
+      "Blocked visitors (roleblock) and already-dead visitors do not appear.",
+      "You cannot watch yourself.",
+      "Useful to spot the mafia killer or track who visits whom."
+    ],
     "actions": {
       "LOOKOUT": { "label": "Watch", "description": "Watch a player to see who visits them tonight" }
     }
@@ -33,6 +58,13 @@
     "label": "Vigilante",
     "description": "You are the Vigilante. You can shoot a player at night, but you'll die of guilt if you kill an innocent.",
     "objectif": "Your goal: eliminate threats to the town by force.",
+    "details": [
+      "**2 bullets max** for the whole game.",
+      "**Cannot shoot** on the **first night** — not enough info yet.",
+      "If you kill a **town** player, you die of guilt the following night.",
+      "Your attack is basic — a Doctor can save your target.",
+      "Killing a neutral (Jester, Survivor, Executioner) does **not** trigger guilt."
+    ],
     "actions": {
       "VIGILANTE_KILL": { "label": "Shoot", "description": "Shoot a player tonight (careful with innocents!)" }
     }
@@ -41,6 +73,12 @@
     "label": "Mayor",
     "description": "You are the Mayor. You can reveal yourself to gain 3 votes, but you can no longer be healed.",
     "objectif": "Your goal: use your influence to guide the town.",
+    "details": [
+      "Reveal **during the day only**, once per game.",
+      "After revealing: your vote counts as **3** instead of 1.",
+      "Once revealed, you become a **priority target** for the mafia and can no longer be healed by the Doctor.",
+      "Tradeoff: reveal late for safety, reveal early for impact."
+    ],
     "actions": {
       "REVEAL": { "label": "Reveal", "description": "Reveal your Mayor role (3 votes, but no more healing)" }
     }
@@ -49,6 +87,13 @@
     "label": "Escort",
     "description": "You are the Escort. Each night, you block a player from using their power.",
     "objectif": "Your goal: block enemy powers to protect the town.",
+    "details": [
+      "Prevents the target from **acting tonight** — their action does not resolve.",
+      "The roleblock runs **before** all other night actions.",
+      "Works on the **Godfather** (he is not roleblock-immune).",
+      "Blocking the Jailor prevents the jail from activating.",
+      "**Warning:** blocking a Serial Killer can trigger retaliation depending on settings."
+    ],
     "actions": {
       "ROLEBLOCK": { "label": "Block", "description": "Prevent a player from acting tonight" }
     }
@@ -57,22 +102,42 @@
     "label": "Bodyguard",
     "description": "You are the Bodyguard. You protect a player at night. If your target is attacked, you kill the attacker but die too.",
     "objectif": "Your goal: protect the town at the cost of your life.",
+    "details": [
+      "If your target is attacked, you **intercept**: you kill the attacker and die with them.",
+      "Your counter-attack is **powerful** (level 2) — ignores basic immunity.",
+      "If no one attacks your target, you survive and return the next night.",
+      "You cannot guard yourself.",
+      "Only one sacrifice: if several attackers hit the same target, you only take one."
+    ],
     "actions": {
       "BODYGUARD": { "label": "Protect", "description": "Sacrifice yourself to protect a player and kill their attacker" }
     }
   },
   "spy": {
     "label": "Spy",
-    "description": "You are the Spy. You can read the mafia chat at night and see who the mafia visits.",
+    "description": "You are the Spy. Each night, you learn who the mafia visited.",
     "objectif": "Your goal: infiltrate the mafia to obtain crucial information.",
+    "details": [
+      "You learn **who the mafia visited** tonight (target's name).",
+      "You do **not** see Cult or Serial Killer targets.",
+      "You do **not** learn mafia identities — only their action.",
+      "If the mafia doesn't kill anyone (roleblock, jail...), you get a \"no visit\" notification."
+    ],
     "actions": {
-      "SPY": { "label": "Spy", "description": "Listen to mafia chat and see who they visit" }
+      "SPY": { "label": "Spy", "description": "Learn who the mafia visited tonight" }
     }
   },
   "jailor": {
     "label": "Jailor",
     "description": "You are the Jailor. You choose a player during the day to jail them at night. You can execute them (3 uses).",
     "objectif": "Your goal: interrogate and eliminate suspects in a controlled manner.",
+    "details": [
+      "You choose your target **during the day**, not at night.",
+      "The prisoner is **roleblocked** and **protected** from attacks while in the cell.",
+      "You can **execute** them: 3 executions max per game, **unstoppable** attack (ignores doctor, immunity, vest).",
+      "You chat **anonymously** with your prisoner at night (they don't see your name).",
+      "The prisoner isn't exposed as a mafia target to the Spy since they don't go out."
+    ],
     "actions": {
       "JAIL": { "label": "Jail", "description": "Jail a player tonight (chosen during the day)" },
       "JAILOR_EXECUTE": { "label": "Execute", "description": "Execute the prisoner tonight (3 uses max)" }
@@ -82,6 +147,13 @@
     "label": "Godfather",
     "description": "You are the Godfather. You lead the mafia and appear non-suspicious to the Sheriff.",
     "objectif": "Your goal: eliminate everyone who opposes the mafia.",
+    "details": [
+      "**Unique**: only one Godfather per game.",
+      "**Basic night immunity**: you survive level-1 attacks (Vigilante, Mafioso, SK).",
+      "Appears **non-suspicious** to the Sheriff — you blend in with the town.",
+      "The **Consigliere** still sees your real role.",
+      "You can be **roleblocked** by the Escort and **jailed** by the Jailor."
+    ],
     "actions": {
       "KILL": { "label": "Kill", "description": "Order the elimination of a player tonight" }
     }
@@ -90,6 +162,12 @@
     "label": "Mafioso",
     "description": "You are the mafia's enforcer. You carry out the Godfather's orders.",
     "objectif": "Your goal: eliminate everyone who opposes the mafia.",
+    "details": [
+      "You kill **one target per night** (coordinated with the rest of the mafia in chat).",
+      "Appears **suspicious** to the Sheriff — unlike the Godfather.",
+      "Basic attack: a Doctor or Bodyguard can save your target.",
+      "No night immunity: a basic attack can kill you."
+    ],
     "actions": {
       "KILL": { "label": "Kill", "description": "Kill a player tonight on mafia's orders" }
     }
@@ -98,14 +176,27 @@
     "label": "Framer",
     "description": "You are the Framer. You can make a player appear suspicious to the Sheriff.",
     "objectif": "Your goal: sow confusion to protect the mafia.",
+    "details": [
+      "Your target appears **suspicious** to the Sheriff — **for this night only**.",
+      "You do **not** change the target's real role or permanent status: the effect fades by morning.",
+      "The **Consigliere** still sees the target's **real** role — you can't fool them.",
+      "Perfect for framing a villager when a Sheriff is known or suspected.",
+      "You appear **suspicious** to the Sheriff yourself."
+    ],
     "actions": {
-      "FRAME": { "label": "Frame", "description": "Make a player appear suspicious to investigators" }
+      "FRAME": { "label": "Frame", "description": "Make a player appear suspicious to the Sheriff (1 night)" }
     }
   },
   "blackmailer": {
     "label": "Blackmailer",
     "description": "You are the Blackmailer. You can prevent a player from speaking the next day.",
     "objectif": "Your goal: silence threats to the mafia.",
+    "details": [
+      "Your target **cannot send messages** in public chat the following day.",
+      "They can still **vote**, **act** and read the chat — only sending messages is blocked.",
+      "Effect lasts **one day** — the gag lifts at the following night.",
+      "Great for muting a Sheriff about to share their findings."
+    ],
     "actions": {
       "BLACKMAIL": { "label": "Blackmail", "description": "Prevent a player from speaking the next day" }
     }
@@ -114,6 +205,13 @@
     "label": "Consigliere",
     "description": "You are the Consigliere. You can discover the exact role of a player.",
     "objectif": "Your goal: provide valuable information to the mafia.",
+    "details": [
+      "You learn the **exact role** of your target (not just \"suspicious / not suspicious\").",
+      "The **Framer cannot fool you**: you always see the real role.",
+      "**One** target per night, locked in on first click.",
+      "You cannot investigate a fellow mafia member — they're already known to you.",
+      "You appear **suspicious** to the Sheriff."
+    ],
     "actions": {
       "INVESTIGATE_ROLE": { "label": "Investigate", "description": "Discover the exact role of a player" }
     }
@@ -122,6 +220,13 @@
     "label": "Serial Killer",
     "description": "You are the Serial Killer, a lone killer. You eliminate a player each night. You have night immunity.",
     "objectif": "Your goal: be the last one standing.",
+    "details": [
+      "Kill **one target per night**, starting on night one.",
+      "**Night immunity**: you survive all basic attacks (mafia, vigilante).",
+      "Appears **suspicious** to the Sheriff.",
+      "**Unstoppable** on your target: your attack still kills through a Doctor (only the Bodyguard intercepts).",
+      "You win if you're the last one alive — or only other neutrals remain with you."
+    ],
     "actions": {
       "KILL": { "label": "Stab", "description": "Kill a player tonight" }
     }
@@ -130,26 +235,54 @@
     "label": "Jester",
     "description": "You are the Jester. You want to get lynched by the town. You have no powers.",
     "objectif": "Your goal: get yourself lynched by the town.",
+    "details": [
+      "**No night action**. No offensive or defensive ability.",
+      "You win **only** if you are **lynched at trial** — dying at night doesn't count.",
+      "Appears **non-suspicious** to the Sheriff — perfect for looking innocent… or *too* innocent.",
+      "Play just suspicious enough to trigger a vote against you."
+    ],
     "actions": {}
   },
   "survivor": {
     "label": "Survivor",
     "description": "You are the Survivor. You just want to stay alive. You have a limited bulletproof vest.",
     "objectif": "Your goal: survive until the end of the game.",
+    "details": [
+      "You win if you are **alive at the end**, no matter which team wins.",
+      "**3 bulletproof vests** total: one use per night, blocks one basic attack.",
+      "The vest does not protect against an unstoppable attack (Jailor, Serial Killer hitting you).",
+      "Appears **non-suspicious** to the Sheriff — use it to survive the vote.",
+      "No offensive actions: you can only protect yourself."
+    ],
     "actions": {
-      "VEST": { "label": "Vest", "description": "Put on a bulletproof vest for tonight (limited)" }
+      "VEST": { "label": "Vest", "description": "Put on a bulletproof vest for tonight (3 uses max)" }
     }
   },
   "executioner": {
     "label": "Executioner",
     "description": "You are the Executioner. You have a secret town target that you must get lynched.",
     "objectif": "Your goal: get your target lynched by the town.",
+    "details": [
+      "A **secret target** (a town player) is revealed to you at game start.",
+      "You win if your target is **lynched at trial** — not killed at night.",
+      "**Night immunity** + **basic defense**: hard to eliminate.",
+      "If your target dies **another way** (night, other vote), you automatically become **Jester**.",
+      "Appears **non-suspicious** to the Sheriff."
+    ],
     "actions": {}
   },
   "cultist": {
     "label": "Cultist",
     "description": "You belong to the Cult. You see the other cultists and can chat with them at night. Each cultist votes for a conversion target: the conversion only happens if every cultist votes for the same person. If votes disagree, nobody is converted that night.",
     "objectif": "Your goal: convert enough villagers so the Cult dominates the game.",
+    "details": [
+      "You see the other cultists and chat with them in a private night channel.",
+      "Conversion: **all** living cultists must vote the **same target**. Divergent votes = no conversion.",
+      "The converted target joins the Cult **in the morning** and gains access to the cult chat.",
+      "Cultists **cannot** convert a mafia or Serial Killer player.",
+      "Appears **suspicious** to the Sheriff.",
+      "The Cult wins when it equals or outnumbers the rest of the living players."
+    ],
     "actions": {
       "CULT_VOTE": { "label": "Convert", "description": "Vote to convert this target tonight. Conversion only happens if every cultist votes for the same target." }
     }
