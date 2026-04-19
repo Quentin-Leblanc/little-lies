@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useAuth } from '../Auth/Auth';
 import { isAdmin as checkIsAdmin } from '../../utils/supabase';
+import { toTextCss } from '../../utils/playerColor';
 import './AdminPanel.scss';
 
 const AdminPanel = () => {
@@ -105,7 +106,7 @@ const AdminPanel = () => {
         <div className="admin-player-list">
           {players.map(p => (
             <div key={p.id} className={`admin-player-item ${!p.isAlive ? 'admin-player-dead' : ''}`}>
-              <span style={{ color: p.profile?.color || '#aaa' }}>
+              <span style={{ color: toTextCss(p.profile?.color, '#aaa') }}>
                 <i className="fas fa-gem" style={{ marginRight: 6 }}></i>
                 {p.profile?.name || 'Joueur'}
               </span>

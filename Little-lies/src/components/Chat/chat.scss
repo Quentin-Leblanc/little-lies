@@ -201,18 +201,29 @@
   }
 }
 
+// Highlight behind every player message — the tint uses the player's own
+// profile color (solid hex OR `linear-gradient(...)` when they've picked
+// a SPECIAL palette). History on this opacity:
+//   0.08 → invisible for white/pale solids.
+//   0.22 → fixed solids but dark palette gradients (Slate #546e7a/#90a4ae,
+//          Royal #4a148c/#7b1fa2, Void #000000/#37474f) still drowned into
+//          the dark chat bg. Screen blend lightens those instead of
+//          layering a darker tint, so dark palettes now add a visible
+//          coloured glow on the wrapper instead of vanishing, and vivid
+//          colours stay readable at a moderate 0.32 opacity.
 .chat-message-background {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.08;
+  opacity: 0.32;
+  mix-blend-mode: screen;
 }
 
 .chat-message {
   position: relative;
-  font-size: 0.941rem !important;
+  font-size: 1.05rem !important;
   line-height: 1.45;
   width: 100%;
   color: #fff;
@@ -345,8 +356,8 @@
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 0.235rem;
-  padding: 0.412rem 0.588rem;
-  font-size: 0.765rem;
+  padding: 0.47rem 0.65rem;
+  font-size: 0.92rem;
   font-family: inherit;
   transition: border-color 0.2s;
 

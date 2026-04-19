@@ -6,6 +6,8 @@ import { useGameEngine } from '../../hooks/useGameEngine';
 import Audio from '../../utils/AudioManager';
 import './chat.scss';
 
+import { toBgCss, toTextCss } from '../../utils/playerColor';
+
 const MESSAGE_LIMIT = 5;
 const TIME_FRAME = 5000;
 const TIMEOUT_DURATION = 10000;
@@ -473,12 +475,12 @@ function Chat(props) {
             <div className={`chat-message-wrapper ${getMessageClass(message)} ${isPastPlayer ? 'msg-past-player' : ''}`} key={message.id || index}>
               <div
                 className="chat-message-background"
-                style={isPastPlayer ? {} : { backgroundColor: message.color }}
+                style={isPastPlayer ? {} : { background: toBgCss(message.color) }}
               ></div>
               <div className="chat-message">
                 {formatPrefix(message)}
                 {message.type !== 'whisper_notice' && (
-                  <strong style={{ color: message.color }}>{message.player}</strong>
+                  <strong style={{ color: toTextCss(message.color) }}>{message.player}</strong>
                 )}
                 {message.type === 'whisper_notice' ? (
                   <span className="whisper-notice-text">{message.content}</span>
@@ -502,7 +504,7 @@ function Chat(props) {
         </div>
       ) : inputVisible ? (
         <div className="chat-input-outside">
-          <span className="chat-input-name" style={{ color: myColor || '#ccc' }}>{myName}:</span>
+          <span className="chat-input-name" style={{ color: toTextCss(myColor) }}>{myName}:</span>
           <input
             ref={inputRef}
             className={`chat-input ${inputError ? 'invalid-char' : ''} ${isBlackmailed ? 'chat-blackmailed' : ''}`}
