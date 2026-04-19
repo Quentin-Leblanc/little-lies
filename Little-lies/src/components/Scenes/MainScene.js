@@ -224,6 +224,33 @@ const MainScene = () => {
     setShowExecutionFlash(false);
   }, [phase]);
 
+  // Day-1 opening: the intro cinematic feeds straight into DISCUSSION
+  // (no DEATH_REPORT on day 1 — nobody died yet). When that transition
+  // fires, show a single "Le village se lève..." line so the first day
+  // actually has a moment before the chat + HUD fade in, without ever
+  // printing a misleading "peaceful night" or "Nuit 1" label. Gated on
+  // a ref that is re-armed every time a new INTRO_CINEMATIC starts so
+  // "Rejouer" replays the opener.
+  const introToDayFired = useRef(false);
+  useEffect(() => {
+    if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) {
+      introToDayFired.current = false;
+      return;
+    }
+    if (phase !== CONSTANTS.PHASE.DISCUSSION) return;
+    if ((game?.dayCount || 0) !== 1) return;
+    if (introToDayFired.current) return;
+    introToDayFired.current = true;
+    const variants = i18n.t('game:day_rising_variants', { returnObjects: true });
+    const picked = Array.isArray(variants) && variants.length > 0
+      ? variants[Math.floor(Math.random() * variants.length)]
+      : i18n.t('game:phases.DAY_RISING');
+    setDayRisingText(picked);
+    const t0 = setTimeout(() => setShowDayText(true), 50);
+    const t1 = setTimeout(() => setShowDayText(false), 2600);
+    return () => { clearTimeout(t0); clearTimeout(t1); };
+  }, [phase, game.dayCount]);
+
   // Death report sequence: "Le village se lève..." during day fade-in,
   // then reveal deaths once the text has played out. Re-rolls a random
   // variant for both the day-rise line and the peaceful-night fallback

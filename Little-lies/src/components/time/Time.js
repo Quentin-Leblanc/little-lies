@@ -42,6 +42,12 @@ const Time = () => {
     return () => clearInterval(interval);
   }, [isPaused, phase]);
 
+  // Nothing to show during the opening cinematic — the 2 village shots
+  // run with no UI. Returning null also stops the "Jour 1" / "Nuit" pill
+  // from flashing during the CSS fade-out. Placed after every hook so
+  // the early return doesn't break React's rules-of-hooks.
+  if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) return null;
+
   let barColor;
   if (progressPercentage <= 25) barColor = '#ff4757';
   else if (progressPercentage <= 55) barColor = '#ffa502';

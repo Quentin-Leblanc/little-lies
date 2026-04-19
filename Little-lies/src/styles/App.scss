@@ -117,19 +117,21 @@
 }
 
 // === INTRO CINEMATIC ===
-// During the 6s INTRO_CINEMATIC phase the HUD + game-layout are faded
-// out so nothing competes with the 3D village camera shots. Pointer
-// events are killed too so clicks on the sidebar toggle etc. can't
-// accidentally fire during the reveal. Once the phase flips, the same
-// surfaces fade back in on a gentle ease — no pop, no jarring appear.
+// During the 6s INTRO_CINEMATIC phase the HUD + game-layout are fully
+// hidden so nothing competes with the 3D village camera shots. We use
+// visibility alongside opacity so no child element (day pill, phase
+// label…) can flash through the fade — and a delayed visibility swap
+// on reveal keeps the fade-in smooth.
 .intro-cinematic-hide {
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.4s ease-out;
+  transition: opacity 0.4s ease-out, visibility 0s linear 0.4s;
 }
 .intro-cinematic-reveal {
   opacity: 1;
-  transition: opacity 0.6s ease-in 0.1s;
+  visibility: visible;
+  transition: opacity 0.6s ease-in 0.1s, visibility 0s linear 0s;
 }
 
 // Parchment noise texture (shared)

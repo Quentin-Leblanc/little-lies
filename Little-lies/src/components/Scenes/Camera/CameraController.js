@@ -68,69 +68,69 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
     };
   }, []);
 
-  // One-shot 6s intro cinematic: two ground-level "walking tour" shots
-  // that show off the village before the first discussion starts. No UI
-  // — the .intro-cinematic-hide class on the HUD + game-layout fades
-  // every overlay to 0 opacity for the duration.
+  // One-shot 6s intro cinematic: two ground-level "walking tour" shots.
+  // Both keep Y_pos = Y_lookAt (parallel-to-ground) so the mountain
+  // silhouettes in the distance stay out of frame — the horizon feels
+  // grounded and the plaza reads as the subject.
   //
-  //   Shot 1 (0-3s): low glide between the west cottages ([-10,1] and
-  //   [-7,8]), looking across the plaza toward the blood circle. Sells
-  //   "you live in this village".
+  //   Shot 1 (0-2s): gentle sideways dolly between the west cottages,
+  //   looking across the plaza. Hard cut at t=2s.
   //
-  //   Shot 2 (3-6s): push from the south plaza up toward the church
-  //   ([0,0,-15]) with the belfry dominating frame. Sells "and there's
-  //   a darker building you'll keep coming back to".
-  const INTRO_WAYPOINTS = useMemo(() => [
-    {
-      pos: new THREE.Vector3(-8.5, 2.4, 4.5),
-      lookAt: new THREE.Vector3(0, 0.6, -1),
-    },
-    {
-      pos: new THREE.Vector3(1.5, 2.6, 4),
-      lookAt: new THREE.Vector3(0, 4.5, -15),
-    },
-  ], []);
+  //   Shot 2 (2-6s): new camera on the east side, slow orbit around
+  //   the plaza center — the rotation sells "there's a village here
+  //   you're about to live in" without ever tilting up toward the
+  //   mountains.
 
   useFrame((_, delta) => {
     if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) {
-      // Reset timer when entering the phase so the 6s clock aligns with
-      // the phase duration on the game engine (keeps camera in sync).
+      const SHOT1_DURATION = 2.0;
       if (prevPhaseRef.current !== CONSTANTS.PHASE.INTRO_CINEMATIC) {
         introTimeRef.current = 0;
         prevShotRef.current = 0;
-        // Snap to the first waypoint — no long lerp from the lobby camera.
-        camera.position.copy(INTRO_WAYPOINTS[0].pos);
-        camera.lookAt(INTRO_WAYPOINTS[0].lookAt);
+        // Snap to shot 1 start pose — no long lerp from the lobby camera.
+        camera.position.set(-7.2, 1.8, 6.2);
+        camera.lookAt(3, 1.8, -1);
       }
       introTimeRef.current += delta;
       const t = introTimeRef.current;
-      // Two discrete shots, 3s each, with a hard cut at t=3s. Inside
-      // each shot, a very slow drift + orbit keeps the frame from
-      // looking like a stuck screenshot. Snap-teleport the camera at
-      // the cut (handled by the onEnter snap + raising targets) so the
-      // smoothing lerp in the outer updater lands on the shot-2 pose
-      // almost instantly.
-      const shot = t < 3 ? 0 : 1;
-      const localT = t < 3 ? t : t - 3; // 0..3 within each shot
-      const wp = INTRO_WAYPOINTS[shot];
-      // Gentle orbital drift on the horizontal plane — radius 0.4 units,
-      // one full revolution over ~18s so 3s = ~60° of travel, just enough
-      // to feel alive.
-      const drift = new THREE.Vector3(
-        Math.sin(localT * 0.35) * 0.35,
-        Math.sin(localT * 0.22) * 0.10,
-        Math.cos(localT * 0.35) * 0.35,
-      );
-      targetPos.current.copy(wp.pos).add(drift);
-      targetLookAt.current.copy(wp.lookAt);
-      // Hard cut between shot 0 and shot 1: on the frame we cross t=3s,
-      // teleport the camera (and its smoothing anchor) straight to the
-      // shot-2 anchor so the outer lerp doesn't glide between them.
-      if (shot === 1 && prevShotRef.current === 0) {
-        camera.position.copy(wp.pos).add(drift);
-        camera.lookAt(wp.lookAt);
+
+      if (t < SHOT1_DURATION) {
+        // Shot 1 (0-2s): sideways dolly between the west cottages, camera
+        // and target share the same Y so the view stays parallel to the
+        // ground and the mountains never creep into frame.
+        const p = t / SHOT1_DURATION; // 0 → 1
+        targetPos.current.set(
+          -7.2 + p * 2.4, // slight push to the east while travelling
+          1.8,
+          6.2 - p * 1.2, // gently closing toward the plaza
+        );
+        targetLookAt.current.set(3, 1.8, -1);
+        prevShotRef.current = 0;
+      } else {
+        // Shot 2 (2-6s): hard cut to the east side, then slow orbit
+        // around the plaza center. Y_pos = Y_lookAt again — we orbit
+        // horizontally so the frame stays low and grounded.
+        const localT = t - SHOT1_DURATION;
+        const orbitCenter = new THREE.Vector3(0, 1.5, -1.2);
+        const radius = 5.8;
+        // Start ~110° (east-south-east) and rotate ~45° over 4s.
+        const angle = Math.PI * 0.61 + localT * 0.2;
+        targetPos.current.set(
+          orbitCenter.x + Math.sin(angle) * radius,
+          1.9,
+          orbitCenter.z + Math.cos(angle) * radius,
+        );
+        targetLookAt.current.copy(orbitCenter);
+
+        // Hard cut on the frame we cross t=2s: teleport the camera to
+        // the shot-2 anchor so the outer lerp doesn't glide between
+        // shots.
+        if (prevShotRef.current === 0) {
+          camera.position.copy(targetPos.current);
+          camera.lookAt(targetLookAt.current);
+        }
+        prevShotRef.current = 1;
       }
-      prevShotRef.current = shot;
     } else if (phase === CONSTANTS.PHASE.NIGHT) {
       const enteringNight = prevPhaseRef.current !== CONSTANTS.PHASE.NIGHT;
       if (enteringNight) {
