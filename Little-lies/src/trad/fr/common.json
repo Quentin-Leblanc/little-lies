@@ -85,6 +85,7 @@
   "avatar_upload_failed": "Échec de l'envoi de l'avatar",
   "palettes_title": "Spécial",
   "palettes_locked_hint": "Niv. {{level}}",
+  "palettes_login_hint": "Connecte-toi pour débloquer",
   "games_played_label": "Parties",
   "wins": "Victoires",
   "win_rate": "Victoires %",

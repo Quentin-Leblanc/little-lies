@@ -85,6 +85,7 @@
   "avatar_upload_failed": "Failed to upload avatar",
   "palettes_title": "Special",
   "palettes_locked_hint": "Lv. {{level}}",
+  "palettes_login_hint": "Log in to unlock",
   "games_played_label": "Games",
   "wins": "Wins",
   "win_rate": "Win rate",

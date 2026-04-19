@@ -659,9 +659,13 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const [gradColor1, setGradColor1] = useState('#e74c3c');
   const [gradColor2, setGradColor2] = useState('#3498db');
 
-  // Player level for gradient unlock
-  const playerLevel = profile ? getLevel(profile.xp) : 1;
-  const canUseGradient = playerLevel >= GRADIENT_UNLOCK_LEVEL;
+  // Player level for gradient unlock. When the user isn't signed in we
+  // have no level → no cosmetic should be available, even the level-1
+  // palettes (Slate/Forest) that would otherwise be "free". Guests get
+  // solid colors only; palettes and the custom picker require an account.
+  const isLoggedIn = !!profile;
+  const playerLevel = profile ? getLevel(profile.xp) : 0;
+  const canUseGradient = isLoggedIn && playerLevel >= GRADIENT_UNLOCK_LEVEL;
 
   // Load saved gradient on mount. This used to be gated on canUseGradient,
   // but palettes now unlock at level 1+ so a saved gradient might legitimately
@@ -1013,9 +1017,15 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
               </div>
               <div className="lobby-palettes-grid">
                 {COLOR_REWARDS.map((palette) => {
-                  const unlocked = playerLevel >= palette.unlockLevel;
+                  const unlocked = isLoggedIn && playerLevel >= palette.unlockLevel;
                   const paletteValue = { type: 'gradient', color1: palette.gradient[0], color2: palette.gradient[1] };
                   const isActive = useGradient && gradientMatches(selectedColor, paletteValue);
+                  // Guests see the same padlock but a "log in to unlock"
+                  // tooltip instead of the level requirement — hides the
+                  // per-palette thresholds from non-players.
+                  const lockedHint = isLoggedIn
+                    ? t('common:palettes_locked_hint', { level: palette.unlockLevel })
+                    : t('common:palettes_login_hint', { defaultValue: 'Log in to unlock' });
                   return (
                     <button
                       key={palette.id}
@@ -1023,7 +1033,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
                       style={{ '--palette-bg': `linear-gradient(135deg, ${palette.gradient[0]}, ${palette.gradient[1]})` }}
                       onClick={() => unlocked && handleGradientChange(palette.gradient[0], palette.gradient[1])}
                       disabled={!unlocked}
-                      title={unlocked ? palette.name[i18n.language?.startsWith('fr') ? 'fr' : 'en'] : t('common:palettes_locked_hint', { level: palette.unlockLevel })}
+                      title={unlocked ? palette.name[i18n.language?.startsWith('fr') ? 'fr' : 'en'] : lockedHint}
                     >
                       {!unlocked && <i className="fas fa-lock"></i>}
                     </button>
