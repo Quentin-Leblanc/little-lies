@@ -1,20 +1,19 @@
 import React from 'react';
 import MeshyModel from '../Props/MeshyModel';
+import BloodCircle from '../Props/BloodCircle';
 import RunicCircle from '../Props/RunicCircle';
-import { GALLOWS_PATH, MESHY_PODIUM, PODIUM_POSITION, PODIUM_SCALE } from '../constants';
+import { MESHY_PODIUM, PODIUM_POSITION, PODIUM_SCALE } from '../constants';
 
-// Gallows (potence) + runic circle + defense podium — the landmark of the
-// plaza. During trial phases, a warm spotlight + ground glow highlight
-// the podium where the accused stands.
+// Blood ritual circle + runic circle + defense podium — the landmark of the
+// plaza (the blood circle replaces the former gallows). During trial phases,
+// a warm spotlight + ground glow highlight the podium where the accused stands.
 const VillageCenter = React.memo(({ isTrialPhase }) => (
   <group>
     <RunicCircle position={[0, 0, 0]} scale={5.8} />
-    <MeshyModel
-      path={GALLOWS_PATH}
-      position={[0, 0.1, 0]}
+    <BloodCircle
+      position={[0, 0.05, 0]}
       rotation={[0, Math.PI * 0.15, 0]}
-      scale={2}
-      halfHeight={0.92}
+      scale={3.5}
     />
     <MeshyModel
       path={MESHY_PODIUM}

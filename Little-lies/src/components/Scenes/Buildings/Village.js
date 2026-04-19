@@ -4,6 +4,7 @@ import BuildingRenderer from './BuildingRenderer';
 import SkullLantern from '../Props/SkullLantern';
 import MeshyModel from '../Props/MeshyModel';
 import KenneyModel from '../Props/KenneyModel';
+import FireCircle from '../Props/FireCircle';
 import DarkMountain from '../Environment/DarkMountain';
 import LowPolyFence from '../Environment/LowPolyFence';
 import LowPolyRiver from '../Environment/LowPolyRiver';
@@ -12,6 +13,7 @@ import {
   BUILDING_POSITIONS, MOUNTAINS, TORCH_POS, TREE_POSITIONS,
   ROCK_POSITIONS, FENCE_SEGMENTS,
   MESHY_TREE, MESHY_BOARD, MESHY_SKULL, MESHY_RING,
+  MESHY_OBELISK,
 } from '../constants';
 import { faceCenter } from '../utils';
 
@@ -64,7 +66,7 @@ const Village = React.memo(({ isDay, isTrialPhase }) => (
 
     {/* Dark-theme props: wanted board, skull sign, rope ring */}
     <MeshyModel path={MESHY_BOARD}
-      position={[5.5, 0, 3]} scale={1.3}
+      position={[5.5, 0, 3]} scale={1.9}
       rotation={[0, faceCenter(5.5, 3), 0]} />
     <MeshyModel path={MESHY_SKULL}
       position={[-5.5, 0, -4]} scale={1.3}
@@ -73,6 +75,21 @@ const Village = React.memo(({ isDay, isTrialPhase }) => (
       position={[5, 0, -10]} scale={1.6}
       rotation={[0, 0.5, 0]}
       halfHeight={0.38} />
+
+    {/* Wolf obelisk : big monolith in the back-left corner, past the outer
+        cottage ring so it breaks the silhouette without crowding the plaza.
+        Previous NW plaza spot (-6, 6) at scale 1.5 clipped the SW plaza
+        fence and got dwarfed by the bulletin board. */}
+    <MeshyModel path={MESHY_OBELISK}
+      position={[-16, 0, -14]} scale={2.5}
+      rotation={[0, faceCenter(-16, -14), 0]}
+      halfHeight={0.95} />
+
+    {/* Runic fire circle : mystical ground feature in the SW plaza, pairs
+        narratively with the rope ring across the center. The FireCircle
+        wrapper adds embers + pulsing pointLights on top of the GLB (the
+        model textures show a lit fire but the scene had no real glow). */}
+    <FireCircle position={[-3, 0, -9]} scale={1.3} rotation={[0, 0.8, 0]} />
 
     {FENCE_SEGMENTS.map((f, i) => (
       <LowPolyFence key={`fence-${i}`} start={f.start} end={f.end} />

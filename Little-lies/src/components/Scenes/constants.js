@@ -21,8 +21,9 @@ export const MESHY_RING    = '/models/rope_ring.glb';
 export const MESHY_LANTERN = '/models/skull_lantern.glb';
 export const MESHY_RUNIC   = '/models/runic_circle.glb';
 export const MESHY_PODIUM  = '/models/defense_podium.glb';
-
-export const GALLOWS_PATH = '/models/Meshy_AI_potence_0415121815_texture.glb';
+export const MESHY_BLOOD   = '/models/blood_circle.glb';
+export const MESHY_OBELISK = '/models/obelisk.glb';
+export const MESHY_FIRE    = '/models/fire_circle.glb';
 
 // ============================================================
 // Trial / podium positioning
@@ -63,22 +64,27 @@ export const NIGHT_CAMERA_WAYPOINTS = [
     { pos: [0, 11, 0],      lookAt: [0, 20, -3],       duration: 30, hold: true },
   ]},
   // 1 — STORMSWEEP: low ground-hugging lateral tracking shot, east →
-  // west across the plaza. The camera stays at the same low altitude
-  // the whole way — feels like storm wind rolling through the village.
+  // west across the plaza. Traces a U-shape from the SE corner through
+  // the plaza and out to the SW — stays in the clear corridor south of
+  // the cottage ring so the camera never crosses a building. Earlier
+  // pass had a snap at [12, 2, 4] that lerped straight through the
+  // cottage at [10, 0, 2].
   { name: 'stormsweep', waypoints: [
-    { pos: [12, 2, 4],      lookAt: [0, 3, -4],        duration: 5, snap: true },
-    { pos: [6, 2.2, -2],    lookAt: [-2, 3, -8],       duration: 18 },
-    { pos: [-4, 2.4, -6],   lookAt: [-6, 3.5, -10],    duration: 18 },
-    { pos: [-12, 2.6, -2],  lookAt: [-2, 4, -12],      duration: 30, hold: true },
+    { pos: [22, 3, 8],      lookAt: [-5, 3, -6],       duration: 5, snap: true },
+    { pos: [8, 2.5, -5],    lookAt: [-4, 3, -10],      duration: 18 },
+    { pos: [-8, 2.5, -5],   lookAt: [-8, 3.5, -12],    duration: 18 },
+    { pos: [-22, 3, 8],     lookAt: [-5, 4, -6],       duration: 30, hold: true },
   ]},
-  // 2 — FOGDRIFT: ground-level slow forward push from far south to
-  // deep into the village, ending right at the church doors. Low and
-  // oppressive, no height change.
+  // 2 — FOGDRIFT: slow forward push from the SE plaza edge toward the
+  // church, offset from x=0 so the camera never crosses the gallows
+  // sphere. Earlier pass started at z=14 behind the south cottages and
+  // threaded between [-3, 11] and [3, 12] at y=1.3 — which reads as the
+  // camera walking *through* a house before reaching the plaza.
   { name: 'fogdrift', waypoints: [
-    { pos: [0, 1.3, 14],    lookAt: [0, 1.3, 0],       duration: 5, snap: true },
-    { pos: [0, 1.3, 6],     lookAt: [0, 1.3, -6],      duration: 20 },
-    { pos: [0, 1.3, -2],    lookAt: [0, 1.3, -12],     duration: 20 },
-    { pos: [0, 1.3, -9],    lookAt: [0, 2, -15],       duration: 28, hold: true },
+    { pos: [4, 2.2, 8],     lookAt: [0, 2, -6],        duration: 5, snap: true },
+    { pos: [3, 2.0, 0],     lookAt: [-1, 2, -10],      duration: 18 },
+    { pos: [2, 2.2, -5],    lookAt: [-1, 2, -14],      duration: 20 },
+    { pos: [1, 2.5, -7],    lookAt: [0, 2.5, -15],     duration: 28, hold: true },
   ]},
   // 3 — PLAZASPIN: full 360° orbit around the gallows at mid height.
   // Four cardinal directions so you clearly see rotation happening.
@@ -96,22 +102,64 @@ export const NIGHT_CAMERA_WAYPOINTS = [
     { pos: [0, 14, -3],     lookAt: [0, 0, -7],        duration: 20 },
     { pos: [-5, 15, 0],     lookAt: [0, 0, -5],        duration: 28, hold: true },
   ]},
-  // 5 — CHURCHAPPROACH: starts far south, pushes in on the church in a
-  // straight line, ending close to the doorway looking up at the roof.
+  // 5 — CHURCHAPPROACH: straight-line push on the church from far south.
+  // Rides above cottage roofs (y ≥ 5) so the shot never dips into the
+  // z=11 corridor where south cottages at [-3, 11] and [3, 12] almost
+  // touch. Lands near the doorway angled up at the roof.
   { name: 'churchapproach', waypoints: [
-    { pos: [0, 3, 16],      lookAt: [0, 6, -10],       duration: 5, snap: true },
-    { pos: [0, 3, 6],       lookAt: [0, 6, -12],       duration: 18 },
-    { pos: [0, 2.5, -2],    lookAt: [0, 7, -14],       duration: 20 },
-    { pos: [0, 2.2, -8],    lookAt: [0, 9, -15],       duration: 30, hold: true },
+    { pos: [0, 6, 16],      lookAt: [0, 5, -10],       duration: 5, snap: true },
+    { pos: [0, 5, 6],       lookAt: [0, 6, -12],       duration: 18 },
+    { pos: [0, 4, -2],      lookAt: [0, 7, -14],       duration: 20 },
+    { pos: [0, 3, -8],      lookAt: [0, 9, -15],       duration: 30, hold: true },
   ]},
+];
+
+// Day-orbit camera pool — during daylight phases the camera rotates
+// slowly around the plaza. Index 0 is the original wide overview; the
+// others are closer with different heights so each day shifts the focus
+// and what's visible around the village. Pick is deterministic per
+// dayCount so all clients see the same shot. Angular speeds differ so
+// linear motion reads similarly across different radii. `phaseOffset`
+// is an angle (radians) that shifts the starting position of the orbit
+// — otherwise all cameras would start looking due south on day 1.
+// Every shot here is framed DOWNWARD on the plaza — vertical tilt ≥ ~45°
+// in all configs. Earlier iterations had "shoulder" at ~31° and "intimate"
+// at ~15° (effectively parallel to the ground) so the frame was filled by
+// the far mountain ridge / sparse background instead of the plaza props.
+// The goal now: every day-orbit pick lands closer to a top-down view of
+// the blood circle, with the skyline clipped above frame.
+export const DAY_ORBIT_CAMERAS = [
+  // 0 — FAR WIDE: overview, whole village visible, steep enough that
+  // only a thin slice of skyline shows above the cottage ring.
+  //   tilt = atan2(12.5 - 0.2, 10) ≈ 51°
+  { name: 'far-wide',  radius: 10,   height: 12.5, lookY: 0.2, speed: 0.008, phaseOffset: 0 },
+  // 1 — LOW SWEEP: closer look at plaza life, still angled steeply down
+  // so mountains don't creep back into frame.
+  //   tilt = atan2(7.0 - 0.4, 6.0) ≈ 48°
+  { name: 'low-sweep', radius: 6,    height: 7,    lookY: 0.4, speed: 0.010, phaseOffset: 1.8 },
+  // 2 — SHOULDER: mid-distance high-shoulder tilt onto the plaza — used
+  // to be a near-horizontal three-quarter view at h=5.2 / lookY=1.0.
+  //   tilt = atan2(8.5 - 0.4, 7.0) ≈ 49°
+  { name: 'shoulder',  radius: 7,    height: 8.5,  lookY: 0.4, speed: 0.010, phaseOffset: 3.4 },
+  // 3 — TOPDOWN: near top-down, map-like perspective.
+  //   tilt = atan2(13.5 - 0, 4.5) ≈ 72°
+  { name: 'topdown',   radius: 4.5,  height: 13.5, lookY: 0,   speed: 0.013, phaseOffset: 4.5 },
+  // 4 — INTIMATE: close orbit around the blood circle. Was almost
+  // parallel to the ground (h=3.8 / lookY=2.2 → ~15° tilt) which cropped
+  // the player heads and filled the top of frame with distant mountains.
+  // Now steeply tilted so the altar + nearby players dominate.
+  //   tilt = atan2(7.5 - 0.4, 5.0) ≈ 55°
+  { name: 'intimate',  radius: 5,    height: 7.5,  lookY: 0.4, speed: 0.012, phaseOffset: 2.2 },
 ];
 
 // Spherical obstacles the camera must stay outside of.
 // Church (rootbound_manor) at [0,0,-15] scale 4.8 → snug sphere.
-// Gallows at origin with scale 2.
+// Blood circle at origin with scale 3.5 (flat ritual altar, replaces potence).
+// Obelisk is a tall slim landmark at the back-left, past the cottages.
 export const CAMERA_OBSTACLES = [
-  { center: new THREE.Vector3(0, 6, -15), radius: 7.8 }, // church body
-  { center: new THREE.Vector3(0, 2, 0), radius: 2.8 },   // gallows
+  { center: new THREE.Vector3(0, 6, -15), radius: 7.8 },   // church body
+  { center: new THREE.Vector3(0, 0.8, 0), radius: 2.2 },   // blood circle
+  { center: new THREE.Vector3(-16, 2.5, -14), radius: 3.2 }, // obelisk (scale 2.5)
 ];
 
 // 2D obstacles that player walks (day→house, morning→circle) should steer
@@ -119,11 +167,15 @@ export const CAMERA_OBSTACLES = [
 // small buffer so the model doesn't clip into the prop. These correspond
 // to the dark-theme plaza props declared in Village.js.
 export const WALK_OBSTACLES = [
-  { x: 5.5, z: 3,    radius: 1.2 }, // bulletin board (MESHY_BOARD)
+  { x: 5.5, z: 3,    radius: 1.6 }, // bulletin board (MESHY_BOARD, scale 1.9)
   { x: -5.5, z: -4,  radius: 1.1 }, // skull sign (MESHY_SKULL)
   { x: 5, z: -10,    radius: 1.4 }, // rope ring (MESHY_RING)
   { x: 7, z: -6,     radius: 1.3 }, // podium (MESHY_PODIUM)
-  { x: 0, z: 0,      radius: 1.6 }, // gallows
+  { x: 0, z: 0,      radius: 2.0 }, // blood circle (MESHY_BLOOD, replaces gallows, scale 3.5)
+  { x: -3, z: -9,    radius: 1.2 }, // fire circle / campfire (MESHY_FIRE)
+  // Obelisk moved out of the plaza (-16, -14) — past the cottage ring so
+  // players won't bump into it during walk sequences. No walk obstacle
+  // needed at that distance.
 ];
 
 // ============================================================
@@ -218,9 +270,11 @@ export const BUSH_POSITIONS = [
   { position: [-15, 0, 13], scale: 0.7, variant: 11 },
 ];
 
+// The two SW/SE plaza-front segments used to sit at (±5..7, z≈6), which
+// clipped the bulletin board / obelisk / fire circle when those props
+// were placed on the plaza perimeter. Dropped them — the west/east side
+// fences and the south one still frame the village.
 export const FENCE_SEGMENTS = [
-  { start: [-7, 0, 5.5], end: [-4, 0, 6.5] },
-  { start: [4, 0, 6.5], end: [7, 0, 5.5] },
   { start: [-12, 0, -3], end: [-12, 0, 0] },
   { start: [12, 0, -3], end: [12, 0, 0] },
   { start: [-5, 0, 14], end: [5, 0, 14] },
