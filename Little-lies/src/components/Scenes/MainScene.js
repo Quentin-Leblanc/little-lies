@@ -546,15 +546,23 @@ const MainScene = () => {
           {(() => {
             const day = game.dayCount || 0;
             const dayIdx = ((day % 4) + 4) % 4;
-            const dayRoll = MOOD_DAY_ROLLS[lobbyMood][dayIdx];
+            // INTRO_CINEMATIC overrides the mood roll: the 6s opening
+            // reel should always show a bright, presentational village
+            // regardless of the lobby's mood (STORM/FOG would darken it
+            // and the cinematic is supposed to *sell* the village to
+            // new players, not match the eventual atmosphere). DUSK
+            // tint is also skipped here — it comes back the moment
+            // DISCUSSION starts.
+            const isIntro = phase === CONSTANTS.PHASE.INTRO_CINEMATIC;
+            const dayRoll = isIntro ? 0 : MOOD_DAY_ROLLS[lobbyMood][dayIdx];
             const isSunny = dayRoll === 0;
             const isRainyDay = dayRoll === 3;
             const isMisty = !isSunny && !isRainyDay;
             const nightWeather = MOOD_NIGHT_ROLLS[lobbyMood][dayIdx];
             // DUSK: warm-tint the sky all day regardless of roll. Keeps
             // the weather rolls doing their thing, just colorgraded like
-            // a sunset game.
-            const isDusk = lobbyMood === 'DUSK';
+            // a sunset game. Disabled during INTRO_CINEMATIC (see above).
+            const isDusk = !isIntro && lobbyMood === 'DUSK';
 
             if (game.isDay) {
               // Sky color: warm blue sun, cold slate storm, mid grey mist.

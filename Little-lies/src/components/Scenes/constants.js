@@ -174,117 +174,155 @@ export const DAY_ORBIT_CAMERAS = [
 // single pick for their whole duration.
 export const DISCUSSION_CAMERA_CYCLE_MS = 12000;
 
-// Intro cinematic pool — 5 variants, each a 6s opening shot sequence.
-// Pick is deterministic per (roomSeed + playerCount) so a given lobby
-// replaying sees the same intro, but changing the roster or room
-// rotates it. Each entry exposes a `run(t, out, THREE)` that mutates
-// out.pos (Vector3), out.lookAt (Vector3), and out.shot (int — the
-// controller hard-cuts when this changes). The startPos/startLookAt
-// are the frame-0 pose used for the initial snap into the cinematic.
+// Intro cinematic pool — 5 presentational 6s openings. Each cinematic
+// is deliberately *multi-cut* (3–4 shots, hard cuts between) and stays
+// on daylight-legible framings: no low-creep, no lightning flashes, no
+// orbit-around-gallows — goals that were useful for "mood" at night
+// but read as night-scene to new players during the opening. Pick is
+// deterministic per gameSeed so a given match stays synchronized across
+// clients, and consecutive matches in the same room rotate through
+// different tours.
+//
+// Each run(t, out) mutates out.pos / out.lookAt / out.shot (the
+// controller hard-cuts when shot changes). startPos/startLookAt drive
+// the initial snap on phase entry.
+//
+// Coordinate reference: plaza center [0,0,0], chapel [0,0,-15] scale
+// 4.8, podium [7,0,-6], windmills at [-28,-26] and [26,-30].
 export const INTRO_CINEMATICS = [
-  // 0 — WALKING TOUR (original): west-side dolly (0-2s) then east-side
-  // slow orbit around the plaza center (2-6s). Parallel-to-ground Y so
-  // distant mountains never creep into frame.
+  // 0 — GRAND TOUR: aerial wide → plaza close → chapel overhead. The
+  // canonical "here is the village" establishing shot.
   {
-    name: 'walking-tour',
+    name: 'grand-tour',
     duration: 6,
-    startPos: [-7.2, 1.8, 6.2],
-    startLookAt: [3, 1.8, -1],
+    startPos: [0, 18, 18],
+    startLookAt: [0, 0, -5],
     run: (t, out) => {
       if (t < 2) {
         const p = t / 2;
-        out.pos.set(-7.2 + p * 2.4, 1.8, 6.2 - p * 1.2);
-        out.lookAt.set(3, 1.8, -1);
-        out.shot = 0;
-      } else {
-        const localT = t - 2;
-        const angle = Math.PI * 0.61 + localT * 0.2;
-        out.pos.set(Math.sin(angle) * 5.8, 1.9, Math.cos(angle) * 5.8 - 1.2);
-        out.lookAt.set(0, 1.5, -1.2);
-        out.shot = 1;
-      }
-    },
-  },
-  // 1 — CHURCH PUSH: straight-line push from far south toward the church,
-  // slight climb so the belfry dominates the frame as we approach.
-  // Single shot — no cut, steady forward momentum = "the story is going
-  // somewhere dark".
-  {
-    name: 'church-push',
-    duration: 6,
-    startPos: [0, 2.5, 14],
-    startLookAt: [0, 4.2, -14],
-    run: (t, out) => {
-      const p = t / 6;
-      out.pos.set(0, 2.5 + p * 1.4, 14 - p * 13.2);
-      out.lookAt.set(0, 4.2 + p * 0.9, -14);
-      out.shot = 0;
-    },
-  },
-  // 2 — ALTAR CREEP: low crawl (y=0.7) that closes toward the ritual
-  // blood circle, then a dramatic 2s rise at the end revealing the
-  // altar symbol from above. Tension builds then releases on the rise.
-  {
-    name: 'altar-creep',
-    duration: 6,
-    startPos: [4.5, 0.7, 5.5],
-    startLookAt: [0, 0.4, 0],
-    run: (t, out) => {
-      if (t < 4) {
-        const p = t / 4;
-        out.pos.set(4.5 - p * 3.0, 0.7 + p * 0.25, 5.5 - p * 3.6);
-        out.lookAt.set(0, 0.4, 0);
-        out.shot = 0;
-      } else {
-        const localT = t - 4;
-        const p = localT / 2;
-        out.pos.set(1.5, 0.95 + p * 1.5, 1.9 - p * 0.3);
-        out.lookAt.set(0, 0.5 + p * 0.3, 0);
-        out.shot = 1;
-      }
-    },
-  },
-  // 3 — AERIAL DROP: spiral descent from 22m → 5m. Starts with a
-  // map-like view, progressively closes in on the plaza as it spirals
-  // down. "You're descending into this story."
-  {
-    name: 'aerial-drop',
-    duration: 6,
-    startPos: [9.9, 22, 9.9],
-    startLookAt: [0, 0, -2],
-    run: (t, out) => {
-      const p = t / 6;
-      const angle = Math.PI * 0.25 + p * Math.PI * 0.6;
-      const radius = 14 - p * 6;
-      const y = 22 - p * 17;
-      out.pos.set(Math.sin(angle) * radius, y, Math.cos(angle) * radius);
-      out.lookAt.set(0, p * 0.9, -2 + p * 0.7);
-      out.shot = 0;
-    },
-  },
-  // 4 — LIGHTNING REVEAL: three static shots in rapid cuts (2s + 2s +
-  // 2s) from very different angles. The hard cuts + distinct poses
-  // read as lightning strikes illuminating the village for brief
-  // instants. The overall screen flash stays subtle (no full-white
-  // overlay) so we don't step on NightLightning's thunder audio path.
-  {
-    name: 'lightning-reveal',
-    duration: 6,
-    startPos: [-12, 4, 12],
-    startLookAt: [0, 2, -10],
-    run: (t, out) => {
-      if (t < 2) {
-        out.pos.set(-12, 4, 12);
-        out.lookAt.set(0, 2, -10);
+        out.pos.set(-3 + p * 6, 18, 18 - p * 2);
+        out.lookAt.set(0, 0, -5);
         out.shot = 0;
       } else if (t < 4) {
-        out.pos.set(12, 4, -12);
-        out.lookAt.set(0, 2, 0);
+        const p = (t - 2) / 2;
+        out.pos.set(5.5 - p * 1.5, 2.5, 5 - p * 0.8);
+        out.lookAt.set(-1 + p * 2, 1, -2 - p * 1);
         out.shot = 1;
       } else {
         const p = (t - 4) / 2;
-        out.pos.set(0, 3.5, 8 - p * 2);
-        out.lookAt.set(0, 2.2, -8);
+        out.pos.set(-2 + p * 4, 9 - p * 1, -22 + p * 4);
+        out.lookAt.set(0, 4, -12);
+        out.shot = 2;
+      }
+    },
+  },
+  // 1 — LANDMARK SWEEP: windmill silhouette → altar centerpiece →
+  // chapel from the plaza. Three iconic props, one per shot.
+  {
+    name: 'landmark-sweep',
+    duration: 6,
+    startPos: [-20, 5, -18],
+    startLookAt: [-28, 4, -26],
+    run: (t, out) => {
+      if (t < 2) {
+        const p = t / 2;
+        out.pos.set(-20 + p * 3, 5, -18 + p * 2);
+        out.lookAt.set(-28, 4, -26);
+        out.shot = 0;
+      } else if (t < 4) {
+        const p = (t - 2) / 2;
+        out.pos.set(4.5 - p * 1.5, 2.2 - p * 0.6, 4 - p * 1.5);
+        out.lookAt.set(0, 0.5, 0);
+        out.shot = 1;
+      } else {
+        const p = (t - 4) / 2;
+        out.pos.set(0 + p * 0.8, 3.5, 5 - p * 1.2);
+        out.lookAt.set(0, 5 + p * 0.6, -15);
+        out.shot = 2;
+      }
+    },
+  },
+  // 2 — SPIRAL DESCENT: very high → mid altitude → ground plaza, with
+  // a gentle rotation between shots so the village reveals progressively.
+  // Each shot stays airy and bright — no low-creep creep.
+  {
+    name: 'spiral-descent',
+    duration: 6,
+    startPos: [10, 24, 10],
+    startLookAt: [0, 0, -2],
+    run: (t, out) => {
+      if (t < 2) {
+        const p = t / 2;
+        const ang = Math.PI * 0.25 + p * 0.25;
+        out.pos.set(Math.sin(ang) * 15, 24 - p * 2, Math.cos(ang) * 15);
+        out.lookAt.set(0, 0, -2);
+        out.shot = 0;
+      } else if (t < 4) {
+        const p = (t - 2) / 2;
+        const ang = Math.PI * 0.6 + p * 0.35;
+        out.pos.set(Math.sin(ang) * 10, 10, Math.cos(ang) * 10);
+        out.lookAt.set(0, 1, -2);
+        out.shot = 1;
+      } else {
+        const p = (t - 4) / 2;
+        const ang = Math.PI * 1.0 + p * 0.35;
+        out.pos.set(Math.sin(ang) * 4.5, 2.2, Math.cos(ang) * 4.5);
+        out.lookAt.set(0, 0.8, 0);
+        out.shot = 2;
+      }
+    },
+  },
+  // 3 — PLAZA PAN: 4 quick 1.5s cuts around the plaza. West cottages
+  // → top-down plaza → east cottages → chapel front. Feels like a
+  // presentation reel — "here's what's around you".
+  {
+    name: 'plaza-pan',
+    duration: 6,
+    startPos: [-8, 4, 7],
+    startLookAt: [-6, 1, 3],
+    run: (t, out) => {
+      if (t < 1.5) {
+        out.pos.set(-8, 4, 7);
+        out.lookAt.set(-6, 1, 3);
+        out.shot = 0;
+      } else if (t < 3) {
+        out.pos.set(0, 14, 0.1);
+        out.lookAt.set(0, 0, 0);
+        out.shot = 1;
+      } else if (t < 4.5) {
+        out.pos.set(8, 4, 7);
+        out.lookAt.set(6, 1, 3);
+        out.shot = 2;
+      } else {
+        out.pos.set(0, 3.5, 5);
+        out.lookAt.set(0, 5, -15);
+        out.shot = 3;
+      }
+    },
+  },
+  // 4 — OUTSIDE IN: far perimeter → mid distance → ground in the plaza.
+  // Traces the path of someone arriving at the village from outside
+  // the treeline — bright, inviting, no night creep.
+  {
+    name: 'outside-in',
+    duration: 6,
+    startPos: [20, 6, 18],
+    startLookAt: [0, 2, -2],
+    run: (t, out) => {
+      if (t < 2) {
+        const p = t / 2;
+        out.pos.set(20 - p * 2, 6, 18 - p * 1);
+        out.lookAt.set(0, 2, -2);
+        out.shot = 0;
+      } else if (t < 4) {
+        const p = (t - 2) / 2;
+        out.pos.set(12 - p * 2, 3 - p * 0.2, 5 - p * 1);
+        out.lookAt.set(0, 1, -2);
+        out.shot = 1;
+      } else {
+        const p = (t - 4) / 2;
+        out.pos.set(3 - p * 0.5, 2 - p * 0.2, 2 - p * 0.3);
+        out.lookAt.set(0, 0.5, 0);
         out.shot = 2;
       }
     },

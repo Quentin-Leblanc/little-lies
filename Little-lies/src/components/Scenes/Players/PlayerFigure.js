@@ -6,6 +6,7 @@ import ChatBubble from './ChatBubble';
 import PhaseEmote from './PhaseEmote';
 import { IDLE_VARIANTS, DANCE_VARIANTS, WALK_OBSTACLES } from '../constants';
 import { pickForPlayer } from '../utils';
+import { toTextCss, toBgCss } from '../../../utils/playerColor';
 
 // Apply radial "push" away from each obstacle so the walker curves around
 // plaza props (bulletin board, podium, gallows…) instead of clipping
@@ -142,11 +143,29 @@ const PlayerFigure = ({
     }
   });
 
+  // Player "profile.color" is either a hex string or a gradient object
+  // ({ type: 'gradient', color1, color2 }) when a palette was picked in
+  // the lobby. Resolve it once to the CSS/3D values we need:
+  //   - characterColor: single hex the Three.js material can parse
+  //   - nameBg: CSS background (gradient string or solid)
+  //   - nameEdge: CSS border color (always a single hex — CSS borders
+  //     can't render a gradient without an extra wrapper we're not
+  //     bothering with for the label)
+  //   - isGradient: whether the palette is a gradient — when true we
+  //     render the name text with a background-clip gradient trick so
+  //     it actually looks like the picked palette instead of the
+  //     default white fallback.
+  const rawColor = player.profile?.color || color;
+  const isGradient = typeof rawColor === 'object' && rawColor?.type === 'gradient';
+  const characterColor = toTextCss(rawColor, color || '#ffffff');
+  const nameBg = isGradient ? toBgCss(rawColor) : 'rgba(0,0,0,0.65)';
+  const nameEdge = toTextCss(rawColor, color || '#ffffff');
+
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
       <group ref={charGroupRef}>
         <Character
-          color={color}
+          color={characterColor}
           animation={pauseAnim || currentAnim}
           scale={characterScale || 1.0}
           skin={playerSkin}
@@ -167,17 +186,23 @@ const PlayerFigure = ({
             gap: '6px',
             whiteSpace: 'nowrap',
           }}>
-            <div style={{
-              color: player.profile?.color || color,
-              backgroundColor: 'rgba(0,0,0,0.65)',
-              padding: '4px 12px',
-              borderRadius: '6px',
-              fontSize: '22px',
-              fontWeight: 'bold',
-              textShadow: '0 2px 6px rgba(0,0,0,0.8)',
-              border: `2px solid ${player.profile?.color || color}`,
-              letterSpacing: '0.5px',
-            }}>
+            <div
+              className={isGradient ? 'player-name-label player-name-label--gradient' : 'player-name-label'}
+              style={{
+                background: nameBg,
+                padding: '4px 12px',
+                borderRadius: '6px',
+                fontSize: '22px',
+                fontWeight: 'bold',
+                textShadow: '0 2px 6px rgba(0,0,0,0.8)',
+                border: `2px solid ${nameEdge}`,
+                letterSpacing: '0.5px',
+                // Solid-color labels keep the original text-colored style
+                // (text painted with the player color on a dark box). Gradient
+                // labels paint the box with the gradient and the text stays
+                // white for contrast against the palette.
+                color: isGradient ? '#fff' : nameEdge,
+              }}>
               {player.profile.name}
             </div>
             {showVote && voteCount > 0 && (
