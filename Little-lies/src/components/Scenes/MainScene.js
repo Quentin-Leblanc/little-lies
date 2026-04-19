@@ -20,7 +20,7 @@ import PlayerFigure from './Players/PlayerFigure';
 import DeadPlayerFigure from './Players/DeadPlayerFigure';
 import PausePlayerController from './Players/PausePlayerController';
 import Moon from './Atmosphere/Moon';
-import { Fireflies, DayFireflies } from './Atmosphere/Fireflies';
+import { DayFireflies } from './Atmosphere/Fireflies';
 import FloatingDust from './Atmosphere/FloatingDust';
 import WindLeaves from './Atmosphere/WindLeaves';
 import NightEmbers from './Atmosphere/NightEmbers';
@@ -537,7 +537,6 @@ const MainScene = () => {
                   />
                   <Stars radius={80} depth={50} count={isRainy ? 500 : 3000} factor={4} saturation={0} fade speed={1} />
                   <Moon />
-                  <Fireflies count={isRainy ? 15 : 60} />
                   <FloatingDust count={60} isDay={false} />
                   <NightEmbers count={isRainy ? 30 : isFoggy ? 50 : 70} />
                   {/* Ground-level fog reserved for weather that actually
