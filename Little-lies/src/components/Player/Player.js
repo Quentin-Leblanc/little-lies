@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
 import PlayerActions from '../PlayerActions/PlayerActions';
+import { toTextCss } from '../../utils/playerColor';
 import './Player.scss';
 
 const Player = () => {
@@ -81,7 +82,7 @@ const Player = () => {
                     <h4 className="team-block-title">{t(`game:teams.${me.character.team}.short`)}</h4>
                     {players.filter(p => p.character?.team === me.character.team).map(p => (
                         <div key={p.id} className="team-member" style={{ opacity: p.isAlive ? 1 : 0.4 }}>
-                            <span style={{ color: p.profile?.color || '#ccc' }}>{p.profile?.name}</span>
+                            <span style={{ color: toTextCss(p.profile?.color) }}>{p.profile?.name}</span>
                             <span className="team-member-role" style={{ color: p.character?.couleur || '#888' }}>
                                 {t(`roles:${p.character?.key}.label`, { defaultValue: p.character?.label })}
                             </span>
@@ -93,7 +94,7 @@ const Player = () => {
             {/* Role info */}
             <div className={`role-container ${roleIntroHighlight ? 'role-intro-highlight' : ''}`}>
                 <div className="status-line">
-                    <span className="status-name" style={{ color: me.profile?.color || '#fff' }}>{me.profile?.name || 'Joueur'}</span>
+                    <span className="status-name" style={{ color: toTextCss(me.profile?.color, '#fff') }}>{me.profile?.name || 'Joueur'}</span>
                     <span className="status-separator">&mdash;</span>
                     <span className="status-team" style={{ color: { town: '#78ff78', mafia: '#ff4444', cult: '#a96edd', neutral: '#9370db' }[me.character?.team] || '#aaa' }}>
                         {t(`game:teams.${me.character?.team}.short`)}
@@ -121,53 +122,73 @@ const Player = () => {
                             <h2>{roleLabel}</h2>
                         </div>
 
-                        <h4 className="role-section-title"><i className="fas fa-info-circle" aria-hidden="true"></i> {t('game:role_sections.description')}</h4>
-                        <p className="role-description">
-                            {descriptionParts.map((part, i) =>
-                                part.toLowerCase() === roleLabel.toLowerCase()
-                                    ? <strong key={i}>{part}</strong>
-                                    : <React.Fragment key={i}>{part}</React.Fragment>
-                            )}
-                        </p>
+                        {/* Role info split into a 2-column grid so the block
+                            halves its vertical footprint: left column = what
+                            you do (description + abilities), right column =
+                            what it means (objective + mechanics detail).
+                            Grid collapses to one column on narrow viewports. */}
+                        <div className="role-info-grid">
+                            <section className="role-info-cell">
+                                <h4 className="role-section-title"><i className="fas fa-info-circle" aria-hidden="true"></i> {t('game:role_sections.description')}</h4>
+                                <p className="role-description">
+                                    {descriptionParts.map((part, i) =>
+                                        part.toLowerCase() === roleLabel.toLowerCase()
+                                            ? <strong key={i}>{part}</strong>
+                                            : <React.Fragment key={i}>{part}</React.Fragment>
+                                    )}
+                                </p>
+                            </section>
 
-                        <h4 className="role-section-title"><i className="fas fa-crosshairs"></i> {t('game:role_sections.objective', { defaultValue: 'Objectif' })}</h4>
-                        <div className="role-objective">
-                            <span>{t(`roles:${me.character.key}.objectif`, { defaultValue: me.character.objectif })}</span>
-                            {execTarget && (
-                                <div className="exec-target">
-                                    <i className="fas fa-bullseye" aria-hidden="true"></i> {t('game:role_sections.target')} : <strong>{execTarget.profile.name}</strong>
+                            <section className="role-info-cell">
+                                <h4 className="role-section-title"><i className="fas fa-crosshairs"></i> {t('game:role_sections.objective', { defaultValue: 'Objectif' })}</h4>
+                                <div className="role-objective">
+                                    <span>{t(`roles:${me.character.key}.objectif`, { defaultValue: me.character.objectif })}</span>
+                                    {execTarget && (
+                                        <div className="exec-target">
+                                            <i className="fas fa-bullseye" aria-hidden="true"></i> {t('game:role_sections.target')} : <strong>{execTarget.profile.name}</strong>
+                                        </div>
+                                    )}
                                 </div>
+                            </section>
+
+                            <section className="role-info-cell">
+                                <h4 className="role-section-title role-section-title-abilities"><i className="fas fa-bolt" aria-hidden="true"></i> {t('game:role_sections.abilities')}</h4>
+                                <div className="role-actions role-actions-highlight">
+                                    {me.character.actions?.length > 0 ? (
+                                        <ul>
+                                            {me.character.actions.map((action, index) => (
+                                                <li key={index}>
+                                                    <strong>{t(`roles:${me.character.key}.actions.${action.type}.label`, { defaultValue: action.label })}:</strong> {t(`roles:${me.character.key}.actions.${action.type}.description`, { defaultValue: action.description })}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="no-ability">{t('game:no_ability')}</p>
+                                    )}
+                                </div>
+                            </section>
+
+                            {/* Rich mechanics detail — the "why does it matter" bullets
+                                the 1-line description can't convey (framing persistence,
+                                sheriff binary result, vigilante suicide rule, etc.).
+                                Mirrors the role cards in the help dialog so the in-game
+                                block shows the same level of nuance a player would look
+                                up mid-debate. Supports **markdown bold** inline via the
+                                same regex as the help dialog. */}
+                            {Array.isArray(me.character.details) && me.character.details.length > 0 && (
+                                <section className="role-info-cell">
+                                    <h4 className="role-section-title role-section-title-details"><i className="fas fa-scroll" aria-hidden="true"></i> {t('game:role_sections.details', { defaultValue: 'Détails' })}</h4>
+                                    <ul className="role-details-list">
+                                        {me.character.details.map((line, i) => (
+                                            <li
+                                                key={i}
+                                                dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+                                            />
+                                        ))}
+                                    </ul>
+                                </section>
                             )}
                         </div>
-
-                        <h4 className="role-section-title role-section-title-abilities"><i className="fas fa-bolt" aria-hidden="true"></i> {t('game:role_sections.abilities')}</h4>
-                        <div className="role-actions role-actions-highlight">
-                            {me.character.actions?.length > 0 ? (
-                                <ul>
-                                    {me.character.actions.map((action, index) => (
-                                        <li key={index}>
-                                            <strong>{t(`roles:${me.character.key}.actions.${action.type}.label`, { defaultValue: action.label })}:</strong> {t(`roles:${me.character.key}.actions.${action.type}.description`, { defaultValue: action.description })}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="no-ability">{t('game:no_ability')}</p>
-                            )}
-                        </div>
-
-                        {/* Private notifications */}
-                        {notifications.length > 0 && (
-                            <div className="notifications">
-                                <span className="notif-title">
-                                    <i className="fas fa-bell" aria-hidden="true"></i> {t('game:role_sections.information')}
-                                </span>
-                                {notifications.map((notif, i) => (
-                                    <div key={i} className="notification-item">
-                                        {notif.message}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                     </>
                     );
                 })()}
@@ -178,6 +199,31 @@ const Player = () => {
             <div className="sidebar-actions-block">
                 <PlayerActions />
             </div>
+
+            {/* Night-info reveal panel — sits under the action list so the
+                Sheriff/Consigliere/Spy etc. reveal lands in a dedicated slot
+                instead of piling onto the role description. `night-info-key`
+                gets the emphasis treatment (larger font + gold accent) and is
+                applied to the investigate/investigate_role notifications. */}
+            {notifications.length > 0 && (
+                <div className="night-info-panel" key={`ni-${game.dayCount}-${notifications.length}`}>
+                    <span className="night-info-title">
+                        <i className="fas fa-scroll" aria-hidden="true"></i> {t('game:role_sections.information')}
+                    </span>
+                    {notifications.map((notif, i) => {
+                        const isReveal = notif.type === 'investigate' || notif.type === 'investigate_role';
+                        return (
+                            <div
+                                key={i}
+                                className={`night-info-item ${isReveal ? 'night-info-key' : ''}`}
+                                style={{ animationDelay: `${0.15 + i * 0.08}s` }}
+                            >
+                                {notif.message}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Last Will — always at bottom */}
             <div className="last-will-section">

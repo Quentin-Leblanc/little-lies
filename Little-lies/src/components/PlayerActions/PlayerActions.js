@@ -6,6 +6,7 @@ import i18n from '../../trad/i18n';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
 import Audio from '../../utils/AudioManager';
+import { toTextCss } from '../../utils/playerColor';
 import './playerActions.scss';
 
 const ACTION_COLORS = {
@@ -32,6 +33,14 @@ const ACTION_COLORS = {
 const getActionStyle = (type) => ACTION_COLORS[type] || { bg: 'rgba(100,100,100,0.7)', hover: 'rgba(100,100,100,0.9)', color: '#fff' };
 
 const getActionTooltip = (type) => i18n.t(`game:action_tooltips.${type}`, { defaultValue: '' });
+
+// Actions the player commits to on the first click — no retargeting and no
+// cancelling mid-night. Investigations specifically got this treatment
+// because the Sheriff was able to bounce between suspects while the night
+// countdown ran, turning the one-per-night investigation into a probe-and-
+// swap. Listing here is all it takes: the action buttons self-hide on the
+// non-committed rows, and the click handler refuses to mutate once sealed.
+const ONE_SHOT_LOCK_ACTIONS = new Set(['INVESTIGATE', 'INVESTIGATE_ROLE']);
 
 // Stable, shared across renders — lifted out of the component to keep
 // the useMemo below purely dependent on rawPlayers.
@@ -242,6 +251,11 @@ const PlayerActions = memo(function () {
     }
 
     const currentTarget = Events.getMyActionTarget(action.type);
+    // One-shot actions (Sheriff investigate, Consigliere investigate_role):
+    // once a target is set tonight, the click handler refuses further
+    // changes. The button for the committed target stays visible so the
+    // Sheriff sees who they locked in; the others self-hide in render.
+    if (ONE_SHOT_LOCK_ACTIONS.has(action.type) && currentTarget) return;
     if (currentTarget === targetPlayer.id) return;
 
     Events.replaceAction({
@@ -406,7 +420,7 @@ const PlayerActions = memo(function () {
               <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''} ${isNightTarget || isDayTarget ? 'night-target' : ''}`}>
                 <span className="player-name-cell">
                   <span className={`player-status-dot ${player.connected !== false ? 'dot-online' : 'dot-offline'}`}></span>
-                  <span className="player-name-text" style={{ color: player.isAlive ? (player.profile?.color || '#ccc') : '#666' }}>
+                  <span className="player-name-text" style={{ color: player.isAlive ? toTextCss(player.profile?.color) : '#666' }}>
                     {player.profile.name}{player.id === me.id ? ` (${t('common:you')})` : ''}
                   </span>
                   {player.isRevealed && (
@@ -511,20 +525,34 @@ const PlayerActions = memo(function () {
                         if (action.targets === 'self' && player.id !== me.id) return null;
                         if (action.targets === 'jailed') return null;
 
+                        // Hide one-shot actions on every row except the locked
+                        // target once the player has committed. Keeps the
+                        // committed-target row visible as a "locked in" cue
+                        // (the active-class styling makes it read as sealed).
+                        if (ONE_SHOT_LOCK_ACTIONS.has(action.type)) {
+                          const lockedTarget = Events.getMyActionTarget(action.type);
+                          if (lockedTarget && lockedTarget !== player.id) return null;
+                        }
+
                         const isSelected = Events.getMyActionTarget(action.type) === player.id;
+                        const isLocked = ONE_SHOT_LOCK_ACTIONS.has(action.type) && isSelected;
                         const style = getActionStyle(action.type);
                         const showCounter = action.type === 'VIGILANTE_KILL' && action.maxUses;
                         const shotsLeft = showCounter ? action.maxUses - (me.vigilanteShots || 0) : null;
                         return (
                           <button
-                            className={`action-btn ${isSelected ? 'action-btn-active' : ''}`}
+                            className={`action-btn ${isSelected ? 'action-btn-active' : ''} ${isLocked ? 'action-btn-locked' : ''}`}
                             style={{ '--action-bg': style.bg, '--action-hover': style.hover }}
                             onClick={() => handleNightAction(action, player)}
+                            disabled={isLocked}
                             key={action.type}
-                            title={getActionTooltip(action.type) || action.description || ''}
+                            title={isLocked
+                              ? t('game:one_shot_locked', { defaultValue: 'Already committed for this night' })
+                              : (getActionTooltip(action.type) || action.description || '')}
                             aria-pressed={isSelected}
                             aria-label={t('game:aria.action_on', { action: action.label, name: player.profile.name, defaultValue: `${action.label} ${player.profile.name}` })}
                           >
+                            {isLocked && <i className="fas fa-lock" style={{ marginRight: 4 }}></i>}
                             {action.label}{showCounter ? ` (${shotsLeft})` : ''}
                           </button>
                         );
