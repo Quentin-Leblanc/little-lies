@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { isHost } from 'playroomkit';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import './RoleReveal.scss';
+
+// After this many seconds of sitting on "waiting-players" with a player
+// still pending, the host gets a kick button under the pending dot so a
+// stuck client can't block the lobby forever.
+const KICK_UNLOCK_MS = 30000;
 
 const MODELS_TO_PRELOAD = [
   '/models/Villager_Idle.glb',
@@ -94,9 +100,10 @@ const CardParticles = ({ color }) => {
 
 const RoleReveal = ({ onComplete }) => {
   const { t } = useTranslation(['setup', 'game', 'roles']);
-  const { getMe, getPlayers, markReady, markRevealDone, readyPlayers } = useGameEngine();
+  const { getMe, getPlayers, markReady, markRevealDone, readyPlayers, kickPlayer } = useGameEngine();
   const me = getMe();
   const players = getPlayers();
+  const amHost = isHost();
   const [phase, setPhase] = useState('loading');
   const [progress, setProgress] = useState(0);
   const [msgIndex, setMsgIndex] = useState(0);
@@ -179,6 +186,20 @@ const RoleReveal = ({ onComplete }) => {
     const allLoaded = players.every((p) => readyPlayers.includes(p.id));
     if (allLoaded) setPhase('waiting');
   }, [phase, readyPlayers, players]);
+
+  // Kick button unlock: after 30s on the waiting-players screen, the host
+  // gets a "Kick" button under any still-pending player so one stuck
+  // client can't freeze the whole lobby indefinitely.
+  const [kickUnlocked, setKickUnlocked] = useState(false);
+  useEffect(() => {
+    if (phase !== 'waiting-players') {
+      setKickUnlocked(false);
+      return;
+    }
+    setKickUnlocked(false);
+    const timer = setTimeout(() => setKickUnlocked(true), KICK_UNLOCK_MS);
+    return () => clearTimeout(timer);
+  }, [phase]);
 
   // Role reveal sequence — uses rAF-aware delays to survive tab throttling
   const sequenceStarted = useRef(false);
@@ -294,10 +315,22 @@ const RoleReveal = ({ onComplete }) => {
             <div className="waiting-players-dots">
               {players.map((p) => {
                 const isReady = readyPlayers.includes(p.id);
+                const canKick = amHost && !isReady && kickUnlocked && p.id !== me?.id;
                 return (
                   <div key={p.id} className={`waiting-dot ${isReady ? 'ready' : 'pending'}`} title={p.profile?.name}>
                     <i className="fas fa-user waiting-dot-indicator" aria-hidden="true" />
                     <span className="waiting-dot-name">{p.profile?.name?.slice(0, 8)}</span>
+                    {canKick && (
+                      <button
+                        type="button"
+                        className="waiting-dot-kick"
+                        onClick={() => kickPlayer(p.id)}
+                        title={t('common:kick')}
+                      >
+                        <i className="fas fa-user-xmark" aria-hidden="true" />
+                        <span>{t('common:kick')}</span>
+                      </button>
+                    )}
                   </div>
                 );
               })}

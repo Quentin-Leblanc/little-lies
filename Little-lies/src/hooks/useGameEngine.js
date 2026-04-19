@@ -369,6 +369,22 @@ export const GameEngineProvider = ({ children }) => {
     }
   };
 
+  // Host-only: evict a stuck player during the load/reveal gate. Removes
+  // them from players[] + ready/revealed lists immediately so the
+  // all-ready / all-revealed check stops waiting on them, then triggers
+  // PlayroomKit's native kick so their socket drops. Without the roster
+  // cleanup, a kicked player still blocks waitingForPlayers via the
+  // 30s disconnect grace window before handleDisconnectPlayers decides
+  // they're gone.
+  const kickPlayer = (playerId) => {
+    if (!isHost() || !playerId) return;
+    setPlayers((prev) => (prev || []).filter((p) => p.id !== playerId));
+    setReadyPlayers((readyPlayers || []).filter((id) => id !== playerId));
+    setRevealedPlayers((revealedPlayers || []).filter((id) => id !== playerId));
+    const pp = playroom_players.find((p) => p.id === playerId);
+    try { pp?.kick?.(); } catch { /* player may already have left */ }
+  };
+
   const startGame = () => {
     const shuffledRoles = [...rolesSelected].sort(() => Math.random() - 0.5);
     const newPlayers = playroom_players
@@ -942,6 +958,7 @@ export const GameEngineProvider = ({ children }) => {
         markReady,
         revealedPlayers,
         markRevealDone,
+        kickPlayer,
         updateActivity,
       }}
     >

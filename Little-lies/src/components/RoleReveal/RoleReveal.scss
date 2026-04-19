@@ -250,6 +250,47 @@
   .ready & { color: rgba(120, 255, 120, 0.7); }
 }
 
+// Kick button: host-only, only after 30s of waiting — gives the host a
+// manual escape hatch when a client can't finish loading. Fades in so it
+// doesn't pop aggressively once the unlock fires.
+.waiting-dot-kick {
+  margin-top: 0.29rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.18rem 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+  color: rgba(255, 120, 120, 0.85);
+  background: rgba(255, 68, 68, 0.08);
+  border: 1px solid rgba(255, 68, 68, 0.35);
+  border-radius: 0.3rem;
+  cursor: pointer;
+  animation: kick-btn-appear 0.35s ease-out;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+
+  i { font-size: 0.7rem; }
+
+  &:hover {
+    color: #ffdede;
+    background: rgba(255, 68, 68, 0.25);
+    border-color: rgba(255, 120, 120, 0.7);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@keyframes kick-btn-appear {
+  0% { opacity: 0; transform: translateY(-3px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes dot-pop {
   0% { transform: scale(1); }
   50% { transform: scale(1.5); }
