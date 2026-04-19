@@ -361,11 +361,18 @@ export const EventsProvider = ({ children }) => {
           chatMessage: deathMsg,
           victimName: target?.profile?.name,
           flavor,
+          // killType is the raw kill source ('mafia', 'neutral' = SK,
+          // 'vigilante', 'jailor_execute', 'bodyguard_sacrifice'…) used by
+          // the morning overlay to render a "who hit you" pill alongside
+          // the flavor narrative. Included here so the UI can render it
+          // without re-deriving from the flavor string.
+          killType: killInfo.type,
           roleKey: target?.character?.key,
           roleLabel: target?.character?.label,
           roleIcon: target?.character?.icon,
           roleColor: target?.character?.couleur,
           roleTeam: target?.character?.team,
+          roleDescription: target?.character?.description,
           lastWill: target?.lastWill || null,
         },
         displayed: false,
@@ -456,6 +463,9 @@ export const EventsProvider = ({ children }) => {
     });
 
     // === Priority 6: Investigations (skip if roleblocked or target dead) ===
+    // Tagged 'investigate' / 'investigate_role' so the morning info panel
+    // can style them as the headline reveal (larger font, accent border)
+    // instead of a plain notification line.
     activeEvents
       .filter((e) => e.type === 'INVESTIGATE')
       .forEach((e) => {
@@ -467,7 +477,8 @@ export const EventsProvider = ({ children }) => {
             e.content.by,
             detectResult === 'suspect'
               ? i18n.t('game:notifications.investigate_suspect', { name: target.profile.name })
-              : i18n.t('game:notifications.investigate_innocent', { name: target.profile.name })
+              : i18n.t('game:notifications.investigate_innocent', { name: target.profile.name }),
+            'investigate',
           );
         }
       });
@@ -479,7 +490,8 @@ export const EventsProvider = ({ children }) => {
         if (target?.isAlive) {
           addNotif(
             e.content.by,
-            i18n.t('game:notifications.investigate_role', { name: target.profile.name, role: target.character?.label })
+            i18n.t('game:notifications.investigate_role', { name: target.profile.name, role: target.character?.label }),
+            'investigate_role',
           );
         }
       });

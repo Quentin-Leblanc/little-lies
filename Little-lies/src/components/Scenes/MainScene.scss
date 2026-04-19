@@ -1,22 +1,32 @@
 // 3D Chat bubble — parchment-style speech bubble displaying the player's
 // last chat message. Pops in, holds, then fades (controlled by JS).
+//
+// `width: max-content` is the key: without it the bubble hugged the
+// narrowest fallback (drei's Html wrapper constrains its content in an
+// auto-layout box) and combined with `word-break: break-word` the text
+// wrapped at 2–3 characters per line — vertical strip instead of a
+// horizontal bubble. `max-content` lets the bubble size naturally to
+// one line, and `max-width` still kicks in for longer sentences so the
+// bubble breaks at spaces instead of mid-word.
 .chat-bubble-3d {
   position: relative;
-  max-width: 15rem;
-  min-width: 3rem;
-  padding: 0.45rem 0.8rem 0.55rem;
-  border-radius: 0.85rem;
+  width: max-content;
+  max-width: 14rem;
+  min-width: 2.5rem;
+  padding: 0.28rem 0.6rem 0.32rem;
+  border-radius: 0.7rem;
   background: linear-gradient(170deg, rgba(252, 247, 232, 0.97) 0%, rgba(232, 222, 196, 0.97) 100%);
-  border: 2px solid rgba(80, 50, 20, 0.65);
+  border: 1.5px solid rgba(80, 50, 20, 0.65);
   box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 4px 10px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.35) inset;
   font-family: 'Cinzel', serif;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.62rem;
   color: #2a1a05;
-  line-height: 1.3;
+  line-height: 1.25;
   text-align: center;
+  white-space: normal;
   animation: chat-bubble-pop 0.32s cubic-bezier(0.2, 1.3, 0.4, 1) both;
   transition: opacity 0.35s ease, transform 0.35s ease;
   pointer-events: none;
@@ -29,20 +39,20 @@
 
 .chat-bubble-3d-text {
   display: block;
-  word-break: break-word;
+  overflow-wrap: break-word;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .chat-bubble-3d-tail {
   position: absolute;
-  bottom: -8px;
+  bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 10px solid rgba(80, 50, 20, 0.65);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid rgba(80, 50, 20, 0.65);
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
 
   &::after {
@@ -53,9 +63,9 @@
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 8px solid rgba(252, 247, 232, 0.97);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid rgba(252, 247, 232, 0.97);
   }
 }
 
@@ -523,6 +533,44 @@
   &:last-child { margin-bottom: 0; }
 }
 
+/* Attack source + team faction pills — shown between the flavor line
+   and the role card so a new player can trace the chain: "attack from
+   Mafia" → "role was Doctor" → "they tried to save, it wasn't enough".
+   Kept subtle (thin border, translucent bg) so it doesn't compete with
+   the bigger role card below. */
+.death-meta-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  animation: role-reveal-fade 0.7s ease-out 1.4s forwards;
+}
+
+.death-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.72rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  background: rgba(30, 20, 20, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #e8e8e8;
+  backdrop-filter: blur(4px);
+
+  i { font-size: 0.8rem; opacity: 0.85; }
+  .death-meta-label { opacity: 0.7; letter-spacing: 0.04em; font-size: 0.75rem; text-transform: uppercase; }
+  strong { font-weight: 700; letter-spacing: 0.03em; }
+}
+
+.death-meta-attack {
+  border-color: rgba(220, 80, 80, 0.45);
+  color: #ffcccc;
+  background: rgba(50, 20, 20, 0.6);
+  i { color: #ff8080; }
+}
+
 /* Role card — distinct block that makes the role reveal unmissable. */
 .death-role-card {
   display: flex;
@@ -536,6 +584,20 @@
   backdrop-filter: blur(6px);
   opacity: 0;
   animation: role-reveal-fade 0.9s ease-out 1.8s forwards;
+}
+
+/* One-line role mechanic reminder under the big role label — same data
+   as the guide's description, kept short so it reads at a glance during
+   the 3-4s morning overlay. */
+.death-role-desc {
+  font-family: 'Inter', 'Chakra Petch', sans-serif;
+  font-size: 0.86rem;
+  color: rgba(230, 225, 215, 0.8);
+  font-style: italic;
+  line-height: 1.45;
+  max-width: 30rem;
+  margin-top: 0.2rem;
+  text-align: center;
 }
 
 .death-role-label {
