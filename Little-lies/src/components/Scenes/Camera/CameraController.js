@@ -5,20 +5,28 @@ import * as THREE from 'three';
 import {
   NIGHT_CAMERA_WAYPOINTS,
   DAY_ORBIT_CAMERAS,
+  DISCUSSION_CAMERA_CYCLE_MS,
+  INTRO_CINEMATICS,
   JUDGMENT_CAMERA_POS, JUDGMENT_CAMERA_LOOK,
   EXECUTION_CAMERA_POS, EXECUTION_CAMERA_LOOK,
 } from '../constants';
 import { pushCameraOutOfObstacles } from '../utils';
 
 // Smooth follow based on phase:
+// - Intro: one of 5 cinematics rotated by (roomSeed + playerCount), so
+//   back-to-back games in the same room land on different openings as
+//   soon as the roster shifts by one.
 // - Night: one of 6 cinematics rotated by dayCount with a coprime step,
 //   so back-to-back nights never replay the same shot and the whole pool
 //   is used before anything repeats.
 // - Trial (defense/judgment/last-words/execution): zoom on podium
-// - Day / other: continuous slow orbit around the plaza (~13 min/turn)
+// - Day / other: continuous slow orbit around the plaza. During
+//   DISCUSSION specifically, the orbit camera cycles through the pool
+//   every DISCUSSION_CAMERA_CYCLE_MS so a 30s debate isn't locked to a
+//   single angle.
 // Pushes the target and interpolated position out of the church & gallows
 // obstacle spheres so the camera never ends up inside a model.
-const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null }) => {
+const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null, playerCount = 0 }) => {
   const { camera } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 8, 12));
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
@@ -31,6 +39,10 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
   const prevDeathFocusRef = useRef(null);
   const introTimeRef = useRef(0);
   const prevShotRef = useRef(0);
+  const prevDayOrbitIdxRef = useRef(-1);
+  // Scratch object the INTRO_CINEMATICS run() callbacks mutate. Kept as
+  // a ref so we don't allocate a Vector3 per frame.
+  const introOut = useRef({ pos: new THREE.Vector3(), lookAt: new THREE.Vector3(), shot: 0 });
 
   // Hash the room code into a stable integer so day 0 / night 0 start on
   // a different cinematic each game. Without this, every first night
@@ -68,68 +80,41 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
     };
   }, []);
 
-  // One-shot 6s intro cinematic: two ground-level "walking tour" shots.
-  // Both keep Y_pos = Y_lookAt (parallel-to-ground) so the mountain
-  // silhouettes in the distance stay out of frame — the horizon feels
-  // grounded and the plaza reads as the subject.
-  //
-  //   Shot 1 (0-2s): gentle sideways dolly between the west cottages,
-  //   looking across the plaza. Hard cut at t=2s.
-  //
-  //   Shot 2 (2-6s): new camera on the east side, slow orbit around
-  //   the plaza center — the rotation sells "there's a village here
-  //   you're about to live in" without ever tilting up toward the
-  //   mountains.
+  // Intro cinematic pick: deterministic pool rotation by roomSeed +
+  // playerCount * 7. 7 is coprime with 5 (pool length) so a single
+  // roster change rotates through every variant within 5 games. All
+  // clients compute the same index because they share roomCode and
+  // players list at intro time — no extra networking needed.
+  const introIdx = useMemo(() => {
+    const pool = INTRO_CINEMATICS;
+    return ((roomSeed + playerCount * 7) % pool.length + pool.length) % pool.length;
+  }, [roomSeed, playerCount]);
 
   useFrame((_, delta) => {
     if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) {
-      const SHOT1_DURATION = 2.0;
+      const cinematic = INTRO_CINEMATICS[introIdx];
       if (prevPhaseRef.current !== CONSTANTS.PHASE.INTRO_CINEMATIC) {
         introTimeRef.current = 0;
-        prevShotRef.current = 0;
-        // Snap to shot 1 start pose — no long lerp from the lobby camera.
-        camera.position.set(-7.2, 1.8, 6.2);
-        camera.lookAt(3, 1.8, -1);
+        prevShotRef.current = -1;
+        // Snap to the cinematic's starting pose — no long lerp from
+        // the lobby camera.
+        camera.position.set(...cinematic.startPos);
+        camera.lookAt(...cinematic.startLookAt);
       }
       introTimeRef.current += delta;
-      const t = introTimeRef.current;
+      const t = Math.min(introTimeRef.current, cinematic.duration);
 
-      if (t < SHOT1_DURATION) {
-        // Shot 1 (0-2s): sideways dolly between the west cottages, camera
-        // and target share the same Y so the view stays parallel to the
-        // ground and the mountains never creep into frame.
-        const p = t / SHOT1_DURATION; // 0 → 1
-        targetPos.current.set(
-          -7.2 + p * 2.4, // slight push to the east while travelling
-          1.8,
-          6.2 - p * 1.2, // gently closing toward the plaza
-        );
-        targetLookAt.current.set(3, 1.8, -1);
-        prevShotRef.current = 0;
-      } else {
-        // Shot 2 (2-6s): hard cut to the east side, then slow orbit
-        // around the plaza center. Y_pos = Y_lookAt again — we orbit
-        // horizontally so the frame stays low and grounded.
-        const localT = t - SHOT1_DURATION;
-        const orbitCenter = new THREE.Vector3(0, 1.5, -1.2);
-        const radius = 5.8;
-        // Start ~110° (east-south-east) and rotate ~45° over 4s.
-        const angle = Math.PI * 0.61 + localT * 0.2;
-        targetPos.current.set(
-          orbitCenter.x + Math.sin(angle) * radius,
-          1.9,
-          orbitCenter.z + Math.cos(angle) * radius,
-        );
-        targetLookAt.current.copy(orbitCenter);
+      // Let the cinematic compute target pose + current shot index.
+      cinematic.run(t, introOut.current);
+      targetPos.current.copy(introOut.current.pos);
+      targetLookAt.current.copy(introOut.current.lookAt);
 
-        // Hard cut on the frame we cross t=2s: teleport the camera to
-        // the shot-2 anchor so the outer lerp doesn't glide between
-        // shots.
-        if (prevShotRef.current === 0) {
-          camera.position.copy(targetPos.current);
-          camera.lookAt(targetLookAt.current);
-        }
-        prevShotRef.current = 1;
+      // Hard cut whenever shot index changes — teleport camera + anchor
+      // straight to the new pose so the outer lerp doesn't glide.
+      if (introOut.current.shot !== prevShotRef.current) {
+        camera.position.copy(targetPos.current);
+        camera.lookAt(targetLookAt.current);
+        prevShotRef.current = introOut.current.shot;
       }
     } else if (phase === CONSTANTS.PHASE.NIGHT) {
       const enteringNight = prevPhaseRef.current !== CONSTANTS.PHASE.NIGHT;
@@ -232,18 +217,42 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
       // Full 360° loop: orbitAngle is a strictly-increasing scalar, and
       // sin/cos wrap naturally through 2π — no clamp, no flip, no reset.
       //
-      // Camera choice rotates per day through DAY_ORBIT_CAMERAS. 3 is
-      // coprime with pool length (5), so (dayCount * 3 + 1) % 5 cycles
-      // through all 5 indices without consecutive repeats. +roomSeed
-      // rotates the sequence per game so day 1 isn't always the same
-      // angle across different matches.
+      // Camera choice rotates per day through DAY_ORBIT_CAMERAS. During
+      // DISCUSSION (the 30s debate phase) we further rotate the pick
+      // every DISCUSSION_CAMERA_CYCLE_MS so a long phase doesn't lock
+      // on a single angle — the cut keeps the scene alive when nobody
+      // is moving. For other day phases (DEATH_REPORT, NO_LYNCH, SPARED)
+      // we stay on the per-day pick because those phases are short and
+      // a mid-phase cut would feel like a glitch.
       dayOrbitTimeRef.current += delta;
       const pool = DAY_ORBIT_CAMERAS;
-      const idx = ((dayCount * 3 + 1 + roomSeed) % pool.length + pool.length) % pool.length;
+      const baseIdx = ((dayCount * 3 + 1 + roomSeed) % pool.length + pool.length) % pool.length;
+      let idx = baseIdx;
+      if (phase === CONSTANTS.PHASE.DISCUSSION) {
+        // Use accumulated time (same clock as orbit) so clients that
+        // entered DISCUSSION at slightly different wall-clock times
+        // still cycle through the same offsets from their local
+        // phase-entry — imperfect sync, but close enough that shots
+        // feel similar across screens.
+        const cycleStep = Math.floor((dayOrbitTimeRef.current * 1000) / DISCUSSION_CAMERA_CYCLE_MS);
+        idx = ((baseIdx + cycleStep) % pool.length + pool.length) % pool.length;
+      }
       const cam = pool[idx];
       const orbitAngle = dayOrbitTimeRef.current * cam.speed + cam.phaseOffset;
       const orbitX = Math.sin(orbitAngle) * cam.radius;
       const orbitZ = Math.cos(orbitAngle) * cam.radius;
+      // Snap camera on DISCUSSION mid-phase cuts so the new angle lands
+      // as a real edit, not a long lerp through the plaza. Skip the
+      // snap on phase entry (prev != DISCUSSION) so the transition from
+      // DEATH_REPORT or any other phase still lerps in smoothly.
+      if (
+        phase === CONSTANTS.PHASE.DISCUSSION &&
+        prevPhaseRef.current === CONSTANTS.PHASE.DISCUSSION &&
+        prevDayOrbitIdxRef.current !== idx
+      ) {
+        camera.position.set(orbitX, cam.height, orbitZ);
+      }
+      prevDayOrbitIdxRef.current = idx;
       targetPos.current.set(orbitX, cam.height, orbitZ);
       targetLookAt.current.set(0, cam.lookY, 0);
     }

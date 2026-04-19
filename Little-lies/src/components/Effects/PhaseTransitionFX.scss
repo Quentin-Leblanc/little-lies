@@ -1,0 +1,61 @@
+// Phase-transition overlay FX. All layers are pointer-events: none so
+// they never swallow clicks from the HUD / action sidebar. z-indices
+// are placed *below* the scene-announcement (z ≈ 80+) and the role
+// reveal card overlays so trial overlays still read on top of the
+// letterbox bars, but *above* the 3D canvas so the bars frame it.
+
+.phase-fx-letterbox {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 35;
+
+  &-top,
+  &-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 11vh;
+    background: #000;
+    transition: transform 0.5s cubic-bezier(0.25, 0.85, 0.2, 1);
+    box-shadow: 0 0 22px rgba(0, 0, 0, 0.6);
+  }
+
+  &-top {
+    top: 0;
+    transform: translateY(-100%);
+  }
+  &-bottom {
+    bottom: 0;
+    transform: translateY(100%);
+  }
+
+  &.visible {
+    .phase-fx-letterbox-top { transform: translateY(0); }
+    .phase-fx-letterbox-bottom { transform: translateY(0); }
+  }
+}
+
+// Brief radial vignette pulse on DISCUSSION → VOTING. The gradient
+// lives in the element background; the animation drives opacity so
+// the fade in/out stays smooth. pointer-events: none so clicks still
+// reach the voting buttons as they appear.
+.phase-fx-radial-pulse {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 28%,
+    rgba(6, 0, 12, 0.55) 80%,
+    rgba(6, 0, 12, 0.85) 100%
+  );
+  animation: phase-fx-radial-pulse 0.65s ease-out forwards;
+}
+
+@keyframes phase-fx-radial-pulse {
+  0%   { opacity: 0; }
+  40%  { opacity: 1; }
+  100% { opacity: 0; }
+}

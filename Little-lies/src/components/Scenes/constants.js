@@ -153,6 +153,142 @@ export const DAY_ORBIT_CAMERAS = [
   // player faces aren't cropped. Tilt stays ~55°.
   //   tilt = atan2(9 - 0.4, 7) ≈ 51°
   { name: 'intimate',  radius: 7,    height: 9,    lookY: 0.4, speed: 0.011, phaseOffset: 2.2 },
+  // 5 — PERIMETER: wide slow circle that skims the perimeter of the
+  // cottage ring. Radius bumped up to 12 so the frame shows a layer of
+  // cottages between the camera and the plaza center — depth cue the
+  // other angles don't give. Height matches radius + 1 to keep the
+  // tilt above 45°. Slow speed because 12m of perimeter adds up fast.
+  //   tilt = atan2(13 - 0.3, 12) ≈ 47°
+  { name: 'perimeter', radius: 12,   height: 13,   lookY: 0.3, speed: 0.0065, phaseOffset: 5.4 },
+  // 6 — TIGHT TOWER: mid-height very close orbit, almost a turntable on
+  // the blood circle. Faster rotation so the 12s cycle window actually
+  // shows ~70° of travel.
+  //   tilt = atan2(11 - 0.3, 5) ≈ 65°
+  { name: 'tight-tower', radius: 5,  height: 11,   lookY: 0.3, speed: 0.013,  phaseOffset: 0.8 },
+];
+
+// Cycle through DAY_ORBIT_CAMERAS mid-phase during DISCUSSION. 30s
+// phase / 12s per pick = ~2.5 camera cuts per discussion, which breaks
+// up the "locked orbit" feel without cutting so often it's distracting.
+// Non-DISCUSSION day phases (DEATH_REPORT, NO_LYNCH, SPARED) stay on a
+// single pick for their whole duration.
+export const DISCUSSION_CAMERA_CYCLE_MS = 12000;
+
+// Intro cinematic pool — 5 variants, each a 6s opening shot sequence.
+// Pick is deterministic per (roomSeed + playerCount) so a given lobby
+// replaying sees the same intro, but changing the roster or room
+// rotates it. Each entry exposes a `run(t, out, THREE)` that mutates
+// out.pos (Vector3), out.lookAt (Vector3), and out.shot (int — the
+// controller hard-cuts when this changes). The startPos/startLookAt
+// are the frame-0 pose used for the initial snap into the cinematic.
+export const INTRO_CINEMATICS = [
+  // 0 — WALKING TOUR (original): west-side dolly (0-2s) then east-side
+  // slow orbit around the plaza center (2-6s). Parallel-to-ground Y so
+  // distant mountains never creep into frame.
+  {
+    name: 'walking-tour',
+    duration: 6,
+    startPos: [-7.2, 1.8, 6.2],
+    startLookAt: [3, 1.8, -1],
+    run: (t, out) => {
+      if (t < 2) {
+        const p = t / 2;
+        out.pos.set(-7.2 + p * 2.4, 1.8, 6.2 - p * 1.2);
+        out.lookAt.set(3, 1.8, -1);
+        out.shot = 0;
+      } else {
+        const localT = t - 2;
+        const angle = Math.PI * 0.61 + localT * 0.2;
+        out.pos.set(Math.sin(angle) * 5.8, 1.9, Math.cos(angle) * 5.8 - 1.2);
+        out.lookAt.set(0, 1.5, -1.2);
+        out.shot = 1;
+      }
+    },
+  },
+  // 1 — CHURCH PUSH: straight-line push from far south toward the church,
+  // slight climb so the belfry dominates the frame as we approach.
+  // Single shot — no cut, steady forward momentum = "the story is going
+  // somewhere dark".
+  {
+    name: 'church-push',
+    duration: 6,
+    startPos: [0, 2.5, 14],
+    startLookAt: [0, 4.2, -14],
+    run: (t, out) => {
+      const p = t / 6;
+      out.pos.set(0, 2.5 + p * 1.4, 14 - p * 13.2);
+      out.lookAt.set(0, 4.2 + p * 0.9, -14);
+      out.shot = 0;
+    },
+  },
+  // 2 — ALTAR CREEP: low crawl (y=0.7) that closes toward the ritual
+  // blood circle, then a dramatic 2s rise at the end revealing the
+  // altar symbol from above. Tension builds then releases on the rise.
+  {
+    name: 'altar-creep',
+    duration: 6,
+    startPos: [4.5, 0.7, 5.5],
+    startLookAt: [0, 0.4, 0],
+    run: (t, out) => {
+      if (t < 4) {
+        const p = t / 4;
+        out.pos.set(4.5 - p * 3.0, 0.7 + p * 0.25, 5.5 - p * 3.6);
+        out.lookAt.set(0, 0.4, 0);
+        out.shot = 0;
+      } else {
+        const localT = t - 4;
+        const p = localT / 2;
+        out.pos.set(1.5, 0.95 + p * 1.5, 1.9 - p * 0.3);
+        out.lookAt.set(0, 0.5 + p * 0.3, 0);
+        out.shot = 1;
+      }
+    },
+  },
+  // 3 — AERIAL DROP: spiral descent from 22m → 5m. Starts with a
+  // map-like view, progressively closes in on the plaza as it spirals
+  // down. "You're descending into this story."
+  {
+    name: 'aerial-drop',
+    duration: 6,
+    startPos: [9.9, 22, 9.9],
+    startLookAt: [0, 0, -2],
+    run: (t, out) => {
+      const p = t / 6;
+      const angle = Math.PI * 0.25 + p * Math.PI * 0.6;
+      const radius = 14 - p * 6;
+      const y = 22 - p * 17;
+      out.pos.set(Math.sin(angle) * radius, y, Math.cos(angle) * radius);
+      out.lookAt.set(0, p * 0.9, -2 + p * 0.7);
+      out.shot = 0;
+    },
+  },
+  // 4 — LIGHTNING REVEAL: three static shots in rapid cuts (2s + 2s +
+  // 2s) from very different angles. The hard cuts + distinct poses
+  // read as lightning strikes illuminating the village for brief
+  // instants. The overall screen flash stays subtle (no full-white
+  // overlay) so we don't step on NightLightning's thunder audio path.
+  {
+    name: 'lightning-reveal',
+    duration: 6,
+    startPos: [-12, 4, 12],
+    startLookAt: [0, 2, -10],
+    run: (t, out) => {
+      if (t < 2) {
+        out.pos.set(-12, 4, 12);
+        out.lookAt.set(0, 2, -10);
+        out.shot = 0;
+      } else if (t < 4) {
+        out.pos.set(12, 4, -12);
+        out.lookAt.set(0, 2, 0);
+        out.shot = 1;
+      } else {
+        const p = (t - 4) / 2;
+        out.pos.set(0, 3.5, 8 - p * 2);
+        out.lookAt.set(0, 2.2, -8);
+        out.shot = 2;
+      }
+    },
+  },
 ];
 
 // Spherical obstacles the camera must stay outside of.

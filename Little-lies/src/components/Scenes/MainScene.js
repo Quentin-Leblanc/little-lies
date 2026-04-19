@@ -32,8 +32,29 @@ import TrialStormLighting from './Weather/TrialStormLighting';
 import NightDarkFog from './Weather/NightDarkFog';
 import NightCrows from './Wildlife/NightCrows';
 import DayRabbits from './Wildlife/DayRabbits';
+import DistantWindmill from './Environment/DistantWindmill';
+import CirclingBirds from './Atmosphere/CirclingBirds';
+import CandleRack from './Props/CandleRack';
+import PhaseTransitionFX from '../Effects/PhaseTransitionFX';
 
 import './MainScene.scss';
+
+// Lerp a hex color toward a target by amount 0..1. Used to blood-tint
+// the sky + fog as deaths accumulate during a game.
+const lerpHex = (hex, targetHex, amount) => {
+  const parse = (h) => [
+    parseInt(h.slice(1, 3), 16),
+    parseInt(h.slice(3, 5), 16),
+    parseInt(h.slice(5, 7), 16),
+  ];
+  const [r1, g1, b1] = parse(hex);
+  const [r2, g2, b2] = parse(targetHex);
+  const r = Math.round(r1 + (r2 - r1) * amount);
+  const g = Math.round(g1 + (g2 - g1) * amount);
+  const b = Math.round(b1 + (b2 - b1) * amount);
+  const pad = (n) => n.toString(16).padStart(2, '0');
+  return `#${pad(r)}${pad(g)}${pad(b)}`;
+};
 
 // ============================================================
 // MainScene — orchestrator. Owns phase-driven UI overlays, player
@@ -54,6 +75,14 @@ const MainScene = () => {
   const isGameOver = game.status === CONSTANTS.GAME_ENDED;
   const alivePlayers = players.filter((p) => p.isAlive);
   const deadPlayers = players.filter((p) => !p.isAlive);
+  // Deaths-ratio drives the escalating "the village is bleeding" look:
+  // sky tint, fog closeness, crow count, extinguished candles. Clamped
+  // to 0..0.6 so a 100%-dead state doesn't black out everything — caps
+  // at the point where mood shift reads strongly without breaking the
+  // scene's readability.
+  const deathsCount = deadPlayers.length;
+  const totalPlayers = Math.max(players.length, 1);
+  const deathsRatio = Math.min(deathsCount / totalPlayers, 1) * 0.6;
 
   // Pause mode — local player position, animation, rotation
   const [pausePos, setPausePos] = useState(null);
@@ -466,6 +495,7 @@ const MainScene = () => {
               CONSTANTS={CONSTANTS}
               dayCount={game.dayCount || 0}
               deathFocusPos={deathFocusPos}
+              playerCount={players.length}
             />
           )}
 
@@ -505,22 +535,23 @@ const MainScene = () => {
 
             if (game.isDay) {
               // Sky color: warm blue sun, cold slate storm, mid grey mist.
-              const skyColor = isSunny ? '#8fcff0' : isRainyDay ? '#5a6878' : '#909aa8';
+              // Blood-tinted progressively toward #4a1e1e as deaths pile
+              // up — the sky turns the color of dried blood late-game.
+              const baseSky = isSunny ? '#8fcff0' : isRainyDay ? '#5a6878' : '#909aa8';
+              const skyColor = lerpHex(baseSky, '#4a1e1e', deathsRatio);
+              // Fog closes in as deaths accumulate — far plane shrinks
+              // up to ~35%. Sunny days still breathe at day 1, but at
+              // death-ratio 0.5 (half the lobby gone) the mountains
+              // dissolve into a tense grey wall.
+              const fogShrink = 1 - deathsRatio * 0.35;
+              const fogNear = (isSunny ? 50 : isRainyDay ? 8 : 12) * fogShrink;
+              const fogFar  = (isSunny ? 120 : isRainyDay ? 26 : 32) * fogShrink;
               return (
                 <>
                   <color attach="background" args={[skyColor]} />
-                  {/* Fog only thickens when visibility is actually limited.
-                      Sunny days push the near-plane far out (50) and the
-                      far-plane to 120, so the mountain silhouettes stay
-                      visible instead of dissolving into a grey wall — that
-                      was the main reason every day felt identical. */}
                   <fog
                     attach="fog"
-                    args={[
-                      skyColor,
-                      isSunny ? 50 : isRainyDay ? 8 : 12,
-                      isSunny ? 120 : isRainyDay ? 26 : 32,
-                    ]}
+                    args={[skyColor, fogNear, fogFar]}
                   />
                   <Sky
                     sunPosition={[100, isRainyDay ? 8 : isSunny ? 60 : 22, 100]}
@@ -538,6 +569,10 @@ const MainScene = () => {
                   {isSunny && <DayRabbits count={8} />}
                   {isRainyDay && <NightRain count={220} />}
                   {isRainyDay && <NightLightning />}
+                  {/* Vultures circling overhead — more of them as deaths
+                      pile up. Living depth cue for the scene even when
+                      nothing else is happening. */}
+                  <CirclingBirds baseCount={3} deathsCount={deathsCount} />
                 </>
               );
             } else {
@@ -551,15 +586,20 @@ const MainScene = () => {
               // foggy/rainy nights still get the thick layer but without
               // the double render. Near/far pushed out so the ground stays
               // visible from the orbit camera (which sits ~14m up).
+              // Night base is near-black; blood-tint very slightly so
+              // late-game nights have a subtle warm-maroon undertone
+              // instead of the same cold black as night 1.
+              const nightSky = lerpHex('#060818', '#140408', deathsRatio);
+              const nightFogShrink = 1 - deathsRatio * 0.25;
               return (
                 <>
-                  <color attach="background" args={['#060818']} />
+                  <color attach="background" args={[nightSky]} />
                   <fog
                     attach="fog"
                     args={[
-                      '#060818',
-                      isRainy ? 14 : isFoggy ? 12 : 22,
-                      isRainy ? 36 : isFoggy ? 38 : 60,
+                      nightSky,
+                      (isRainy ? 14 : isFoggy ? 12 : 22) * nightFogShrink,
+                      (isRainy ? 36 : isFoggy ? 38 : 60) * nightFogShrink,
                     ]}
                   />
                   <Stars radius={80} depth={50} count={isRainy ? 500 : 3000} factor={4} saturation={0} fade speed={1} />
@@ -571,7 +611,9 @@ const MainScene = () => {
                       ground. */}
                   {(isFoggy || isRainy) && <GroundFog isDay={false} />}
                   <VillageFogWall isDay={false} />
-                  <NightCrows count={4} />
+                  {/* Crow count climbs with deaths — 4 base, +1 per
+                      death, capped at 10 so overdraw stays reasonable. */}
+                  <NightCrows count={Math.min(4 + deathsCount, 10)} />
                   <NightDarkFog count={isFoggy ? 24 : isRainy ? 14 : 8} />
                   {isRainy && <NightRain count={300} />}
                   {isRainy && <NightLightning />}
@@ -582,6 +624,18 @@ const MainScene = () => {
 
           <GroundPlane isDay={game.isDay} />
           <Village isDay={game.isDay} isTrialPhase={isTrialPhase} />
+
+          {/* Background decor — procedural landmarks placed between the
+              cottage ring (r ≈ 18) and the mountain ring (r ≈ 42). Both
+              are always-on so the depth cue reads consistently across
+              day and night. */}
+          <DistantWindmill position={[-28, 0, -26]} scale={1.8} />
+          <DistantWindmill position={[26, 0, -30]} scale={1.5} towerColor="#342a24" />
+
+          {/* Diegetic death counter — a row of candles by the church
+              that extinguishes one per death. Rotation orients the rack
+              toward the plaza so players can read it from the orbit. */}
+          <CandleRack position={[5.5, 0, -11]} rotation={[0, -0.35, 0]} deathsCount={deathsCount} />
 
           {/* Alive players — hidden during night and after walk finishes */}
           {!nightPlayersHidden && phase !== CONSTANTS.PHASE.NIGHT && alivePlayers.map((player) => {
@@ -668,6 +722,12 @@ const MainScene = () => {
           </EffectComposer>
         </Suspense>
       </Canvas>
+
+      {/* Phase-transition FX — radial pulse on DISCUSSION → VOTING and
+          cinematic letterbox bars during the trial (DEFENSE / JUDGMENT
+          / LAST_WORDS). Retracts on EXECUTION / SPARED / NO_LYNCH so
+          the climax is literally the bars releasing. */}
+      <PhaseTransitionFX phase={phase} CONSTANTS={CONSTANTS} />
 
       {/* Blood effect — only shown to the player who actually died.
           Before, every living villager got the bloody teeth vignette
