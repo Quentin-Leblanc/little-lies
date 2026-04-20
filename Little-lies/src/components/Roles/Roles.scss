@@ -1,11 +1,16 @@
+@import '../../styles/variables';
+
 .roles-list-box {
   margin-bottom: 0;
   padding: 0.471rem 0.588rem;
   flex: 1;
-  background: rgba(0, 0, 0, 0.8);
+  // Themed panel — warm near-black with oak-like undertone matching the
+  // chat/player blocks. Replaces the pure rgba black that stood out
+  // against the rest of the UI family.
+  background: $al-grad-panel;
   backdrop-filter: blur(3px);
   border-radius: 0.471rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid $al-gold-border;
 
   h3 {
     font-family: 'Cinzel', serif;

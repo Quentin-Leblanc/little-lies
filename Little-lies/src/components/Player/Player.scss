@@ -536,8 +536,8 @@
 
 /* Actions block (between role info and last will) */
 .sidebar-actions-block {
-  // Size to content: the black box hugs the actual player list instead
-  // of stretching down to the last-will section. `flex-shrink: 1` +
+  // Size to content: the panel hugs the actual player list instead of
+  // stretching down to the last-will section. `flex-shrink: 1` +
   // `max-height: 100%` lets it cap itself when the sidebar is shorter
   // than the player count — then the inner `.player-list` scrolls.
   flex: 0 1 auto;
@@ -549,8 +549,8 @@
   overflow: hidden;
   padding: 0.471rem;
   margin-top: 0.941rem;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: $al-grad-panel;
+  border: 1px solid $al-gold-border;
   border-radius: 0.353rem;
   box-sizing: border-box;
 }

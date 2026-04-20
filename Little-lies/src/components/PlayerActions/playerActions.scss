@@ -140,7 +140,10 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
   font-weight: bold;
   font-size: 1.004rem;
-  background: rgba(0, 0, 0, 0.75);
+  // Warm near-black rows with a faint gold hairline so the player list
+  // aligns with the sidebar's themed panels instead of reading as flat
+  // rgba-black stripes.
+  background: linear-gradient(160deg, rgba(30, 23, 18, 0.88) 0%, rgba(14, 10, 8, 0.94) 100%);
   // Stable height — sized as if a vote button were always present so
   // adding/removing the button at phase change doesn't snap the row
   // height (which used to ripple the whole list and made the layout jump).
@@ -148,7 +151,7 @@
   transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
   // Neutral border only — no per-player color outline (used to be set
   // inline as the player's hex; user wanted the rows to read uniformly).
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid $al-gold-border;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 
   &:hover {

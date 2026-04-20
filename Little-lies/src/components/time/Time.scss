@@ -24,10 +24,10 @@
   letter-spacing: 0.118rem;
   text-transform: uppercase;
   padding: 0.65rem 1.05rem;
-  background: rgba(0, 0, 0, 0.6);
+  background: $al-grad-panel;
   backdrop-filter: blur(8px);
   border-radius: 0 0 0 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid $al-gold-border;
   border-top: none;
   border-right: none;
   display: flex;
@@ -53,9 +53,9 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.65rem 1.2rem;
-  background: rgba(0, 0, 0, 0.6);
+  background: $al-grad-panel;
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid $al-gold-border;
   border-top: none;
   border-radius: 0 0 0.55rem 0;
   height: 2.55rem;

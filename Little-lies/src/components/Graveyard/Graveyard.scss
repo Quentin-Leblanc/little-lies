@@ -10,9 +10,12 @@
   overflow-y: auto;
   font-size: 0.824rem;
   flex: 1;
-  background: rgba(0, 0, 0, 0.8);
+  // Themed panel — same warm oak gradient + gold hairline as the chat,
+  // role description and roles-list blocks so all sidebar cards read
+  // as a single family instead of detached rgba-black rectangles.
+  background: $al-grad-panel;
   backdrop-filter: blur(3px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid $al-gold-border;
 
   h2 {
     font-size: 0.765rem;
