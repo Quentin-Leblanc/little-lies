@@ -429,30 +429,14 @@ const MainScene = () => {
           rotation: [0, Math.atan2(pos[0], pos[2]), 0], // face outward
         };
       });
-    } else if (isTrialPhase) {
-      // Podium at PODIUM_POSITION — accused behind it, crowd in the center
-      // circle facing the podium.
-      const podiumFaceAngle = Math.atan2(-PODIUM_POSITION[0], -PODIUM_POSITION[2]);
-      alivePlayers.forEach((p, i) => {
-        if (p.id === game.accusedId) {
-          const behindOffset = 1.4;
-          const ax = PODIUM_POSITION[0] + Math.sin(podiumFaceAngle + Math.PI) * behindOffset;
-          const az = PODIUM_POSITION[2] + Math.cos(podiumFaceAngle + Math.PI) * behindOffset;
-          positions[p.id] = { position: [ax, PLAYER_Y, az], rotation: [0, podiumFaceAngle, 0] };
-        } else {
-          const idx = i - (players.findIndex(pl => pl.id === game.accusedId) < i ? 1 : 0);
-          const count = alivePlayers.length - 1;
-          const angle = (idx / Math.max(count, 1)) * Math.PI * 2 - Math.PI / 2;
-          const pos = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
-          const dx = PODIUM_POSITION[0] - pos[0];
-          const dz = PODIUM_POSITION[2] - pos[2];
-          positions[p.id] = {
-            position: pos,
-            rotation: [0, Math.atan2(dx, dz), 0],
-          };
-        }
-      });
     } else {
+      // Day-phase circle — every alive player keeps the SAME spot from
+      // DISCUSSION through DEFENSE/JUDGMENT/EXECUTION. Previously the
+      // trial phases pulled the accused in front of the podium and
+      // re-laid the rest of the crowd around the missing slot, which
+      // drifted everyone's position mid-day. Per user feedback the day
+      // should feel still: the accused-ring under the feet already
+      // signals who's on trial, no need to physically move them.
       alivePlayers.forEach((p, i) => {
         const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
         const pos = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
@@ -881,39 +865,18 @@ const MainScene = () => {
                       })
                     : (c.chatMessage || '').split(/\n|📜/)[0];
                   // Normalise the kill type into a readable label. Keeps
-                  // the attacker FACTION visible without spoiling identity
-                  // (we don't tell "Bob was the killer", just the side).
-                  const killLabel = c.killType
-                    ? i18n.t(`game:kill_source.${c.killType}`, { defaultValue: c.killType })
-                    : null;
-                  const teamLabel = c.roleTeam
-                    ? i18n.t(`game:team_name.${c.roleTeam}`, { defaultValue: c.roleTeam })
-                    : null;
-                  const teamBadgeColor = {
-                    town: '#78ff78', mafia: '#ff4444',
-                    cult: '#a96edd', neutral: '#9370db',
-                  }[c.roleTeam] || '#aaa';
+                  // Attack-source + faction pills are intentionally NOT
+                  // surfaced here. The narrative line already encodes
+                  // the attack type ("criblé de balles" → mafia,
+                  // "déchiqueté" → werewolf, etc.) — leaving the kill
+                  // source / team faction as explicit text spoiled all
+                  // suspense (players knew the faction before the role
+                  // ever revealed). The killLabel/teamLabel/badge color
+                  // helpers were removed; if a post-game recap needs
+                  // them, recompute from c.killType / c.roleTeam there.
                   return (
                     <div key={i} className="death-report-entry">
                       <div className="death-desc">{narrative}</div>
-                      {killLabel && (
-                        <div className="death-meta-row">
-                          <span className="death-meta-pill death-meta-attack">
-                            <i className="fas fa-skull-crossbones" aria-hidden="true"></i>
-                            <span className="death-meta-label">{i18n.t('game:kill_source.label')} :</span>
-                            <strong>{killLabel}</strong>
-                          </span>
-                          {teamLabel && (
-                            <span
-                              className="death-meta-pill death-meta-team"
-                              style={{ color: teamBadgeColor, borderColor: `${teamBadgeColor}66`, background: `${teamBadgeColor}15` }}
-                            >
-                              <i className="fas fa-users" aria-hidden="true"></i>
-                              <strong>{teamLabel}</strong>
-                            </span>
-                          )}
-                        </div>
-                      )}
                       {c.roleKey && (
                         <div
                           className="death-role-card"

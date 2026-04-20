@@ -83,10 +83,14 @@ export const getGameSeed = (roomCode, gameStartedAt) => {
 // per mood keeps the sequence from feeling monotonic.
 //   day/night index → dayRoll (0=sunny, 1/2=misty, 3=rainy) / nightRoll
 //   (0=clear, 1=rainy, 2=foggy).
-export const LOBBY_MOODS = ['CLEAR', 'STORM', 'FOG', 'DUSK'];
+// FOG is duplicated so foggy games land more often than 25% — clear-sun
+// stretches were dominating playtests; werewolf nights deserve mist.
+export const LOBBY_MOODS = ['CLEAR', 'STORM', 'FOG', 'DUSK', 'FOG', 'FOG'];
 
 export const MOOD_DAY_ROLLS = {
-  CLEAR: [0, 0, 1, 0],   // 3 sunny, 1 misty break
+  // CLEAR is no longer "almost always sunny" — half the days now roll
+  // misty so even a fair-weather match feels weighty.
+  CLEAR: [0, 1, 0, 1],   // 2 sunny, 2 misty
   STORM: [3, 2, 3, 1],   // 2 rainy, 1 misty, 1 sunny break
   FOG:   [1, 1, 2, 1],   // 3 misty + 1 rainy break
   DUSK:  [2, 1, 0, 3],   // mixed — sky warm-tinted separately
