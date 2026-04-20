@@ -2,6 +2,13 @@
   "legal": "Mentions légales & crédits",
   "vote": "Vote",
   "color": "Couleur",
+  "model": "Mod\u00e8le",
+  "model_prev": "Mod\u00e8le pr\u00e9c\u00e9dent",
+  "model_next": "Mod\u00e8le suivant",
+  "models": {
+    "villager": "Villageois",
+    "wanderer": "Vagabond"
+  },
   "close": "Fermer",
   "send": "Envoyer",
   "skip": "Passer",

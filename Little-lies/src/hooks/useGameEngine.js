@@ -160,12 +160,17 @@ export const GameEngineProvider = ({ children }) => {
   const Events = useEvents();
   const [_game, _setGame] = useMultiplayerState('game', {
     status: STATUS.SETUP,
-    phase: PHASE.NIGHT,
-    timer: DURATIONS.NIGHT,
+    // Pre-game idles on INTRO_CINEMATIC rather than NIGHT so a late-
+    // mounting client that reads the shared state before startGame has
+    // fired doesn't surface a stray "Nuit 1" in the HUD. Time.js returns
+    // null for INTRO_CINEMATIC, so nothing renders until the host
+    // actually flips status → STARTED.
+    phase: PHASE.INTRO_CINEMATIC,
+    timer: DURATIONS.INTRO_CINEMATIC,
     phaseStartedAt: null,
     isGameStarted: false,
     isGameSetup: true,
-    isDay: false,
+    isDay: true,
     dayCount: 0,
     trialsToday: 0,
     accusedId: null,
@@ -207,17 +212,32 @@ export const GameEngineProvider = ({ children }) => {
   // Ref for latest trial value (avoids stale state in vote handlers)
   const trialRef = React.useRef(trial);
   trialRef.current = trial;
-  const [_readyPlayers, setReadyPlayers] = useMultiplayerState('readyPlayers', []);
-  const readyPlayers = _readyPlayers || [];
-  // Separate from readyPlayers: this list tracks which clients have
-  // finished their on-screen role-reveal animation. The game timer for
-  // INTRO_CINEMATIC only starts ticking once every player has closed
-  // their card, so the 6s cinematic actually plays after the curtain
-  // opens instead of silently elapsing behind it.
-  const [_revealedPlayers, setRevealedPlayers] = useMultiplayerState('revealedPlayers', []);
-  const revealedPlayers = _revealedPlayers || [];
-
   const playroom_players = usePlayersList(true);
+
+  // readyPlayers + revealedPlayers are derived from per-player state
+  // ("loadReady" / "revealDone") scoped to the current game.gameStartedAt.
+  // The previous implementation used shared useMultiplayerState arrays
+  // and race-condition-dropped entries when several clients finished
+  // loading on the same frame — each set([...current, myId]) based on a
+  // stale read of `current` ended up being last-writer-wins, leaving the
+  // gate stuck on "3/4" even after every client had locally finished.
+  //
+  // Scoping to gameStartedAt means old values from a previous match in
+  // the same lobby don't leak into the new game (same fix pattern as
+  // wantsSkip scoped to phase). A falsy gameStartedAt (first render
+  // before startGame sets it) matches nothing, so nobody reads as ready
+  // until the match actually starts.
+  const _gameSession = game.gameStartedAt || 0;
+  const readyPlayers = _gameSession
+    ? playroom_players
+        .filter((pp) => pp.getState?.('loadReady') === _gameSession)
+        .map((pp) => pp.id)
+    : [];
+  const revealedPlayers = _gameSession
+    ? playroom_players
+        .filter((pp) => pp.getState?.('revealDone') === _gameSession)
+        .map((pp) => pp.id)
+    : [];
 
   const getMe = () => {
     try {
@@ -357,30 +377,35 @@ export const GameEngineProvider = ({ children }) => {
     );
   };
 
+  // Each client marks itself ready via its own per-player state scoped
+  // to game.gameStartedAt (same pattern as wantsSkip scoped to phase).
+  // The playerId arg is kept for API compatibility but is only used as
+  // a sanity check — a client can only ever mark itself. Host reads the
+  // aggregated readyPlayers list through the derivation above.
   const markReady = (playerId) => {
-    if (!readyPlayers.includes(playerId)) {
-      setReadyPlayers([...readyPlayers, playerId]);
-    }
+    const self = me();
+    if (!self || !_gameSession) return;
+    if (playerId && self.id !== playerId) return;
+    if (self.getState?.('loadReady') === _gameSession) return;
+    self.setState('loadReady', _gameSession);
   };
 
   const markRevealDone = (playerId) => {
-    if (!revealedPlayers.includes(playerId)) {
-      setRevealedPlayers([...revealedPlayers, playerId]);
-    }
+    const self = me();
+    if (!self || !_gameSession) return;
+    if (playerId && self.id !== playerId) return;
+    if (self.getState?.('revealDone') === _gameSession) return;
+    self.setState('revealDone', _gameSession);
   };
 
   // Host-only: evict a stuck player during the load/reveal gate. Removes
-  // them from players[] + ready/revealed lists immediately so the
-  // all-ready / all-revealed check stops waiting on them, then triggers
-  // PlayroomKit's native kick so their socket drops. Without the roster
-  // cleanup, a kicked player still blocks waitingForPlayers via the
-  // 30s disconnect grace window before handleDisconnectPlayers decides
-  // they're gone.
+  // them from players[] immediately and triggers PlayroomKit's native
+  // kick — their per-player ready/reveal state becomes irrelevant as
+  // soon as they drop out of playroom_players, so no extra cleanup
+  // needed for the derived readyPlayers/revealedPlayers arrays.
   const kickPlayer = (playerId) => {
     if (!isHost() || !playerId) return;
     setPlayers((prev) => (prev || []).filter((p) => p.id !== playerId));
-    setReadyPlayers((readyPlayers || []).filter((id) => id !== playerId));
-    setRevealedPlayers((revealedPlayers || []).filter((id) => id !== playerId));
     const pp = playroom_players.find((p) => p.id === playerId);
     try { pp?.kick?.(); } catch { /* player may already have left */ }
   };
@@ -424,8 +449,10 @@ export const GameEngineProvider = ({ children }) => {
     });
 
     setPlayers(newPlayers);
-    setReadyPlayers([]);
-    setRevealedPlayers([]);
+    // readyPlayers / revealedPlayers are derived from per-player state
+    // scoped to game.gameStartedAt (set in setGame below), so a fresh
+    // timestamp automatically invalidates the previous match's flags —
+    // no explicit clear needed.
 
     // Game opens on INTRO_CINEMATIC — a 6s wordless camera fly-over so
     // new players can see the village they're about to debate in before
@@ -640,7 +667,9 @@ export const GameEngineProvider = ({ children }) => {
   const resetForNewGame = () => {
     setChatMessages([]);
     resetTrial();
-    setReadyPlayers([]);
+    // No explicit readyPlayers reset — derivation is scoped to the new
+    // game.gameStartedAt set by startGame, so previous-match flags are
+    // already filtered out of the derived array.
     setEvents([]);
     setNotifications([]);
     // Re-sync connected players (stripped of game data)
@@ -658,11 +687,13 @@ export const GameEngineProvider = ({ children }) => {
     setRolesSelected([]);
     setGame({
       status: STATUS.ROLE_SELECTION,
-      phase: PHASE.NIGHT,
-      timer: DURATIONS.NIGHT,
+      // Same rationale as initialGame — no pre-match state should carry
+      // a NIGHT label; Rejouer lands on the same neutral INTRO snapshot.
+      phase: PHASE.INTRO_CINEMATIC,
+      timer: DURATIONS.INTRO_CINEMATIC,
       isGameStarted: false,
       isGameSetup: false,
-      isDay: false,
+      isDay: true,
       dayCount: 0,
       trialsToday: 0,
       accusedId: null,

@@ -7,7 +7,7 @@ import { TextureLoader } from 'three';
 import { Stars, Html, ContactShadows } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, HueSaturation } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { Character, skinForPlayer } from '../Character/Character';
+import { Character, skinForPlayer, resolvePlayerSkin, SKIN_KEYS } from '../Character/Character';
 import GameConfig from '../GameConfig/GameConfig';
 import AuthModal, { ProfileBadge } from '../Auth/Auth';
 import { useAuth } from '../Auth/Auth';
@@ -322,7 +322,9 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
 
   // Alternate animations based on player index
   const anim = LOBBY_ANIMS[index % LOBBY_ANIMS.length];
-  const skin = skinForPlayer(player.id);
+  // Honor the lobby skin pick (profile.skin) — the deterministic hash is
+  // only a fallback when the player hasn't touched the model selector.
+  const skin = resolvePlayerSkin(player);
   const yOffset = anim === 'LieDown' ? (LIEDOWN_Y_OFFSET[skin] ?? -0.35) : 0;
   const nameY = anim === 'LieDown' ? 1.1 : 1.15;
 
@@ -658,6 +660,17 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
   const [useGradient, setUseGradient] = useState(false);
   const [gradColor1, setGradColor1] = useState('#e74c3c');
   const [gradColor2, setGradColor2] = useState('#3498db');
+  // Character model picker — persisted across sessions in localStorage
+  // so the choice sticks match-to-match. Falls back to the hash-based
+  // `skinForPlayer` if nothing has been saved yet (preserves the look
+  // everyone had before the selector existed).
+  const [selectedSkin, setSelectedSkin] = useState(() => {
+    try {
+      const saved = localStorage.getItem('amongliars_skin');
+      if (saved && SKIN_KEYS.includes(saved)) return saved;
+    } catch { /* ignore */ }
+    return skinForPlayer(currentPlayer?.id);
+  });
 
   // Player level for gradient unlock. When the user isn't signed in we
   // have no level → no cosmetic should be available, even the level-1
@@ -754,6 +767,30 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
     const name = e.target.value;
     setPlayerName(name);
     currentPlayer.setState('profile', { ...currentPlayer.getState().profile, name });
+  };
+
+  // Push the current skin pick into the playroom profile so every client
+  // (lobby preview + in-game 3D) sees the same model. Re-fires whenever
+  // `currentPlayer` becomes available (late mount) so a saved pick lands
+  // even if the user didn't click the selector this session.
+  useEffect(() => {
+    if (!currentPlayer) return;
+    const profileState = currentPlayer.getState?.()?.profile || {};
+    if (profileState.skin === selectedSkin) return;
+    currentPlayer.setState('profile', { ...profileState, skin: selectedSkin });
+  }, [currentPlayer, selectedSkin]);
+
+  const cycleSkin = (direction) => {
+    const i = SKIN_KEYS.indexOf(selectedSkin);
+    const baseIdx = i === -1 ? 0 : i;
+    const nextIdx = (baseIdx + direction + SKIN_KEYS.length) % SKIN_KEYS.length;
+    const next = SKIN_KEYS[nextIdx];
+    setSelectedSkin(next);
+    try { localStorage.setItem('amongliars_skin', next); } catch { /* ignore */ }
+    if (currentPlayer) {
+      const profileState = currentPlayer.getState?.()?.profile || {};
+      currentPlayer.setState('profile', { ...profileState, skin: next });
+    }
   };
 
   const handleColorChange = (color) => {
@@ -988,6 +1025,35 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             />
           </div>
 
+          {/* Character model selector — left/right arrows cycle between
+              the Villager and Wanderer skins. No dropdown, no modal; the
+              label between the arrows reflects the current pick and the
+              lobby 3D preview updates in place. */}
+          <div className="lobby-section">
+            <label className="lobby-label">{t('common:model', { defaultValue: 'Mod\u00e8le' })}</label>
+            <div className="lobby-model-picker">
+              <button
+                type="button"
+                className="lobby-model-arrow"
+                onClick={() => cycleSkin(-1)}
+                aria-label={t('common:model_prev', { defaultValue: 'Mod\u00e8le pr\u00e9c\u00e9dent' })}
+              >
+                <i className="fas fa-chevron-left"></i>
+              </button>
+              <span className="lobby-model-name">
+                {t(`common:models.${selectedSkin}`, { defaultValue: selectedSkin })}
+              </span>
+              <button
+                type="button"
+                className="lobby-model-arrow"
+                onClick={() => cycleSkin(1)}
+                aria-label={t('common:model_next', { defaultValue: 'Mod\u00e8le suivant' })}
+              >
+                <i className="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
           {/* Color picker */}
           <div className="lobby-section">
             <label className="lobby-label">{t('common:color', { defaultValue: 'Color' })}</label>
@@ -1137,7 +1203,22 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
           {/* Tutorial button for first-time players — separate from the
               full in-game guide, this is a fast 4-step walkthrough. */}
           <button className="lobby-tutorial-link" onClick={() => setShowTutorial(true)}>
-            <i className="fas fa-graduation-cap" aria-hidden="true"></i> {t('menu:tutorial.open_button', { defaultValue: 'Tutoriel' })}
+            <i className="fas fa-graduation-cap" aria-hidden="true"></i> {t('menu:tutorial.open_button', { defaultValue: 'Comment jouer ?' })}
+          </button>
+
+          {/* Re-arm the interactive in-game walkthrough — clears the
+              localStorage "tutorial seen" flag so the spotlight tour
+              plays again on the next match. Useful for testing and for
+              players who want a refresher. */}
+          <button
+            className="lobby-tutorial-link"
+            onClick={() => {
+              try { localStorage.removeItem('amongliars_game_tutorial_seen'); } catch { /* ignore */ }
+              alert(t('menu:game_tutorial.reset_confirm', { defaultValue: 'Le tutoriel interactif s\u2019affichera au prochain d\u00e9but de partie.' }));
+            }}
+            title={t('menu:game_tutorial.reset_tooltip', { defaultValue: 'R\u00e9activer le tutoriel interactif' })}
+          >
+            <i className="fas fa-redo" aria-hidden="true"></i> {t('menu:game_tutorial.reset_button', { defaultValue: 'Rejouer le tutoriel en partie' })}
           </button>
 
           <button className="lobby-stats-link" onClick={() => setShowRoleStats(true)}>

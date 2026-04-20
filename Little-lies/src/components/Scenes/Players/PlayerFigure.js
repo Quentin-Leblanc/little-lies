@@ -1,7 +1,7 @@
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { Character, skinForPlayer } from '../../Character/Character';
+import { Character, resolvePlayerSkin } from '../../Character/Character';
 import ChatBubble from './ChatBubble';
 import PhaseEmote from './PhaseEmote';
 import { IDLE_VARIANTS, DANCE_VARIANTS, WALK_OBSTACLES } from '../constants';
@@ -41,7 +41,7 @@ const PlayerFigure = ({
   const transitionStartTime = useRef(null);
   const walkStarted = useRef(false);
 
-  const playerSkin = useMemo(() => skinForPlayer(player.id), [player.id]);
+  const playerSkin = useMemo(() => resolvePlayerSkin(player), [player.id, player.profile?.skin]);
 
   // Stable random idle & dance per player (skin-aware variant lists)
   const playerIdle = useMemo(
@@ -158,8 +158,14 @@ const PlayerFigure = ({
   const rawColor = player.profile?.color || color;
   const isGradient = typeof rawColor === 'object' && rawColor?.type === 'gradient';
   const characterColor = toTextCss(rawColor, color || '#ffffff');
-  const nameBg = isGradient ? toBgCss(rawColor) : 'rgba(0,0,0,0.65)';
   const nameEdge = toTextCss(rawColor, color || '#ffffff');
+  // Unified nameplate look: the box is painted with the player's color
+  // (gradient palette → gradient fill; solid color → solid fill) and the
+  // text is always white. Border uses the same color so it reads as a
+  // chunky "colored pill". Previously solid colors had a dark box + colored
+  // text — that diverged from the gradient version and made palette
+  // players look way more vivid than classic-color players.
+  const nameBg = isGradient ? toBgCss(rawColor) : nameEdge;
 
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
@@ -197,11 +203,10 @@ const PlayerFigure = ({
                 textShadow: '0 2px 6px rgba(0,0,0,0.8)',
                 border: `2px solid ${nameEdge}`,
                 letterSpacing: '0.5px',
-                // Solid-color labels keep the original text-colored style
-                // (text painted with the player color on a dark box). Gradient
-                // labels paint the box with the gradient and the text stays
-                // white for contrast against the palette.
-                color: isGradient ? '#fff' : nameEdge,
+                // Text always white so the nameplate reads the same way
+                // whether the player picked a gradient palette or a solid
+                // color. See the nameBg comment above.
+                color: '#fff',
               }}>
               {player.profile.name}
             </div>

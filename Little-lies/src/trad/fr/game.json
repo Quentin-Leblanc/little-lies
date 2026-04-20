@@ -1,6 +1,6 @@
 {
   "phases": {
-    "INTRO_CINEMATIC": "",
+    "INTRO_CINEMATIC": "Préparation",
     "NIGHT": "Nuit",
     "NIGHT_TRANSITION": "La nuit tombe...",
     "DAY_RISING": "Le village se lève...",

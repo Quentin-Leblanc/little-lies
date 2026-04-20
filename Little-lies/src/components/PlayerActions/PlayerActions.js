@@ -6,7 +6,7 @@ import i18n from '../../trad/i18n';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
 import Audio from '../../utils/AudioManager';
-import { toTextCss } from '../../utils/playerColor';
+import { toTextCss, toBgCss } from '../../utils/playerColor';
 import './playerActions.scss';
 
 const ACTION_COLORS = {
@@ -416,11 +416,18 @@ const PlayerActions = memo(function () {
             const voteCount = trial?.suspects?.[player.id]?.suspectedBy?.length || 0;
             const isBlackmailed = player.isBlackmailed && game.isDay;
 
+            const rawColor = player.profile?.color;
+            const colorBg = player.isAlive ? toBgCss(rawColor) : null;
+            const borderColor = toTextCss(rawColor);
             return (
-              <li key={player.id} className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''} ${isNightTarget || isDayTarget ? 'night-target' : ''}`}>
+              <li
+                key={player.id}
+                className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''} ${isNightTarget || isDayTarget ? 'night-target' : ''}`}
+                style={player.isAlive && colorBg ? { background: colorBg, borderColor } : undefined}
+              >
                 <span className="player-name-cell">
                   <span className={`player-status-dot ${player.connected !== false ? 'dot-online' : 'dot-offline'}`}></span>
-                  <span className="player-name-text" style={{ color: player.isAlive ? toTextCss(player.profile?.color) : '#666' }}>
+                  <span className="player-name-text" style={{ color: player.isAlive ? '#fff' : '#666' }}>
                     {player.profile.name}{player.id === me.id ? ` (${t('common:you')})` : ''}
                   </span>
                   {player.isRevealed && (

@@ -2,6 +2,13 @@
   "legal": "Legal notice & credits",
   "vote": "Vote",
   "color": "Color",
+  "model": "Model",
+  "model_prev": "Previous model",
+  "model_next": "Next model",
+  "models": {
+    "villager": "Villager",
+    "wanderer": "Wanderer"
+  },
   "close": "Close",
   "send": "Send",
   "skip": "Skip",

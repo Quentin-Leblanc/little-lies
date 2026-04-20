@@ -1,3 +1,6 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
 .custom-lobby-container {
   position: relative;
   width: 100%;
@@ -88,11 +91,11 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 0.5rem 0.55rem;
-  background: rgba(10, 10, 16, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.65rem;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  background: $al-grad-panel;
+  border: 1px solid $al-gold-border;
+  border-radius: $al-radius-md;
+  backdrop-filter: blur($al-blur);
+  box-shadow: $al-shadow-card;
   animation: lobby-volume-pop 0.18s ease-out;
 }
 
@@ -220,9 +223,10 @@
   pointer-events: auto;
   width: 100%;
   padding: 1.647rem 1.294rem;
-  background: rgba(12, 12, 18, 0.88);
-  backdrop-filter: blur(12px);
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  background: $al-grad-panel;
+  backdrop-filter: blur($al-blur-strong);
+  border-left: 1px solid $al-gold-border;
+  box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   gap: 0.941rem;
@@ -234,15 +238,20 @@
 }
 
 /* ── Title ── */
+// Glitch recolored to werewolf palette: aged gold offset + blood offset
+// instead of the cyan/magenta cyberpunk pair. Reads as "old film reel"
+// rather than "tech product".
 .lobby-title {
   margin: 0;
+  font-family: $al-font-header;
   font-size: 1.529rem;
   font-weight: 800;
   letter-spacing: 0.294rem;
-  color: #fff;
+  color: $al-gold-soft;
   text-align: center;
   white-space: nowrap;
   position: relative;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), 0 0 24px rgba(201, 168, 98, 0.25);
 
   &::before,
   &::after {
@@ -258,14 +267,13 @@
 
   &::before {
     left: -1px;
-    text-shadow: 1px 0 #0ff;
-    // ~2s glitch burst → 1s rest → repeat (total 3s cycle)
+    text-shadow: 1px 0 $al-gold;
     animation: lobby-glitch-top 3s infinite linear;
   }
 
   &::after {
     left: 1px;
-    text-shadow: -1px 0 #ff0040;
+    text-shadow: -1px 0 $al-blood-hot;
     animation: lobby-glitch-bottom 3s infinite linear;
   }
 }
@@ -350,27 +358,31 @@
   font-size: 0.647rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.071rem;
-  color: #aaa;
+  letter-spacing: $al-track-label;
+  color: $al-gold-hot;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 /* ── Inputs ── */
 .lobby-input {
   padding: 0.588rem 0.706rem;
-  border-radius: 0.353rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
-  color: #f0f0f0;
+  border-radius: $al-radius-sm;
+  border: 1px solid $al-border-subtle;
+  background: $al-bg-subtle;
+  color: $al-text;
+  font-family: $al-font-body;
   font-size: 0.882rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 
   &:focus {
-    border-color: rgba(100, 140, 255, 0.5);
+    border-color: $al-gold-border-hv;
+    background: rgba(201, 168, 98, 0.04);
+    box-shadow: 0 0 0 1px $al-gold-glow;
   }
 
   &::placeholder {
-    color: #666;
+    color: $al-text-faint;
   }
 }
 
@@ -456,47 +468,71 @@
 }
 
 /* ── Buttons ── */
+// Static lobby buttons — no transform, no filter brightness. Hover only
+// shifts the background gradient and the glow. Feels like a torch
+// flaring up next to the button, not a web CTA.
 .lobby-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.471rem;
   padding: 0.588rem 0.941rem;
-  border-radius: 0.353rem;
+  border-radius: $al-radius-sm;
   border: none;
   cursor: pointer;
   font-size: 0.824rem;
   font-weight: 600;
-  transition: background 0.2s, transform 0.1s;
-
-  &:active {
-    transform: scale(0.98);
-  }
+  position: relative;
+  overflow: hidden;
+  transition: background $al-trans, box-shadow $al-trans, color $al-trans, border-color $al-trans;
 }
 
+// Primary lobby action (Create game) — gold, ceremonial. The only
+// lobby button that keeps a (very subtle) shimmer, to mark it as the
+// intended path forward.
 .lobby-btn-primary {
-  background: #4a7cff;
-  color: #fff;
+  background: $al-grad-gold;
+  color: $al-gold-text;
+  font-family: $al-font-header;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow: $al-glow-gold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 0%, rgba(255, 230, 190, 0.12) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.7s $al-ease-pop;
+    pointer-events: none;
+  }
+  &:hover::before { transform: translateX(100%); }
 
   &:hover {
-    background: #3a65d4;
+    background: $al-grad-gold-hv;
+    box-shadow: $al-glow-gold-hv;
   }
 
   &:disabled {
-    background: #333;
+    background: linear-gradient(90deg, #3a3228 0%, #1a1410 100%);
     color: #666;
     cursor: not-allowed;
+    box-shadow: none;
+    text-shadow: none;
   }
 }
 
 .lobby-btn-secondary {
-  background: rgba(255, 255, 255, 0.07);
-  color: #ccc;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: $al-bg-hover;
+  color: $al-text-dim;
+  border: 1px solid $al-gold-border;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
+    background: rgba(201, 168, 98, 0.12);
+    border-color: $al-gold-border-hv;
+    color: $al-text;
   }
 }
 
@@ -674,6 +710,56 @@
     background: rgba(47, 130, 255, 0.15);
     border-color: rgba(47, 130, 255, 0.4);
   }
+}
+
+// Model picker — left/right arrows around a label. Keeps the footprint
+// tiny (one row, no dropdown) so it sits naturally above the color grid.
+.lobby-model-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.235rem;
+  padding: 0.35rem 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.4rem;
+}
+
+.lobby-model-arrow {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d4c8a8;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(201, 168, 98, 0.18);
+    border-color: rgba(201, 168, 98, 0.6);
+    color: #fff;
+  }
+
+  i { font-size: 0.85rem; }
+}
+
+.lobby-model-name {
+  flex: 1;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 // Color picker

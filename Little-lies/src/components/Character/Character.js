@@ -6,9 +6,11 @@ import { SkeletonUtils } from 'three-stdlib';
 // ============================================================
 // Skin keys
 // ============================================================
-const SKIN_KEYS = ['villager', 'wanderer'];
+export const SKIN_KEYS = ['villager', 'wanderer'];
 
-// Deterministic skin pick from player ID — stable across renders & sessions
+// Deterministic skin pick from player ID — stable across renders & sessions.
+// Used as the fallback when a player hasn't explicitly picked a model
+// from the lobby selector.
 export function skinForPlayer(playerId) {
   if (!playerId) return SKIN_KEYS[0];
   let hash = 0;
@@ -16,6 +18,22 @@ export function skinForPlayer(playerId) {
     hash = ((hash << 5) - hash + playerId.charCodeAt(i)) | 0;
   }
   return SKIN_KEYS[Math.abs(hash) % SKIN_KEYS.length];
+}
+
+// Resolve the actual skin for a given player object. Honors the lobby
+// selector's `profile.skin` pick first, then falls back to the stable
+// deterministic hash so players who never touch the selector keep the
+// look they've always had. Accepts both playroom players
+// (`player.getState().profile`) and game-state player objects
+// (`player.profile`) — the shape is inspected lazily.
+export function resolvePlayerSkin(player) {
+  if (!player) return SKIN_KEYS[0];
+  const profile = typeof player.getState === 'function'
+    ? player.getState?.()?.profile
+    : player.profile;
+  const picked = profile?.skin;
+  if (picked && SKIN_KEYS.includes(picked)) return picked;
+  return skinForPlayer(player.id);
 }
 
 // Preload all GLBs

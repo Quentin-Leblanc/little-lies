@@ -167,13 +167,6 @@ export const DAY_ORBIT_CAMERAS = [
   { name: 'tight-tower', radius: 5,  height: 11,   lookY: 0.3, speed: 0.013,  phaseOffset: 0.8 },
 ];
 
-// Cycle through DAY_ORBIT_CAMERAS mid-phase during DISCUSSION. 30s
-// phase / 12s per pick = ~2.5 camera cuts per discussion, which breaks
-// up the "locked orbit" feel without cutting so often it's distracting.
-// Non-DISCUSSION day phases (DEATH_REPORT, NO_LYNCH, SPARED) stay on a
-// single pick for their whole duration.
-export const DISCUSSION_CAMERA_CYCLE_MS = 12000;
-
 // Intro cinematic pool — 5 presentational 6s openings. Each cinematic
 // is deliberately *multi-cut* (3–4 shots, hard cuts between) and stays
 // on daylight-legible framings: no low-creep, no lightning flashes, no
@@ -189,141 +182,109 @@ export const DISCUSSION_CAMERA_CYCLE_MS = 12000;
 //
 // Coordinate reference: plaza center [0,0,0], chapel [0,0,-15] scale
 // 4.8, podium [7,0,-6], windmills at [-28,-26] and [26,-30].
+// Setup-phase cinematic: exactly TWO village shots per variant, each 3s.
+// The brief: after role reveal, the HUD is still hidden — the player
+// should see the village from two distinct angles, then the UI fades
+// in and Day 1 starts. Keeps each shot long enough to read (≥3s),
+// tight enough that the whole thing doesn't overstay at 6s total.
 export const INTRO_CINEMATICS = [
-  // 0 — GRAND TOUR: aerial wide → plaza close → chapel overhead. The
-  // canonical "here is the village" establishing shot.
+  // 0 — GRAND TOUR: aerial wide establishing → plaza ground reveal.
   {
     name: 'grand-tour',
     duration: 6,
     startPos: [0, 18, 18],
     startLookAt: [0, 0, -5],
     run: (t, out) => {
-      if (t < 2) {
-        const p = t / 2;
-        out.pos.set(-3 + p * 6, 18, 18 - p * 2);
-        out.lookAt.set(0, 0, -5);
+      if (t < 3) {
+        const p = t / 3;
+        out.pos.set(-3 + p * 6, 18 - p * 2, 18 - p * 1);
+        out.lookAt.set(0, 1, -5);
         out.shot = 0;
-      } else if (t < 4) {
-        const p = (t - 2) / 2;
+      } else {
+        const p = (t - 3) / 3;
         out.pos.set(5.5 - p * 1.5, 2.5, 5 - p * 0.8);
         out.lookAt.set(-1 + p * 2, 1, -2 - p * 1);
         out.shot = 1;
-      } else {
-        const p = (t - 4) / 2;
-        out.pos.set(-2 + p * 4, 9 - p * 1, -22 + p * 4);
-        out.lookAt.set(0, 4, -12);
-        out.shot = 2;
       }
     },
   },
-  // 1 — LANDMARK SWEEP: windmill silhouette → altar centerpiece →
-  // chapel from the plaza. Three iconic props, one per shot.
+  // 1 — LANDMARK SWEEP: windmill silhouette → chapel from the plaza.
   {
     name: 'landmark-sweep',
     duration: 6,
     startPos: [-20, 5, -18],
     startLookAt: [-28, 4, -26],
     run: (t, out) => {
-      if (t < 2) {
-        const p = t / 2;
+      if (t < 3) {
+        const p = t / 3;
         out.pos.set(-20 + p * 3, 5, -18 + p * 2);
         out.lookAt.set(-28, 4, -26);
         out.shot = 0;
-      } else if (t < 4) {
-        const p = (t - 2) / 2;
-        out.pos.set(4.5 - p * 1.5, 2.2 - p * 0.6, 4 - p * 1.5);
-        out.lookAt.set(0, 0.5, 0);
-        out.shot = 1;
       } else {
-        const p = (t - 4) / 2;
+        const p = (t - 3) / 3;
         out.pos.set(0 + p * 0.8, 3.5, 5 - p * 1.2);
         out.lookAt.set(0, 5 + p * 0.6, -15);
-        out.shot = 2;
+        out.shot = 1;
       }
     },
   },
-  // 2 — SPIRAL DESCENT: very high → mid altitude → ground plaza, with
-  // a gentle rotation between shots so the village reveals progressively.
-  // Each shot stays airy and bright — no low-creep creep.
+  // 2 — SPIRAL DESCENT: very high aerial → mid plaza orbit.
   {
     name: 'spiral-descent',
     duration: 6,
     startPos: [10, 24, 10],
     startLookAt: [0, 0, -2],
     run: (t, out) => {
-      if (t < 2) {
-        const p = t / 2;
+      if (t < 3) {
+        const p = t / 3;
         const ang = Math.PI * 0.25 + p * 0.25;
-        out.pos.set(Math.sin(ang) * 15, 24 - p * 2, Math.cos(ang) * 15);
+        out.pos.set(Math.sin(ang) * 15, 24 - p * 4, Math.cos(ang) * 15);
         out.lookAt.set(0, 0, -2);
         out.shot = 0;
-      } else if (t < 4) {
-        const p = (t - 2) / 2;
+      } else {
+        const p = (t - 3) / 3;
         const ang = Math.PI * 0.6 + p * 0.35;
-        out.pos.set(Math.sin(ang) * 10, 10, Math.cos(ang) * 10);
+        out.pos.set(Math.sin(ang) * 10, 10 - p * 2, Math.cos(ang) * 10);
         out.lookAt.set(0, 1, -2);
         out.shot = 1;
-      } else {
-        const p = (t - 4) / 2;
-        const ang = Math.PI * 1.0 + p * 0.35;
-        out.pos.set(Math.sin(ang) * 4.5, 2.2, Math.cos(ang) * 4.5);
-        out.lookAt.set(0, 0.8, 0);
-        out.shot = 2;
       }
     },
   },
-  // 3 — PLAZA PAN: 4 quick 1.5s cuts around the plaza. West cottages
-  // → top-down plaza → east cottages → chapel front. Feels like a
-  // presentation reel — "here's what's around you".
+  // 3 — PLAZA PAN: west cottages side → chapel front.
   {
     name: 'plaza-pan',
     duration: 6,
     startPos: [-8, 4, 7],
     startLookAt: [-6, 1, 3],
     run: (t, out) => {
-      if (t < 1.5) {
+      if (t < 3) {
         out.pos.set(-8, 4, 7);
         out.lookAt.set(-6, 1, 3);
         out.shot = 0;
-      } else if (t < 3) {
-        out.pos.set(0, 14, 0.1);
-        out.lookAt.set(0, 0, 0);
-        out.shot = 1;
-      } else if (t < 4.5) {
-        out.pos.set(8, 4, 7);
-        out.lookAt.set(6, 1, 3);
-        out.shot = 2;
       } else {
         out.pos.set(0, 3.5, 5);
         out.lookAt.set(0, 5, -15);
-        out.shot = 3;
+        out.shot = 1;
       }
     },
   },
-  // 4 — OUTSIDE IN: far perimeter → mid distance → ground in the plaza.
-  // Traces the path of someone arriving at the village from outside
-  // the treeline — bright, inviting, no night creep.
+  // 4 — OUTSIDE IN: far perimeter approach → ground plaza center.
   {
     name: 'outside-in',
     duration: 6,
     startPos: [20, 6, 18],
     startLookAt: [0, 2, -2],
     run: (t, out) => {
-      if (t < 2) {
-        const p = t / 2;
-        out.pos.set(20 - p * 2, 6, 18 - p * 1);
+      if (t < 3) {
+        const p = t / 3;
+        out.pos.set(20 - p * 4, 6 - p * 1, 18 - p * 4);
         out.lookAt.set(0, 2, -2);
         out.shot = 0;
-      } else if (t < 4) {
-        const p = (t - 2) / 2;
-        out.pos.set(12 - p * 2, 3 - p * 0.2, 5 - p * 1);
-        out.lookAt.set(0, 1, -2);
-        out.shot = 1;
       } else {
-        const p = (t - 4) / 2;
+        const p = (t - 3) / 3;
         out.pos.set(3 - p * 0.5, 2 - p * 0.2, 2 - p * 0.3);
         out.lookAt.set(0, 0.5, 0);
-        out.shot = 2;
+        out.shot = 1;
       }
     },
   },
@@ -384,8 +345,12 @@ export const BUILDING_POSITIONS = [
   { type: 'cottage', position: [17, 0, -1],   scale: 1.3, variant: 0, get rotation() { return [0, faceCenter(17, -1), 0]; } },
 ];
 
-// Background mountains — procedural cones
-export const MOUNTAINS = [
+// Background mountains — procedural cones, 3 concentric rings so the
+// horizon reads as a mountain range receding to infinity instead of a
+// single visible ridgeline. The MID + FAR rings sit behind the NEAR one
+// and get washed out by HorizonMist so we don't see the "end of the map".
+// Tones lighten toward the horizon: atmospheric perspective cue.
+export const MOUNTAINS_NEAR = [
   { position: [0, 0, -50],   scale: 5, variant: 0 },
   { position: [-25, 0, -48], scale: 3.5, variant: 7 },
   { position: [25, 0, -48],  scale: 4, variant: 8 },
@@ -403,6 +368,84 @@ export const MOUNTAINS = [
   { position: [-25, 0, 42],  scale: 3.5, variant: 14 },
   { position: [25, 0, 42],   scale: 3.5, variant: 15 },
 ];
+
+// Mid ring — radius ~75, taller mountains that peek OVER the near ring.
+// Denser placement (20 peaks) so the horizon doesn't show gaps at the
+// back where the sky used to be visible behind the village.
+export const MOUNTAINS_MID = [
+  { position: [0, 0, -78],    scale: 7,   variant: 20 },
+  { position: [-20, 0, -76],  scale: 6,   variant: 21 },
+  { position: [20, 0, -76],   scale: 6.5, variant: 22 },
+  { position: [-40, 0, -66],  scale: 5.5, variant: 23 },
+  { position: [40, 0, -66],   scale: 6,   variant: 24 },
+  { position: [-58, 0, -50],  scale: 5.5, variant: 25 },
+  { position: [58, 0, -50],   scale: 5,   variant: 26 },
+  { position: [-72, 0, -28],  scale: 5,   variant: 27 },
+  { position: [72, 0, -28],   scale: 5.5, variant: 28 },
+  { position: [-78, 0, 0],    scale: 5,   variant: 29 },
+  { position: [78, 0, 0],     scale: 5.5, variant: 30 },
+  { position: [-72, 0, 28],   scale: 5,   variant: 31 },
+  { position: [72, 0, 28],    scale: 5.5, variant: 32 },
+  { position: [-58, 0, 50],   scale: 5,   variant: 33 },
+  { position: [58, 0, 50],    scale: 5,   variant: 34 },
+  { position: [-40, 0, 66],   scale: 5.5, variant: 35 },
+  { position: [40, 0, 66],    scale: 5,   variant: 36 },
+  { position: [-20, 0, 76],   scale: 5.5, variant: 37 },
+  { position: [20, 0, 76],    scale: 5.5, variant: 38 },
+  { position: [0, 0, 78],     scale: 6,   variant: 39 },
+];
+
+// Far ring — radius ~115, gigantic peaks that close the horizon. Almost
+// fully obscured by HorizonMist; what pokes through reads as a distant
+// alpine backdrop. Kept sparser (14 peaks) because each is huge (scale 8-10).
+export const MOUNTAINS_FAR = [
+  { position: [0, 0, -118],    scale: 10, variant: 40 },
+  { position: [-36, 0, -112],  scale: 9,  variant: 41 },
+  { position: [36, 0, -112],   scale: 9,  variant: 42 },
+  { position: [-70, 0, -94],   scale: 8,  variant: 43 },
+  { position: [70, 0, -94],    scale: 8.5, variant: 44 },
+  { position: [-100, 0, -58],  scale: 8,  variant: 45 },
+  { position: [100, 0, -58],   scale: 8,  variant: 46 },
+  { position: [-118, 0, 0],    scale: 8.5, variant: 47 },
+  { position: [118, 0, 0],     scale: 8.5, variant: 48 },
+  { position: [-100, 0, 58],   scale: 8,  variant: 49 },
+  { position: [100, 0, 58],    scale: 8,  variant: 50 },
+  { position: [-70, 0, 94],    scale: 8,  variant: 51 },
+  { position: [70, 0, 94],     scale: 8,  variant: 52 },
+  { position: [0, 0, 118],     scale: 9,  variant: 53 },
+];
+
+// Back-compat alias — a few callers still reference MOUNTAINS for collision
+// checks. Keep it pointing at the near ring since that's the only one
+// close enough to ever matter for camera push-out / walk obstacles.
+export const MOUNTAINS = MOUNTAINS_NEAR;
+
+// Mid-ground forest ring — small dark-green cone "trees" between the
+// cottage ring and the near mountains. Fills the visual gap that reads
+// as bare ground from high day-orbit cameras. Procedural cones (no GLB
+// load cost). 40 trees arranged as a loose arc so it doesn't look like
+// a regular circle.
+export const DISTANT_TREES = (() => {
+  const arr = [];
+  let s = 4242;
+  const rand = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  const count = 40;
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2 + rand() * 0.12;
+    const radius = 26 + rand() * 8; // 26..34 — inside near-mountain ring
+    const scale = 0.9 + rand() * 0.7;
+    arr.push({
+      position: [
+        Math.cos(angle) * radius,
+        0,
+        Math.sin(angle) * radius,
+      ],
+      scale,
+      variant: i,
+    });
+  }
+  return arr;
+})();
 
 // Skull-lantern anchor positions (4 corners of central plaza)
 export const TORCH_POS = [

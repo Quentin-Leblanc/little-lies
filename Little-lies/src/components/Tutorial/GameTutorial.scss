@@ -1,0 +1,236 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+// First-match tutorial — spotlight directly on the real HUD zones.
+// Zero modal/schematic: a transparent-centre div with a massive outer
+// box-shadow paints everything else dark, so the player sees their own
+// screen with one zone lit up at a time.
+
+.tutorial-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9500; // below curtain (10000), above HUD
+  pointer-events: none; // spotlight non-interactive, tooltip re-enables
+  animation: tutorial-root-fade 0.3s ease-out;
+}
+
+// Spotlight — transparent centre, box-shadow paints the "shroud".
+// Using 9999px keeps the shadow off-screen regardless of viewport size;
+// the first arg is spread, so no blur = sharp cutout. Border glow pulses
+// so the highlighted zone feels alive.
+.tutorial-spotlight {
+  position: fixed;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 0 0 9999px rgba(5, 5, 10, 0.78),
+    0 0 0 3px rgba(255, 205, 130, 0.7),
+    0 0 30px rgba(255, 205, 130, 0.35);
+  animation: tutorial-spotlight-pulse 2.2s ease-in-out infinite;
+  transition: top 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1),
+              left 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1),
+              width 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1),
+              height 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  pointer-events: none;
+}
+
+@keyframes tutorial-spotlight-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 9999px rgba(5, 5, 10, 0.78),
+      0 0 0 3px rgba(255, 205, 130, 0.7),
+      0 0 30px rgba(255, 205, 130, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 9999px rgba(5, 5, 10, 0.78),
+      0 0 0 4px rgba(255, 205, 130, 0.95),
+      0 0 48px rgba(255, 205, 130, 0.55);
+  }
+}
+
+// Tooltip — floats near the spotlight. pointer-events: auto so the
+// Skip / Next buttons are clickable while the rest of the overlay isn't.
+.tutorial-tooltip {
+  @include al-card;
+  position: fixed;
+  width: 22rem;
+  max-width: 90vw;
+  border-color: $al-gold-border-hv;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7), inset 0 0 40px $al-gold-glow;
+  padding: 1rem 1.2rem 1.05rem;
+  color: $al-text;
+  font-family: $al-font-body;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  animation: tutorial-tooltip-in 0.35s $al-ease-pop;
+  pointer-events: auto;
+}
+
+// Small arrow / wedge pointing toward the highlighted zone. Renders via
+// a pseudo-element so we can swap sides per tooltipSide variant.
+.tutorial-tooltip::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 9px solid transparent;
+}
+
+.tutorial-tooltip.tooltip-below::before {
+  // Tooltip sits below the spotlight → arrow points up.
+  top: -18px;
+  left: 2.2rem;
+  border-bottom-color: rgba(255, 205, 130, 0.6);
+}
+
+.tutorial-tooltip.tooltip-above::before {
+  // Tooltip sits above the spotlight → arrow points down.
+  bottom: -18px;
+  left: 2.2rem;
+  border-top-color: rgba(255, 205, 130, 0.6);
+}
+
+.tutorial-tooltip.tooltip-left::before {
+  // Tooltip sits to the left of the spotlight → arrow points right.
+  right: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: rgba(255, 205, 130, 0.6);
+}
+
+.tutorial-tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.tutorial-tooltip-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.88rem;
+  color: #f3cc74;
+  letter-spacing: 0.05em;
+
+  i { margin-right: 0.4rem; color: #ffcc66; }
+}
+
+.tutorial-tooltip-skip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #aaa;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.24rem 0.55rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: inherit;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  i { font-size: 0.62rem; }
+}
+
+.tutorial-tooltip-progress {
+  width: 100%;
+  height: 0.24rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0.2rem;
+  overflow: hidden;
+}
+
+.tutorial-tooltip-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #b08040 0%, #ffcc66 50%, #f3cc74 100%);
+  border-radius: 0.2rem;
+  transition: width 0.35s ease-out;
+  box-shadow: 0 0 10px rgba(255, 205, 130, 0.5);
+}
+
+.tutorial-tooltip-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  color: #f3cc74;
+  margin: 0.15rem 0 0;
+  letter-spacing: 0.02em;
+}
+
+.tutorial-tooltip-body {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #d4d4d8;
+  margin: 0;
+}
+
+.tutorial-tooltip-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.1rem;
+}
+
+.tutorial-tooltip-step {
+  font-size: 0.72rem;
+  color: #888;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.tutorial-tooltip-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+}
+
+.tutorial-tooltip-btn {
+  @include al-btn-base;
+  & {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+    gap: 0.3rem;
+  }
+}
+
+.tutorial-tooltip-btn-primary {
+  @include al-btn-gold;
+  & {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+  }
+}
+
+.tutorial-tooltip-btn-ghost {
+  @include al-btn-secondary;
+  & {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+  }
+}
+
+@keyframes tutorial-root-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes tutorial-tooltip-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+// Preserve translate(...) from inline style when animating the centered
+// fallback (rect not measured yet).
+.tutorial-tooltip[style*="translate(-50%, -50%)"] {
+  animation-name: tutorial-tooltip-in-centered;
+}
+@keyframes tutorial-tooltip-in-centered {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.94); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}

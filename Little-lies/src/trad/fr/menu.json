@@ -58,8 +58,8 @@
     "hint": "Stats enregistrées localement sur ce navigateur."
   },
   "tutorial": {
-    "open_button": "Tutoriel",
-    "title": "Bienvenue dans Among Liars",
+    "open_button": "Comment jouer ?",
+    "title": "Comment jouer ?",
     "step1_title": "Quatre factions, un rôle secret",
     "step1_body": "Chaque joueur reçoit un rôle secret : Village (gentils), Mafia (tueurs coordonnés), Culte (convertisseurs) ou Neutre (objectifs solos). Seule ta propre équipe connaît ton rôle.",
     "step2_title": "La nuit : tout le monde agit en même temps",
@@ -73,6 +73,22 @@
     "done": "C'est parti !",
     "guide_hint": "Une fois en jeu, ouvre le menu → « Guide du jeu » pour le détail de chaque rôle.",
     "step_aria": "Étape {{n}}"
+  },
+  "game_tutorial": {
+    "title": "Tutorial",
+    "skip": "Passer",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "done": "C'est parti !",
+    "roster_title": "Joueurs & rôles",
+    "roster_body": "Le cimetière montre qui est mort et son rôle révélé. Juste à côté, la liste des rôles présents dans cette partie — utile pour savoir ce qu'il te reste à débusquer.",
+    "role_title": "Ton rôle, tes actions, ton testament",
+    "role_body": "Ce panneau contient TON rôle secret, ton objectif, les actions que tu peux effectuer (la nuit ou le jour), et un testament que tu peux écrire — il sera lu si tu meurs.",
+    "chat_title": "Le chat : parler, accuser, se défendre",
+    "chat_body": "Le chat est ton arme principale le jour. Pose des questions, accuse, défends-toi. La nuit, seuls certains rôles (Mafia, Culte) peuvent y écrire entre eux.",
+    "reset_button": "Rejouer le tutoriel en partie",
+    "reset_tooltip": "Réactiver le tutoriel interactif pour la prochaine partie",
+    "reset_confirm": "Le tutoriel interactif s'affichera au prochain début de partie."
   },
   "survey": {
     "title": "Donne-moi ton avis",

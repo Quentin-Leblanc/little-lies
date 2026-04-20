@@ -1,3 +1,6 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
 /* Player list - flows inside left panel grid cell */
 .player-list-container {
   display: flex;
@@ -134,37 +137,47 @@
   padding: 0.471rem 0.588rem;
   margin-bottom: 0.353rem;
   border-radius: 0.235rem;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
   font-weight: bold;
   font-size: 1.004rem;
+  // Fallback for dead players (inline style is stripped when !isAlive)
   background: rgba(0, 0, 0, 0.75);
   min-height: 2.471rem;
   transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 
   &:hover {
-    filter: brightness(1.05);
+    filter: brightness(1.08);
+  }
+
+  // Same nameplate treatment as the 3D labels — fill with the player
+  // color, white text, slight outline so the row still reads over any
+  // backdrop. Kept cosmetic states (accused/me/target) as outline rings
+  // so they stack on top of the color bg instead of replacing it.
+  .player-name-text {
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   }
 
   &.accused {
-    box-shadow: 0 0 0 2px #ff4444, 0 0 12px rgba(255, 68, 68, 0.4);
-    border-color: rgba(255, 68, 68, 0.5);
+    box-shadow: 0 0 0 2px #ff4444, 0 0 12px rgba(255, 68, 68, 0.45);
+    border-color: rgba(255, 68, 68, 0.7) !important;
   }
 
   &.is-me {
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35), 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   &.night-target {
-    box-shadow: 0 0 0 2px #ff4444, 0 0 12px rgba(255, 68, 68, 0.3);
-    border-color: rgba(255, 68, 68, 0.4);
+    box-shadow: 0 0 0 2px #ff4444, 0 0 12px rgba(255, 68, 68, 0.35);
+    border-color: rgba(255, 68, 68, 0.6) !important;
   }
 
   &.is-dead {
-    opacity: 0.45;
-    border-color: rgba(255, 255, 255, 0.04);
+    opacity: 0.4;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    .player-name-text { color: #666 !important; text-shadow: none; }
   }
 }
 
@@ -392,29 +405,34 @@
   font-size: 0.769rem;
 }
 
+// Vote button — inline in the player row. Static hover (no movement),
+// werewolf blood for the active "I'm voting them" state.
 .vote-btn {
   padding: 0.235rem 0.706rem;
   font-size: 0.769rem;
   margin: 0;
-  background: #111;
-  color: #eee;
-  border: 1px solid #555;
-  border-radius: 0.176rem;
+  background: #1a1410;
+  color: $al-text;
+  border: 1px solid rgba(201, 168, 98, 0.18);
+  border-radius: $al-radius-xs;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
   font-weight: 600;
   text-transform: capitalize;
 
   &:hover {
-    background: #222;
-    border-color: #888;
+    background: #241b14;
+    border-color: $al-gold-border-hv;
+    color: $al-gold-hot;
   }
 
   &.vote-btn-active {
-    background: #cc2222;
-    border-color: #ff4444;
+    background: $al-grad-blood;
+    border-color: $al-blood-hot;
     color: #fff;
     cursor: default;
+    box-shadow: $al-glow-blood;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 
   &.vote-btn-disabled {
@@ -520,43 +538,41 @@
   border-radius: 0.471rem;
 }
 
+// Night action button (Shoot, Check, Silence…) — static hover. Active
+// state and locked state are signalled by glow + border, not by scaling.
 .action-btn {
   padding: 0.294rem 0.706rem;
   font-size: 0.828rem;
   margin: 0;
-  border-radius: 0.235rem;
+  border-radius: $al-radius-xs;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
   background: var(--action-bg, rgba(100,100,100,0.7)) !important;
   color: #fff !important;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   font-weight: bold;
 
   &:hover {
-    background: var(--action-hover, rgba(100,100,100,0.9)) !important;
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: scale(1.03);
+    background: var(--action-hover, rgba(120,120,120,0.95)) !important;
+    border-color: $al-gold-border-hv;
+    box-shadow: 0 0 14px rgba(201, 168, 98, 0.35);
   }
 
   &.action-btn-active {
-    border-color: #fff;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4), 0 0 10px rgba(255, 255, 255, 0.15);
-    transform: scale(1.02);
+    border-color: $al-gold-hot;
+    box-shadow: 0 0 0 1px $al-gold, 0 0 14px rgba(201, 168, 98, 0.45);
   }
 
-  // Locked one-shot action (Sheriff/Consigliere after committing). The
-  // selected-target row keeps this button visible as a "sealed" cue; the
-  // other rows hide theirs entirely (handled in render). No hover state
-  // because there is nothing to click — the handler refuses anyway.
+  // Locked one-shot action (Sheriff/Consigliere after committing).
   &.action-btn-locked {
     cursor: default;
     opacity: 0.78;
-    border-color: rgba(255, 210, 130, 0.65);
-    box-shadow: 0 0 0 1px rgba(255, 210, 130, 0.3), 0 0 12px rgba(255, 210, 130, 0.18);
+    border-color: $al-gold-border-hv;
+    box-shadow: 0 0 0 1px $al-gold-border, 0 0 12px rgba(201, 168, 98, 0.2);
 
     &:hover {
-      transform: none;
-      border-color: rgba(255, 210, 130, 0.65);
+      border-color: $al-gold-border-hv;
+      box-shadow: 0 0 0 1px $al-gold-border, 0 0 12px rgba(201, 168, 98, 0.2);
       background: var(--action-bg, rgba(100,100,100,0.7)) !important;
     }
   }
@@ -607,15 +623,17 @@
   pointer-events: auto;
 }
 
+// Judgment verdict buttons — Innocent / Guilty. Static, no movement.
+// Hover darkens & adds a glow ring so it reads as "activated" not "lifted".
 .judgment-center-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 9.5rem;
   padding: 1rem 2rem;
-  border-radius: 0.35rem;
-  border: none;
-  font-family: 'Cinzel', serif;
+  border-radius: $al-radius-sm;
+  border: 1px solid transparent;
+  font-family: $al-font-header;
   font-size: 1.35rem;
   font-weight: 900;
   letter-spacing: 0.14rem;
@@ -624,16 +642,8 @@
   color: #000;
   text-shadow: none;
   -webkit-text-stroke: 0;
-  transition: transform 0.18s ease, background 0.2s ease, filter 0.2s ease;
+  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s, color 0.2s;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0) scale(0.98);
-  }
 
   &:disabled {
     cursor: not-allowed;
@@ -642,24 +652,32 @@
   }
 
   &.active {
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 6px 18px rgba(0, 0, 0, 0.6);
-    filter: brightness(1.05);
+    box-shadow: 0 0 0 2px rgba(255, 230, 190, 0.6), 0 6px 18px rgba(0, 0, 0, 0.6);
   }
 }
 
+// Innocent — aged parchment green, like moss on stone
 .judgment-center-innocent {
-  background: #b7cdb0;
+  background: #7a9068;
+  color: #0f1208;
 
   &:hover:not(:disabled) {
-    background: #a2bf9a;
+    background: #8ea67b;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), 0 0 20px rgba(122, 144, 104, 0.45);
+    border-color: rgba(122, 144, 104, 0.8);
   }
 }
 
+// Guilty — werewolf blood red
 .judgment-center-guilty {
-  background: #c9a7a2;
+  background: #8b1a1a;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 
   &:hover:not(:disabled) {
-    background: #b89189;
+    background: #a02828;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), $al-glow-blood;
+    border-color: $al-blood-hot;
   }
 }
 

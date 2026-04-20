@@ -58,8 +58,8 @@
     "hint": "Stats are stored locally on this browser."
   },
   "tutorial": {
-    "open_button": "Tutorial",
-    "title": "Welcome to Among Liars",
+    "open_button": "How to play?",
+    "title": "How to play?",
     "step1_title": "Four factions, a secret role",
     "step1_body": "Every player is dealt a secret role: Town (good guys), Mafia (coordinated killers), Cult (converters) or Neutral (solo goals). Only your own team knows your role.",
     "step2_title": "Night: everyone acts in parallel",
@@ -73,6 +73,22 @@
     "done": "Let's go!",
     "guide_hint": "Once in-game, open the menu → \"Game guide\" for role-by-role details.",
     "step_aria": "Step {{n}}"
+  },
+  "game_tutorial": {
+    "title": "Tutorial",
+    "skip": "Skip",
+    "prev": "Back",
+    "next": "Next",
+    "done": "Let's go!",
+    "roster_title": "Players & roles",
+    "roster_body": "The graveyard shows who's dead and their revealed role. Next to it, the role list present in this match — useful to know what threats remain.",
+    "role_title": "Your role, actions, last will",
+    "role_body": "This panel holds YOUR secret role, your goal, the actions you can take (at night or during the day), and a last will you can write — it gets read if you die.",
+    "chat_title": "Chat: talk, accuse, defend",
+    "chat_body": "Chat is your main weapon during the day. Ask questions, accuse, defend yourself. At night, only specific roles (Mafia, Cult) can write to each other.",
+    "reset_button": "Replay the in-game tutorial",
+    "reset_tooltip": "Re-enable the interactive tutorial for the next match",
+    "reset_confirm": "The interactive tutorial will appear at the start of the next game."
   },
   "survey": {
     "title": "Give me your feedback",
