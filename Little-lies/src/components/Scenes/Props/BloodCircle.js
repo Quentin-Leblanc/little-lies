@@ -1,33 +1,29 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Clouds, Cloud } from '@react-three/drei';
 import * as THREE from 'three';
 import MeshyModel from './MeshyModel';
 import { MESHY_BLOOD } from '../constants';
 
-// The blood-ritual altar that replaces the old gallows. The wolf crest on
-// the altar has two ruby eye-sockets — this wrapper stages a soft volumetric
-// mist at the centre of the socle so the altar reads as "smoking" instead
-// of "lit up". Previous version used semitransparent sphere puffs which
-// looked like literal white balls; this version uses the same drei Cloud
-// volumetric setup as GroundFog / VillageFogWall (cloud.png sprite cards
-// stacked via noise) so the plume blends in with the rest of the scene's
-// mist language.
+// The blood-ritual altar that replaces the old gallows. Surfaces the
+// socle with a neon halo (inner + outer additive rings) and two small
+// point lights at the wolf-crest eye sockets so the altar reads as a
+// lit ritual focal point. A previous pass also stacked two drei Cloud
+// volumetric columns above the sockets to mimic smoking eyes — it read
+// as a literal pair of red puffs floating in mid-air and was cut.
 //
-//  - 2 small mist columns centred on the socle (slight L/R offset so
-//    they read as two eyes), animated by drei's built-in speed prop
-//  - 2 short-range white pointLights pulsing on two offset sines so the
-//    altar stones glow faintly around the mist
+//  - 2 breathing red pointLights pulsing on two offset sines so the
+//    altar stones glow faintly around the eye sockets
+//  - inner + outer additive ring tracing the socle rim with a slow
+//    opacity wobble on top of the pulse so it feels alive
 const HALF_HEIGHT = 0.48;
 
-// Emitter world-offsets relative to the altar's position. Base is
+// Socket world-offsets relative to the altar's position. Base is
 // circularly symmetric so we don't rotate — X/Z separation stays centred
-// regardless of the altar's Y rotation. Eyes sit right on the socle base
-// at ground level, so the plume reads as smoke rising from the stone ring
-// rather than hovering halfway up the altar.
+// regardless of the altar's Y rotation. Eyes sit right on the socle
+// base at ground level so the point lights warm the stone they're
+// anchored in instead of floating above it.
 const EYE_OFFSET_X = 0.28;
 const EYE_Y = 0.18;
-const CLOUD_Y_RAISE = 0.22; // lift cloud centre above the emitter anchor so the column grows upward
 
 const BloodCircle = React.memo(function BloodCircle({
   position = [0, 0.05, 0], rotation = [0, 0, 0], scale = 3.5,
@@ -55,8 +51,6 @@ const BloodCircle = React.memo(function BloodCircle({
 
   const leftPos = [position[0] - EYE_OFFSET_X, position[1] + EYE_Y, position[2]];
   const rightPos = [position[0] + EYE_OFFSET_X, position[1] + EYE_Y, position[2]];
-  const leftCloudPos = [leftPos[0], leftPos[1] + CLOUD_Y_RAISE, leftPos[2]];
-  const rightCloudPos = [rightPos[0], rightPos[1] + CLOUD_Y_RAISE, rightPos[2]];
 
   return (
     <>
@@ -69,43 +63,6 @@ const BloodCircle = React.memo(function BloodCircle({
         saturate={1.55}
         contrast={1.25}
       />
-
-      {/* Two thin rubine-red columns rising out of the socle. Bounds are
-          tall and thin (0.015 XZ, 0.35 Y) so the plume reads as a vertical
-          smoke stream instead of a drifting puff. Volume bumped so the
-          column stays visually continuous rather than flickering between
-          sparse sprites. Speed pushed high so motion is obviously alive —
-          previous 0.55/0.6 felt static in a paused-game screenshot. */}
-      <Clouds material={THREE.MeshBasicMaterial} limit={32} texture="/cloud.png">
-        <Cloud
-          position={leftCloudPos}
-          seed={17}
-          segments={14}
-          bounds={[0.015, 0.35, 0.015]}
-          volume={0.07}
-          smallestVolume={0.012}
-          concentrate="inside"
-          growth={0.45}
-          color="#a82020"
-          opacity={0.75}
-          speed={1.8}
-          fade={4}
-        />
-        <Cloud
-          position={rightCloudPos}
-          seed={31}
-          segments={14}
-          bounds={[0.015, 0.35, 0.015]}
-          volume={0.07}
-          smallestVolume={0.012}
-          concentrate="inside"
-          growth={0.45}
-          color="#a82020"
-          opacity={0.75}
-          speed={1.95}
-          fade={4}
-        />
-      </Clouds>
 
       {/* Neon halo around the altar's circular base — thin additive ring
           reads like a red-neon highlight tracing the stone perimeter. A
@@ -146,10 +103,10 @@ const BloodCircle = React.memo(function BloodCircle({
         />
       </mesh>
 
-      {/* Lueur : short-range white pointLight at each socket so the mist
-          column catches a soft glow and the altar stones around read as
-          illuminated. Distance stays tight so it's a local ritual glow,
-          not a plaza flood. */}
+      {/* Lueur : short-range red pointLight at each socket so the altar
+          stones around the wolf-crest eyes read as embered from within.
+          Distance stays tight so it's a local ritual glow, not a plaza
+          flood. */}
       <pointLight
         ref={lightL}
         position={leftPos}

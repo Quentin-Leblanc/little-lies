@@ -227,13 +227,15 @@ function CharacterRenderer({ group, clone, allAnimations, origMaterials, color, 
           // thin line on the outline instead of bleeding onto the
           // body, and a gentle contrast curve on the final colour
           // pushes shadows down and highlights up so the figures
-          // stop looking like flat paper cut-outs.
+          // stop looking like flat paper cut-outs. Curve trimmed
+          // 1.18 → 1.10 after user feedback — the harder version
+          // crushed shadows on darker palettes.
           shader.fragmentShader = shader.fragmentShader.replace(
             '#include <dithering_fragment>',
             `float rimFresnel = 1.0 - clamp(dot(normalize(geometryNormal), normalize(vViewPosition)), 0.0, 1.0);
              rimFresnel = pow(rimFresnel, 3.2);
              gl_FragColor.rgb += uRimColor * rimFresnel * uRimIntensity;
-             gl_FragColor.rgb = (gl_FragColor.rgb - 0.5) * 1.18 + 0.5;
+             gl_FragColor.rgb = (gl_FragColor.rgb - 0.5) * 1.10 + 0.5;
              gl_FragColor.rgb = clamp(gl_FragColor.rgb, 0.0, 1.0);
              #include <dithering_fragment>`,
           );
