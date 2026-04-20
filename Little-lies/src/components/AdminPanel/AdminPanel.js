@@ -3,29 +3,47 @@ import { useMultiplayerState } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useAuth } from '../Auth/Auth';
-import { isAdmin as checkIsAdmin } from '../../utils/supabase';
+import { isAdmin as checkIsAdmin, isAdminEmail, addXP } from '../../utils/supabase';
 import { toTextCss } from '../../utils/playerColor';
 import './AdminPanel.scss';
 
+const WEATHER_OPTIONS_DAY = [
+  { key: 'sunny', label: 'Soleil', icon: 'fa-sun' },
+  { key: 'misty', label: 'Brume', icon: 'fa-smog' },
+  { key: 'rainy', label: 'Pluie', icon: 'fa-cloud-rain' },
+];
+const WEATHER_OPTIONS_NIGHT = [
+  { key: 'clear', label: 'Claire', icon: 'fa-moon' },
+  { key: 'rainy', label: 'Pluie', icon: 'fa-cloud-rain' },
+  { key: 'foggy', label: 'Brouillard', icon: 'fa-smog' },
+];
+
 const AdminPanel = () => {
   const { t } = useTranslation('common');
-  const { game, setGame, setPlayers, getPlayers, addChatSystem, CONSTANTS } = useGameEngine();
+  const { game, setGame, setPlayers, getPlayers, kickPlayer, addChatSystem, CONSTANTS } = useGameEngine();
   const { user } = useAuth();
   const [adminCharScale, setAdminCharScale] = useMultiplayerState('adminCharScale', 0.8);
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [visible, setVisible] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [chatMsg, setChatMsg] = useState('');
+  const [xpStatus, setXpStatus] = useState('');
   const charScale = adminCharScale || 0.8;
 
-  // Check admin status from Supabase profile
+  // Fast path: email whitelist; slow path: DB flag
   useEffect(() => {
-    if (user?.id) {
-      checkIsAdmin(user.id).then(setIsAdminUser);
-    } else {
-      setIsAdminUser(false);
-    }
-  }, [user?.id]);
+    if (!user) { setIsAdminUser(false); return; }
+    if (isAdminEmail(user)) { setIsAdminUser(true); return; }
+    if (user.id) checkIsAdmin(user.id).then(setIsAdminUser);
+    else setIsAdminUser(false);
+  }, [user?.id, user?.email]);
+
+  // Listen for menu-triggered open
+  useEffect(() => {
+    const open = () => setVisible(true);
+    window.addEventListener('admin-panel-open', open);
+    return () => window.removeEventListener('admin-panel-open', open);
+  }, []);
 
   // Not admin -> render nothing
   if (!isAdminUser) return null;
@@ -87,6 +105,24 @@ const AdminPanel = () => {
     ));
   };
 
+  const kickPlayerFromGame = (playerId) => {
+    kickPlayer(playerId);
+    addChatSystem(`[ADMIN] Joueur expulsé`, '#ff4444');
+  };
+
+  const setWeather = (key) => {
+    const current = game.adminWeather;
+    setGame(prev => ({ ...prev, adminWeather: current === key ? null : key }));
+  };
+
+  const grantMaxXP = async () => {
+    if (!user?.id) return;
+    setXpStatus('…');
+    const { error } = await addXP(user.id, 99999, 'admin_max_xp');
+    setXpStatus(error ? `Erreur: ${error.message}` : 'XP max accordé !');
+    setTimeout(() => setXpStatus(''), 3000);
+  };
+
   const players = getPlayers();
 
   return (
@@ -110,16 +146,27 @@ const AdminPanel = () => {
                 <i className="fas fa-gem" style={{ marginRight: 6 }}></i>
                 {p.profile?.name || 'Joueur'}
               </span>
-              {p.isAlive && (
+              <div className="admin-player-actions">
+                {p.isAlive && (
+                  <button
+                    className="admin-kill-btn"
+                    onClick={() => killPlayer(p.id)}
+                    title="Tuer"
+                    aria-label={t('admin_kill_player', { defaultValue: 'Kill', name: p.profile?.name || '' })}
+                  >
+                    <i className="fas fa-skull" aria-hidden="true"></i>
+                  </button>
+                )}
                 <button
-                  className="admin-kill-btn"
-                  onClick={() => killPlayer(p.id)}
-                  aria-label={t('admin_kill_player', { defaultValue: 'Kill', name: p.profile?.name || '' })}
+                  className="admin-kick-btn"
+                  onClick={() => kickPlayerFromGame(p.id)}
+                  title="Expulser"
+                  aria-label={`Expulser ${p.profile?.name || ''}`}
                 >
-                  <i className="fas fa-skull" aria-hidden="true"></i>
+                  <i className="fas fa-door-open" aria-hidden="true"></i>
                 </button>
-              )}
-              {!p.isAlive && <span className="admin-dead-tag">{t('dead').toLowerCase()}</span>}
+                {!p.isAlive && <span className="admin-dead-tag">{t('dead').toLowerCase()}</span>}
+              </div>
             </div>
           ))}
         </div>
@@ -136,6 +183,47 @@ const AdminPanel = () => {
           <i className={`fas ${game.adminFreeRoam ? 'fa-play' : 'fa-video'}`}></i>
           {game.adminFreeRoam ? ` ${t('admin_resume')}` : ` ${t('admin_free_roam')}`}
         </button>
+      </div>
+
+      <div className="admin-section">
+        <label className="admin-label"><i className="fas fa-cloud" style={{ marginRight: 4 }}></i> Météo (jour)</label>
+        <div className="admin-weather-row">
+          {WEATHER_OPTIONS_DAY.map(w => (
+            <button
+              key={w.key}
+              className={`admin-weather-btn ${game.adminWeather === w.key ? 'admin-active' : ''}`}
+              onClick={() => setWeather(w.key)}
+              title={w.label}
+            >
+              <i className={`fas ${w.icon}`}></i>
+            </button>
+          ))}
+        </div>
+        <label className="admin-label" style={{ marginTop: 6 }}><i className="fas fa-moon" style={{ marginRight: 4 }}></i> Météo (nuit)</label>
+        <div className="admin-weather-row">
+          {WEATHER_OPTIONS_NIGHT.map(w => (
+            <button
+              key={w.key}
+              className={`admin-weather-btn ${game.adminWeather === w.key ? 'admin-active' : ''}`}
+              onClick={() => setWeather(w.key)}
+              title={w.label}
+            >
+              <i className={`fas ${w.icon}`}></i>
+            </button>
+          ))}
+          {game.adminWeather && (
+            <button className="admin-weather-btn" onClick={() => setGame(prev => ({ ...prev, adminWeather: null }))} title="Auto">
+              <i className="fas fa-rotate-left"></i>
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="admin-section">
+        <button className="admin-action-btn admin-xp-btn" onClick={grantMaxXP}>
+          <i className="fas fa-star"></i> Max XP (moi)
+        </button>
+        {xpStatus && <span className="admin-xp-status">{xpStatus}</span>}
       </div>
 
       <div className="admin-section">

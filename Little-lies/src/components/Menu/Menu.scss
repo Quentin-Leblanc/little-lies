@@ -107,6 +107,17 @@
   }
 }
 
+.menu-btn-admin {
+  color: #ff6666;
+  border-color: rgba(255, 68, 68, 0.3);
+
+  &:hover {
+    color: #ff4444;
+    border-color: rgba(255, 68, 68, 0.6);
+    background: rgba(255, 68, 68, 0.1);
+  }
+}
+
 .menu-lobby-code {
   position: relative;
   display: flex;

@@ -553,11 +553,15 @@ const MainScene = () => {
             // tint is also skipped here — it comes back the moment
             // DISCUSSION starts.
             const isIntro = phase === CONSTANTS.PHASE.INTRO_CINEMATIC;
-            const dayRoll = isIntro ? 0 : MOOD_DAY_ROLLS[lobbyMood][dayIdx];
+            const rawDayRoll = isIntro ? 0 : MOOD_DAY_ROLLS[lobbyMood][dayIdx];
+            const rawNightWeather = MOOD_NIGHT_ROLLS[lobbyMood][dayIdx];
+            // Admin weather override: takes precedence over mood-roll when set
+            const aw = game.adminWeather;
+            const dayRoll = aw === 'sunny' ? 0 : aw === 'misty' ? 1 : aw === 'rainy' ? 3 : rawDayRoll;
+            const nightWeather = aw === 'clear' ? 0 : aw === 'rainy' ? 1 : aw === 'foggy' ? 2 : rawNightWeather;
             const isSunny = dayRoll === 0;
             const isRainyDay = dayRoll === 3;
             const isMisty = !isSunny && !isRainyDay;
-            const nightWeather = MOOD_NIGHT_ROLLS[lobbyMood][dayIdx];
             // DUSK: warm-tint the sky all day regardless of roll. Keeps
             // the weather rolls doing their thing, just colorgraded like
             // a sunset game. Disabled during INTRO_CINEMATIC (see above).

@@ -8,11 +8,14 @@ import { getRoles } from '../../data/roles.js';
 import Audio from '../../utils/AudioManager';
 import useEscapeKey from '../../hooks/useEscapeKey';
 import Legal from '../Legal/Legal';
+import { useAuth } from '../Auth/Auth';
+import { isAdminEmail } from '../../utils/supabase';
 
 import './Menu.scss';
 
 const Menu = () => {
   const { t } = useTranslation(['menu', 'common']);
+  const { user } = useAuth();
   const [showLogs, setShowLogs] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -20,6 +23,7 @@ const Menu = () => {
   const [roomCode, setRoomCode] = useState('');
   const [muted, setMuted] = useState(Audio.isMuted());
   const [barCopied, setBarCopied] = useState(false);
+  const isAdmin = isAdminEmail(user);
 
   const [messages = []] = useMultiplayerState('chatMessages', []);
 
@@ -85,6 +89,11 @@ const Menu = () => {
         <button className="menu-btn-icon" onClick={() => { const m = Audio.toggleMute(); setMuted(m); }} title={muted ? t('menu:unmute') : t('menu:mute')} aria-label={muted ? t('menu:unmute') : t('menu:mute')} aria-pressed={muted}>
           <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
         </button>
+        {isAdmin && (
+          <button className="menu-btn-icon menu-btn-admin" onClick={() => window.dispatchEvent(new Event('admin-panel-open'))} title="Admin" aria-label="Admin">
+            <i className="fas fa-shield-alt" aria-hidden="true"></i>
+          </button>
+        )}
       </div>
       {showMenu && createPortal(
         <MenuDialog

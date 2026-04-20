@@ -167,6 +167,19 @@ export const saveGameHistory = async (gameData) => {
 
 // --- Admin check ---
 
+// Hard-coded fallback for accounts that should always be admin even when
+// the `profiles.is_admin` flag hasn't been flipped in the DB yet. Keeps
+// the owner unlocked without requiring a SQL migration per-environment.
+export const ADMIN_EMAILS = ['artofleb@gmail.com'];
+
+// Synchronous check on the session user object — used when we already
+// have a `user` from the auth context and don't need a DB round-trip.
+export const isAdminEmail = (userLike) => {
+  const email = userLike?.email;
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(String(email).toLowerCase());
+};
+
 export const isAdmin = async (userId) => {
   if (!supabase) return false;
   const profile = await getProfile(userId);

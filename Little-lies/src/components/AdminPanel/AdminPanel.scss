@@ -219,3 +219,67 @@
 
   &:hover { background: rgba(255, 68, 68, 0.35); }
 }
+
+.admin-player-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.235rem;
+}
+
+.admin-kick-btn {
+  background: rgba(255, 160, 50, 0.15);
+  border: 1px solid rgba(255, 160, 50, 0.3);
+  border-radius: 0.235rem;
+  color: #ffaa44;
+  padding: 0.176rem 0.471rem;
+  font-size: 0.647rem;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: rgba(255, 160, 50, 0.4);
+    color: #fff;
+  }
+}
+
+.admin-weather-row {
+  display: flex;
+  gap: 0.294rem;
+  flex-wrap: wrap;
+}
+
+.admin-weather-btn {
+  padding: 0.353rem 0.588rem;
+  font-size: 0.765rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.235rem;
+  color: #aaa;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+  &.admin-active {
+    background: rgba(80, 180, 255, 0.2);
+    border-color: rgba(80, 180, 255, 0.4);
+    color: #88ccff;
+  }
+}
+
+.admin-xp-btn {
+  color: #ffd700;
+  border-color: rgba(255, 215, 0, 0.2);
+
+  &:hover {
+    background: rgba(255, 215, 0, 0.15);
+    color: #ffe44d;
+  }
+}
+
+.admin-xp-status {
+  display: block;
+  margin-top: 0.294rem;
+  font-size: 0.647rem;
+  color: #88ff88;
+}
