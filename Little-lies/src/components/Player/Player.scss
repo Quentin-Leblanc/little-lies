@@ -299,32 +299,9 @@
       );
     box-shadow:
       0 0 0 1px rgba(126, 179, 255, 0.08),
-      0 0 18px rgba(126, 179, 255, 0.22),
-      inset 0 0 22px rgba(126, 179, 255, 0.08);
-    animation: role-desc-glow 4.6s ease-in-out infinite;
+      0 0 12px rgba(126, 179, 255, 0.14),
+      inset 0 0 18px rgba(126, 179, 255, 0.06);
     > .role-section-title { color: #a9c8ff; i { color: inherit; } }
-
-    // Thin diagonal light sweep travelling left→right to keep the
-    // description alive (reads as "scroll being lit by a moving
-    // candle" rather than a flat panel). Pointer-events disabled so
-    // it never intercepts the description text.
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        115deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.12) 48%,
-        rgba(255, 255, 255, 0.22) 50%,
-        rgba(255, 255, 255, 0.12) 52%,
-        transparent 70%
-      );
-      transform: translateX(-100%);
-      animation: role-desc-shimmer 5.4s ease-in-out infinite;
-      pointer-events: none;
-      mix-blend-mode: screen;
-    }
   }
   &:nth-child(2) {
     border-left-color: #ffb05a;

@@ -213,16 +213,6 @@
 //          layering a darker tint, so dark palettes now add a visible
 //          coloured glow on the wrapper instead of vanishing, and vivid
 //          colours stay readable at a moderate 0.32 opacity.
-.chat-message-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.32;
-  mix-blend-mode: screen;
-}
-
 .chat-message {
   position: relative;
   font-size: 1.05rem !important;

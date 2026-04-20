@@ -35,7 +35,8 @@
     "title": "Game configuration",
     "toggle_open": "Config",
     "toggle_close": "Close",
-    "host_only": "Only the host can modify"
+    "host_only": "Only the host can modify",
+    "reset": "Reset"
   },
   "reveal": {
     "loading_title": "Among Liars",

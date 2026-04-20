@@ -35,7 +35,8 @@
     "title": "Configuration de la partie",
     "toggle_open": "Config",
     "toggle_close": "Fermer",
-    "host_only": "Seul l'hôte peut modifier"
+    "host_only": "Seul l'hôte peut modifier",
+    "reset": "Réinitialiser"
   },
   "reveal": {
     "loading_title": "Among Liars",

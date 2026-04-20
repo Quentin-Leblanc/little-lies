@@ -29,6 +29,11 @@ const GameConfig = ({ config, onConfigChange }) => {
     onConfigChange({ ...config, durations: newDurations });
   };
 
+  const handleReset = () => {
+    if (!host) return;
+    onConfigChange({ ...config, durations: { ...DEFAULT_DURATIONS } });
+  };
+
   return (
     <div className="game-config">
       <button className="config-toggle" onClick={() => setIsOpen(!isOpen)}>
@@ -57,6 +62,16 @@ const GameConfig = ({ config, onConfigChange }) => {
               </div>
             ))}
           </div>
+          {host && (
+            <button
+              type="button"
+              className="config-reset"
+              onClick={handleReset}
+              title={t('setup:config.reset')}
+            >
+              <i className="fas fa-rotate-left"></i> {t('setup:config.reset')}
+            </button>
+          )}
         </div>
       )}
     </div>

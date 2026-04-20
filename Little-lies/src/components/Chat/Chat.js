@@ -476,10 +476,6 @@ function Chat(props) {
           const isPastPlayer = message.dayCount < game.dayCount;
           return (
             <div className={`chat-message-wrapper ${getMessageClass(message)} ${isPastPlayer ? 'msg-past-player' : ''}`} key={message.id || index}>
-              <div
-                className="chat-message-background"
-                style={isPastPlayer ? {} : { background: toBgCss(message.color) }}
-              ></div>
               <div className="chat-message">
                 {formatPrefix(message)}
                 {message.type !== 'whisper_notice' && (
