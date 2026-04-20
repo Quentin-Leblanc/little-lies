@@ -49,19 +49,25 @@ export function computeNextPhase(currentPhase, context) {
         sideEffects: [],
       };
 
-    case PHASE.NIGHT:
+    case PHASE.NIGHT: {
+      // First night is peaceful by design (actions are disabled), so
+      // skip the DEATH_REPORT on the morning of day 2 and jump straight
+      // into the day's DISCUSSION. Later nights keep the full beat.
+      const nextDayCount = (game?.dayCount || 0) + 1;
+      const isFirstMorning = (game?.dayCount || 0) === 1;
       return {
         gameDelta: {
-          phase: PHASE.DEATH_REPORT,
-          timer: dur('DEATH_REPORT'),
+          phase: isFirstMorning ? PHASE.DISCUSSION : PHASE.DEATH_REPORT,
+          timer: isFirstMorning ? dur('DISCUSSION') : dur('DEATH_REPORT'),
           isDay: true,
-          dayCount: (game?.dayCount || 0) + 1,
+          dayCount: nextDayCount,
           trialsToday: 0,
           accusedId: null,
           skipVotes: [],
         },
         sideEffects: [],
       };
+    }
 
     case PHASE.DEATH_REPORT:
       return {

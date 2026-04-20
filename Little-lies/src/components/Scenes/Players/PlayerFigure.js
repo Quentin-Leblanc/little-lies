@@ -113,7 +113,15 @@ const PlayerFigure = ({
         setCurrentAnim(isGameOver && isWinningTeam ? playerDance : playerIdle);
       }
     } else {
+      // Outside of a walk transition, keep the group pinned to the
+      // target position every frame. Previously only `y` was synced,
+      // which left the group stuck at a stale `x`/`z` if a transition
+      // was interrupted (e.g. PlayroomKit re-syncs mid-walk on Day 1
+      // first-gather), stranding the character far from the plaza
+      // until the next walk fired.
+      groupRef.current.position.x = position[0];
       groupRef.current.position.y = position[1];
+      groupRef.current.position.z = position[2];
     }
   });
 

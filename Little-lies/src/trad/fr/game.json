@@ -200,6 +200,7 @@
   "spectator_banner": "Mode spectateur",
   "lag_indicator": "Connexion instable / FPS bas",
   "vigilante_night1": "Impossible de tirer la première nuit",
+  "first_night_peaceful": "Première nuit paisible — aucune action ne peut être tentée",
   "vigilante_out_of_shots": "Plus de munitions — tirs épuisés",
   "judgment_default_guilty": "Coupable par défaut — votez Innocent pour sauver",
   "scene": {

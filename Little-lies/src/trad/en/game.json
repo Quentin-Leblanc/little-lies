@@ -200,6 +200,7 @@
   "spectator_banner": "Spectator mode",
   "lag_indicator": "Unstable connection / low FPS",
   "vigilante_night1": "Cannot shoot on the first night",
+  "first_night_peaceful": "Peaceful first night — no action can be attempted",
   "vigilante_out_of_shots": "No ammo left — shots depleted",
   "judgment_default_guilty": "Guilty by default — vote Innocent to save",
   "scene": {

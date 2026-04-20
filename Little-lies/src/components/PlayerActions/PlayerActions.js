@@ -81,6 +81,10 @@ const PlayerActions = memo(function () {
   const isNightPhase = phase === CONSTANTS.PHASE.NIGHT;
   const isDiscussionPhase = phase === CONSTANTS.PHASE.DISCUSSION;
   const isDayPhase = game.isDay && phase !== CONSTANTS.PHASE.NIGHT_TRANSITION;
+  // First night is a peaceful introduction — no kills, no investigations,
+  // nothing. Actions are rendered disabled so players still see their
+  // role's capabilities without being able to trigger them.
+  const isFirstNight = isNightPhase && (game.dayCount || 0) === 1;
 
   // Death flash
   useEffect(() => {
@@ -207,6 +211,8 @@ const PlayerActions = memo(function () {
   // --- Night action handler ---
   const handleNightAction = (action, targetPlayer) => {
     if (me.isSpectator || !me.isAlive) return;
+    // First night is peaceful by design — no night actions can fire.
+    if (isFirstNight) return;
     updateActivity(me.id);
     if (action.type === 'VEST' && action.maxUses) {
       const alreadyUsed = Events.hasDoneThisActionTonight(action.type);
@@ -553,20 +559,23 @@ const PlayerActions = memo(function () {
                         const style = getActionStyle(action.type);
                         const showCounter = action.type === 'VIGILANTE_KILL' && action.maxUses;
                         const shotsLeft = showCounter ? action.maxUses - (me.vigilanteShots || 0) : null;
+                        const disabledByFirstNight = isFirstNight;
                         return (
                           <button
                             className={`action-btn ${isSelected ? 'action-btn-active' : ''} ${isLocked ? 'action-btn-locked' : ''}`}
                             style={{ '--action-bg': style.bg, '--action-hover': style.hover }}
                             onClick={() => handleNightAction(action, player)}
-                            disabled={isLocked}
+                            disabled={isLocked || disabledByFirstNight}
                             key={action.type}
-                            title={isLocked
-                              ? t('game:one_shot_locked', { defaultValue: 'Already committed for this night' })
-                              : (getActionTooltip(action.type) || action.description || '')}
+                            title={disabledByFirstNight
+                              ? t('game:first_night_peaceful', { defaultValue: 'Première nuit — aucune action ne peut être tentée.' })
+                              : (isLocked
+                                ? t('game:one_shot_locked', { defaultValue: 'Already committed for this night' })
+                                : (getActionTooltip(action.type) || action.description || ''))}
                             aria-pressed={isSelected}
                             aria-label={t('game:aria.action_on', { action: action.label, name: player.profile.name, defaultValue: `${action.label} ${player.profile.name}` })}
                           >
-                            {isLocked && <i className="fas fa-lock" style={{ marginRight: 4 }}></i>}
+                            {(isLocked || disabledByFirstNight) && <i className={`fas ${disabledByFirstNight ? 'fa-moon' : 'fa-lock'}`} style={{ marginRight: 4 }}></i>}
                             {action.label}{showCounter ? ` (${shotsLeft})` : ''}
                           </button>
                         );
