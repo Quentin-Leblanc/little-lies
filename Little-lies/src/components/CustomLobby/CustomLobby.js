@@ -21,6 +21,7 @@ import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import { getLevel } from '../../utils/xpSystem';
 import { COLOR_REWARDS } from '../../data/progression';
 import { buildPlayerNamePillStyle } from '../../utils/playerColor';
+import { motion, AnimatePresence } from 'framer-motion';
 import './CustomLobby.scss';
 
 const GRADIENT_UNLOCK_LEVEL = 6;
@@ -329,8 +330,64 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
   const yOffset = anim === 'LieDown' ? (LIEDOWN_Y_OFFSET[skin] ?? -0.35) : 0;
   const nameY = anim === 'LieDown' ? 1.1 : 1.15;
 
+  const groupRef = useRef();
+  const labelRef = useRef();
+  const opacityRef = useRef(0);
+  const fadingOut = useRef(false);
+  const prevTotal = useRef(total);
+  const targetX = useRef(x);
+  const targetZ = useRef(z);
+  const targetAngle = useRef(lookAtAngle);
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    targetX.current = x;
+    targetZ.current = z;
+    targetAngle.current = lookAtAngle;
+    if (prevTotal.current !== total) {
+      fadingOut.current = true;
+      prevTotal.current = total;
+    }
+  }, [total, x, z, lookAtAngle]);
+
+  useFrame(() => {
+    const g = groupRef.current;
+    if (!g) return;
+    if (!initialized.current) {
+      g.position.set(targetX.current, yOffset, targetZ.current);
+      g.rotation.y = targetAngle.current;
+      initialized.current = true;
+    }
+    if (fadingOut.current) {
+      opacityRef.current = Math.max(0, opacityRef.current - 0.12);
+      if (opacityRef.current === 0) {
+        g.position.set(targetX.current, yOffset, targetZ.current);
+        g.rotation.y = targetAngle.current;
+        fadingOut.current = false;
+      }
+    } else {
+      opacityRef.current = Math.min(1, opacityRef.current + 0.07);
+    }
+    // Traverse and set per-mesh opacity (clone material once to avoid
+    // mutating the GLB's shared materials across other PlayerSeats).
+    g.traverse((child) => {
+      if (child.isMesh && child.material) {
+        if (!child.userData._opacityInit) {
+          child.material = child.material.clone();
+          child.userData._baseOpacity = child.material.opacity;
+          child.userData._opacityInit = true;
+        }
+        child.material.transparent = true;
+        child.material.opacity = child.userData._baseOpacity * opacityRef.current;
+      }
+    });
+    if (labelRef.current) {
+      labelRef.current.style.opacity = String(opacityRef.current);
+    }
+  });
+
   return (
-    <group position={[x, yOffset, z]} rotation={[0, lookAtAngle, 0]}>
+    <group ref={groupRef}>
       <Character color={color} animation={anim} scale={0.55} skin={skin} animOffset={index * 0.5} />
       {/* Aura glow under local player */}
       {isMe && (
@@ -350,13 +407,14 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
           const rawColor = player.getState?.()?.profile?.color;
           const { pillStyle, textStyle } = buildPlayerNamePillStyle(rawColor, color || '#888');
           return (
-            <div style={{
+            <div ref={labelRef} style={{
               ...pillStyle,
               padding: '3px 10px',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: 'bold',
               whiteSpace: 'nowrap',
+              opacity: 0,
             }}>
               {isMe && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block', marginRight: 6, flexShrink: 0 }} />}
               <span style={textStyle}>{player.getState?.()?.profile?.name || 'Player'}</span>
@@ -611,6 +669,10 @@ const CustomLobby = () => {
 
   // Lobby ambient music — gesture-gated (browser autoplay policy).
   // Starts on the first user pointerdown/keydown anywhere on the page.
+  // The music keeps playing across the game (lobby → match → game over →
+  // lobby) so the 3-track rotation stays seamless. stopLobbyMusic() is
+  // not called here — playLobbyMusic() is idempotent, so re-mounting the
+  // lobby doesn't restart the track.
   useEffect(() => {
     const unlock = () => { Audio.playLobbyMusic(); };
     window.addEventListener('pointerdown', unlock, { once: true });
@@ -618,7 +680,6 @@ const CustomLobby = () => {
     return () => {
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
-      Audio.stopLobbyMusic();
     };
   }, []);
 
@@ -1157,29 +1218,38 @@ const CustomLobby = () => {
           <div className="lobby-section">
             <label className="lobby-label">{t('setup:players_count', { count: playroom_players.length })}</label>
             <div className="player-list">
-              {playroom_players.map((p, idx) => {
-                const n = p.getState?.()?.profile?.name || 'Player';
-                const isMe = p.id === currentPlayer?.id;
-                const isH = idx === 0;
-                return (
-                  <div key={p.id} className={`player-list-item ${isMe ? 'is-me' : ''}`}>
-                    <span className="player-number">#{idx + 1}</span>
-                    <span className="player-dot" style={{ background: getColorCSS(p.getState?.()?.profile?.color) || '#888' }} />
-                    <span className="player-list-name">{n}</span>
-                    {isH && <span className="player-badge host">{t('common:host')}</span>}
-                    {isMe && <span className="player-badge me">{t('common:me')}</span>}
-                    {isHost() && !isMe && !isH && (
-                      <button
-                        className="player-kick-btn"
-                        onClick={() => p.kick()}
-                        title={t('common:kick')}
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+              <AnimatePresence>
+                {playroom_players.map((p, idx) => {
+                  const n = p.getState?.()?.profile?.name || 'Player';
+                  const isMe = p.id === currentPlayer?.id;
+                  const isH = idx === 0;
+                  return (
+                    <motion.div
+                      key={p.id}
+                      className={`player-list-item ${isMe ? 'is-me' : ''}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                    >
+                      <span className="player-number">#{idx + 1}</span>
+                      <span className="player-dot" style={{ background: getColorCSS(p.getState?.()?.profile?.color) || '#888' }} />
+                      <span className="player-list-name">{n}</span>
+                      {isH && <span className="player-badge host">{t('common:host')}</span>}
+                      {isMe && <span className="player-badge me">{t('common:me')}</span>}
+                      {isHost() && !isMe && !isH && (
+                        <button
+                          className="player-kick-btn"
+                          onClick={() => p.kick()}
+                          title={t('common:kick')}
+                        >
+                          <i className="fas fa-times"></i>
+                        </button>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
           </div>
 
