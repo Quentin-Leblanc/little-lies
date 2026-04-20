@@ -135,6 +135,10 @@ const MainScene = () => {
   // Night transition phrase — rotates between "La nuit tombe..." variants
   // so the end-of-day fade doesn't always read the same line.
   const [nightTransitionText, setNightTransitionText] = useState(null);
+  // "No lynch" phrase — rotates between no_lynch_variants so the end-of-
+  // vote verdict announcement doesn't always read as the same line.
+  // Reset to null on non-NO_LYNCH phases so the next re-entry re-rolls.
+  const [noLynchText, setNoLynchText] = useState(null);
   // Death-reveal cinematic camera focus — when set, CameraController cuts
   // to a close-up shot of this body (world-space [x, y, z]). Non-null for
   // ~4s at the start of DEATH_REPORT when there's a fresh corpse to show.
@@ -184,6 +188,16 @@ const MainScene = () => {
           setNightTransitionText(nightVariants[Math.floor(Math.random() * nightVariants.length)]);
         } else {
           setNightTransitionText(i18n.t('game:phases.NIGHT_TRANSITION'));
+        }
+        // No-lynch phrase rotates on the same gate so players don't read
+        // "Tout le monde peut rentrer chez soi" every single skipped vote.
+        if (phase === CONSTANTS.PHASE.NO_LYNCH) {
+          const noLynchVariants = i18n.t('game:no_lynch_variants', { returnObjects: true });
+          if (Array.isArray(noLynchVariants) && noLynchVariants.length > 0) {
+            setNoLynchText(noLynchVariants[Math.floor(Math.random() * noLynchVariants.length)]);
+          } else {
+            setNoLynchText(i18n.t('game:scene.no_lynch'));
+          }
         }
       }
       // Delay fade so sunset animation is fully visible (~5s), except for
@@ -918,7 +932,7 @@ const MainScene = () => {
       {/* Phase announcements */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
         <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 2.5s ease-out forwards' }}>
-          <div className="announcement-text">{i18n.t('game:scene.no_lynch')}</div>
+          <div className="announcement-text">{noLynchText || i18n.t('game:scene.no_lynch')}</div>
         </div>
       )}
       {phase === CONSTANTS.PHASE.SPARED && (
