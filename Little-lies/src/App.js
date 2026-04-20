@@ -62,7 +62,16 @@ function App() {
     const me = getMe();
     const isSpectator = !!me?.isSpectator;
     const isNight = phase === CONSTANTS.PHASE.NIGHT || phase === CONSTANTS.PHASE.NIGHT_TRANSITION;
-    const [isSelectingRoles, setIsSelectingRoles] = useState(false);
+    // Lobby ↔ Setup switch is driven directly by the shared game.status
+    // so the guest moves in lockstep with the host. Previously this was a
+    // local useState synced via an effect on [status] — if PlayroomKit
+    // coalesced the host's moveToRoleSelection() + startGame() replicas
+    // into a single update (status 'setup' → 'started' straight), the
+    // role_selection observation window never fired on the guest and the
+    // useEffect condition `!isGameStarted` was also false, leaving the
+    // guest stuck on CustomLobby with isSelectingRoles=false. Deriving
+    // the switch instead removes the timing hole.
+    const isSelectingRoles = status === CONSTANTS.GAME_ROLE_SELECTION;
     // showRoleReveal starts false if this tab already saw the reveal, so
     // F5 during a game drops the player straight into the match instead
     // of replaying the card + "la nuit tombe" intro.
@@ -82,12 +91,14 @@ function App() {
     const isGameOver = status === CONSTANTS.GAME_ENDED;
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    // Sync isSelectingRoles when game resets to ROLE_SELECTION (e.g. Rejouer)
+    // Rejouer / new-match reset: when status bounces back to ROLE_SELECTION
+    // after a finished game, re-arm the role reveal and the curtain so the
+    // next match plays its intro fresh. isSelectingRoles itself is derived
+    // above, so nothing to set for the screen switch here.
     useEffect(() => {
         if (status === CONSTANTS.GAME_ROLE_SELECTION && !isGameStarted && !isGameOver) {
-            setIsSelectingRoles(true);
             setShowRoleReveal(true);
-            writeRoleRevealSeen(false); // next game should show reveal again
+            writeRoleRevealSeen(false);
             setCurtainVisible(false);
             setCurtainClosed(false);
             setCurtainReady(false);
@@ -202,7 +213,7 @@ function App() {
                             transition={{ duration: 0.7, ease: 'easeInOut' }}
                             style={{ width: '100%', height: '100%' }}
                         >
-                            <CustomLobby setIsSelectingRoles={setIsSelectingRoles} />
+                            <CustomLobby />
                         </motion.div>
                     ) : (
                         <motion.div

@@ -589,7 +589,7 @@ export const LobbyChat = () => {
   );
 };
 
-const CustomLobby = ({ setIsSelectingRoles }) => {
+const CustomLobby = () => {
   const { t } = useTranslation(['setup', 'common']);
   const currentPlayer = myPlayer();
   const playroom_players = usePlayersList(true);
@@ -1183,7 +1183,7 @@ const CustomLobby = ({ setIsSelectingRoles }) => {
             </div>
           </div>
 
-          <GameConfig config={game?.config} onConfigChange={handleConfigChange} />
+          {isHost() && <GameConfig config={game?.config} onConfigChange={handleConfigChange} />}
 
           <div className="lobby-actions">
             {playroom_players.length > 0 && isHost() ? (
