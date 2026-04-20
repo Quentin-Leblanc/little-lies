@@ -1,27 +1,203 @@
-// === Not Me — Color Palette ===
+// === Among Liars — Design Tokens ===
+// Single source of truth for colors, typography, shadows, radii, z-index.
+// Components import this file and compose via _mixins.scss.
 
-// UI Colors
+// ─────────────────────────────────────────────
+// IDENTITY — Dark nocturnal + signature gold + action blue
+// ─────────────────────────────────────────────
+
+// Dark backgrounds — warm blacks (werewolf night, parchment-aged feel)
+// Shifted from cold blue-black to warmer brown-black so the UI reads as
+// "old village lit by torches" rather than "cinematic studio logo".
+$al-bg-abyss:   #050404;    // deepest — vignette edges, curtain
+$al-bg-deep:    #0b0908;    // primary panels
+$al-bg-panel:   #14100e;    // lifted panels/cards
+$al-bg-lifted:  #1d1813;    // nested surfaces
+$al-bg-subtle:  rgba(255, 230, 190, 0.03);
+$al-bg-hover:   rgba(255, 230, 190, 0.06);
+
+// Overlay veils (for modals/vignettes) — heavier for werewolf mood
+$al-veil-soft:   rgba(0, 0, 0, 0.55);
+$al-veil:        rgba(0, 0, 0, 0.78);
+$al-veil-strong: rgba(0, 0, 0, 0.92);
+
+// Signature gold — aged parchment, not bright yellow
+// Retained as anchor of identity but deepened toward brass/brown so it
+// reads as "oil lamp on old paper" instead of "luxury brand gold".
+$al-gold:        #c9a862;    // anchor — titles, key labels (was #f3cc74)
+$al-gold-hot:    #d9b870;    // highlight (was #ffcc66)
+$al-gold-soft:   #e8d49a;    // glow
+$al-gold-rich:   #a88547;    // gradient mid (was #e5b65e)
+$al-gold-dim:    #6b4e22;    // gradient dark-end (was #b08040)
+$al-gold-text:   #120a04;    // text-on-gold
+
+// Gold helpers (alpha for surfaces)
+$al-gold-border:      rgba(201, 168, 98, 0.22);
+$al-gold-border-hv:   rgba(201, 168, 98, 0.45);
+$al-gold-glow:        rgba(201, 168, 98, 0.14);
+$al-gold-glow-strong: rgba(201, 168, 98, 0.3);
+
+// Primary action — cold moon blue (desaturated, "nocturnal" not "tech")
+// Shifted from #5b8dff (bright tech blue) to a darker steel/moonstone
+// that sits quietly next to the gold and doesn't shout modernity.
+$al-blue:           #5a7290;
+$al-blue-end:       #334860;
+$al-blue-hv:        #6b84a4;
+$al-blue-hv-end:    #425a76;
+$al-blue-glow:      rgba(60, 85, 115, 0.4);
+$al-blue-glow-hv:   rgba(80, 110, 145, 0.6);
+
+// Blood — werewolf signature. Replaces the "danger red" as a proper
+// faction/ceremonial color. Use for lynch, kick, blood moon, critical
+// actions. Deep wine > bright UI red.
+$al-blood:       #8b1a1a;
+$al-blood-deep:  #5a0f0f;
+$al-blood-hot:   #a02828;
+$al-blood-glow:  rgba(139, 26, 26, 0.45);
+
+// Semantic — realigned around werewolf palette
+$al-danger:      $al-blood-hot;    // legacy alias → now blood
+$al-danger-deep: $al-blood-deep;
+$al-danger-glow: $al-blood-glow;
+$al-success:     #6a9a4e;    // mossy green (was bright #78ff78)
+$al-warn:        #c88a3a;    // amber (was #ffa502)
+$al-mystic:      #8a5ca8;    // dusk purple (was #a96edd)
+
+// Role factions (for role pills, chat colors)
+$al-faction-mafia:   #cc2222;
+$al-faction-cult:    #a96edd;
+$al-faction-whisper: #ff6bb5;
+$al-faction-town:    #8ec3ff;
+$al-faction-neutral: #c2a75d;
+
+// Text
+$al-text:      #f0f0f0;
+$al-text-dim:  #aaa;
+$al-text-mute: #888;
+$al-text-faint: #666;
+
+// Borders
+$al-border-subtle: rgba(255, 255, 255, 0.08);
+$al-border-soft:   rgba(255, 255, 255, 0.15);
+$al-border-strong: rgba(255, 255, 255, 0.22);
+
+// ─────────────────────────────────────────────
+// TYPOGRAPHY
+// ─────────────────────────────────────────────
+$al-font-header: 'Cinzel', serif;
+$al-font-body:   'Chakra Petch', 'Space Grotesk', 'Segoe UI', sans-serif;
+$al-font-mono:   'Courier New', monospace;
+
+// Letter-spacings (identity — Cinzel titles breathe)
+$al-track-title:  0.12em;
+$al-track-label:  0.08em;
+$al-track-button: 0.03em;
+
+// ─────────────────────────────────────────────
+// GRADIENTS
+// ─────────────────────────────────────────────
+$al-grad-primary:    linear-gradient(90deg, $al-blue 0%, $al-blue-end 100%);
+$al-grad-primary-hv: linear-gradient(90deg, $al-blue-hv 0%, $al-blue-hv-end 100%);
+$al-grad-gold:       linear-gradient(90deg, $al-gold-rich 0%, $al-gold-dim 100%);
+$al-grad-gold-hv:    linear-gradient(90deg, $al-gold-hot 0%, $al-gold-rich 100%);
+$al-grad-gold-rich:  linear-gradient(90deg, $al-gold-dim 0%, $al-gold-hot 50%, $al-gold 100%);
+$al-grad-danger:     linear-gradient(90deg, $al-danger 0%, $al-danger-deep 100%);
+
+// Panel gradient — warm black with a subtle brown undertone (old oak,
+// candle-lit tavern). Replaces the cold blue-grey gradient.
+$al-grad-panel:      linear-gradient(160deg, rgba(26, 20, 16, 0.94) 0%, rgba(8, 6, 5, 0.97) 100%);
+$al-grad-panel-lite: linear-gradient(160deg, rgba(36, 28, 22, 0.9) 0%, rgba(14, 10, 8, 0.95) 100%);
+
+// Blood gradient (lynch button, danger CTAs)
+$al-grad-blood:      linear-gradient(90deg, $al-blood-hot 0%, $al-blood-deep 100%);
+$al-grad-blood-hv:   linear-gradient(90deg, lighten($al-blood-hot, 6%) 0%, lighten($al-blood-deep, 6%) 100%);
+
+// Radial vignette (overlays) — deeper, more werewolf/horror
+$al-vignette: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.92) 100%);
+
+// ─────────────────────────────────────────────
+// SHADOWS + GLOWS
+// ─────────────────────────────────────────────
+$al-shadow-panel:  0 8px 40px rgba(0, 0, 0, 0.5);
+$al-shadow-card:   0 6px 22px rgba(0, 0, 0, 0.4);
+$al-shadow-btn:    0 3px 10px rgba(0, 0, 0, 0.3);
+$al-shadow-btn-hv: 0 6px 22px rgba(0, 0, 0, 0.5);
+$al-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+// Colored glows for primary buttons
+$al-glow-primary:    0 3px 10px $al-blue-glow, inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+$al-glow-primary-hv: 0 6px 22px $al-blue-glow-hv, inset 0 0 0 1px rgba(255, 255, 255, 0.14), inset 0 -8px 18px rgba(110, 140, 180, 0.22);
+$al-glow-gold:       0 3px 10px $al-gold-glow-strong, inset 0 0 0 1px rgba(255, 230, 190, 0.08);
+$al-glow-gold-hv:    0 6px 22px rgba(201, 168, 98, 0.5), inset 0 0 0 1px rgba(255, 230, 190, 0.22);
+$al-glow-blood:      0 3px 10px $al-blood-glow, inset 0 0 0 1px rgba(255, 180, 180, 0.08);
+$al-glow-blood-hv:   0 6px 22px rgba(139, 26, 26, 0.7), inset 0 0 0 1px rgba(255, 200, 200, 0.18), inset 0 -8px 18px rgba(180, 40, 40, 0.25);
+$al-glow-danger:     $al-glow-blood;
+
+// ─────────────────────────────────────────────
+// RADII
+// ─────────────────────────────────────────────
+$al-radius-xs:   0.235rem;
+$al-radius-sm:   0.353rem;
+$al-radius-md:   0.588rem;
+$al-radius-lg:   0.941rem;
+$al-radius-xl:   1.412rem;
+$al-radius-pill: 999px;
+
+// ─────────────────────────────────────────────
+// BLUR (glassmorphism)
+// ─────────────────────────────────────────────
+$al-blur-soft:   6px;
+$al-blur:        8px;
+$al-blur-strong: 12px;
+
+// ─────────────────────────────────────────────
+// Z-INDEX (clear layering)
+// ─────────────────────────────────────────────
+$al-z-scene:    0;
+$al-z-hud:      10;
+$al-z-layout:   15;
+$al-z-banner:   800;
+$al-z-overlay:  100;
+$al-z-dialog:   1000;
+$al-z-curtain:  2000;
+$al-z-toast:    3000;
+
+// ─────────────────────────────────────────────
+// TRANSITIONS
+// ─────────────────────────────────────────────
+$al-trans-fast: 0.15s ease;
+$al-trans:      0.25s ease;
+$al-trans-slow: 0.45s ease;
+
+// Easing for bounce/pop
+$al-ease-pop: cubic-bezier(0.2, 0.9, 0.3, 1.1);
+
+// ═════════════════════════════════════════════
+// LEGACY — kept for back-compat with existing SCSS
+// ═════════════════════════════════════════════
+
+// UI colors (legacy names — aliased to new tokens where sensible)
 $gradient-rainbow: linear-gradient(145deg, rgba(0,185,106,1) 0%, rgba(0,131,255,1) 100%);
 $gradient-redBlue: linear-gradient(145deg, rgb(255, 0, 0) 0%, rgba(0,131,255,1) 100%);
-$green: rgba(0,185,106,1);
-$blue: #2f82ff;
+$green:    rgba(0,185,106,1);
+$blue:     #2f82ff;
 $darkBlue: #0d5fcc;
-$red: #a10000;
+$red:      #a10000;
 
 // 3D Scene — Day Palette
-$day-sky: #87CEEB;
+$day-sky:   #87CEEB;
 $day-grass: #7EC850;
-$day-path: #D4A574;
-$day-roof: #E8734A;
+$day-path:  #D4A574;
+$day-roof:  #E8734A;
 $day-walls: #F5E6D0;
-$day-wood: #8B6914;
+$day-wood:  #8B6914;
 $day-stone: #C4A882;
 
 // 3D Scene — Night Palette
-$night-sky: #1B1464;
+$night-sky:    #1B1464;
 $night-ground: #2D4A3E;
-$night-light: #FFD700;
-$night-torch: #FF6B35;
+$night-light:  #FFD700;
+$night-torch:  #FF6B35;
 $night-shadow: #0D0D2B;
 
 // Responsive Breakpoints

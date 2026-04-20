@@ -1,0 +1,284 @@
+// === Among Liars — Shared Mixins ===
+// Compose these in component SCSS to enforce a coherent visual identity.
+// Usage: @import '../../styles/variables'; @import '../../styles/mixins';
+
+// ─────────────────────────────────────────────
+// BUTTONS — Primary / Gold / Secondary / Ghost / Danger
+// ─────────────────────────────────────────────
+
+// Base — shape, typography, transitions. All variants build on this.
+// Hover/active deliberately do NOT move the button: we only shift the
+// background tone and glow. Physical motion (translate/scale) felt too
+// "web-product" for a werewolf UI; a steady button that brightens feels
+// more like a torch flaring up than a bouncy CTA.
+@mixin al-btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.471rem;
+  padding: 0.588rem 1.176rem;
+  font-family: $al-font-body;
+  font-size: 0.882rem;
+  font-weight: 600;
+  letter-spacing: $al-track-button;
+  border-radius: $al-radius-sm;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background $al-trans, box-shadow $al-trans, color $al-trans, border-color $al-trans;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+
+  &:active {
+    // Slight darken on press — no translate, no scale.
+    background-blend-mode: multiply;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    background: linear-gradient(90deg, #3a3228 0%, #1a1410 100%) !important;
+    color: $al-text-faint !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    text-shadow: none;
+  }
+}
+
+// Shimmer sweep — opt-in modifier for ceremonial CTAs only (Start, Replay).
+// Not applied to every button anymore: routine UI buttons get a flat,
+// quiet hover so the eye isn't drawn to every interactive element.
+@mixin al-btn-shimmer {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent 0%, rgba(255, 230, 190, 0.14) 50%, transparent 100%);
+    transform: skewX(-18deg);
+    transition: left 0.7s $al-ease-pop;
+    pointer-events: none;
+  }
+  &:hover::before {
+    left: 125%;
+  }
+}
+
+// Primary — cold moonstone blue. Actions of secondary importance (vote,
+// continue, confirm) that shouldn't pull the eye like the ceremonial
+// gold CTA does.
+@mixin al-btn-primary {
+  @include al-btn-base;
+  & {
+    background: $al-grad-primary;
+    color: $al-text;
+    box-shadow: $al-glow-primary;
+  }
+  &:hover:not(:disabled) {
+    background: $al-grad-primary-hv;
+    box-shadow: $al-glow-primary-hv;
+  }
+}
+
+// Gold — ceremonial, for narrative CTAs (Start Game, Replay, Tutorial Next,
+// Reveal). Only THIS variant keeps the shimmer sweep, since it's the
+// moment we want the player's eye.
+@mixin al-btn-gold {
+  @include al-btn-base;
+  @include al-btn-shimmer;
+  & {
+    background: $al-grad-gold;
+    color: $al-gold-text;
+    font-family: $al-font-header;
+    font-weight: 700;
+    box-shadow: $al-glow-gold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  &:hover:not(:disabled) {
+    background: $al-grad-gold-hv;
+    box-shadow: $al-glow-gold-hv;
+  }
+}
+
+// Secondary — neutral surface with subtle border (tokenized gold hint)
+@mixin al-btn-secondary {
+  @include al-btn-base;
+  & {
+    background: $al-bg-hover;
+    color: $al-text-dim;
+    border: 1px solid $al-border-subtle;
+    text-shadow: none;
+  }
+  &:hover:not(:disabled) {
+    background: rgba(201, 168, 98, 0.1);
+    border-color: $al-gold-border;
+    color: $al-text;
+  }
+}
+
+// Ghost — pure text, minimal visual weight
+@mixin al-btn-ghost {
+  @include al-btn-base;
+  & {
+    background: none;
+    color: $al-text-mute;
+    font-size: 0.824rem;
+    padding: 0.471rem 0.706rem;
+    text-shadow: none;
+  }
+  &:hover:not(:disabled) {
+    color: $al-gold-hot;
+    background: $al-bg-subtle;
+  }
+}
+
+// Blood — destructive / lynch / kick. Werewolf wine red.
+@mixin al-btn-blood {
+  @include al-btn-base;
+  & {
+    background: $al-grad-blood;
+    color: #fff;
+    box-shadow: $al-glow-blood;
+  }
+  &:hover:not(:disabled) {
+    background: $al-grad-blood-hv;
+    box-shadow: $al-glow-blood-hv;
+  }
+}
+
+// Legacy alias: al-btn-danger now renders as blood
+@mixin al-btn-danger {
+  @include al-btn-blood;
+}
+
+// ─────────────────────────────────────────────
+// CARDS / PANELS / DIALOGS
+// ─────────────────────────────────────────────
+
+// Unified card — use for Setup, GameOver, Tutorial, RoleReveal, Menu dialogs
+@mixin al-card {
+  background: $al-grad-panel;
+  border: 1px solid $al-border-subtle;
+  border-radius: $al-radius-lg;
+  box-shadow: $al-shadow-panel;
+  backdrop-filter: blur($al-blur-strong);
+  -webkit-backdrop-filter: blur($al-blur-strong);
+}
+
+// Lifted card — slightly lighter for nested panels
+@mixin al-card-lite {
+  background: $al-grad-panel-lite;
+  border: 1px solid $al-border-subtle;
+  border-radius: $al-radius-md;
+  box-shadow: $al-shadow-card;
+}
+
+// Accent card — with gold border for ceremonial content (role reveal, last will)
+@mixin al-card-accent {
+  @include al-card;
+  & {
+    border-color: $al-gold-border;
+    box-shadow: $al-shadow-panel, 0 0 32px $al-gold-glow;
+  }
+}
+
+// Dialog — centered overlay card (help, confirm, survey)
+@mixin al-dialog {
+  @include al-card;
+  & {
+    padding: 1.412rem 1.647rem;
+    max-width: 32rem;
+    width: min(92vw, 32rem);
+  }
+}
+
+// ─────────────────────────────────────────────
+// OVERLAYS — full-screen backdrops
+// ─────────────────────────────────────────────
+
+// Vignette backdrop — for modal overlays (RoleReveal, GameOver curtain)
+@mixin al-overlay {
+  position: fixed;
+  inset: 0;
+  background: $al-vignette;
+  backdrop-filter: blur($al-blur);
+  -webkit-backdrop-filter: blur($al-blur);
+  z-index: $al-z-overlay;
+}
+
+// Dialog overlay (dimmer, still blur)
+@mixin al-overlay-dialog {
+  position: fixed;
+  inset: 0;
+  background: $al-veil;
+  backdrop-filter: blur($al-blur-soft);
+  -webkit-backdrop-filter: blur($al-blur-soft);
+  z-index: $al-z-dialog;
+}
+
+// ─────────────────────────────────────────────
+// TYPOGRAPHY HELPERS
+// ─────────────────────────────────────────────
+
+// Ceremonial title — Cinzel with gold + tracking
+@mixin al-title($size: 1.4rem) {
+  font-family: $al-font-header;
+  font-size: $size;
+  font-weight: 700;
+  letter-spacing: $al-track-title;
+  color: $al-gold;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 205, 130, 0.25);
+}
+
+// Section label — small caps, dim
+@mixin al-label {
+  font-family: $al-font-body;
+  font-size: 0.706rem;
+  font-weight: 600;
+  letter-spacing: $al-track-label;
+  text-transform: uppercase;
+  color: $al-text-mute;
+}
+
+// Ceremonial label — gold variant for key sections
+@mixin al-label-gold {
+  @include al-label;
+  color: $al-gold-hot;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+// ─────────────────────────────────────────────
+// SURFACE DETAILS — subtle visual flair
+// ─────────────────────────────────────────────
+
+// Parchment noise texture overlay (from App.scss — reused across panels)
+@mixin al-panel-texture {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+    mix-blend-mode: overlay;
+    opacity: 0.4;
+    z-index: 0;
+  }
+  & > * { position: relative; z-index: 1; }
+}
+
+// Gold glow halo (for reveal moments, titles)
+@mixin al-halo-gold {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background: radial-gradient(ellipse at center, $al-gold-glow-strong, transparent 70%);
+    filter: blur(20px);
+    z-index: -1;
+    pointer-events: none;
+  }
+}

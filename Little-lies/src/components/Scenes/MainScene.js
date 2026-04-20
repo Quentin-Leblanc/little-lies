@@ -26,6 +26,7 @@ import WindLeaves from './Atmosphere/WindLeaves';
 import NightEmbers from './Atmosphere/NightEmbers';
 import GroundFog from './Weather/GroundFog';
 import VillageFogWall from './Weather/VillageFogWall';
+import HorizonMist from './Weather/HorizonMist';
 import NightRain from './Weather/NightRain';
 import NightLightning from './Weather/NightLightning';
 import TrialStormLighting from './Weather/TrialStormLighting';
@@ -600,6 +601,12 @@ const MainScene = () => {
                       low-visibility wall the old build always drew. */}
                   {(isMisty || isRainyDay) && <GroundFog isDay />}
                   {(isMisty || isRainyDay) && <VillageFogWall isDay />}
+                  {/* Always-on horizon haze — sits far past the village
+                      between the mountain rings so the far horizon
+                      always fades into fog, never shows a visible scene
+                      edge. Cheap because the Clouds instancer shares one
+                      draw call. */}
+                  <HorizonMist isDay />
                   {isSunny && <DayRabbits count={8} />}
                   {isRainyDay && <NightRain count={220} />}
                   {isRainyDay && <NightLightning />}
@@ -645,6 +652,7 @@ const MainScene = () => {
                       ground. */}
                   {(isFoggy || isRainy) && <GroundFog isDay={false} />}
                   <VillageFogWall isDay={false} />
+                  <HorizonMist isDay={false} />
                   {/* Crow count climbs with deaths — 4 base, +1 per
                       death, capped at 10 so overdraw stays reasonable. */}
                   <NightCrows count={Math.min(4 + deathsCount, 10)} />

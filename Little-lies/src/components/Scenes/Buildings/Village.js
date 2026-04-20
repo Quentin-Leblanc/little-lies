@@ -6,11 +6,13 @@ import MeshyModel from '../Props/MeshyModel';
 import KenneyModel from '../Props/KenneyModel';
 import FireCircle from '../Props/FireCircle';
 import DarkMountain from '../Environment/DarkMountain';
+import DistantTree from '../Environment/DistantTree';
 import LowPolyFence from '../Environment/LowPolyFence';
 import LowPolyRiver from '../Environment/LowPolyRiver';
 import LowPolyBridge from '../Environment/LowPolyBridge';
 import {
-  BUILDING_POSITIONS, MOUNTAINS, TORCH_POS, TREE_POSITIONS,
+  BUILDING_POSITIONS, MOUNTAINS_NEAR, MOUNTAINS_MID, MOUNTAINS_FAR,
+  DISTANT_TREES, TORCH_POS, TREE_POSITIONS,
   ROCK_POSITIONS, FENCE_SEGMENTS,
   MESHY_TREE, MESHY_BOARD, MESHY_SKULL, MESHY_RING,
   MESHY_OBELISK,
@@ -57,8 +59,23 @@ const Village = React.memo(({ isDay, isTrialPhase, gameSeed = 0 }) => {
       <SkullLantern key={`lantern-${i}`} position={pos} rotation={[0, i * Math.PI / 2, 0]} scale={1.2} />
     ))}
 
-    {MOUNTAINS.map((m, i) => (
-      <DarkMountain key={`mountain-${i}`} position={m.position} scale={m.scale * 1.2} variant={i} />
+    {/* 3 concentric mountain rings — near detailed, mid taller, far
+        gigantic and haze-washed. Tones lighten toward the horizon so the
+        mountains feel like they recede into atmospheric perspective. */}
+    {MOUNTAINS_NEAR.map((m, i) => (
+      <DarkMountain key={`mtn-near-${i}`} position={m.position} scale={m.scale * 1.2} variant={m.variant ?? i} tone="near" />
+    ))}
+    {MOUNTAINS_MID.map((m, i) => (
+      <DarkMountain key={`mtn-mid-${i}`} position={m.position} scale={m.scale * 1.2} variant={m.variant ?? i} tone="mid" />
+    ))}
+    {MOUNTAINS_FAR.map((m, i) => (
+      <DarkMountain key={`mtn-far-${i}`} position={m.position} scale={m.scale * 1.2} variant={m.variant ?? i} tone="far" />
+    ))}
+
+    {/* Mid-ground forest ring — procedural firs filling the gap between
+        cottages and the near mountains. */}
+    {DISTANT_TREES.map((t, i) => (
+      <DistantTree key={`dt-${i}`} position={t.position} scale={t.scale} variant={t.variant} isDay={isDay} />
     ))}
 
     {TREE_POSITIONS.map((pos, i) => (

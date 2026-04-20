@@ -1,4 +1,5 @@
 @import '../../styles/variables';
+@import '../../styles/mixins';
 @import '../../styles/global';
 
 .player-container {
@@ -30,12 +31,12 @@
   padding-bottom: 0.706rem;
   margin-bottom: 0.353rem;
   text-align: left;
-  border-radius: 0.588rem;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(3px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: $al-radius-md;
+  background: $al-grad-panel;
+  backdrop-filter: blur($al-blur-soft);
+  border: 1px solid $al-gold-border;
   flex-shrink: 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: $al-shadow-card;
   // Widened from 26rem so the 3 cells (description / objective / abilities)
   // each have room to breathe now that they have their own card framing.
   // Still caps below the sidebar (40vw ≈ 32rem at 1440w) and the inner
@@ -111,10 +112,6 @@
   z-index: 5;
 
   .role-details-btn {
-    // Explicit box-sizing + padding:0 so the default user-agent button
-    // padding (asymmetric L/R vs T/B) doesn't stretch the circle into an
-    // oval. Flex:none locks the circle against being squished by the
-    // parent flex row on narrow viewports.
     box-sizing: border-box;
     flex: 0 0 auto;
     padding: 0;
@@ -122,29 +119,26 @@
     width: 1.529rem;
     height: 1.529rem;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    color: #ffffff;
+    background: rgba(201, 168, 98, 0.1);
+    border: 1px solid $al-gold-border-hv;
+    color: $al-gold-hot;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.82rem;
     font-family: inherit;
-    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s;
 
     &:hover,
     .role-details-toggle.open & {
-      background: rgba(255, 255, 255, 0.24);
-      border-color: #ffffff;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-      transform: scale(1.06);
+      background: rgba(201, 168, 98, 0.2);
+      border-color: $al-gold;
+      box-shadow: 0 0 12px rgba(201, 168, 98, 0.5);
+      color: $al-gold-soft;
     }
   }
 
-  // Tooltip opens DOWN and toward the LEFT (right:0 anchor) so it never
-  // clips off the right side of the sidebar. max-width collapses to the
-  // viewport width on narrow screens to avoid horizontal overflow.
   .role-details-tooltip {
     position: absolute;
     top: calc(100% + 0.47rem);
@@ -152,16 +146,15 @@
     width: 32rem;
     max-width: calc(100vw - 2rem);
     padding: 0.824rem 0.941rem;
-    background: linear-gradient(180deg, rgba(22, 22, 32, 0.98), rgba(14, 14, 22, 0.98));
-    border: 1px solid rgba(255, 215, 120, 0.32);
-    border-radius: 0.412rem;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-    z-index: 1000;
+    background: $al-grad-panel;
+    border: 1px solid $al-gold-border-hv;
+    border-radius: $al-radius-sm;
+    box-shadow: $al-shadow-panel;
+    z-index: $al-z-dialog;
     animation: role-tooltip-fade 0.2s ease-out;
     text-align: left;
-    color: #e6e6e6;
+    color: $al-text;
 
-    // Small triangle notch pointing up to the trigger button.
     &::before {
       content: '';
       position: absolute;
@@ -169,9 +162,9 @@
       right: 0.412rem;
       width: 0.706rem;
       height: 0.706rem;
-      background: rgba(22, 22, 32, 0.98);
-      border-left: 1px solid rgba(255, 215, 120, 0.32);
-      border-top: 1px solid rgba(255, 215, 120, 0.32);
+      background: rgba(22, 16, 12, 0.98);
+      border-left: 1px solid $al-gold-border-hv;
+      border-top: 1px solid $al-gold-border-hv;
       transform: rotate(45deg);
     }
   }

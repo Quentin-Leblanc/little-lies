@@ -224,20 +224,21 @@
   z-index: 750;
   pointer-events: none;
   padding: 0.35rem 0.85rem;
-  background: rgba(20, 20, 40, 0.78);
-  color: #aab5d8;
-  border: 1px solid rgba(150, 170, 230, 0.35);
+  background: rgba(20, 12, 8, 0.85);
+  color: $al-gold-soft;
+  border: 1px solid $al-gold-border;
   border-radius: 1rem;
   font-size: 0.82rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-family: $al-font-header;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   backdrop-filter: blur(4px);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 
-  i { font-size: 0.78rem; color: #8ec3ff; }
+  i { font-size: 0.78rem; color: $al-gold-hot; }
 }
 
 .phase-banner {
@@ -317,9 +318,9 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 15;
-  background: rgba(10, 10, 16, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ccc;
+  background: rgba(14, 10, 8, 0.88);
+  border: 1px solid $al-gold-border;
+  color: $al-gold-soft;
   width: 2.118rem;
   height: 2.118rem;
   border-radius: 50%;

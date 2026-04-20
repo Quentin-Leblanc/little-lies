@@ -1,4 +1,5 @@
 @import '../../styles/variables';
+@import '../../styles/mixins';
 @import '../../styles/global';
 
 /* Menu — single compact bar */
@@ -193,20 +194,21 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.62);
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur($al-blur-soft);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: $al-z-dialog;
   animation: dialog-fade-in 0.25s ease-out;
 }
 
 %ll-dialog-panel {
-  background: linear-gradient(180deg, rgba(22, 22, 32, 0.98) 0%, rgba(14, 14, 22, 0.98) 100%);
-  border: 1px solid rgba(255, 205, 130, 0.22);
-  border-radius: 0.706rem;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.4) inset;
-  font-family: 'Inter', 'Chakra Petch', sans-serif;
+  background: $al-grad-panel;
+  border: 1px solid $al-gold-border;
+  border-radius: $al-radius-md;
+  box-shadow: $al-shadow-panel, inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur($al-blur-strong);
+  font-family: $al-font-body;
   color: #d6d6d6;
   text-align: left;
   animation: dialog-slide-in 0.3s ease-out;
@@ -215,18 +217,18 @@
   max-height: 82vh;
 
   h2 {
-    font-family: 'Cinzel', serif;
+    font-family: $al-font-header;
     font-size: 1.176rem;
     margin: 0;
-    color: #f3cc74;
-    letter-spacing: 0.082rem;
+    color: $al-gold;
+    letter-spacing: $al-track-label;
   }
 
   h3 {
-    font-family: 'Cinzel', serif;
+    font-family: $al-font-header;
     font-size: 0.941rem;
     margin: 1.059rem 0 0.471rem;
-    color: #e5c37b;
+    color: $al-gold-rich;
     letter-spacing: 0.047rem;
     padding-bottom: 0.235rem;
     border-bottom: 1px solid rgba(255, 205, 130, 0.15);

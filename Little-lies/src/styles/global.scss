@@ -69,36 +69,39 @@ html, body, #root {
 .App {
     height: 100%;
 }
+// Native button default — kept deliberately unstyled-ish so utility
+// buttons look like they belong in the werewolf UI without having to
+// tokenize every single one. Component-level buttons override via mixins.
 button {
-    background-color: #2b2b2b;
-    color: #f0f0f0;
-    border: 2px solid #444;
+    background-color: #1a1410;
+    color: $al-text;
+    border: 1px solid rgba(201, 168, 98, 0.18);
     padding: 0.588rem 1.176rem;
     font-size: 0.941rem;
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: $al-font-body;
     text-transform: capitalize;
-    border-radius: 0.471rem;
+    border-radius: $al-radius-sm;
     cursor: pointer;
     transition: all 0.25s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
     margin: 0.294rem;
 
     &:hover {
-        background-color: #1f1f1f;
-        border-color: #222;
+        background-color: #241b14;
+        border-color: rgba(201, 168, 98, 0.35);
     }
 
     &:active {
-        background-color: #555;
+        background-color: #0e0a06;
         box-shadow: none;
-        transform: translateY(0);
+        transform: translateY(1px);
     }
 
     &:disabled {
-        background-color: #454545;
-        color: #888888;
+        background-color: #2a2420;
+        color: #666;
         cursor: not-allowed;
-        border-color: #666;
+        border-color: #3a332c;
     }
 }
 
@@ -147,9 +150,12 @@ h1, h2 {
     }
 }
 .close-button, .primaryBtn {
-    background: $blue;
+    background: $al-grad-gold;
+    color: $al-gold-text;
+    border-color: transparent;
     &:hover {
-        background: $darkBlue;
+        background: $al-grad-gold-hv;
+        border-color: transparent;
     }
 }
 

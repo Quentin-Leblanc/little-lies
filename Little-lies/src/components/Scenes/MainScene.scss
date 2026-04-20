@@ -175,32 +175,38 @@
   white-space: nowrap;
 }
 
+// In-scene judge buttons — SAVE (mossy green) vs LYNCH (blood). No scale,
+// hover only shifts the tone + adds a colored glow ring.
 .judge-btn {
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(201, 168, 98, 0.35);
   border-radius: 0.353rem;
   padding: 0.235rem 0.706rem;
   font-size: 0.706rem;
   font-family: 'Cinzel', serif;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   color: white;
-
-  &:hover {
-    transform: scale(1.1);
-  }
 }
 
 .judge-save {
-  background: rgba(68, 255, 68, 0.8);
-  color: black;
-  &:hover { background: rgba(68, 255, 68, 1); }
+  background: #6a9a4e;
+  color: #0f1208;
+  &:hover {
+    background: #7db15c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 14px rgba(122, 154, 104, 0.45);
+    border-color: rgba(140, 180, 120, 0.7);
+  }
 }
 
 .judge-lynch {
-  background: rgba(255, 68, 68, 0.8);
-  &:hover { background: rgba(255, 68, 68, 1); }
+  background: #8b1a1a;
+  &:hover {
+    background: #a02828;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 14px rgba(139, 26, 26, 0.55);
+    border-color: #a02828;
+  }
 }
 
 /* Phase announcement overlay — with subtle background for readability */
@@ -226,21 +232,25 @@
   font-family: 'Cinzel', serif;
   font-size: 1.529rem;
   font-weight: 700;
-  color: #eee;
+  color: #f0e4c8;
   padding: 0.824rem 2.118rem;
-  background: rgba(0, 0, 0, 0.7);
+  background: linear-gradient(160deg, rgba(22, 16, 12, 0.85) 0%, rgba(8, 6, 5, 0.9) 100%);
+  border: 1px solid rgba(201, 168, 98, 0.22);
   border-radius: 0.471rem;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
   animation: announcement-fade-in 0.5s ease-out;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 
   &.announcement-spared {
-    color: #78ff78;
-    background: rgba(0, 40, 0, 0.7);
+    color: #a8c68c;
+    background: linear-gradient(160deg, rgba(32, 40, 22, 0.85) 0%, rgba(14, 18, 10, 0.9) 100%);
+    border-color: rgba(122, 154, 104, 0.35);
   }
 
   &.announcement-execution {
-    color: #ff6666;
-    background: rgba(40, 0, 0, 0.7);
+    color: #e5a5a5;
+    background: linear-gradient(160deg, rgba(60, 14, 14, 0.85) 0%, rgba(28, 8, 8, 0.9) 100%);
+    border-color: rgba(139, 26, 26, 0.4);
   }
 
   &.announcement-report {
@@ -374,7 +384,7 @@
   border-width: 2px;
   border-style: solid;
   border-radius: 1rem;
-  background: linear-gradient(160deg, rgba(15, 15, 25, 0.94), rgba(8, 8, 18, 0.97));
+  background: linear-gradient(160deg, rgba(22, 16, 12, 0.95) 0%, rgba(8, 6, 5, 0.97) 100%);
   backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
@@ -387,10 +397,10 @@
   font-family: 'Cinzel', serif;
   font-size: 2rem;
   font-weight: 800;
-  color: #ff6666;
+  color: #c23a3a;
   letter-spacing: 0.14rem;
   text-align: center;
-  text-shadow: 0 0 18px rgba(255, 100, 100, 0.35), 0 2px 10px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 20px rgba(139, 26, 26, 0.6), 0 2px 10px rgba(0, 0, 0, 0.9);
   line-height: 1.15;
 }
 
@@ -739,13 +749,15 @@
   font-family: 'Cinzel', serif;
   font-size: 1.294rem;
   font-style: italic;
-  color: rgba(200, 210, 240, 0.9);
+  color: rgba(232, 212, 154, 0.85);
   padding: 0.706rem 1.765rem;
-  background: rgba(0, 0, 15, 0.5);
+  background: linear-gradient(160deg, rgba(12, 8, 5, 0.7) 0%, rgba(4, 3, 2, 0.8) 100%);
+  border: 1px solid rgba(201, 168, 98, 0.18);
   border-radius: 0.353rem;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
   max-width: 80%;
   text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 /* Night → Day: fade to black at end of night */
@@ -835,13 +847,20 @@
 
 // Scoped to ambient night messages only — day "le village se lève" and
 // phase transition ("La nuit tombe") keep their larger impact size.
+// Overrides the parent .night-text-content font-family: Cinzel. Cinzel
+// ships with only uppercase glyphs, which visually capsed every random
+// night phrase ("UN CHAT NOIR TRAVERSE..."). We want those phrases to
+// render as the mixed-case sentences they are in the JSON source, but
+// the bigger phase-transition texts still use Cinzel for impact.
 .night-text-ambiance {
+  font-family: 'Georgia', 'Times New Roman', serif;
   font-size: 0.95rem;
   font-style: italic;
-  letter-spacing: 0.09rem;
+  letter-spacing: 0.04rem;
   padding: 0.45rem 1rem;
   color: rgba(180, 200, 230, 0.78);
   font-weight: 500;
+  text-transform: none;
 }
 
 @keyframes night-text-anim {

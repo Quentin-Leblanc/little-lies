@@ -1,4 +1,5 @@
 @import '../../styles/variables';
+@import '../../styles/mixins';
 
 // ── Setup Screen ──
 .setup-screen {
@@ -12,14 +13,10 @@
 }
 
 .setup-card {
+  @include al-card;
   width: 100%;
   max-width: 51.765rem;
-  background: linear-gradient(160deg, rgba(15, 15, 25, 0.92), rgba(8, 8, 18, 0.96));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.176rem;
   padding: 1.882rem 2.118rem;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
 }
 
 // ── Header ──
@@ -390,34 +387,31 @@
 }
 
 .start-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.588rem;
-  padding: 0.824rem 2.118rem;
-  font-size: 0.95rem;
-  font-family: 'Cinzel', serif;
-  font-weight: 700;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.824rem;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.3);
-  cursor: not-allowed;
-  transition: all 0.3s;
-  letter-spacing: 0.5px;
+  @include al-btn-base;
+  & {
+    padding: 0.824rem 2.118rem;
+    font-size: 0.95rem;
+    font-family: $al-font-header;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: $al-radius-md;
+    background: $al-bg-subtle;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: not-allowed;
+  }
 
   i { font-size: 0.8rem; }
 
   &.ready {
-    background: linear-gradient(135deg, rgba(47, 130, 255, 0.2), rgba(47, 130, 255, 0.35));
-    border-color: rgba(47, 130, 255, 0.5);
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(47, 130, 255, 0.2);
-
-    &:hover {
-      background: linear-gradient(135deg, rgba(47, 130, 255, 0.3), rgba(47, 130, 255, 0.5));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 30px rgba(47, 130, 255, 0.3);
+    @include al-btn-primary;
+    & {
+      padding: 0.824rem 2.118rem;
+      font-size: 0.95rem;
+      font-family: $al-font-header;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border-radius: $al-radius-md;
     }
   }
 

@@ -5,7 +5,6 @@ import * as THREE from 'three';
 import {
   NIGHT_CAMERA_WAYPOINTS,
   DAY_ORBIT_CAMERAS,
-  DISCUSSION_CAMERA_CYCLE_MS,
   INTRO_CINEMATICS,
   JUDGMENT_CAMERA_POS, JUDGMENT_CAMERA_LOOK,
   EXECUTION_CAMERA_POS, EXECUTION_CAMERA_LOOK,
@@ -20,10 +19,11 @@ import { pushCameraOutOfObstacles } from '../utils';
 //   so back-to-back nights never replay the same shot and the whole pool
 //   is used before anything repeats.
 // - Trial (defense/judgment/last-words/execution): zoom on podium
-// - Day / other: continuous slow orbit around the plaza. During
-//   DISCUSSION specifically, the orbit camera cycles through the pool
-//   every DISCUSSION_CAMERA_CYCLE_MS so a 30s debate isn't locked to a
-//   single angle.
+// - Day / other: ONE slow orbit camera for the entire day, picked per
+//   dayCount so the angle still rotates match-to-match / day-to-day, but
+//   never changes mid-day. VOTING gets a subtle zoom-in (radius * 0.78,
+//   height * 0.9) and a small angle nudge on top of that same cam so the
+//   phase reads as "closer / more tense" without cutting to a new shot.
 // Pushes the target and interpolated position out of the church & gallows
 // obstacle spheres so the camera never ends up inside a model.
 const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null, playerCount = 0, gameSeed = 0 }) => {
@@ -39,7 +39,6 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
   const prevDeathFocusRef = useRef(null);
   const introTimeRef = useRef(0);
   const prevShotRef = useRef(0);
-  const prevDayOrbitIdxRef = useRef(-1);
   // Scratch object the INTRO_CINEMATICS run() callbacks mutate. Kept as
   // a ref so we don't allocate a Vector3 per frame.
   const introOut = useRef({ pos: new THREE.Vector3(), lookAt: new THREE.Vector3(), shot: 0 });
@@ -210,7 +209,12 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
       );
       targetLookAt.current.set(bx, 0.35, bz);
     } else {
-      // Day phases: continuous very slow orbit around the plaza.
+      // Day phases: ONE continuous slow orbit around the plaza — same
+      // cam for the entire day (DEATH_REPORT → DISCUSSION → VOTING →
+      // NO_LYNCH / SPARED). Pick rotates per dayCount + roomSeed so
+      // angle still varies match-to-match and day-to-day, never within
+      // a day. No hard cuts between day phases.
+      //
       // Use accumulated delta (not Date.now) so the orbit pauses cleanly
       // when the tab is hidden rather than snapping forward when it comes
       // back — matches what everyone else is seeing if they're also active.
@@ -218,44 +222,24 @@ const CameraController = ({ phase, CONSTANTS, dayCount = 0, deathFocusPos = null
       // Full 360° loop: orbitAngle is a strictly-increasing scalar, and
       // sin/cos wrap naturally through 2π — no clamp, no flip, no reset.
       //
-      // Camera choice rotates per day through DAY_ORBIT_CAMERAS. During
-      // DISCUSSION (the 30s debate phase) we further rotate the pick
-      // every DISCUSSION_CAMERA_CYCLE_MS so a long phase doesn't lock
-      // on a single angle — the cut keeps the scene alive when nobody
-      // is moving. For other day phases (DEATH_REPORT, NO_LYNCH, SPARED)
-      // we stay on the per-day pick because those phases are short and
-      // a mid-phase cut would feel like a glitch.
+      // VOTING: subtle zoom-in on the SAME cam — radius shrinks 22%,
+      // height drops 10%, lookY lifts a touch, plus a small angle nudge.
+      // The outer lerp (speed 0.02) eases into the new pose over ~1s so
+      // it reads as "camera leans in" rather than a cut.
       dayOrbitTimeRef.current += delta;
       const pool = DAY_ORBIT_CAMERAS;
-      const baseIdx = ((dayCount * 3 + 1 + roomSeed) % pool.length + pool.length) % pool.length;
-      let idx = baseIdx;
-      if (phase === CONSTANTS.PHASE.DISCUSSION) {
-        // Use accumulated time (same clock as orbit) so clients that
-        // entered DISCUSSION at slightly different wall-clock times
-        // still cycle through the same offsets from their local
-        // phase-entry — imperfect sync, but close enough that shots
-        // feel similar across screens.
-        const cycleStep = Math.floor((dayOrbitTimeRef.current * 1000) / DISCUSSION_CAMERA_CYCLE_MS);
-        idx = ((baseIdx + cycleStep) % pool.length + pool.length) % pool.length;
-      }
+      const idx = ((dayCount * 3 + 1 + roomSeed) % pool.length + pool.length) % pool.length;
       const cam = pool[idx];
-      const orbitAngle = dayOrbitTimeRef.current * cam.speed + cam.phaseOffset;
-      const orbitX = Math.sin(orbitAngle) * cam.radius;
-      const orbitZ = Math.cos(orbitAngle) * cam.radius;
-      // Snap camera on DISCUSSION mid-phase cuts so the new angle lands
-      // as a real edit, not a long lerp through the plaza. Skip the
-      // snap on phase entry (prev != DISCUSSION) so the transition from
-      // DEATH_REPORT or any other phase still lerps in smoothly.
-      if (
-        phase === CONSTANTS.PHASE.DISCUSSION &&
-        prevPhaseRef.current === CONSTANTS.PHASE.DISCUSSION &&
-        prevDayOrbitIdxRef.current !== idx
-      ) {
-        camera.position.set(orbitX, cam.height, orbitZ);
-      }
-      prevDayOrbitIdxRef.current = idx;
-      targetPos.current.set(orbitX, cam.height, orbitZ);
-      targetLookAt.current.set(0, cam.lookY, 0);
+      const isVoting = phase === CONSTANTS.PHASE.VOTING;
+      const radius = cam.radius * (isVoting ? 0.78 : 1);
+      const height = cam.height * (isVoting ? 0.9 : 1);
+      const lookY = cam.lookY + (isVoting ? 0.25 : 0);
+      const angleNudge = isVoting ? 0.35 : 0;
+      const orbitAngle = dayOrbitTimeRef.current * cam.speed + cam.phaseOffset + angleNudge;
+      const orbitX = Math.sin(orbitAngle) * radius;
+      const orbitZ = Math.cos(orbitAngle) * radius;
+      targetPos.current.set(orbitX, height, orbitZ);
+      targetLookAt.current.set(0, lookY, 0);
     }
 
     if (!isTrialCamera && !isDeathCinematic) {

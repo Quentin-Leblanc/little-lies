@@ -1,3 +1,6 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
 // === GAME OVER — Premium cinematic screen ===
 
 // Intermediate 3D-scene reveal: shown for ~5s right after the game ends so
@@ -586,51 +589,39 @@
 }
 
 .go-btn {
-  padding: 0.588rem 1.294rem;
-  border-radius: 0.588rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-
-  &:active { transform: scale(0.97); }
-}
-
-.go-btn-primary {
-  background: linear-gradient(135deg, #2f82ff 0%, #0d5fcc 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(47, 130, 255, 0.3);
-
-  &:hover {
-    box-shadow: 0 6px 20px rgba(47, 130, 255, 0.45);
-    transform: translateY(-1px);
+  @include al-btn-base;
+  & {
+    padding: 0.588rem 1.294rem;
+    font-size: 0.9rem;
   }
-
   i { margin-right: 0.353rem; }
 }
 
+// Replay = ceremonial primary action (gold, strongest visual weight)
 .go-btn-replay {
-  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-
-  &:hover {
-    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.45);
-    transform: translateY(-1px);
+  @include al-btn-gold;
+  & {
+    padding: 0.588rem 1.294rem;
+    font-size: 0.9rem;
   }
+  i { margin-right: 0.353rem; }
+}
 
+// Primary = return to lobby (blue, secondary-importance action)
+.go-btn-primary {
+  @include al-btn-primary;
+  & {
+    padding: 0.588rem 1.294rem;
+    font-size: 0.9rem;
+  }
   i { margin-right: 0.353rem; }
 }
 
 .go-btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  color: #999;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ccc;
+  @include al-btn-secondary;
+  & {
+    padding: 0.588rem 1.294rem;
+    font-size: 0.9rem;
   }
 }
 

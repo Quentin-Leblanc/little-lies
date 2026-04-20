@@ -1,7 +1,8 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
 .tutorial-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  @include al-overlay-dialog;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,15 +11,13 @@
 }
 
 .tutorial-dialog {
-  background: linear-gradient(180deg, rgba(22, 22, 32, 0.98) 0%, rgba(14, 14, 22, 0.98) 100%);
-  border: 1px solid rgba(255, 205, 130, 0.28);
-  border-radius: 0.706rem;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  @include al-card;
+  border-color: $al-gold-border-hv;
   width: 92%;
   max-width: 32rem;
   padding: 1.412rem 1.647rem;
-  color: #e0e0e0;
-  font-family: 'Inter', 'Chakra Petch', sans-serif;
+  color: $al-text;
+  font-family: $al-font-body;
   animation: tutorial-slide-in 0.3s ease-out;
   display: flex;
   flex-direction: column;
@@ -116,33 +115,31 @@
 }
 
 .tutorial-btn {
-  padding: 0.471rem 1.059rem;
-  border-radius: 0.353rem;
-  cursor: pointer;
-  font-size: 0.941rem;
-  font-weight: 600;
-  transition: all 0.15s;
-  border: 1px solid transparent;
-  font-family: inherit;
-
+  @include al-btn-base;
+  & {
+    padding: 0.471rem 1.059rem;
+    font-size: 0.941rem;
+  }
   i { margin: 0 0.235rem; }
 }
 
 .tutorial-btn-primary {
-  background: linear-gradient(180deg, #e5b65e, #b08040);
-  color: #1a1408;
-  border-color: #d4a050;
-  margin-left: auto;
-
-  &:hover { background: linear-gradient(180deg, #f5c670, #c09050); transform: translateY(-1px); }
+  @include al-btn-gold;
+  & {
+    padding: 0.471rem 1.059rem;
+    font-size: 0.941rem;
+    margin-left: auto;
+  }
+  i { margin: 0 0.235rem; }
 }
 
 .tutorial-btn-ghost {
-  background: rgba(255, 255, 255, 0.05);
-  color: #b8b8b8;
-  border-color: rgba(255, 255, 255, 0.15);
-
-  &:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+  @include al-btn-secondary;
+  & {
+    padding: 0.471rem 1.059rem;
+    font-size: 0.941rem;
+  }
+  i { margin: 0 0.235rem; }
 }
 
 .tutorial-hint {
