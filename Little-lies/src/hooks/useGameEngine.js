@@ -454,11 +454,12 @@ export const GameEngineProvider = ({ children }) => {
     // timestamp automatically invalidates the previous match's flags —
     // no explicit clear needed.
 
-    // Game opens on INTRO_CINEMATIC — a 6s wordless camera fly-over so
-    // new players can see the village they're about to debate in before
-    // the first Discussion kicks in. The cinematic feeds straight into
-    // DISCUSSION via phaseTransitions; we deliberately skip the usual
-    // 15s shortened day-1 window since the intro already buys that time.
+    // Game opens on INTRO_CINEMATIC (Night 0) — a wordless camera
+    // fly-over while players walk in to the village. The cinematic
+    // feeds into DISCUSSION (Day 1) via phaseTransitions, which flips
+    // isDay=true and bumps dayCount 0 → 1 at that boundary.
+    // Rationale: the intro reads as "players arriving under moonlight"
+    // narratively, then the first day starts when they're seated.
     setGame({
       ...game,
       status: STATUS.STARTED,
@@ -468,8 +469,8 @@ export const GameEngineProvider = ({ children }) => {
       gameStartedAt: Date.now(),
       isGameStarted: true,
       isGameSetup: false,
-      isDay: true,
-      dayCount: 1,
+      isDay: false,
+      dayCount: 0,
       trialsToday: 0,
       accusedId: null,
       winner: null,

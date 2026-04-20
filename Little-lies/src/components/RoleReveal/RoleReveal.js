@@ -45,33 +45,33 @@ const useTypewriter = (text, speed = 40, startDelay = 0) => {
 
 // Card glow particles. Positions/sizes/delays MUST be memoized once per
 // mount — previously they were recomputed on every parent re-render so
-// particles teleported around the card mid-reveal (typewriter text + ready
-// state changes were triggering the jumps).
+// particles teleported around the card mid-reveal.
 //
-// Two particle types mixed together give the reveal more "magical" depth:
-//  - round dots (the original glow) for ambient drift
-//  - cross-shape sparkles (CSS ::before/::after on `.card-sparkle`) that
-//    twinkle with a scale+rotate animation, echoing the star-cross flares
-//    you get in cinematic sword reveals.
+// Two particle types mixed together give the reveal magical depth:
+//  - round dots (ambient drift) — kept
+//  - diamond sparkles (4-pointed star via clip-path) — replaced the old
+//    cross/plus shape which read as a medical/math symbol. Diamonds feel
+//    more "enchanted card reveal". Spread is much wider than the card so
+//    particles drift in from the sides of the screen, not just the box.
 const CardParticles = ({ color }) => {
   const particles = useMemo(() => {
-    const dots = Array.from({ length: 18 }, (_, i) => ({
+    const dots = Array.from({ length: 28 }, (_, i) => ({
       id: `dot-${i}`,
       kind: 'dot',
-      x: (Math.random() - 0.5) * 320,
-      y: (Math.random() - 0.5) * 440,
+      x: (Math.random() - 0.5) * 720,
+      y: (Math.random() - 0.5) * 820,
       size: 2 + Math.random() * 4,
       delay: Math.random() * 2,
       duration: 2 + Math.random() * 3,
     }));
-    const sparkles = Array.from({ length: 10 }, (_, i) => ({
+    const sparkles = Array.from({ length: 22 }, (_, i) => ({
       id: `spark-${i}`,
       kind: 'sparkle',
-      x: (Math.random() - 0.5) * 340,
-      y: (Math.random() - 0.5) * 460,
-      size: 6 + Math.random() * 10,
-      delay: Math.random() * 2.5,
-      duration: 1.8 + Math.random() * 2,
+      x: (Math.random() - 0.5) * 780,
+      y: (Math.random() - 0.5) * 860,
+      size: 8 + Math.random() * 14,
+      delay: Math.random() * 3,
+      duration: 2 + Math.random() * 2.2,
     }));
     return [...dots, ...sparkles];
   }, []);
@@ -88,7 +88,7 @@ const CardParticles = ({ color }) => {
             width: p.size,
             height: p.size,
             '--sparkle-color': color,
-            backgroundColor: p.kind === 'sparkle' ? undefined : color,
+            backgroundColor: p.kind === 'sparkle' ? color : color,
             animationDelay: `${p.delay}s`,
             animationDuration: `${p.duration}s`,
           }}

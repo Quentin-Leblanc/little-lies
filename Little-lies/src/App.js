@@ -98,6 +98,12 @@ function App() {
     const [curtainVisible, setCurtainVisible] = useState(false);
     const [curtainClosed, setCurtainClosed] = useState(false);
     const [curtainReady, setCurtainReady] = useState(false); // true once curtain is fully closed
+    // Brief "La nuit tombe sur le village…" beat played ON the closed
+    // curtain between RoleReveal finishing and the curtain actually
+    // opening. Without it the cut from role card → live scene was abrupt:
+    // the reveal's own intro text appears too early (before the card) to
+    // serve as the bridge, so we explicitly show it here as a hand-off.
+    const [showNightFall, setShowNightFall] = useState(false);
 
     // When game starts → show curtain and close it, wait for it to finish
     useEffect(() => {
@@ -110,13 +116,23 @@ function App() {
         }
     }, [isGameStarted]);
 
-    // RoleReveal is done → remove overlay and open curtain immediately
+    // RoleReveal is done → play the "la nuit tombe" beat on the closed
+    // curtain, THEN open the curtain. Timeline (from reveal complete):
+    //   0.00s : reveal overlay unmounts, curtain still closed
+    //   0.15s : night-fall text fades in
+    //   2.80s : text fades out
+    //   3.10s : curtain slides open
+    //   4.30s : curtain element removed, tutorial armed
     const handleRoleRevealComplete = () => {
         setShowRoleReveal(false);
         writeRoleRevealSeen(true); // remember across F5 in this tab
-        // Open curtain right away
-        requestAnimationFrame(() => setCurtainClosed(false));
-        // Remove curtain element after opening animation (1s)
+        // Show the transition text right after the reveal unmounts so
+        // there's no black-screen dead time.
+        setTimeout(() => setShowNightFall(true), 150);
+        setTimeout(() => setShowNightFall(false), 2800);
+        // Open curtain after the text has faded out.
+        setTimeout(() => setCurtainClosed(false), 3100);
+        // Remove curtain element after opening animation (1s) — total 4.3s
         setTimeout(() => {
             setCurtainVisible(false);
             setCurtainReady(false);
@@ -127,7 +143,7 @@ function App() {
             if (!readGameTutorialSeen()) {
                 setGameTutorialArmed(true);
             }
-        }, 1200);
+        }, 4300);
     };
 
     // Spawn the tutorial once the setup cinematic ends (UI now visible).
@@ -225,6 +241,24 @@ function App() {
                     <div className="curtain-panel curtain-right" />
                 </div>
             )}
+
+            {/* "La nuit tombe sur le village…" — plays on top of the closed
+                black curtain, between RoleReveal finishing and the curtain
+                opening on the scene. Z-index above the curtain (2000). */}
+            <AnimatePresence>
+                {showNightFall && (
+                    <motion.div
+                        key="nightfall"
+                        className="nightfall-beat"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.7, ease: 'easeInOut' }}
+                    >
+                        <p className="nightfall-text">{i18n.t('setup:reveal.intro_text')}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Role reveal (loader + card) — shown only after curtain is
                 fully closed. Keeps rendering even after the game has

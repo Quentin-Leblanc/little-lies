@@ -373,3 +373,35 @@
     i { font-size: 1.412rem; }
   }
 }
+
+// ── "La nuit tombe sur le village…" beat on the closed curtain ──
+// Lives between the role-reveal close and the curtain opening. The
+// curtain itself is z-index 2000; this beat sits just above it (2010)
+// so the text appears on a fully black backdrop. Pure text, no bg.
+.nightfall-beat {
+  position: fixed;
+  inset: 0;
+  z-index: 2010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 0 1.2rem;
+}
+
+.nightfall-text {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.2rem, 3.2vw, 2rem);
+  font-weight: 600;
+  color: #d9cfbf;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8), 0 0 24px rgba(180, 150, 90, 0.18);
+  margin: 0;
+  animation: nightfall-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes nightfall-breathe {
+  0%, 100% { opacity: 0.85; letter-spacing: 0.14em; }
+  50%      { opacity: 1;    letter-spacing: 0.18em; }
+}
