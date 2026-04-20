@@ -4,6 +4,29 @@ import { useGameEngine } from '../../hooks/useGameEngine';
 import './Time.scss';
 import { useEffect, useState } from 'react';
 
+// Big "5… 4… 3… 2… 1" overlay that pops in during the last 5 seconds
+// of the VOTING phase. Each tick pulses with a scale + fade so the
+// number breathes briefly before sliding into the next one.
+const FinalFiveCountdown = ({ phase, timeRemaining }) => {
+  const active = phase === 'VOTING' && timeRemaining > 0 && timeRemaining <= 5;
+  return (
+    <AnimatePresence>
+      {active && (
+        <motion.div
+          key={`finalfive-${timeRemaining}`}
+          className="final-five-countdown"
+          initial={{ opacity: 0, scale: 0.6, y: -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 1.4, y: 4 }}
+          transition={{ duration: 0.45, ease: [0.2, 0.9, 0.3, 1.1] }}
+        >
+          {timeRemaining}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 const Time = () => {
   const { t } = useTranslation(['game', 'common']);
   const {
@@ -109,19 +132,20 @@ const Time = () => {
           </motion.div>
         </AnimatePresence>
 
-        {showCountdown && (
-          <div className="timer">
-            <motion.div
-              key={localTimer}
-              initial={{ opacity: 0.8 }}
-              animate={{ opacity: 1, color: barColor }}
-              exit={{ opacity: 0.8 }}
-              transition={{ duration: 0.5 }}
-            >
-              {timeRemaining}s
-            </motion.div>
-          </div>
-        )}
+        {/* Always render the timer slot so the pill width stays stable
+            between countdown / no-countdown phases. Hide via visibility
+            when the phase shouldn't surface a countdown. */}
+        <div className={`timer ${showCountdown ? '' : 'timer-hidden'}`}>
+          <motion.div
+            key={localTimer}
+            initial={{ opacity: 0.8 }}
+            animate={{ opacity: 1, color: barColor }}
+            exit={{ opacity: 0.8 }}
+            transition={{ duration: 0.5 }}
+          >
+            {timeRemaining}s
+          </motion.div>
+        </div>
 
       </div>
 
@@ -131,6 +155,11 @@ const Time = () => {
           <div className="phase-progress-fill" style={{ width: `${progressPercentage}%`, backgroundColor: barColor }} />
         </div>
       )}
+
+      {/* Final-five overlay — when the VOTING phase has 5s or less left,
+          surface a big animated "5, 4, 3, 2, 1" countdown centered just
+          below the pill so players know the deadline is closing. */}
+      <FinalFiveCountdown phase={phase} timeRemaining={timeRemaining} />
     </div>
   );
 };

@@ -8,6 +8,9 @@
   align-items: stretch;
   pointer-events: none;
   white-space: nowrap;
+  // Anchor for the absolutely-positioned final-five countdown overlay
+  // so it lands directly under the time pill, not at viewport top-left.
+  position: relative;
 }
 
 // Day/Night pill — left side. Top-left corner kept square so the pill
@@ -41,6 +44,9 @@
 
 // Phase info — right side. Top-right corner also kept square so both
 // pills form a clean shelf against the top of the screen.
+// Width is widened + transitioned because phases flip the trailing
+// countdown on/off (INFO_PHASES hide it). Previously that snapped the
+// pill shorter/longer and visibly jumped the whole time-container.
 .phase-info {
   display: flex;
   align-items: center;
@@ -51,9 +57,10 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: none;
   border-radius: 0 0 0.55rem 0;
-  min-width: 9.5rem;
+  min-width: 13rem;
   height: 2.55rem;
   box-sizing: border-box;
+  transition: min-width 0.35s ease, width 0.35s ease;
 }
 
 // Phase name
@@ -74,15 +81,19 @@
   }
 }
 
-// Countdown number
+// Countdown number — always takes its slot (placeholder when hidden)
+// so the phase-info pill width doesn't shift between countdown / no-
+// countdown phases.
 .timer {
   font-family: 'Chakra Petch', sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.059rem;
-  min-width: 2.2rem;
+  min-width: 2.4rem;
   text-align: right;
+  transition: opacity 0.3s ease;
+  &.timer-hidden { visibility: hidden; }
 }
 
 // Progress bar — same width as the two pills combined
@@ -105,6 +116,35 @@
 // Old scene bar — hidden
 .progress-bar-scene {
   display: none;
+}
+
+// ── Final-five vote countdown ──
+// Big number that flashes under the time pill during the final 5 seconds
+// of VOTING. Crossfade between consecutive ticks gives a breath rather
+// than a rapid swap.
+.final-five-countdown {
+  position: absolute;
+  left: 50%;
+  top: calc(2.55rem + 0.5rem);
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: 4.2rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #ff5252;
+  text-shadow:
+    0 0 16px rgba(255, 80, 80, 0.55),
+    0 0 36px rgba(255, 80, 80, 0.3),
+    0 4px 18px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .final-five-countdown {
+    font-size: 3.2rem;
+    top: calc(2.1rem + 0.4rem);
+  }
 }
 
 // ── Responsive ──

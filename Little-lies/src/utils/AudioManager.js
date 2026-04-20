@@ -117,9 +117,12 @@ export const playVote = () => {
   playFile('/sounds/vote.wav', 0.7);
 };
 
-/** Morning death report — old church bell (Pixabay Freesound Community) */
+/** Morning death report — old church bell (Pixabay Freesound Community).
+ * Bumped from 0.6 → 0.95 so the bell actually punches over the master
+ * volume and registers as the "someone died" cue before the role card
+ * slams in. */
 export const playDeathBell = () => {
-  playFile('/sounds/death-bell.mp3', 0.6);
+  playFile('/sounds/death-bell.mp3', 0.95);
 };
 
 /** Death / execution — chop */
