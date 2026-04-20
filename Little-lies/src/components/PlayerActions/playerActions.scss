@@ -140,26 +140,23 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
   font-weight: bold;
   font-size: 1.004rem;
-  // Fallback for dead players (inline style is stripped when !isAlive)
   background: rgba(0, 0, 0, 0.75);
-  min-height: 2.471rem;
+  // Stable height — sized as if a vote button were always present so
+  // adding/removing the button at phase change doesn't snap the row
+  // height (which used to ripple the whole list and made the layout jump).
+  min-height: 2.94rem;
   transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  // Neutral border only — no per-player color outline (used to be set
+  // inline as the player's hex; user wanted the rows to read uniformly).
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 
   &:hover {
     filter: brightness(1.08);
   }
 
-  // Same nameplate treatment as the 3D labels — fill with the player
-  // color, white text, slight outline so the row still reads over any
-  // backdrop. Kept cosmetic states (accused/me/target) as outline rings
-  // so they stack on top of the color bg instead of replacing it.
-  .player-name-text {
-    color: #fff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-  }
-
+  // Cosmetic state rings stack on top of the neutral border without
+  // replacing the player-color treatment (text only).
   &.accused {
     box-shadow: 0 0 0 2px #ff4444, 0 0 12px rgba(255, 68, 68, 0.45);
     border-color: rgba(255, 68, 68, 0.7) !important;
@@ -175,9 +172,9 @@
   }
 
   &.is-dead {
-    opacity: 0.4;
+    opacity: 0.5;
     border-color: rgba(255, 255, 255, 0.05) !important;
-    .player-name-text { color: #666 !important; text-shadow: none; }
+    .player-name-text { color: #555 !important; text-shadow: none; }
   }
 }
 
@@ -441,13 +438,26 @@
   }
 }
 
+// Person icon replaces the green/red status dot — reads as "a player
+// slot" at a glance rather than a connection light. Grey when alive,
+// dark grey when dead. Connection state still surfaces via the title
+// attribute on the icon.
+.player-status-icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  &.is-alive { color: #b8b8b8; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7); }
+  &.is-dead  { color: #444; text-shadow: none; }
+}
+
+// Legacy class kept for any external references; falls back to the same
+// muted dot look. New rows use .player-status-icon above.
 .player-status-dot {
   width: 0.353rem;
   height: 0.353rem;
   border-radius: 50%;
   flex-shrink: 0;
-  &.dot-online { background: #44cc44; box-shadow: 0 0 4px #44cc44; }
-  &.dot-offline { background: #cc2222; box-shadow: 0 0 4px #cc2222; }
+  background: #555;
 }
 
 .player-name-text {

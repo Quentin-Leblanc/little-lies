@@ -20,6 +20,7 @@ import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import { getLevel } from '../../utils/xpSystem';
 import { COLOR_REWARDS } from '../../data/progression';
+import { buildPlayerNamePillStyle } from '../../utils/playerColor';
 import './CustomLobby.scss';
 
 const GRADIENT_UNLOCK_LEVEL = 6;
@@ -343,25 +344,22 @@ const PlayerSeat = ({ index, total, player, color, isMe }) => {
       )}
       <Html position={[0, nameY, 0]} center distanceFactor={6} zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
         {(() => {
+          // Same pill treatment as the in-game PlayerFigure label:
+          // solid color → colored pill + white text; gradient palette →
+          // black pill with gradient-painted + stroked text.
           const rawColor = player.getState?.()?.profile?.color;
-          const isGrad = rawColor && typeof rawColor === 'object' && rawColor.type === 'gradient';
-          const borderCol = isGrad ? rawColor.color1 : (color || '#888');
-          const nameStyle = isGrad
-            ? { background: `linear-gradient(90deg, ${rawColor.color1}, ${rawColor.color2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
-            : { color: color };
+          const { pillStyle, textStyle } = buildPlayerNamePillStyle(rawColor, color || '#888');
           return (
             <div style={{
-              backgroundColor: 'rgba(0,0,0,0.7)',
+              ...pillStyle,
               padding: '3px 10px',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: 'bold',
               whiteSpace: 'nowrap',
-              textShadow: isGrad ? 'none' : '0 1px 4px rgba(0,0,0,0.8)',
-              border: `1px solid ${borderCol}`,
             }}>
               {isMe && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block', marginRight: 6, flexShrink: 0 }} />}
-              <span style={nameStyle}>{player.getState?.()?.profile?.name || 'Player'}</span>
+              <span style={textStyle}>{player.getState?.()?.profile?.name || 'Player'}</span>
             </div>
           );
         })()}

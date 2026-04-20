@@ -199,11 +199,17 @@ function CharacterRenderer({ group, clone, allAnimations, origMaterials, color, 
         mat.roughness = 0.85;
         const rimColor = new Color(color || '#ffffff');
         if (color) {
-          mat.color = new Color('#ffffff').lerp(rimColor, 0.45);
+          // Tint the base material toward the player color subtly —
+          // previously 0.45 made the whole silhouette read as "team
+          // sweater", which drowned out role signalling. 0.2 keeps the
+          // model warm/identifiable without repainting it.
+          mat.color = new Color('#ffffff').lerp(rimColor, 0.2);
         }
         mat.onBeforeCompile = (shader) => {
           shader.uniforms.uRimColor = { value: rimColor };
-          shader.uniforms.uRimIntensity = { value: 0.9 };
+          // Rim fresnel intensity — 0.9 was "glowing" on the silhouette,
+          // 0.4 is a faint edge light that still conveys the player color.
+          shader.uniforms.uRimIntensity = { value: 0.4 };
           shader.fragmentShader = shader.fragmentShader.replace(
             '#include <common>',
             `#include <common>

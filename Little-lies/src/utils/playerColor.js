@@ -29,3 +29,48 @@ export const toBgCss = (color) => {
   }
   return color;
 };
+
+// Unified nameplate style for the 3D billboard labels (in-game figure +
+// lobby seat) and for the in-game player list / action bar. Anchored on
+// the lobby's existing look so the player's color identity stays consistent
+// across all surfaces:
+//   - solid color    → BLACK background, text painted in the player color,
+//                      colored border
+//   - gradient color → BLACK background, text painted with the gradient
+//                      (background-clip: text) + a thin stroke for legibility,
+//                      border uses color1 as a gradient-evocative hint
+// Use `pillStyle` on the outer pill <div> and spread `textStyle` on the
+// inner <span> wrapping the name text.
+export const buildPlayerNamePillStyle = (rawColor, fallback = '#888') => {
+  const isGradient = typeof rawColor === 'object' && rawColor?.type === 'gradient';
+  if (isGradient) {
+    const gradient = `linear-gradient(135deg, ${rawColor.color1}, ${rawColor.color2})`;
+    return {
+      isGradient: true,
+      pillStyle: {
+        background: 'rgba(0, 0, 0, 0.78)',
+        border: `2px solid ${rawColor.color1}`,
+      },
+      textStyle: {
+        background: gradient,
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+        WebkitTextStroke: '0.5px rgba(0,0,0,0.55)',
+        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.8))',
+      },
+    };
+  }
+  const solid = rawColor || fallback;
+  return {
+    isGradient: false,
+    pillStyle: {
+      background: 'rgba(0, 0, 0, 0.78)',
+      border: `2px solid ${solid}`,
+    },
+    textStyle: {
+      color: solid,
+      textShadow: '0 1px 4px rgba(0,0,0,0.85)',
+    },
+  };
+};

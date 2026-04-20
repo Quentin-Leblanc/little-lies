@@ -6,7 +6,7 @@ import i18n from '../../trad/i18n';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
 import Audio from '../../utils/AudioManager';
-import { toTextCss, toBgCss } from '../../utils/playerColor';
+import { toTextCss, buildPlayerNamePillStyle } from '../../utils/playerColor';
 import './playerActions.scss';
 
 const ACTION_COLORS = {
@@ -417,17 +417,24 @@ const PlayerActions = memo(function () {
             const isBlackmailed = player.isBlackmailed && game.isDay;
 
             const rawColor = player.profile?.color;
-            const colorBg = player.isAlive ? toBgCss(rawColor) : null;
-            const borderColor = toTextCss(rawColor);
+            // Text painted with the player color (gradient palettes get
+            // gradient-painted text + stroke). The pill background and
+            // border are handled by SCSS (neutral, no per-player color
+            // outline) — the user explicitly didn't want a colored border
+            // on every list row.
+            const { textStyle: liveText } = buildPlayerNamePillStyle(rawColor);
             return (
               <li
                 key={player.id}
                 className={`player-list-item ${player.id === game.accusedId ? 'accused' : ''} ${!player.isAlive ? 'is-dead' : ''} ${player.id === me.id ? 'is-me' : ''} ${isNightTarget || isDayTarget ? 'night-target' : ''}`}
-                style={player.isAlive && colorBg ? { background: colorBg, borderColor } : undefined}
               >
                 <span className="player-name-cell">
-                  <span className={`player-status-dot ${player.connected !== false ? 'dot-online' : 'dot-offline'}`}></span>
-                  <span className="player-name-text" style={{ color: player.isAlive ? '#fff' : '#666' }}>
+                  <i
+                    className={`fas fa-user player-status-icon ${player.isAlive ? 'is-alive' : 'is-dead'}`}
+                    aria-hidden="true"
+                    title={player.connected !== false ? '' : 'offline'}
+                  ></i>
+                  <span className="player-name-text" style={player.isAlive ? liveText : { color: '#555' }}>
                     {player.profile.name}{player.id === me.id ? ` (${t('common:you')})` : ''}
                   </span>
                   {player.isRevealed && (

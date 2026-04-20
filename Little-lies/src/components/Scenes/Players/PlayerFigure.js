@@ -1,12 +1,13 @@
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
+import * as THREE from 'three';
 import { Character, resolvePlayerSkin } from '../../Character/Character';
 import ChatBubble from './ChatBubble';
 import PhaseEmote from './PhaseEmote';
 import { IDLE_VARIANTS, DANCE_VARIANTS, WALK_OBSTACLES } from '../constants';
 import { pickForPlayer } from '../utils';
-import { toTextCss, toBgCss } from '../../../utils/playerColor';
+import { toTextCss, buildPlayerNamePillStyle } from '../../../utils/playerColor';
 
 // Apply radial "push" away from each obstacle so the walker curves around
 // plaza props (bulletin board, podium, gallows…) instead of clipping
@@ -143,29 +144,59 @@ const PlayerFigure = ({
     }
   });
 
-  // Player "profile.color" is either a hex string or a gradient object
-  // ({ type: 'gradient', color1, color2 }) when a palette was picked in
-  // the lobby. Resolve it once to the CSS/3D values we need:
-  //   - characterColor: single hex the Three.js material can parse
-  //   - nameBg: CSS background (gradient string or solid)
-  //   - nameEdge: CSS border color (always a single hex — CSS borders
-  //     can't render a gradient without an extra wrapper we're not
-  //     bothering with for the label)
-  //   - isGradient: whether the palette is a gradient — when true we
-  //     render the name text with a background-clip gradient trick so
-  //     it actually looks like the picked palette instead of the
-  //     default white fallback.
+  // Player "profile.color" is either a hex string or a gradient object.
+  // Character uses the resolved solid hex; the floating name pill uses
+  // the shared buildPlayerNamePillStyle() helper so the lobby seat and
+  // in-game figure share the exact same visual treatment:
+  //   - solid color    → colored pill + white text
+  //   - gradient color → BLACK pill + gradient text with a thin stroke
   const rawColor = player.profile?.color || color;
-  const isGradient = typeof rawColor === 'object' && rawColor?.type === 'gradient';
   const characterColor = toTextCss(rawColor, color || '#ffffff');
-  const nameEdge = toTextCss(rawColor, color || '#ffffff');
-  // Unified nameplate look: the box is painted with the player's color
-  // (gradient palette → gradient fill; solid color → solid fill) and the
-  // text is always white. Border uses the same color so it reads as a
-  // chunky "colored pill". Previously solid colors had a dark box + colored
-  // text — that diverged from the gradient version and made palette
-  // players look way more vivid than classic-color players.
-  const nameBg = isGradient ? toBgCss(rawColor) : nameEdge;
+  const { pillStyle, textStyle } = buildPlayerNamePillStyle(rawColor, color || '#ffffff');
+
+  // Colored halo disk under the player's feet — gives every player a
+  // persistent visual identity on the plaza (and on the dead-pile in
+  // the middle, where the floating name is hidden but the color cue
+  // still tells you who it is). Gradient palettes get a CanvasTexture
+  // that paints the linear gradient + a radial alpha fade so the disk
+  // edges stay soft.
+  const haloMaterial = useMemo(() => {
+    const isGrad = typeof rawColor === 'object' && rawColor?.type === 'gradient';
+    if (isGrad) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      const linear = ctx.createLinearGradient(0, 0, 128, 0);
+      linear.addColorStop(0, rawColor.color1);
+      linear.addColorStop(1, rawColor.color2);
+      ctx.fillStyle = linear;
+      ctx.fillRect(0, 0, 128, 128);
+      const radial = ctx.createRadialGradient(64, 64, 12, 64, 64, 60);
+      radial.addColorStop(0, 'rgba(255,255,255,1)');
+      radial.addColorStop(0.55, 'rgba(255,255,255,0.85)');
+      radial.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.fillStyle = radial;
+      ctx.fillRect(0, 0, 128, 128);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.needsUpdate = true;
+      return new THREE.MeshBasicMaterial({
+        map: tex, transparent: true, opacity: 0.55, depthWrite: false,
+      });
+    }
+    return new THREE.MeshBasicMaterial({
+      color: characterColor || '#ffffff',
+      transparent: true,
+      opacity: 0.4,
+      depthWrite: false,
+    });
+  }, [rawColor, characterColor]);
+
+  useEffect(() => () => {
+    haloMaterial.map?.dispose?.();
+    haloMaterial.dispose?.();
+  }, [haloMaterial]);
 
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
@@ -178,6 +209,14 @@ const PlayerFigure = ({
           animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
         />
       </group>
+      {/* Colored halo disk under the feet — visible whether the player
+          is alive on their seat or the dead body on the central pile. */}
+      {!isTransitioning && (
+        <mesh position={[0, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1}>
+          <circleGeometry args={[0.65, 32]} />
+          <primitive object={haloMaterial} attach="material" />
+        </mesh>
+      )}
       {isAccused && (
         <mesh position={[0, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.7, 0.9, 16]} />
@@ -193,22 +232,16 @@ const PlayerFigure = ({
             whiteSpace: 'nowrap',
           }}>
             <div
-              className={isGradient ? 'player-name-label player-name-label--gradient' : 'player-name-label'}
+              className="player-name-label"
               style={{
-                background: nameBg,
+                ...pillStyle,
                 padding: '4px 12px',
                 borderRadius: '6px',
                 fontSize: '22px',
                 fontWeight: 'bold',
-                textShadow: '0 2px 6px rgba(0,0,0,0.8)',
-                border: `2px solid ${nameEdge}`,
                 letterSpacing: '0.5px',
-                // Text always white so the nameplate reads the same way
-                // whether the player picked a gradient palette or a solid
-                // color. See the nameBg comment above.
-                color: '#fff',
               }}>
-              {player.profile.name}
+              <span style={textStyle}>{player.profile.name}</span>
             </div>
             {showVote && voteCount > 0 && (
               <div style={{
