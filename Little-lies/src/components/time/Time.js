@@ -6,15 +6,35 @@ import { useEffect, useState } from 'react';
 
 // Big "5… 4… 3… 2… 1" overlay that pops in during the last 5 seconds
 // of the VOTING phase. Each tick pulses with a scale + fade so the
-// number breathes briefly before sliding into the next one.
+// number breathes briefly before sliding into the next one. Color
+// ramps from warm amber (5s) → red (1s) so the countdown *feels*
+// like the deadline closing instead of staying on a single colour.
+const FINAL_FIVE_COLORS = {
+  5: '#ffcf4b',
+  4: '#ff9f43',
+  3: '#ff7a3d',
+  2: '#ff5252',
+  1: '#ff3344',
+};
 const FinalFiveCountdown = ({ phase, timeRemaining }) => {
   const active = phase === 'VOTING' && timeRemaining > 0 && timeRemaining <= 5;
+  const color = FINAL_FIVE_COLORS[timeRemaining] || '#ff5252';
+  const rgb = color.replace('#', '');
+  const r = parseInt(rgb.substring(0, 2), 16);
+  const g = parseInt(rgb.substring(2, 4), 16);
+  const b = parseInt(rgb.substring(4, 6), 16);
+  const textShadow = `
+    0 0 16px rgba(${r}, ${g}, ${b}, 0.6),
+    0 0 36px rgba(${r}, ${g}, ${b}, 0.35),
+    0 4px 18px rgba(0, 0, 0, 0.85)
+  `;
   return (
     <AnimatePresence>
       {active && (
         <motion.div
           key={`finalfive-${timeRemaining}`}
           className="final-five-countdown"
+          style={{ color, textShadow }}
           initial={{ opacity: 0, scale: 0.6, y: -10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 1.4, y: 4 }}

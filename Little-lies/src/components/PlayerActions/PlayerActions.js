@@ -278,7 +278,7 @@ const PlayerActions = memo(function () {
     if (isVotingPhase) return { text: t('game:phase_headers.voting_phase'), icon: 'fa-gavel', color: '#ffa502' };
     if (isJudgmentPhase) return { text: t('game:phase_headers.judgment'), icon: 'fa-scale-balanced', color: '#cc88ff' };
     if (isDefensePhase) return { text: t('game:phase_headers.defense'), icon: 'fa-shield', color: '#ff6666' };
-    if (isDiscussionPhase) return { text: t('game:phase_headers.discussion'), icon: 'fa-comments', color: '#78ff78' };
+    if (isDiscussionPhase) return { text: t('game:phase_headers.discussion'), icon: 'fa-comments', color: '#ffffff' };
     return null;
   };
   const phaseHeader = getPhaseHeader();

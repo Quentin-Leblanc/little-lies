@@ -17,7 +17,7 @@
   },
   "phase_headers": {
     "night_actions": "Night actions",
-    "voting_phase": "Voting phase",
+    "voting_phase": "Vote",
     "judgment": "Judgment",
     "defense": "Defense",
     "discussion": "Discussion"
@@ -297,5 +297,17 @@
     "No cry broke the silence.",
     "A night without incident — for once.",
     "The doors stayed shut, and so did the graves."
+  ],
+  "no_lynch_variants": [
+    "Everyone can go home safely tonight.",
+    "Today has been a quiet one.",
+    "It's getting late...",
+    "No one will hang this time.",
+    "The noose stays empty tonight.",
+    "Suspicion fades without evidence.",
+    "No name will stand out tonight.",
+    "The village heads home — sleeping with one eye open.",
+    "The square empties without a verdict.",
+    "The gallows will wait for another day."
   ]
 }

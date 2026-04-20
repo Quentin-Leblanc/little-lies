@@ -286,8 +286,45 @@
   gap: 0.294rem;
 
   &:nth-child(1) {
+    position: relative;
+    overflow: hidden;
     border-left-color: #7eb3ff;
+    border-color: rgba(126, 179, 255, 0.38);
+    background:
+      radial-gradient(
+        ellipse at 15% 0%,
+        rgba(126, 179, 255, 0.18),
+        rgba(126, 179, 255, 0.06) 45%,
+        rgba(255, 255, 255, 0.035) 75%
+      );
+    box-shadow:
+      0 0 0 1px rgba(126, 179, 255, 0.08),
+      0 0 18px rgba(126, 179, 255, 0.22),
+      inset 0 0 22px rgba(126, 179, 255, 0.08);
+    animation: role-desc-glow 4.6s ease-in-out infinite;
     > .role-section-title { color: #a9c8ff; i { color: inherit; } }
+
+    // Thin diagonal light sweep travelling left→right to keep the
+    // description alive (reads as "scroll being lit by a moving
+    // candle" rather than a flat panel). Pointer-events disabled so
+    // it never intercepts the description text.
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.12) 48%,
+        rgba(255, 255, 255, 0.22) 50%,
+        rgba(255, 255, 255, 0.12) 52%,
+        transparent 70%
+      );
+      transform: translateX(-100%);
+      animation: role-desc-shimmer 5.4s ease-in-out infinite;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
   }
   &:nth-child(2) {
     border-left-color: #ffb05a;
@@ -308,6 +345,32 @@
   @media (max-width: 820px) {
     &:nth-child(3) { grid-column: 1; }
   }
+}
+
+// Continuous "this is the important block" treatment for the role
+// description cell — echoes the reveal card halo so the card keeps
+// pulling the eye after the role-reveal modal closes. Kept subtle
+// enough not to read as an error or a notification.
+@keyframes role-desc-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(126, 179, 255, 0.08),
+      0 0 16px rgba(126, 179, 255, 0.18),
+      inset 0 0 20px rgba(126, 179, 255, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(126, 179, 255, 0.16),
+      0 0 28px rgba(126, 179, 255, 0.38),
+      inset 0 0 28px rgba(126, 179, 255, 0.12);
+  }
+}
+
+@keyframes role-desc-shimmer {
+  0%        { transform: translateX(-120%); opacity: 0; }
+  20%       { opacity: 0.85; }
+  55%       { transform: translateX(120%); opacity: 0.85; }
+  56%, 100% { transform: translateX(120%); opacity: 0; }
 }
 
 // Bullet list — one line per mechanic (1-night framing, SK immunity,

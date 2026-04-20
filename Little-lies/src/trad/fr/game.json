@@ -17,7 +17,7 @@
   },
   "phase_headers": {
     "night_actions": "Actions de nuit",
-    "voting_phase": "Phase de vote",
+    "voting_phase": "Votez",
     "judgment": "Jugement",
     "defense": "Défense",
     "discussion": "Discussion"
@@ -297,5 +297,17 @@
     "Aucun cri n'a troublé le silence.",
     "Une nuit sans incident — pour cette fois.",
     "Les portes sont restées closes, les morts aussi."
+  ],
+  "no_lynch_variants": [
+    "Tout le monde peut rentrer chez soi ce soir.",
+    "Aujourd'hui a été bien calme.",
+    "Il se fait tard...",
+    "Personne ne sera pendu cette fois-ci.",
+    "La corde restera vide cette nuit.",
+    "Les soupçons retombent, faute de preuves.",
+    "Aucun nom ne sortira du lot ce soir.",
+    "Le village rentre, mais dort d'un œil.",
+    "La place se vide sans verdict.",
+    "La potence ne servira pas aujourd'hui."
   ]
 }

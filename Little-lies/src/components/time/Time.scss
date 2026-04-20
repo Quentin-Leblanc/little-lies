@@ -43,10 +43,11 @@
 }
 
 // Phase info — right side. Top-right corner also kept square so both
-// pills form a clean shelf against the top of the screen.
-// Width is widened + transitioned because phases flip the trailing
-// countdown on/off (INFO_PHASES hide it). Previously that snapped the
-// pill shorter/longer and visibly jumped the whole time-container.
+// pills form a clean shelf against the top of the screen. Width is
+// now fluid: the pill shrinks to fit the phase label (+ optional
+// countdown) so short labels like "Nuit" don't get padded out to
+// match the longest phase. Snap is fine here — phase flips are
+// infrequent enough that a micro-jump reads as a phase change cue.
 .phase-info {
   display: flex;
   align-items: center;
@@ -57,10 +58,8 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: none;
   border-radius: 0 0 0.55rem 0;
-  min-width: 13rem;
   height: 2.55rem;
   box-sizing: border-box;
-  transition: min-width 0.35s ease, width 0.35s ease;
 }
 
 // Phase name
@@ -81,9 +80,9 @@
   }
 }
 
-// Countdown number — always takes its slot (placeholder when hidden)
-// so the phase-info pill width doesn't shift between countdown / no-
-// countdown phases.
+// Countdown number — collapses entirely when the phase hides the
+// countdown (info/intro phases) so the phase-info pill can shrink
+// to just the label + icon instead of reserving a timer slot.
 .timer {
   font-family: 'Chakra Petch', sans-serif;
   font-size: 1.1rem;
@@ -93,7 +92,7 @@
   min-width: 2.4rem;
   text-align: right;
   transition: opacity 0.3s ease;
-  &.timer-hidden { visibility: hidden; }
+  &.timer-hidden { display: none; }
 }
 
 // Progress bar — same width as the two pills combined
@@ -156,7 +155,6 @@
   }
   .phase-info {
     padding: 0.45rem 0.85rem;
-    min-width: 7.2rem;
     height: 2.1rem;
   }
   .progress-content {

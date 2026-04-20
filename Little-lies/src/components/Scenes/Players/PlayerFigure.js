@@ -157,36 +157,15 @@ const PlayerFigure = ({
   // Colored halo disk under the player's feet — gives every player a
   // persistent visual identity on the plaza (and on the dead-pile in
   // the middle, where the floating name is hidden but the color cue
-  // still tells you who it is). Gradient palettes get a CanvasTexture
-  // that paints the linear gradient + a radial alpha fade so the disk
-  // edges stay soft.
+  // still tells you who it is). Gradient palettes collapse to their
+  // first color so the SPECIAL-palette player's halo matches the
+  // solid-color halos of everyone else (the gradient-on-a-disc read
+  // as a noticeably different visual treatment).
   const haloMaterial = useMemo(() => {
     const isGrad = typeof rawColor === 'object' && rawColor?.type === 'gradient';
-    if (isGrad) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
-      const linear = ctx.createLinearGradient(0, 0, 128, 0);
-      linear.addColorStop(0, rawColor.color1);
-      linear.addColorStop(1, rawColor.color2);
-      ctx.fillStyle = linear;
-      ctx.fillRect(0, 0, 128, 128);
-      const radial = ctx.createRadialGradient(64, 64, 12, 64, 64, 60);
-      radial.addColorStop(0, 'rgba(255,255,255,1)');
-      radial.addColorStop(0.55, 'rgba(255,255,255,0.85)');
-      radial.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.fillStyle = radial;
-      ctx.fillRect(0, 0, 128, 128);
-      const tex = new THREE.CanvasTexture(canvas);
-      tex.needsUpdate = true;
-      return new THREE.MeshBasicMaterial({
-        map: tex, transparent: true, opacity: 0.55, depthWrite: false,
-      });
-    }
+    const solid = isGrad ? (rawColor.color1 || '#ffffff') : (characterColor || '#ffffff');
     return new THREE.MeshBasicMaterial({
-      color: characterColor || '#ffffff',
+      color: solid,
       transparent: true,
       opacity: 0.4,
       depthWrite: false,
