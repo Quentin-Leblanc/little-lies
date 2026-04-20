@@ -66,6 +66,8 @@ const BloodCircle = React.memo(function BloodCircle({
         rotation={rotation}
         scale={scale}
         halfHeight={HALF_HEIGHT}
+        saturate={1.55}
+        contrast={1.25}
       />
 
       {/* Two thin rubine-red columns rising out of the socle. Bounds are

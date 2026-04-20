@@ -25,7 +25,11 @@ const GroundPlane = React.memo(function GroundPlane({ isDay }) {
     albedo.generateMipmaps = true;
   }, [albedo]);
 
-  const groundTint = isDay ? '#c8c0a8' : '#30302a';
+  // Day tint desaturated from #c8c0a8 → #b9b5ad so the ground reads as
+  // a cool neutral instead of a warm tan — this lets the newly contrast-
+  // punched cottages and the blood altar carry the colour in frame.
+  // Night tint unchanged (already near-neutral).
+  const groundTint = isDay ? '#b9b5ad' : '#30302a';
 
   return (
     <group>

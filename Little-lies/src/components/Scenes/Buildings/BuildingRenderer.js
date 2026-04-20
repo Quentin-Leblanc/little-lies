@@ -4,10 +4,21 @@ import { MESHY_COTTAGE, MESHY_MANOR } from '../constants';
 
 // Swap path based on building "type" so BUILDING_POSITIONS can stay pure
 // data. Chapel slot uses the manor model for the dark theme; other types
-// get the small cottage.
+// get the small cottage. A mild HSL punch-up (contrast > saturate) pulls
+// the cottage/manor silhouettes out of the desaturated terrain so the
+// village ring no longer blends into the ground at distance.
 const BuildingRenderer = React.memo(function BuildingRenderer({ type, position, rotation, scale }) {
   const path = type === 'chapel' ? MESHY_MANOR : MESHY_COTTAGE;
-  return <MeshyModel path={path} position={position} rotation={rotation} scale={scale * 1.6} />;
+  return (
+    <MeshyModel
+      path={path}
+      position={position}
+      rotation={rotation}
+      scale={scale * 1.6}
+      saturate={1.15}
+      contrast={1.2}
+    />
+  );
 });
 
 export default BuildingRenderer;

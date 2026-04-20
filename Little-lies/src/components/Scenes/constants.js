@@ -128,43 +128,42 @@ export const NIGHT_CAMERA_WAYPOINTS = [
 // the far mountain ridge / sparse background instead of the plaza props.
 // The goal now: every day-orbit pick lands closer to a top-down view of
 // the blood circle, with the skyline clipped above frame.
+// Whole pool pulled back vs the old close-up tuning, then dialled back
+// in a notch (~10%) so the orbit doesn't feel "distant / aerial" while
+// keeping the breathing room the previous pass added. Radius + height
+// move together so each pick's tilt stays intact — shots still frame
+// downward on the plaza, not across it.
 export const DAY_ORBIT_CAMERAS = [
   // 0 — FAR WIDE: overview, whole village visible, steep enough that
   // only a thin slice of skyline shows above the cottage ring.
-  //   tilt = atan2(12.5 - 0.2, 10) ≈ 51°
-  { name: 'far-wide',  radius: 10,   height: 12.5, lookY: 0.2, speed: 0.008, phaseOffset: 0 },
+  //   tilt = atan2(13.5 - 0.2, 11.5) ≈ 49°
+  { name: 'far-wide',  radius: 11.5, height: 13.5, lookY: 0.2, speed: 0.008, phaseOffset: 0 },
   // 1 — LOW SWEEP: closer look at plaza life, still angled steeply down
-  // so mountains don't creep back into frame. Pulled back from r=6/h=7
-  // (still felt on top of the players during debate) to r=8/h=8.5 — the
-  // shot still reads as "low and close" but gives breathing room around
-  // the character sprites.
-  //   tilt = atan2(8.5 - 0.4, 8.0) ≈ 45°
-  { name: 'low-sweep', radius: 8,    height: 8.5,  lookY: 0.4, speed: 0.010, phaseOffset: 1.8 },
+  // so mountains don't creep back into frame.
+  //   tilt = atan2(10 - 0.4, 9.5) ≈ 45°
+  { name: 'low-sweep', radius: 9.5,  height: 10,   lookY: 0.4, speed: 0.010, phaseOffset: 1.8 },
   // 2 — SHOULDER: mid-distance high-shoulder tilt onto the plaza — used
   // to be a near-horizontal three-quarter view at h=5.2 / lookY=1.0.
-  //   tilt = atan2(8.5 - 0.4, 7.0) ≈ 49°
-  { name: 'shoulder',  radius: 7,    height: 8.5,  lookY: 0.4, speed: 0.010, phaseOffset: 3.4 },
+  //   tilt = atan2(10 - 0.4, 8.5) ≈ 48°
+  { name: 'shoulder',  radius: 8.5,  height: 10,   lookY: 0.4, speed: 0.010, phaseOffset: 3.4 },
   // 3 — TOPDOWN: near top-down, map-like perspective.
-  //   tilt = atan2(13.5 - 0, 4.5) ≈ 72°
-  { name: 'topdown',   radius: 4.5,  height: 13.5, lookY: 0,   speed: 0.013, phaseOffset: 4.5 },
-  // 4 — INTIMATE: close orbit around the blood circle. Pulled back from
-  // r=5 / h=7.5 (too tight on players' heads) to r=7 / h=9 so the shot
-  // still reads as "close to the action" but the plaza breathes and
-  // player faces aren't cropped. Tilt stays ~55°.
-  //   tilt = atan2(9 - 0.4, 7) ≈ 51°
-  { name: 'intimate',  radius: 7,    height: 9,    lookY: 0.4, speed: 0.011, phaseOffset: 2.2 },
+  //   tilt = atan2(15 - 0, 5.5) ≈ 70°
+  { name: 'topdown',   radius: 5.5,  height: 15,   lookY: 0,   speed: 0.013, phaseOffset: 4.5 },
+  // 4 — INTIMATE: close orbit around the blood circle. "Close to the
+  // action" read without cropping player heads.
+  //   tilt = atan2(10 - 0.4, 8) ≈ 50°
+  { name: 'intimate',  radius: 8,    height: 10,   lookY: 0.4, speed: 0.011, phaseOffset: 2.2 },
   // 5 — PERIMETER: wide slow circle that skims the perimeter of the
-  // cottage ring. Radius bumped up to 12 so the frame shows a layer of
-  // cottages between the camera and the plaza center — depth cue the
-  // other angles don't give. Height matches radius + 1 to keep the
-  // tilt above 45°. Slow speed because 12m of perimeter adds up fast.
-  //   tilt = atan2(13 - 0.3, 12) ≈ 47°
-  { name: 'perimeter', radius: 12,   height: 13,   lookY: 0.3, speed: 0.0065, phaseOffset: 5.4 },
-  // 6 — TIGHT TOWER: mid-height very close orbit, almost a turntable on
-  // the blood circle. Faster rotation so the 12s cycle window actually
+  // cottage ring. Radius sized so the frame shows a layer of cottages
+  // between the camera and the plaza center — depth cue the other
+  // angles don't give. Slow speed because perimeter length adds up.
+  //   tilt = atan2(15 - 0.3, 13.5) ≈ 47°
+  { name: 'perimeter', radius: 13.5, height: 15,   lookY: 0.3, speed: 0.0065, phaseOffset: 5.4 },
+  // 6 — TIGHT TOWER: mid-height close orbit, almost a turntable on the
+  // blood circle. Faster rotation so the 12s cycle window actually
   // shows ~70° of travel.
-  //   tilt = atan2(11 - 0.3, 5) ≈ 65°
-  { name: 'tight-tower', radius: 5,  height: 11,   lookY: 0.3, speed: 0.013,  phaseOffset: 0.8 },
+  //   tilt = atan2(12 - 0.3, 6) ≈ 63°
+  { name: 'tight-tower', radius: 6,  height: 12,   lookY: 0.3, speed: 0.013,  phaseOffset: 0.8 },
 ];
 
 // Intro cinematic pool — 5 presentational 6s openings. Each cinematic

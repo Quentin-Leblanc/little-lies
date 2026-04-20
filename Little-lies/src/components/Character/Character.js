@@ -196,31 +196,45 @@ function CharacterRenderer({ group, clone, allAnimations, origMaterials, color, 
         mat.emissiveMap = null;
         mat.metalness = 0;
         mat.metalnessMap = null;
-        mat.roughness = 0.85;
+        // Slightly less roughness so highlights / shadows separate
+        // more — the previous 0.85 flattened the figure into a single
+        // tone under the scene's soft lighting and made everyone read
+        // as milky pastels.
+        mat.roughness = 0.65;
         const rimColor = new Color(color || '#ffffff');
         if (color) {
-          // Tint the base material toward the player color subtly —
-          // previously 0.45 made the whole silhouette read as "team
-          // sweater", which drowned out role signalling. 0.2 keeps the
-          // model warm/identifiable without repainting it.
-          mat.color = new Color('#ffffff').lerp(rimColor, 0.2);
+          // Stronger base tint (0.2 → 0.32): the rim fresnel was the
+          // only thing carrying player identity before, and once it
+          // was dialled down the figure skewed washed-out. A warmer
+          // mid-lerp keeps the silhouette identifiable without the
+          // old "team sweater" look.
+          mat.color = new Color('#ffffff').lerp(rimColor, 0.32);
         }
         mat.onBeforeCompile = (shader) => {
           shader.uniforms.uRimColor = { value: rimColor };
-          // Rim fresnel intensity — 0.9 was "glowing" on the silhouette,
-          // 0.4 is a faint edge light that still conveys the player color.
-          shader.uniforms.uRimIntensity = { value: 0.4 };
+          // Rim fresnel trimmed (0.4 → 0.22) — the bright edge light
+          // was the "fade / halo around the texture" the scene read
+          // as low-contrast. Keeping a thin hint of colour on the
+          // silhouette while letting the base material do the work.
+          shader.uniforms.uRimIntensity = { value: 0.22 };
           shader.fragmentShader = shader.fragmentShader.replace(
             '#include <common>',
             `#include <common>
              uniform vec3 uRimColor;
              uniform float uRimIntensity;`,
           );
+          // Sharper fresnel falloff (pow 2.2 → 3.2) keeps the rim a
+          // thin line on the outline instead of bleeding onto the
+          // body, and a gentle contrast curve on the final colour
+          // pushes shadows down and highlights up so the figures
+          // stop looking like flat paper cut-outs.
           shader.fragmentShader = shader.fragmentShader.replace(
             '#include <dithering_fragment>',
             `float rimFresnel = 1.0 - clamp(dot(normalize(geometryNormal), normalize(vViewPosition)), 0.0, 1.0);
-             rimFresnel = pow(rimFresnel, 2.2);
+             rimFresnel = pow(rimFresnel, 3.2);
              gl_FragColor.rgb += uRimColor * rimFresnel * uRimIntensity;
+             gl_FragColor.rgb = (gl_FragColor.rgb - 0.5) * 1.18 + 0.5;
+             gl_FragColor.rgb = clamp(gl_FragColor.rgb, 0.0, 1.0);
              #include <dithering_fragment>`,
           );
         };

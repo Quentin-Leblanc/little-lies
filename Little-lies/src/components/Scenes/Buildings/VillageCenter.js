@@ -15,12 +15,18 @@ const VillageCenter = React.memo(({ isTrialPhase }) => (
       rotation={[0, Math.PI * 0.15, 0]}
       scale={3.5}
     />
+    {/* Landmark models get an HSL punch so the ritual altar + gallows
+        podium read as the plaza's focal elements instead of washing
+        out under the scene tonemap. Saturate + mild contrast only —
+        no emissive bump, so they still respect lighting. */}
     <MeshyModel
       path={MESHY_PODIUM}
       position={PODIUM_POSITION}
       rotation={[0, Math.atan2(-PODIUM_POSITION[0], -PODIUM_POSITION[2]), 0]}
       scale={PODIUM_SCALE}
       halfHeight={0.92}
+      saturate={1.5}
+      contrast={1.22}
     />
     {isTrialPhase && (
       <>
