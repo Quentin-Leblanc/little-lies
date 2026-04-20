@@ -42,6 +42,19 @@ export const signOut = async () => {
   await supabase.auth.signOut();
 };
 
+// Send a password-reset email. Supabase emails the user a magic link
+// that opens our app on the recovery route — there the user picks a new
+// password via supabase.auth.updateUser({ password }). We point the
+// link back to the app origin (Supabase appends the recovery token in
+// the URL hash) so we don't have to host a dedicated reset page.
+export const sendPasswordReset = async (email) => {
+  if (!supabase) return { error: { message: 'Supabase not configured' } };
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin,
+  });
+  return { data, error };
+};
+
 export const getSession = async () => {
   if (!supabase) return null;
   const { data: { session } } = await supabase.auth.getSession();

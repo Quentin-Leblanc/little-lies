@@ -10,6 +10,8 @@
     "wanderer": "Wanderer"
   },
   "close": "Close",
+  "back": "Back",
+  "email_required": "Email required",
   "send": "Send",
   "skip": "Skip",
   "color_taken": "Taken",

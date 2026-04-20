@@ -10,6 +10,8 @@
     "wanderer": "Vagabond"
   },
   "close": "Fermer",
+  "back": "Retour",
+  "email_required": "Email requis",
   "send": "Envoyer",
   "skip": "Passer",
   "color_taken": "Prise",

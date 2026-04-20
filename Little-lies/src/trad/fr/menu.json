@@ -91,7 +91,7 @@
     "reset_confirm": "Le tutoriel interactif s'affichera au prochain début de partie."
   },
   "survey": {
-    "title": "Donne-moi ton avis",
+    "title": "Donne ton avis",
     "subtitle": "Tout est optionnel — réponds à ce que tu veux, ça m'aide vraiment.",
     "question": "Globalement, tu as aimé cette partie ?",
     "q_more_roles": "Tu aimerais qu'on ajoute plus de rôles différents ?",
@@ -100,7 +100,7 @@
     "answer_yes": "Oui",
     "answer_meh": "Bof",
     "answer_no": "Non",
-    "ideas_title": "Donne-moi des idées d'améliorations ou ton avis",
+    "ideas_title": "Donne tes idées d'améliorations ou ton avis",
     "comment_placeholder": "Tout ce qui te passe par la tête…",
     "submit": "Envoyer",
     "submit_failed": "Envoi impossible — ta réponse est gardée en local.",
@@ -109,6 +109,6 @@
     "thanks_big": "Merci beaucoup !",
     "thanks_sub": "Ton retour compte vraiment et m'aide à améliorer le jeu.",
     "quit": "Quitter",
-    "open_button": "Donne-moi ton avis"
+    "open_button": "Donne ton avis"
   }
 }

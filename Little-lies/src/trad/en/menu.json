@@ -91,7 +91,7 @@
     "reset_confirm": "The interactive tutorial will appear at the start of the next game."
   },
   "survey": {
-    "title": "Give me your feedback",
+    "title": "Share your feedback",
     "subtitle": "Everything is optional — answer what you want, it really helps.",
     "question": "Overall, did you enjoy this game?",
     "q_more_roles": "Would you like more different roles?",
@@ -109,6 +109,6 @@
     "thanks_big": "Thank you so much!",
     "thanks_sub": "Your feedback really matters and helps me improve the game.",
     "quit": "Quit",
-    "open_button": "Give me your feedback"
+    "open_button": "Share your feedback"
   }
 }

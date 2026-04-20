@@ -55,12 +55,15 @@ function Chat(props) {
         last?.type === 'system' &&
         last?.color === 'vote' &&
         last?.dayCount === game.dayCount;
-      if (isFreshVote) {
+      // Suppress the vote SFX once the game is over — the GameOver
+      // recap was re-firing it as the chat re-rendered with the final
+      // message list, which felt out of place on the end screen.
+      if (isFreshVote && game.status !== CONSTANTS.STATUS.ENDED) {
         Audio.playVote();
       }
     }
     prevMsgCountRef.current = current.length;
-  }, [messages, game.dayCount]);
+  }, [messages, game.dayCount, game.status, CONSTANTS.STATUS.ENDED]);
 
   // Open input on Enter key (global)
   useEffect(() => {

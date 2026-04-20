@@ -774,3 +774,198 @@
     .go-btn { width: 100%; }
   }
 }
+
+// ── XP CTA: hint + "Sign in" button under the +XP block when guest ──
+.go-xp-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.55rem;
+}
+
+.go-xp-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.2rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: linear-gradient(90deg, #a88547 0%, #6b4e22 100%);
+  color: #fff;
+  border: 1px solid rgba(255, 230, 190, 0.3);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  transition: background 0.25s ease, transform 0.15s ease;
+
+  &:hover {
+    background: linear-gradient(90deg, #d9b870 0%, #a88547 100%);
+  }
+
+  i { font-size: 0.85rem; }
+}
+
+// ── Embedded auth panel inside GameOver (keeps the screen visible) ──
+.go-auth-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.2rem 1.4rem;
+  max-width: 24rem;
+  margin: 0 auto;
+}
+
+.go-auth-back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: #d9b870;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  transition: color 0.2s ease, background 0.2s ease;
+
+  &:hover { color: #fff; background: rgba(255, 230, 190, 0.06); }
+  i { font-size: 0.75rem; }
+}
+
+.go-auth-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  letter-spacing: 0.06em;
+  margin: 0.2rem 0 0.5rem;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.go-auth-oauth {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.go-auth-oauth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.35); }
+  i { font-size: 1rem; }
+  &.google i { color: #fff; }
+}
+
+.go-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.go-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  input {
+    padding: 0.6rem 0.85rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.35rem;
+    color: #fff;
+    font-size: 0.92rem;
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: rgba(217, 184, 112, 0.55);
+      background: rgba(0, 0, 0, 0.55);
+    }
+    &::placeholder { color: rgba(255, 255, 255, 0.4); }
+  }
+}
+
+.go-auth-submit {
+  margin-top: 0.35rem;
+  padding: 0.7rem 1rem;
+  background: linear-gradient(90deg, #a88547 0%, #6b4e22 100%);
+  color: #fff;
+  border: 1px solid rgba(255, 230, 190, 0.3);
+  border-radius: 0.4rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+
+  &:hover:not(:disabled) { background: linear-gradient(90deg, #d9b870 0%, #a88547 100%); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.go-auth-error,
+.go-auth-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.2rem 0 0;
+  font-size: 0.83rem;
+  letter-spacing: 0.02em;
+
+  i { font-size: 0.85rem; }
+}
+
+.go-auth-error { color: #ff8080; }
+.go-auth-success { color: #78ff78; }
+
+.go-auth-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+  text-align: center;
+
+  button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.2s ease;
+
+    strong { color: #d9b870; font-weight: 700; }
+    &:hover { color: #fff; strong { color: #fff; } }
+    i { margin-right: 0.3rem; font-size: 0.75rem; }
+  }
+}

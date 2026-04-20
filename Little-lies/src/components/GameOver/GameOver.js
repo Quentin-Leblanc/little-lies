@@ -5,7 +5,15 @@ import { useGameEngine } from '../../hooks/useGameEngine';
 import { collectGameMetrics, saveMetrics } from '../../utils/GameMetrics';
 import { calculateGameXP } from '../../utils/xpSystem';
 import { useAuth } from '../Auth/Auth';
-import { addXP, incrementGamesPlayed } from '../../utils/supabase';
+import {
+  addXP,
+  incrementGamesPlayed,
+  signInWithEmail,
+  signUpWithEmail,
+  signInWithOAuth,
+  sendPasswordReset,
+  isSupabaseConfigured,
+} from '../../utils/supabase';
 import Audio from '../../utils/AudioManager';
 import SurveyModal from '../Survey/Survey';
 import { toTextCss } from '../../utils/playerColor';
@@ -23,11 +31,161 @@ const TEAM_STYLES = {
 
 const TEAM_ORDER = ['town', 'mafia', 'evil', 'cult', 'neutral'];
 
-// Timings (ms) for the staged reveal → panel transition. 7s on the
-// intermediate card is enough to read the faction + roster without
-// dragging the end-of-game flow — earlier 8s felt sluggish.
-const INTERMEDIATE_VISIBLE_MS = 7000;
-const FADE_BETWEEN_MS = 1400;
+// ============================================================
+// Embedded auth panel — rendered INSIDE the GameOver overlay so a
+// guest can claim the XP they just earned without losing the end-of-
+// game screen (modal would obscure it; routing away would lose state).
+// Clicking "Back" returns to the main GameOver view; once Supabase
+// flips the auth state to logged-in, the parent useEffect on `user`
+// auto-saves the pending xpGained, then renders the connected UI.
+// Modes: login | register | reset.
+// ============================================================
+const GameOverAuthPanel = ({ onBack }) => {
+  const { t } = useTranslation(['common', 'game']);
+  const [mode, setMode] = useState('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!isSupabaseConfigured()) {
+    return (
+      <div className="go-auth-panel">
+        <button className="go-auth-back" onClick={onBack}>
+          <i className="fas fa-arrow-left"></i> {t('common:back', { defaultValue: 'Retour' })}
+        </button>
+        <p className="go-auth-error" style={{ textAlign: 'center', marginTop: '2rem' }}>
+          {t('common:auth_unavailable')}
+        </p>
+      </div>
+    );
+  }
+
+  const handleOAuth = async (provider) => {
+    setError('');
+    const { error: err } = await signInWithOAuth(provider);
+    if (err) setError(err.message);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setSubmitting(true);
+    try {
+      if (mode === 'reset') {
+        if (!email) { setError(t('common:email_required', { defaultValue: 'Email requis' })); return; }
+        const { error: err } = await sendPasswordReset(email);
+        if (err) setError(err.message);
+        else setSuccess(t('game:gameover.reset_sent', { defaultValue: 'Email de réinitialisation envoyé.' }));
+      } else if (mode === 'register') {
+        if (!username.trim()) { setError(t('common:username_required')); return; }
+        if (password.length < 6) { setError(t('common:password_min')); return; }
+        const { error: err } = await signUpWithEmail(email, password, username.trim());
+        if (err) setError(err.message);
+        else setSuccess(t('common:account_created'));
+      } else {
+        const { error: err } = await signInWithEmail(email, password);
+        if (err) setError(err.message);
+        // Success: auth state flip will swap the UI in the parent.
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="go-auth-panel">
+      <button className="go-auth-back" onClick={onBack}>
+        <i className="fas fa-arrow-left"></i> {t('common:back', { defaultValue: 'Retour' })}
+      </button>
+      <h2 className="go-auth-title">
+        {mode === 'reset'
+          ? t('game:gameover.reset_title', { defaultValue: 'Réinitialiser le mot de passe' })
+          : mode === 'register'
+            ? t('common:create_account')
+            : t('game:gameover.login_to_save', { defaultValue: 'Se connecter pour sauvegarder ton XP' })}
+      </h2>
+
+      {mode !== 'reset' && (
+        <>
+          <div className="go-auth-oauth">
+            <button className="go-auth-oauth-btn google" onClick={() => handleOAuth('google')}>
+              <i className="fab fa-google"></i> Google
+            </button>
+          </div>
+          <div className="go-auth-divider"><span>{t('common:or')}</span></div>
+        </>
+      )}
+
+      <form onSubmit={handleSubmit} className="go-auth-form">
+        {mode === 'register' && (
+          <input
+            type="text"
+            placeholder={t('common:username')}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            maxLength={20}
+            autoComplete="username"
+          />
+        )}
+        <input
+          type="email"
+          placeholder={t('common:email')}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+        />
+        {mode !== 'reset' && (
+          <input
+            type="password"
+            placeholder={t('common:password')}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+          />
+        )}
+        {error && <p className="go-auth-error"><i className="fas fa-exclamation-circle"></i> {error}</p>}
+        {success && <p className="go-auth-success"><i className="fas fa-check-circle"></i> {success}</p>}
+        <button type="submit" className="go-auth-submit" disabled={submitting}>
+          {submitting ? '...' : (
+            mode === 'reset' ? t('game:gameover.reset_send', { defaultValue: 'Envoyer le lien' })
+            : mode === 'register' ? t('common:create_account_btn')
+            : t('common:sign_in')
+          )}
+        </button>
+      </form>
+
+      <div className="go-auth-toggles">
+        {mode === 'login' && (
+          <>
+            <button type="button" onClick={() => { setMode('register'); setError(''); setSuccess(''); }}>
+              {t('common:no_account')} <strong>{t('common:create_account')}</strong>
+            </button>
+            <button type="button" onClick={() => { setMode('reset'); setError(''); setSuccess(''); }}>
+              {t('game:gameover.forgot_password', { defaultValue: 'Mot de passe oublié ?' })}
+            </button>
+          </>
+        )}
+        {mode === 'register' && (
+          <button type="button" onClick={() => { setMode('login'); setError(''); setSuccess(''); }}>
+            {t('common:has_account')} <strong>{t('common:sign_in')}</strong>
+          </button>
+        )}
+        {mode === 'reset' && (
+          <button type="button" onClick={() => { setMode('login'); setError(''); setSuccess(''); }}>
+            <i className="fas fa-arrow-left"></i> {t('common:sign_in')}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // Particules flottantes selon victoire/defaite
 const Particles = ({ type }) => {
@@ -68,9 +226,18 @@ const GameOver = () => {
   const [_events] = useMultiplayerState('events', []);
   const events = _events || [];
   const [dismissed, setDismissed] = useState(false);
-  const [stage, setStage] = useState('intermediate'); // 'intermediate' | 'between' | 'panel'
+  // Stage is kept as a variable for downstream conditionals but the
+  // intermediate "winning faction + roles" splash was removed per user
+  // feedback: it interrupted the flow and double-played the recap. We
+  // jump straight to the final panel and let it animate in softly.
+  const stage = 'panel';
   const [showContent, setShowContent] = useState(false);
   const [showRecap, setShowRecap] = useState(false);
+  // Internal auth view — when 'auth', the panel content is replaced
+  // with the embedded GameOverAuthPanel so the user can sign in / sign
+  // up / reset password without leaving the GameOver screen. They can
+  // hit "Back" to return to the recap.
+  const [view, setView] = useState('main');
   const [xpGained, setXpGained] = useState(null);
   const metricsSaved = useRef(false);
   const xpSaved = useRef(false);
@@ -181,13 +348,13 @@ const GameOver = () => {
     if (v > 0 && muted) { Audio.toggleMute(); setMuted(false); }
   };
 
-  // Staged reveal: faction + roles first (5s), fade to black, then panel.
+  // Soft entry into the panel. The intermediate splash was removed so
+  // we drive the panel reveal directly: a quick fade in, then the recap
+  // card slides up shortly after.
   useEffect(() => {
-    const t1 = setTimeout(() => setStage('between'), INTERMEDIATE_VISIBLE_MS);
-    const t2 = setTimeout(() => setStage('panel'), INTERMEDIATE_VISIBLE_MS + FADE_BETWEEN_MS);
-    const t3 = setTimeout(() => setShowContent(true), INTERMEDIATE_VISIBLE_MS + FADE_BETWEEN_MS + 200);
-    const t4 = setTimeout(() => setShowRecap(true), INTERMEDIATE_VISIBLE_MS + FADE_BETWEEN_MS + 1100);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+    const t1 = setTimeout(() => setShowContent(true), 250);
+    const t2 = setTimeout(() => setShowRecap(true), 1100);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   // Stats rapides
@@ -241,46 +408,10 @@ const GameOver = () => {
     window.location.replace(target);
   };
 
-  // Intermediate reveal — faction banner + roles in a 3D-style card.
-  // Renders on top of the scene, fades out into the full panel.
-  const intermediateVisible = stage === 'intermediate' || stage === 'between';
-  const intermediateFading = stage === 'between';
-
   return (
     <>
-      {intermediateVisible && (
-        <div className={`go-intermediate ${intermediateFading ? 'go-intermediate-fade' : ''}`}>
-          <div className="go-intermediate-backdrop" />
-          <div
-            className="go-intermediate-card"
-            style={{ '--ring-color': teamStyle.color, borderColor: teamStyle.color }}
-          >
-            <div className="go-intermediate-eyebrow">{t('game:gameover.winning_faction', { defaultValue: 'Winning faction' })}</div>
-            <div className="go-intermediate-title" style={{ color: teamStyle.color }}>
-              <i className={`fas ${teamStyle.icon}`}></i>
-              <span>{teamName}</span>
-            </div>
-            <div className="go-intermediate-roles">
-              {players.map((p) => {
-                const rColor = p.character?.couleur || '#888';
-                const roleLabel = t(`roles:${p.character?.key}.label`, { defaultValue: p.character?.label || '?' });
-                return (
-                  <div key={p.id} className={`go-intermediate-row ${p.isAlive ? '' : 'is-dead'}`}>
-                    <span className="go-intermediate-name" style={{ color: toTextCss(p.profile?.color, '#ddd') }}>
-                      {p.character?.icon && <i className={`fas ${p.character.icon}`} style={{ color: rColor, marginRight: '0.35rem' }}></i>}
-                      {p.profile?.name || '?'}
-                    </span>
-                    <span className="go-intermediate-role" style={{ color: rColor }}>{roleLabel}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
       {stage === 'panel' && (
-        <div className={`go-overlay ${intermediateFading ? '' : ''}`}>
+        <div className="go-overlay">
           {/* Volume control — floating top-left, same UX as lobby */}
           <div className="go-volume" ref={volumeRef}>
             <button
@@ -320,6 +451,11 @@ const GameOver = () => {
           <Particles type={particleType} />
           <div className="go-halo" style={{ '--halo-color': teamStyle.color }} />
 
+          {view === 'auth' ? (
+            <div className={`go-container ${showContent ? 'go-visible' : ''}`}>
+              <GameOverAuthPanel onBack={() => setView('main')} />
+            </div>
+          ) : (
           <div className={`go-container ${showContent ? 'go-visible' : ''}`}>
             <div className="go-header">
               <div className="go-icon-ring" style={{ '--ring-color': teamStyle.color }}>
@@ -383,7 +519,16 @@ const GameOver = () => {
                   ))}
                 </div>
                 {!user && (
-                  <p className="go-xp-hint"><i className="fas fa-info-circle"></i> {t('game:gameover.xp_hint')}</p>
+                  <div className="go-xp-cta">
+                    <p className="go-xp-hint"><i className="fas fa-info-circle"></i> {t('game:gameover.xp_hint')}</p>
+                    <button
+                      type="button"
+                      className="go-xp-login-btn"
+                      onClick={() => setView('auth')}
+                    >
+                      <i className="fas fa-sign-in-alt"></i> {t('common:sign_in')}
+                    </button>
+                  </div>
                 )}
               </div>
             )}
@@ -449,6 +594,7 @@ const GameOver = () => {
               </button>
             </div>
           </div>
+          )}
         </div>
       )}
 
