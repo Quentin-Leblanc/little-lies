@@ -29,7 +29,7 @@ $al-gold-hot:    #d9b870;    // highlight (was #ffcc66)
 $al-gold-soft:   #e8d49a;    // glow
 $al-gold-rich:   #a88547;    // gradient mid (was #e5b65e)
 $al-gold-dim:    #6b4e22;    // gradient dark-end (was #b08040)
-$al-gold-text:   #120a04;    // text-on-gold
+$al-gold-text:   #ffffff;    // text-on-gold (white — dark text on gold read too muted)
 
 // Gold helpers (alpha for surfaces)
 $al-gold-border:      rgba(201, 168, 98, 0.22);
@@ -124,13 +124,15 @@ $al-shadow-btn:    0 3px 10px rgba(0, 0, 0, 0.3);
 $al-shadow-btn-hv: 0 6px 22px rgba(0, 0, 0, 0.5);
 $al-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-// Colored glows for primary buttons
-$al-glow-primary:    0 3px 10px $al-blue-glow, inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-$al-glow-primary-hv: 0 6px 22px $al-blue-glow-hv, inset 0 0 0 1px rgba(255, 255, 255, 0.14), inset 0 -8px 18px rgba(110, 140, 180, 0.22);
-$al-glow-gold:       0 3px 10px $al-gold-glow-strong, inset 0 0 0 1px rgba(255, 230, 190, 0.08);
-$al-glow-gold-hv:    0 6px 22px rgba(201, 168, 98, 0.5), inset 0 0 0 1px rgba(255, 230, 190, 0.22);
-$al-glow-blood:      0 3px 10px $al-blood-glow, inset 0 0 0 1px rgba(255, 180, 180, 0.08);
-$al-glow-blood-hv:   0 6px 22px rgba(139, 26, 26, 0.7), inset 0 0 0 1px rgba(255, 200, 200, 0.18), inset 0 -8px 18px rgba(180, 40, 40, 0.25);
+// Button definition — neutral drop + subtle inset border. The colored
+// diffuse glow was removed (too "web-CTA"): we keep a quiet dark shadow
+// for depth and an inset hairline to delineate the button edge.
+$al-glow-primary:    0 2px 6px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+$al-glow-primary-hv: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+$al-glow-gold:       0 2px 6px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 230, 190, 0.08);
+$al-glow-gold-hv:    0 3px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 230, 190, 0.22);
+$al-glow-blood:      0 2px 6px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 180, 180, 0.08);
+$al-glow-blood-hv:   0 3px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 200, 200, 0.18);
 $al-glow-danger:     $al-glow-blood;
 
 // ─────────────────────────────────────────────

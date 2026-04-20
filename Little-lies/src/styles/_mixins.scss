@@ -93,7 +93,7 @@
     font-family: $al-font-header;
     font-weight: 700;
     box-shadow: $al-glow-gold;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
   }
   &:hover:not(:disabled) {
     background: $al-grad-gold-hv;
