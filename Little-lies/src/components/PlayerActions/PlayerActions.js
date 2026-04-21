@@ -81,10 +81,12 @@ const PlayerActions = memo(function () {
   const isNightPhase = phase === CONSTANTS.PHASE.NIGHT;
   const isDiscussionPhase = phase === CONSTANTS.PHASE.DISCUSSION;
   const isDayPhase = game.isDay && phase !== CONSTANTS.PHASE.NIGHT_TRANSITION;
-  // First night is a peaceful introduction — no kills, no investigations,
-  // nothing. Actions are rendered disabled so players still see their
-  // role's capabilities without being able to trigger them.
-  const isFirstNight = isNightPhase && (game.dayCount || 0) === 1;
+  // Night 0 (the wordless INTRO_CINEMATIC before Day 1) is the peaceful
+  // introduction — players arrive under moonlight, no actions possible.
+  // Night 1 and every subsequent night run the full action resolution.
+  // Kept as a flag (always false) so downstream JSX that reads it stays
+  // compatible; a follow-up pass can drop the references entirely.
+  const isFirstNight = false;
 
   // Death flash
   useEffect(() => {

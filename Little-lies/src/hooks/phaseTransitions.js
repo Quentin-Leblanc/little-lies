@@ -50,15 +50,17 @@ export function computeNextPhase(currentPhase, context) {
       };
 
     case PHASE.NIGHT: {
-      // First night is peaceful by design (actions are disabled), so
-      // skip the DEATH_REPORT on the morning of day 2 and jump straight
-      // into the day's DISCUSSION. Later nights keep the full beat.
+      // Every morning goes through DEATH_REPORT — including the morning
+      // of day 2. If nobody actually died, the resolver (useEvents.js)
+      // will pick one of the `peaceful_night_variants` lines instead of
+      // a kill chat. The old "skip DEATH_REPORT on first morning" shortcut
+      // was tied to the removed "first night peaceful" rule (only Night 0
+      // / INTRO_CINEMATIC plays that role now).
       const nextDayCount = (game?.dayCount || 0) + 1;
-      const isFirstMorning = (game?.dayCount || 0) === 1;
       return {
         gameDelta: {
-          phase: isFirstMorning ? PHASE.DISCUSSION : PHASE.DEATH_REPORT,
-          timer: isFirstMorning ? dur('DISCUSSION') : dur('DEATH_REPORT'),
+          phase: PHASE.DEATH_REPORT,
+          timer: dur('DEATH_REPORT'),
           isDay: true,
           dayCount: nextDayCount,
           trialsToday: 0,
