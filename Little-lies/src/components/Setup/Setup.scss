@@ -1,470 +1,634 @@
 @import '../../styles/variables';
 @import '../../styles/mixins';
 
-// ── Setup Screen ──
+// ── CSS variables consumed by sub-components (Balance, Roles…) ──
+.setup-screen {
+  --al-town:    #{$al-faction-town};
+  --al-mafia:   #{$al-faction-mafia};
+  --al-neutral: #{$al-faction-neutral};
+  --al-cult:    #{$al-faction-cult};
+}
+
+// ── Setup Screen ──────────────────────────────────────────────────
 .setup-screen {
   position: relative;
   z-index: 10;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
   min-height: 100vh;
-  padding: 2.353rem 1.176rem;
+  padding: 2.35rem 1.6rem 8rem;
+  background: radial-gradient(
+    ellipse 110% 60% at 50% 120%,
+    rgba(169, 104, 48, 0.28) 0%,
+    rgba(50, 25, 10, 0.12) 40%,
+    transparent 70%
+  );
 }
 
-.setup-card {
+.setup-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  gap: 1.4rem;
+  max-width: 78rem;
+  margin: 0 auto;
+  align-items: start;
+}
+
+// ── Main (left) panel ─────────────────────────────────────────────
+.setup-main,
+.setup-panel {
   @include al-card;
-  width: 100%;
-  max-width: 51.765rem;
-  padding: 1.882rem 2.118rem;
+  padding: 1.6rem 1.8rem;
+  border-radius: 1rem;
 }
 
-// ── Header ──
-.setup-header {
+.setup-heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 1.412rem;
-  padding-bottom: 1.059rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 1rem;
+  margin-bottom: 1.3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $al-border-subtle;
 }
 
-.setup-header-right {
-  display: flex;
-  align-items: center;
-  gap: 0.588rem;
-}
-
-.setup-host-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.353rem;
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.25);
-  border-radius: 1.176rem;
-  padding: 0.294rem 0.824rem;
-  font-size: 0.8rem;
-  color: #ffd700;
+.setup-title {
+  font-family: $al-font-header;
+  font-size: 1.45rem;
   font-weight: 600;
+  letter-spacing: $al-track-title;
+  color: $al-gold;
+  margin: 0 0 0.25rem;
+  padding: 0;
+  // Global .App { text-align: center } bleeds into every descendant, so
+  // we explicitly reset the heading here to sit flush with the subtitle
+  // and the rest of the setup card content.
+  text-align: left;
+  // Cinzel has a fair bit of left side-bearing at large sizes, which —
+  // combined with letter-spacing — drifts the first glyph a few pixels
+  // to the right. A tiny negative text-indent pulls it back onto the
+  // container edge without clipping the "Q".
+  text-indent: -0.04em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+}
 
-  i { font-size: 0.7rem; }
+
+.setup-subtitle {
+  font-family: $al-font-body;
+  font-size: 0.82rem;
+  color: $al-text-mute;
+  margin: 0;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  text-align: left; // override global .App { text-align: center }
+}
+
+.setup-heading-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.setup-host-badge,
+.setup-players-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: $al-radius-pill;
+  border: 1px solid $al-gold-border;
+  background: $al-gold-glow;
+  color: $al-gold-soft;
+  font-family: $al-font-body;
+
+  i { font-size: 0.7rem; color: $al-gold; }
+}
+
+.setup-players-badge {
+  border-color: rgba(142, 195, 255, 0.22);
+  background: rgba(142, 195, 255, 0.08);
+  color: $al-faction-town;
+
+  i { color: $al-faction-town; }
+
+  .min-hint {
+    color: $al-blood-hot;
+    font-size: 0.7rem;
+    margin-left: 0.2rem;
+  }
 }
 
 .setup-host-notice {
   text-align: center;
-  padding: 0.588rem 0.941rem;
-  margin-bottom: 0.941rem;
-  background: rgba(255, 215, 0, 0.06);
-  border: 1px solid rgba(255, 215, 0, 0.15);
-  border-radius: 0.588rem;
-  color: #daa520;
-  font-size: 0.85rem;
+  padding: 0.55rem 0.9rem;
+  margin-bottom: 1rem;
+  background: $al-gold-glow;
+  border: 1px solid $al-gold-border;
+  border-radius: $al-radius-md;
+  color: $al-gold-soft;
+  font-size: 0.82rem;
+  font-family: $al-font-body;
 
-  i { margin-right: 0.353rem; }
+  i { margin-right: 0.3rem; color: $al-gold; }
 }
 
 .setup-waiting {
+  @include al-card;
   text-align: center;
-  padding: 0.706rem;
-  color: #888;
-  font-size: 0.9rem;
+  padding: 0.85rem;
+  color: $al-text-mute;
+  font-size: 0.85rem;
   font-style: italic;
+  font-family: $al-font-body;
   animation: setup-blink 2s ease-in-out infinite;
 
-  i { margin-right: 0.353rem; }
-}
-
-.config-readonly-hint {
-  color: #888;
-  font-size: 0.75rem;
-  font-style: italic;
-  margin: 0 0 0.471rem 0;
-}
-
-// Team counter
-.setup-team-counter {
-  display: flex;
-  align-items: center;
-  gap: 0.941rem;
-  padding: 0.471rem 0.824rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 0.471rem;
-  margin-bottom: 0.706rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-
-  i { margin-right: 0.235rem; font-size: 0.75rem; }
-
-  > span {
-    transition: opacity 0.3s ease;
-  }
-}
-
-.setup-warning {
-  color: #ff6666;
-  font-size: 0.75rem;
-  animation: setup-blink 2s ease-in-out infinite;
-
-  i { margin-right: 0.176rem; }
-}
-
-/* Hard-block warning — appears when the selected roster has no threat
-   faction (mafia / cult / neutral killer) and the town would win at
-   match start. Impossible to miss: large, red, sits above the start btn. */
-.setup-block-warning {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  margin: 0.8rem 0 0;
-  padding: 0.7rem 1rem;
-  background: rgba(255, 68, 68, 0.12);
-  border: 1px solid rgba(255, 68, 68, 0.45);
-  border-radius: 0.5rem;
-  color: #ffb3b3;
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-align: center;
-  line-height: 1.35;
-
-  i { color: #ff4444; font-size: 1.1rem; }
+  i { margin-right: 0.35rem; }
 }
 
 @keyframes setup-blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50%      { opacity: 0.5; }
 }
 
-.setup-title {
-  font-family: 'Cinzel', serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #e8e8f0;
-  margin: 0;
-  letter-spacing: 0.5px;
-}
-
-.setup-players-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.471rem;
-  background: rgba(47, 130, 255, 0.12);
-  border: 1px solid rgba(47, 130, 255, 0.25);
-  border-radius: 1.176rem;
-  padding: 0.353rem 0.941rem;
-  font-size: 0.85rem;
-  color: #a0c4ff;
-
-  i {
-    font-size: 0.8rem;
-    color: $blue;
-  }
-
-  span {
-    font-weight: 700;
-    color: $blue;
-  }
-}
-
-// ── Presets ──
+// ── Presets row ───────────────────────────────────────────────────
 .setup-presets {
   display: flex;
   align-items: center;
-  gap: 0.588rem;
-  margin-bottom: 1.059rem;
   flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1.1rem;
 }
 
 .presets-label {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.3);
+  font-family: $al-font-header;
+  font-size: 0.65rem;
+  color: $al-text-faint;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: $al-track-label;
   font-weight: 600;
+  margin-right: 0.3rem;
 }
 
 .presets-list {
   display: flex;
-  gap: 0.353rem;
+  gap: 0.35rem;
   flex-wrap: wrap;
 }
 
 .preset-btn {
-  font-size: 0.75rem;
-  padding: 0.294rem 0.824rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.55);
-  border-radius: 0.941rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: $al-font-header;
+  font-size: 0.72rem;
+  letter-spacing: $al-track-button;
+  padding: 0.3rem 0.85rem;
+  background: $al-bg-subtle;
+  border: 1px solid $al-border-subtle;
+  color: $al-text-dim;
+  border-radius: $al-radius-pill;
   cursor: pointer;
-  transition: all 0.2s;
-  font-family: 'Cinzel', serif;
+  transition: all $al-trans-fast;
 
-  &:hover {
-    background: rgba(47, 130, 255, 0.15);
-    border-color: rgba(47, 130, 255, 0.4);
-    color: #a0c4ff;
+  &:hover:not(:disabled) {
+    border-color: $al-gold-border-hv;
+    background: $al-gold-glow;
+    color: $al-gold-soft;
     transform: translateY(-1px);
   }
 
   &.preset-beginner {
-    border-color: rgba(0, 185, 106, 0.4);
-    color: rgba(120, 255, 120, 0.7);
-    &:hover {
-      background: rgba(0, 185, 106, 0.15);
-      border-color: rgba(0, 185, 106, 0.6);
-      color: #78ff78;
+    border-color: rgba(106, 154, 78, 0.35);
+    color: rgba(170, 220, 140, 0.85);
+
+    &:hover:not(:disabled) {
+      background: rgba(106, 154, 78, 0.15);
+      border-color: rgba(106, 154, 78, 0.6);
+      color: #cde9a2;
     }
   }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  i { font-size: 0.65rem; }
 }
 
-// ── Dual Box ──
-.dualBox {
+// ── Role grid ─────────────────────────────────────────────────────
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 0.65rem;
+}
+
+.role-card {
+  --team: #{$al-text};
+  position: relative;
   display: flex;
-  justify-content: center;
-  font-family: 'Cinzel', serif;
-  align-items: stretch;
-  gap: 0;
-  margin-bottom: 1.412rem;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.75rem 0.85rem;
+  background: linear-gradient(160deg, rgba(24, 18, 14, 0.92), rgba(10, 7, 5, 0.96));
+  border: 1px solid $al-border-subtle;
+  border-radius: $al-radius-md;
+  transition: border-color $al-trans-fast, background $al-trans-fast,
+              box-shadow $al-trans-fast;
+  user-select: none;
 
-  .rolesAvailable, .rolesSelected {
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 1.059rem 0.941rem;
-    border-radius: 0.824rem;
-    width: 45%;
-    background: rgba(255, 255, 255, 0.02);
+  // Hover: just a border-color shift. The previous translateY(-1px)
+  // lifted the card a pixel — combined with the border swap, it felt
+  // like a snap. Holding position keeps the grid static.
+  &:hover {
+    border-color: color-mix(in srgb, var(--team) 40%, transparent);
   }
 
-  .rolesAvailable {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: none;
+  // Selected state — card picks up the team tint so a filled roster reads
+  // at a glance.
+  &.is-selected {
+    border-color: color-mix(in srgb, var(--team) 55%, transparent);
+    background:
+      linear-gradient(160deg,
+        color-mix(in srgb, var(--team) 18%, rgba(24, 18, 14, 0.92)),
+        color-mix(in srgb, var(--team) 6%, rgba(10, 7, 5, 0.96)));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--team) 25%, transparent),
+                0 4px 14px color-mix(in srgb, var(--team) 18%, transparent);
   }
 
-  .rolesSelected {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+  &--town    { --team: var(--al-town); }
+  &--mafia   { --team: var(--al-mafia); }
+  &--cult    { --team: var(--al-cult); }
+  &--neutral { --team: var(--al-neutral); }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 1.8rem; // leave room for the top-right count badge
   }
 
-  h2 {
-    font-size: 0.7rem;
+  &__icon {
+    font-size: 0.85rem;
+    width: 1.1rem;
+    text-align: center;
+  }
+
+  &__name {
+    font-family: $al-font-header;
+    font-size: 0.78rem;
+    letter-spacing: $al-track-label;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255, 255, 255, 0.35);
-    margin: 0 0 0.824rem 0;
+    color: $al-text;
     font-weight: 600;
   }
 
-  .arrow {
-    display: flex;
-    justify-content: center;
+  // Count badge — top-right corner, only shown once the role has ≥1
+  // instance picked. Absolute positioning so the rest of the layout
+  // never reflows when it appears.
+  &__badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.55rem;
+    min-width: 1.3rem;
+    height: 1.3rem;
+    display: inline-flex;
     align-items: center;
-    font-size: 1.176rem;
-    color: rgba(255, 255, 255, 0.15);
-    padding: 0;
-    width: 2.118rem;
-    flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.02);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  }
-}
-
-// ── Role team groups ──
-.role-team-group {
-  margin-bottom: 0.706rem;
-
-  &:last-child { margin-bottom: 0; }
-
-  h3 {
-    font-size: 0.6rem;
-    margin: 0 0 0.353rem 0;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    justify-content: center;
+    padding: 0 0.35rem;
+    border-radius: $al-radius-pill;
+    font-family: $al-font-header;
+    font-size: 0.72rem;
     font-weight: 700;
-    opacity: 0.8;
+    background: var(--team);
+    color: $al-bg-deep;
+    box-sizing: border-box;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  // Footer row — pill on the left, −/+ stepper on the right.
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+
+  // Side-by-side stepper pair. Deliberately without a number between the
+  // buttons — the count lives in the top-right badge — so the stepper
+  // reads as a compact control, not a spinner.
+  &__stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
   }
 }
 
-._buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.235rem;
-}
-
-// ── Role pick button (available) ──
-.role-pick-btn {
-  display: flex;
+.stepper-btn {
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-flex;
   align-items: center;
-  gap: 0.294rem;
-  padding: 0.235rem 0.588rem;
-  font-size: 0.7rem;
-  border-width: 1px;
-  border-style: solid;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 0.353rem;
+  justify-content: center;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid color-mix(in srgb, var(--team) 35%, $al-border-subtle);
+  color: $al-text;
+  border-radius: 50%;
+  font-family: $al-font-body;
+  font-size: 0.95rem;
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.2s;
-  color: rgba(255, 255, 255, 0.7);
+  transition: background $al-trans-fast, border-color $al-trans-fast,
+              color $al-trans-fast, transform $al-trans-fast;
 
   &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateY(-1px);
-    color: #fff;
+    background: color-mix(in srgb, var(--team) 30%, rgba(0, 0, 0, 0.5));
+    border-color: var(--team);
+    color: var(--team);
+    transform: scale(1.06);
   }
 
   &:disabled {
     opacity: 0.3;
     cursor: not-allowed;
   }
-
-  // Non-host viewers keep full visibility — no grey-out
-  &.is-viewer:disabled {
-    opacity: 1;
-    cursor: default;
-    color: rgba(255, 255, 255, 0.85);
-  }
-
-  i { font-size: 0.6rem; }
 }
 
-// ── Selected roles ──
-.rolesSelected {
-  min-height: 10.588rem;
-
-  .selected {
-    display: flex;
-    flex-direction: column;
-    gap: 0.176rem;
-  }
+.team-pill {
+  align-self: flex-start;
+  font-family: $al-font-body;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: $al-track-label;
+  text-transform: uppercase;
+  padding: 0.15rem 0.55rem;
+  border-radius: $al-radius-pill;
+  background: color-mix(in srgb, var(--team) 18%, transparent);
+  color: var(--team);
+  border: 1px solid color-mix(in srgb, var(--team) 35%, transparent);
 }
 
-.role-selected-btn {
+// ── Sidebar panels ────────────────────────────────────────────────
+.setup-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 1.6rem;
+}
+
+.setup-panel {
+  padding: 1.1rem 1.25rem;
+}
+
+.panel-title {
   display: flex;
   align-items: center;
-  gap: 0.353rem;
-  padding: 0.294rem 0.588rem;
-  font-size: 0.7rem;
-  border-width: 1px;
-  border-style: solid;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 0.353rem;
-  width: 100%;
-  text-align: left;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: rgba(255, 255, 255, 0.7);
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
+  font-family: $al-font-header;
+  font-size: 0.78rem;
+  letter-spacing: $al-track-label;
+  text-transform: uppercase;
+  color: $al-gold;
+  font-weight: 600;
 
-  .remove-icon {
-    margin-left: auto;
-    color: #ff4444;
-    font-size: 0.55rem;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  &:hover:not(:disabled) {
-    background: rgba(255, 60, 60, 0.08);
-    .remove-icon { opacity: 1; }
-  }
-
-  &:disabled { cursor: default; }
-
-  // Non-host viewers keep full visibility — no grey-out
-  &.is-viewer:disabled {
-    opacity: 1;
-    color: rgba(255, 255, 255, 0.85);
-  }
-
-  i:first-child { font-size: 0.6rem; }
+  i { font-size: 0.8rem; }
 }
 
-// ── Footer / Start button ──
-.setup-footer {
+// Balance bars
+.balance-panel {
+  .balance-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+}
+
+.balance-row {
+  --faction: var(--al-town);
+  display: grid;
+  grid-template-columns: 4.6rem 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: $al-font-body;
+  font-size: 0.72rem;
+
+  &--town    { --faction: var(--al-town); }
+  &--mafia   { --faction: var(--al-mafia); }
+  &--neutral { --faction: var(--al-neutral); }
+  &--cult    { --faction: var(--al-cult); }
+
+  &__label {
+    color: $al-text-dim;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.68rem;
+  }
+
+  &__track {
+    position: relative;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  &__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--faction) 85%, transparent) 0%,
+      var(--faction) 100%);
+    border-radius: inherit;
+    transition: width $al-trans;
+  }
+
+  &__pct {
+    color: var(--faction);
+    font-weight: 600;
+    font-size: 0.7rem;
+    min-width: 2.4rem;
+    text-align: right;
+  }
+}
+
+.balance-verdict {
+  margin: 0.95rem 0 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: $al-radius-sm;
+  background: $al-bg-subtle;
+  border: 1px solid $al-border-subtle;
+  font-family: $al-font-body;
+  font-size: 0.74rem;
+  font-style: italic;
+  color: $al-text-dim;
+  line-height: 1.35;
+
+  &.is-warning {
+    color: $al-warn;
+    border-color: rgba(200, 138, 58, 0.3);
+    background: rgba(200, 138, 58, 0.08);
+  }
+
+  &.is-danger {
+    color: $al-blood-hot;
+    border-color: rgba(160, 40, 40, 0.35);
+    background: rgba(160, 40, 40, 0.08);
+  }
+}
+
+// House rules list + toggles
+.rules-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
 }
 
-.start-btn {
+.rule-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed $al-border-subtle;
+
+  &:last-child { border-bottom: 0; }
+
+  &.is-off {
+    .rule-row__label { color: $al-text-faint; }
+    .rule-row__hint  { color: $al-text-faint; opacity: 0.65; }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  &__label {
+    font-family: $al-font-body;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $al-text;
+  }
+
+  &__hint {
+    font-family: $al-font-body;
+    font-size: 0.68rem;
+    color: $al-text-faint;
+    line-height: 1.3;
+  }
+}
+
+.rule-toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 1.15rem;
+  border: 1px solid $al-border-soft;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: $al-radius-pill;
+  cursor: pointer;
+  padding: 0;
+  transition: background $al-trans-fast, border-color $al-trans-fast;
+
+  &__dot {
+    position: absolute;
+    top: 50%;
+    left: 0.15rem;
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    background: $al-text-mute;
+    transform: translateY(-50%);
+    transition: left $al-trans-fast, background $al-trans-fast;
+  }
+
+  &.is-on {
+    background: $al-grad-gold;
+    border-color: $al-gold-border-hv;
+
+    .rule-toggle__dot {
+      left: calc(100% - 1rem);
+      background: #fff;
+    }
+  }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── "Seal the Roster" CTA ─────────────────────────────────────────
+.seal-btn {
   @include al-btn-base;
   & {
-    padding: 0.824rem 2.118rem;
-    font-size: 0.95rem;
+    width: 100%;
+    padding: 0.95rem 1.2rem;
     font-family: $al-font-header;
+    font-size: 0.88rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    letter-spacing: $al-track-label;
+    text-transform: uppercase;
     border-radius: $al-radius-md;
+    border: 1px solid $al-border-subtle;
     background: $al-bg-subtle;
-    color: rgba(255, 255, 255, 0.3);
+    color: $al-text-faint;
     cursor: not-allowed;
   }
 
-  i { font-size: 0.8rem; }
+  i { font-size: 0.85rem; }
 
   &.ready {
-    @include al-btn-primary;
-    & {
-      padding: 0.824rem 2.118rem;
-      font-size: 0.95rem;
-      font-family: $al-font-header;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      border-radius: $al-radius-md;
+    background: $al-grad-gold;
+    color: $al-gold-text;
+    border-color: $al-gold-border-hv;
+    box-shadow: $al-glow-gold;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: $al-grad-gold-hv;
+      box-shadow: $al-glow-gold-hv;
+      transform: translateY(-1px);
     }
   }
 
-  &:disabled {
-    pointer-events: none;
+  &:disabled { pointer-events: none; }
+}
+
+// Make the legacy GameConfig (phase durations collapsible) fit the sidebar
+.setup-sidebar .game-config { margin: 0; }
+
+// ── Responsive ────────────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .setup-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .setup-sidebar {
+    position: static;
   }
 }
 
-// === RESPONSIVE ===
 @media (max-width: 768px) {
-  .setup-screen {
-    padding: 0.941rem 0.588rem;
-  }
-  .setup-card {
-    padding: 1.059rem 0.824rem;
-    border-radius: 0.824rem;
-  }
-  .setup-header {
+  .setup-screen { padding: 1rem 0.7rem 6rem; }
+  .setup-main,
+  .setup-panel { padding: 1rem 1rem; }
+  .setup-heading {
     flex-direction: column;
-    gap: 0.588rem;
     align-items: flex-start;
+    gap: 0.6rem;
   }
-  .setup-title {
-    font-size: 1.1rem;
-  }
-  .dualBox {
-    flex-direction: column;
-    gap: 0.706rem;
-
-    .rolesAvailable, .rolesSelected {
-      width: 100%;
-      border-radius: 0.824rem;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .rolesAvailable {
-      border-top-right-radius: 14px;
-      border-bottom-right-radius: 14px;
-      border-right: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .rolesSelected {
-      border-top-left-radius: 14px;
-      border-bottom-left-radius: 14px;
-    }
-    .arrow {
-      width: 100%;
-      height: 1.765rem;
-      transform: rotate(90deg);
-    }
-  }
-  .start-btn {
-    padding: 0.706rem 1.412rem;
-    font-size: 0.85rem;
-    width: 100%;
-    justify-content: center;
-  }
+  .setup-title { font-size: 1.1rem; }
+  .role-grid { grid-template-columns: repeat(auto-fill, minmax(8.8rem, 1fr)); }
 }

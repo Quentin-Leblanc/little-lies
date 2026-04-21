@@ -1,5 +1,41 @@
 {
   "title": "Game configuration",
+  "assemble_title": "Assemble the village",
+  "assemble_subtitle": "Choose who rides in. The rest will be strangers by sundown...",
+  "seal_the_roster": "Start the game",
+  "slots": "slots",
+  "unique": "unique",
+  "balance": {
+    "title": "Balance",
+    "town": "Town",
+    "mafia": "Mafia",
+    "neutral": "Neutral",
+    "cult": "Cult",
+    "verdict_empty": "No roles picked yet — the village's fate is still unwritten.",
+    "verdict_balanced": "The odds feel even — this one's going to be tight.",
+    "verdict_town_leans": "The odds favor the town — barely.",
+    "verdict_evil_leans": "Evil factions are tipping the scale — the town is at risk.",
+    "verdict_no_threat": "No threat: the town would win instantly at match start."
+  },
+  "rules": {
+    "title": "House rules",
+    "trialDefense": {
+      "label": "Trial defense",
+      "hint": "If off, the accused dies at once — no defense, no judgment."
+    },
+    "lastWills": {
+      "label": "Last wills",
+      "hint": "Let players write a testament that's revealed when they die."
+    },
+    "revealOnDeath": {
+      "label": "Reveal on death",
+      "hint": "Show dead players' roles in chat and the graveyard."
+    },
+    "anonymousVotes": {
+      "label": "Anonymous votes",
+      "hint": "Hide voter names — only the target appears in chat."
+    }
+  },
   "multiplayer_lobby": "Multiplayer lobby",
   "your_username": "Your username",
   "enter_username": "Enter a username...",

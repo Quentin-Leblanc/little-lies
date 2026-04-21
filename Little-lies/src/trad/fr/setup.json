@@ -1,5 +1,41 @@
 {
   "title": "Configuration de la partie",
+  "assemble_title": "Que le village s'assemble",
+  "assemble_subtitle": "Choisis qui entre au village. Les autres ne seront que des ombres au crépuscule...",
+  "seal_the_roster": "Commencer la partie",
+  "slots": "slots",
+  "unique": "unique",
+  "balance": {
+    "title": "Équilibre",
+    "town": "Village",
+    "mafia": "Mafia",
+    "neutral": "Neutres",
+    "cult": "Culte",
+    "verdict_empty": "Aucun rôle choisi — le destin du village est encore à écrire.",
+    "verdict_balanced": "Les probabilités sont équilibrées — la partie sera serrée.",
+    "verdict_town_leans": "Les probabilités favorisent le village — à peine.",
+    "verdict_evil_leans": "Les forces du mal prennent le dessus — le village risque gros.",
+    "verdict_no_threat": "Aucune menace : le village gagnerait au lancement."
+  },
+  "rules": {
+    "title": "Règles du village",
+    "trialDefense": {
+      "label": "Phase de procès",
+      "hint": "Si désactivée, l'accusé meurt immédiatement — sans défense ni jugement."
+    },
+    "lastWills": {
+      "label": "Dernières volontés",
+      "hint": "Permet aux joueurs d'écrire un testament révélé à leur mort."
+    },
+    "revealOnDeath": {
+      "label": "Rôle révélé à la mort",
+      "hint": "Affiche le rôle des joueurs morts dans le chat et le cimetière."
+    },
+    "anonymousVotes": {
+      "label": "Votes anonymes",
+      "hint": "Masque le nom des votants — on voit la cible, pas les accusateurs."
+    }
+  },
   "multiplayer_lobby": "Salon multijoueur",
   "your_username": "Ton pseudo",
   "enter_username": "Entrer un pseudo...",

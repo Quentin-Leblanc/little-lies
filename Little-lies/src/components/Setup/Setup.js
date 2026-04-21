@@ -1,7 +1,9 @@
-import { isHost, usePlayersList, myPlayer } from 'playroomkit';
+import { isHost, usePlayersList } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import './Setup.scss';
 import Roles from './Roles';
+import HouseRules from './HouseRules';
+import Balance from './Balance';
 import GameConfig from '../GameConfig/GameConfig';
 import { LobbyChat } from '../CustomLobby/CustomLobby';
 import { useGameEngine } from '../../hooks/useGameEngine';
@@ -11,7 +13,7 @@ import { getRoles } from '../../data/roles.js';
 const PRESETS = {
   beginner_4: {
     count: 4,
-    roles: ['villageois', 'sheriff', 'godfather', 'mafioso'],
+    roles: ['villageois', 'villageois', 'sheriff', 'mafioso'],
   },
   beginner_5: {
     count: 5,
@@ -45,7 +47,6 @@ const Setup = () => {
   const players = usePlayersList(true);
   const host = isHost();
 
-  // Find the host player name
   const hostPlayer = players.length > 0 ? players[0] : null;
   const hostName = hostPlayer?.getState?.()?.profile?.name || 'Host';
 
@@ -85,14 +86,8 @@ const Setup = () => {
   const mafiaCount = teamCounts.mafia || 0;
   const cultCount = teamCounts.cult || 0;
   const neutralCount = teamCounts.neutral || 0;
-  // Unbalanced if combined evil factions (mafia + cult) reach town count.
   const isUnbalanced = rolesSelected.length > 0 && (mafiaCount + cultCount) >= townCount;
 
-  // Need at least ONE "threat" role — mafia, cult or a neutral killer
-  // (serial killer). Without one, the town's win condition is met at
-  // match start and the game ends immediately. Roles like jester,
-  // survivor or executioner don't count because they win with / alongside
-  // the town, not against it.
   const hasThreatFaction = rolesSelected.some((r) => (
     r?.team === 'mafia' ||
     r?.team === 'cult' ||
@@ -102,121 +97,105 @@ const Setup = () => {
   const missingThreat = allSlotsFilled && !hasThreatFaction;
   const canStart = allSlotsFilled && players.length >= MIN_PLAYERS && hasThreatFaction;
 
+  const startLabel = !allSlotsFilled
+    ? t('common:roles_assigned', { current: rolesSelected.length, total: players.length })
+    : players.length < MIN_PLAYERS
+    ? t('common:min_players_required', { count: MIN_PLAYERS })
+    : missingThreat
+    ? t('setup:team_counter.no_threat_short')
+    : t('setup:seal_the_roster');
+
   return (
     <div className="setup-screen">
-      <div className="setup-card">
-        {/* Header */}
-        <div className="setup-header">
-          <h1 className="setup-title">{t('setup:title')}</h1>
-          <div className="setup-header-right">
-            <div className="setup-host-badge">
-              <i className="fas fa-crown"></i>
-              <span>Host : {hostName}</span>
+      <div className="setup-grid">
+        {/* ── Left: role grid ───────────────────────────────────────── */}
+        <section className="setup-main">
+          <header className="setup-heading">
+            <div>
+              <h1 className="setup-title">{t('setup:assemble_title')}</h1>
+              <p className="setup-subtitle">{t('setup:assemble_subtitle')}</p>
             </div>
-            <div className="setup-players-badge">
-              <i className="fas fa-users"></i>
-              <span>{players.length}</span> {t('common:players')}
-              {players.length < MIN_PLAYERS && (
-                <span style={{ color: '#ff6666', fontSize: '0.75rem', marginLeft: 6 }}>
-                  ({t('common:min_players', { count: MIN_PLAYERS })})
-                </span>
-              )}
+            <div className="setup-heading-badges">
+              <div className="setup-host-badge">
+                <i className="fas fa-crown"></i>
+                <span>{hostName}</span>
+              </div>
+              <div className="setup-players-badge">
+                <i className="fas fa-users"></i>
+                <span>{rolesSelected.length}/{players.length}</span>
+                {players.length < MIN_PLAYERS && (
+                  <span className="min-hint">
+                    ({t('common:min_players', { count: MIN_PLAYERS })})
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
+          </header>
 
-        {/* Host indicator for non-host */}
-        {!host && (
-          <div className="setup-host-notice">
-            <i className="fas fa-crown"></i> {t('setup:host_configuring', { host: hostName })}
-          </div>
-        )}
-
-        {/* Game config — visible to all, editable by host only */}
-        <GameConfig config={game.config} onConfigChange={handleConfigChange} />
-
-        {/* Presets — visible to all, clickable by host only */}
-        {matchingPresets.length > 0 && (
-          <div className="setup-presets">
-            <span className="presets-label">{t('setup:presets')}</span>
-            <div className="presets-list">
-              {matchingPresets.map(([key, preset]) => (
-                <button
-                  key={key}
-                  className={`preset-btn ${key.startsWith('beginner') ? 'preset-beginner' : ''}`}
-                  onClick={() => applyPreset(preset)}
-                  title={t(`setup:presets_list.${key}.desc`)}
-                  disabled={!host}
-                >
-                  {key.startsWith('beginner') && <i className="fas fa-graduation-cap" style={{ marginRight: 4 }}></i>}
-                  {t(`setup:presets_list.${key}.label`)}
-                </button>
-              ))}
+          {!host && (
+            <div className="setup-host-notice">
+              <i className="fas fa-crown"></i> {t('setup:host_configuring', { host: hostName })}
             </div>
-          </div>
-        )}
-
-        {/* Team counter — always rendered, content fades in */}
-        <div className="setup-team-counter">
-          <span style={{ color: '#78ff78', opacity: rolesSelected.length > 0 ? 1 : 0.3 }}>
-            <i className="fas fa-users"></i> {t('setup:team_counter.village', { count: townCount })}
-          </span>
-          <span style={{ color: '#ff4444', opacity: rolesSelected.length > 0 ? 1 : 0.3 }}>
-            <i className="fas fa-user-secret"></i> {t('setup:team_counter.mafia', { count: mafiaCount })}
-          </span>
-          {cultCount > 0 && (
-            <span style={{ color: '#a96edd', opacity: 1 }}>
-              <i className="fas fa-hat-wizard"></i> {t('setup:team_counter.cult', { count: cultCount })}
-            </span>
           )}
-          <span style={{ color: '#9370db', opacity: rolesSelected.length > 0 ? 1 : 0.3 }}>
-            <i className="fas fa-star"></i> {t('setup:team_counter.neutral', { count: neutralCount })}
-          </span>
-          {isUnbalanced && (
-            <span className="setup-warning">
-              <i className="fas fa-exclamation-triangle"></i> {t('setup:team_counter.unbalanced')}
-            </span>
+
+          {matchingPresets.length > 0 && (
+            <div className="setup-presets">
+              <span className="presets-label">{t('setup:presets')}</span>
+              <div className="presets-list">
+                {matchingPresets.map(([key, preset]) => (
+                  <button
+                    key={key}
+                    className={`preset-btn ${key.startsWith('beginner') ? 'preset-beginner' : ''}`}
+                    onClick={() => applyPreset(preset)}
+                    title={t(`setup:presets_list.${key}.desc`)}
+                    disabled={!host}
+                  >
+                    {key.startsWith('beginner') && <i className="fas fa-graduation-cap"></i>}
+                    {t(`setup:presets_list.${key}.label`)}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
-        </div>
 
-        {/* Hard block: no threat faction -> town wins at start, so we
-            refuse to launch and tell the host exactly what's missing. */}
-        {missingThreat && (
-          <div className="setup-block-warning">
-            <i className="fas fa-ban"></i>
-            <span>{t('setup:team_counter.no_threat')}</span>
-          </div>
-        )}
-
-        {/* Roles dual box — visible to all, interactive for host only */}
-        <div className="dualBox">
           <Roles />
-        </div>
+        </section>
 
-        {/* Footer */}
-        <div className="setup-footer">
+        {/* ── Right: balance + house rules + CTA ───────────────────── */}
+        <aside className="setup-sidebar">
+          <Balance
+            town={townCount}
+            mafia={mafiaCount}
+            neutral={neutralCount}
+            cult={cultCount}
+            total={rolesSelected.length}
+            isUnbalanced={isUnbalanced}
+            missingThreat={missingThreat}
+          />
+
+          <HouseRules
+            rules={game.config?.rules}
+            onChange={(rules) => handleConfigChange({ ...game.config, rules })}
+            disabled={!host}
+          />
+
+          <GameConfig config={game.config} onConfigChange={handleConfigChange} />
+
           {host ? (
             <button
-              className={`start-btn ${canStart ? 'ready' : ''}`}
+              className={`seal-btn ${canStart ? 'ready' : ''}`}
               disabled={!canStart}
               onClick={startGame}
             >
-              <i className={`fas ${canStart ? 'fa-play' : 'fa-lock'}`}></i>
-              {!allSlotsFilled
-                ? t('common:roles_assigned', { current: rolesSelected.length, total: players.length })
-                : players.length < MIN_PLAYERS
-                ? t('common:min_players_required', { count: MIN_PLAYERS })
-                : missingThreat
-                ? t('setup:team_counter.no_threat_short')
-                : t('common:start_game')
-              }
+              <i className={`fas ${canStart ? 'fa-scroll' : 'fa-lock'}`}></i>
+              <span>{startLabel}</span>
             </button>
           ) : (
             <div className="setup-waiting">
               <i className="fas fa-hourglass-half"></i> {t('setup:waiting_host', { host: hostName })}
             </div>
           )}
-        </div>
+        </aside>
       </div>
 
       {/* Persistent chat — same multiplayer state as the lobby */}
