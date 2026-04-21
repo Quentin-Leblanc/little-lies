@@ -4,11 +4,9 @@ import { useGameEngine } from '../../hooks/useGameEngine';
 import './Time.scss';
 import { useEffect, useState } from 'react';
 
-// Big "5… 4… 3… 2… 1" overlay that pops in during the last 5 seconds
-// of the VOTING phase. Each tick pulses with a scale + fade so the
-// number breathes briefly before sliding into the next one. Color
-// ramps from warm amber (5s) → red (1s) so the countdown *feels*
-// like the deadline closing instead of staying on a single colour.
+// Big "5… 4… 3… 2… 1" overlay that pops in during the last 5 seconds of
+// VOTING. Unchanged from the original Time HUD — just kept local to this
+// file so the redesigned pill bar keeps the late-voting drama.
 const FINAL_FIVE_COLORS = {
   5: '#ffcf4b',
   4: '#ff9f43',
@@ -47,27 +45,35 @@ const FinalFiveCountdown = ({ phase, timeRemaining }) => {
   );
 };
 
+// Format ms → "m:ss" for the mid-pill timer.
+const formatMs = (ms) => {
+  const total = Math.max(Math.floor(ms / 1000), 0);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
 const Time = () => {
   const { t } = useTranslation(['game', 'common']);
   const {
     game: { isDay, timer, dayCount, phase, adminFreeRoam, phaseStartedAt },
     CONSTANTS,
+    getPlayers,
   } = useGameEngine();
+
+  const players = getPlayers();
+  const aliveCount = players.filter((p) => p.isAlive && !p.isSpectator).length;
+  const totalCount = players.filter((p) => !p.isSpectator).length;
 
   const isInfoPhase = CONSTANTS.INFO_PHASES?.includes(phase) || false;
   const isPaused = !!adminFreeRoam;
   const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
-  const phaseLabel = t(`game:phases.${phase}`, { defaultValue: phase });
-  const phaseIcon = CONSTANTS.PHASE_ICONS?.[phase] || (isDay ? 'fa-sun' : 'fa-moon');
 
-  // Use phaseStartedAt for sync if available, fallback to timer
   const [localTimer, setLocalTimer] = useState(timer);
   const timeRemaining = Math.floor(localTimer / 1000);
-  const progressPercentage = (localTimer / totalDuration) * 100;
 
   useEffect(() => {
     if (isPaused) return;
-    // If we have a sync timestamp, calculate from it
     if (phaseStartedAt) {
       const elapsed = Date.now() - phaseStartedAt;
       const remaining = Math.max(totalDuration - elapsed, 0);
@@ -85,106 +91,65 @@ const Time = () => {
     return () => clearInterval(interval);
   }, [isPaused, phase]);
 
-  // Nothing to show during the opening cinematic — the 2 village shots
-  // run with no UI. Returning null also stops the "Jour 1" / "Nuit" pill
-  // from flashing during the CSS fade-out. Placed after every hook so
-  // the early return doesn't break React's rules-of-hooks.
+  // Opening cinematic: no UI.
   if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) return null;
 
-  let barColor;
-  if (progressPercentage <= 25) barColor = '#ff4757';
-  else if (progressPercentage <= 55) barColor = '#ffa502';
-  else barColor = '#44cc44';
-
-  const dayNightLabel = `${isDay ? t('common:day') : t('common:night')} ${dayCount}`;
   const isFirstDayDiscussion = dayCount === 1 && phase === 'DISCUSSION';
   const showCountdown = !isInfoPhase && !isFirstDayDiscussion;
 
-  // Phase-colored background
-  const PHASE_COLORS = {
-    DISCUSSION: 'rgba(40, 120, 40, 0.7)',
-    VOTING: 'rgba(140, 90, 20, 0.7)',
-    DEFENSE: 'rgba(140, 40, 40, 0.7)',
-    JUDGMENT: 'rgba(80, 40, 120, 0.7)',
-    NIGHT: 'rgba(20, 20, 60, 0.7)',
-    NIGHT_TRANSITION: 'rgba(15, 15, 40, 0.8)',
-    DEATH_REPORT: 'rgba(80, 30, 30, 0.6)',
-    EXECUTION: 'rgba(120, 20, 20, 0.7)',
-    LAST_WORDS: 'rgba(60, 40, 40, 0.6)',
-    NO_LYNCH: 'rgba(60, 60, 60, 0.6)',
-    SPARED: 'rgba(40, 80, 40, 0.6)',
-  };
-  const phaseBg = PHASE_COLORS[phase] || 'rgba(0, 0, 0, 0.7)';
+  // Middle pill label — "DAY 2 · 0:42" or "NIGHT 02 · 0:42" with a
+  // zero-padded night count to mirror the mockup's typography. Paused
+  // games collapse to a "PAUSE" token so the host knows the clock
+  // isn't running.
+  const phaseLabel = t(`game:phases.${phase}`, { defaultValue: phase });
+  const dayNightKey = isDay ? 'day' : 'night';
+  const dayNightShort = t(`common:${dayNightKey}`, { defaultValue: dayNightKey }).toUpperCase();
+  const dayNumberText = isDay ? `${dayCount}` : dayCount.toString().padStart(2, '0');
+  const midLabel = isPaused
+    ? 'PAUSE'
+    : (showCountdown ? `${dayNightShort} ${dayNumberText} · ${formatMs(localTimer)}` : `${dayNightShort} ${dayNumberText}`);
+
+  // Final-five recoloring only applies in VOTING.
+  const urgentClass = phase === 'VOTING' && timeRemaining > 0 && timeRemaining <= 5 ? 'is-urgent' : '';
 
   return (
-    <div className="time-container">
-      {/* Day/Night label */}
+    <div className="time-hud">
+      {/* Pill 1 — day counter + phase name */}
+      <div className="time-pill">
+        <i className="fas fa-book" aria-hidden="true"></i>
+        <span className="time-pill__label">{phaseLabel}</span>
+      </div>
+
+      {/* Pill 2 — day/night + countdown */}
       <AnimatePresence mode="wait">
         <motion.div
-          className="day-label"
-          key={dayNightLabel}
-          initial={{ opacity: 0 }}
+          className={`time-pill time-pill--timer ${urgentClass}`}
+          key={midLabel}
+          initial={{ opacity: 0.3 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
+          exit={{ opacity: 0.3 }}
+          transition={{ duration: 0.25 }}
         >
-          <i className={`fas ${isDay ? 'fa-sun' : 'fa-moon'}`}></i>
-          {dayNightLabel}
+          <i
+            className={`fas ${isPaused ? 'fa-pause' : (isDay ? 'fa-sun' : 'fa-moon')}`}
+            aria-hidden="true"
+          ></i>
+          <span className="time-pill__label">{midLabel}</span>
         </motion.div>
       </AnimatePresence>
 
-      {/* Phase info */}
-      <div className="phase-info" style={{ background: phaseBg }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            className="progress-content"
-            key={phaseLabel}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
-          >
-            {isPaused ? (
-              <><i className="fas fa-pause"></i> PAUSE</>
-            ) : (
-              <><i className={`fas ${phaseIcon}`} style={{ marginRight: 6, fontSize: '0.85em' }}></i>{phaseLabel}</>
-            )}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Always render the timer slot so the pill width stays stable
-            between countdown / no-countdown phases. Hide via visibility
-            when the phase shouldn't surface a countdown. */}
-        <div className={`timer ${showCountdown ? '' : 'timer-hidden'}`}>
-          <motion.div
-            key={localTimer}
-            initial={{ opacity: 0.8 }}
-            animate={{ opacity: 1, color: barColor }}
-            exit={{ opacity: 0.8 }}
-            transition={{ duration: 0.5 }}
-          >
-            {timeRemaining}s
-          </motion.div>
-        </div>
-
+      {/* Pill 3 — alive / total */}
+      <div className="time-pill">
+        <i className="fas fa-users" aria-hidden="true"></i>
+        <span className="time-pill__label">{aliveCount}<span className="time-pill__slash"> / </span>{totalCount}</span>
       </div>
 
-      {/* Progress bar — outside both pills, below */}
-      {showCountdown && (
-        <div className="phase-progress-bar">
-          <div className="phase-progress-fill" style={{ width: `${progressPercentage}%`, backgroundColor: barColor }} />
-        </div>
-      )}
-
-      {/* Final-five overlay — when the VOTING phase has 5s or less left,
-          surface a big animated "5, 4, 3, 2, 1" countdown centered just
-          below the pill so players know the deadline is closing. */}
       <FinalFiveCountdown phase={phase} timeRemaining={timeRemaining} />
     </div>
   );
 };
 
-/** Progress bar — rendered inside the 3D scene container */
+/** Progress bar rendered inside the 3D scene container — kept intact. */
 export const TimeBar = () => {
   const {
     game: { timer, phase, dayCount, adminFreeRoam, phaseStartedAt },

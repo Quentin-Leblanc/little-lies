@@ -1,132 +1,81 @@
 @import '../../styles/variables';
 
-// ── HUD Timer — top center, clean minimal design ──
-
-.time-container {
+// ── Top HUD — three independent pills centered at the top of the scene.
+// Replaces the old "two shelves pinned to the screen" design with loose
+// capsules à la Claude Design mockup: dark warm background, gold icon,
+// gold Cinzel label, subtle gold border. Each pill is its own capsule
+// so they can breathe and animate independently.
+.time-hud {
   display: inline-flex;
-  flex-wrap: wrap;
-  align-items: stretch;
+  align-items: center;
+  gap: 0.6rem;
   pointer-events: none;
-  white-space: nowrap;
-  // Anchor for the absolutely-positioned final-five countdown overlay
-  // so it lands directly under the time pill, not at viewport top-left.
   position: relative;
-}
-
-// Day/Night pill — left side. Top-left corner kept square so the pill
-// sits flush against the viewport ceiling when the HUD is pinned to
-// top: 0 (no visual gap above the rounded corner).
-.day-label {
-  font-family: 'Cinzel', serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.118rem;
-  text-transform: uppercase;
-  padding: 0.65rem 1.05rem;
-  background: $al-grad-panel;
-  backdrop-filter: blur(8px);
-  border-radius: 0 0 0 0.55rem;
-  border: 1px solid $al-gold-border;
-  border-top: none;
-  border-right: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 2.55rem;
-  box-sizing: border-box;
-
-  i {
-    font-size: 0.85rem;
-    color: #ffcc44;
-  }
-}
-
-// Phase info — right side. Top-right corner also kept square so both
-// pills form a clean shelf against the top of the screen. Width is
-// now fluid: the pill shrinks to fit the phase label (+ optional
-// countdown) so short labels like "Nuit" don't get padded out to
-// match the longest phase. Snap is fine here — phase flips are
-// infrequent enough that a micro-jump reads as a phase change cue.
-.phase-info {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.65rem 1.2rem;
-  background: $al-grad-panel;
-  backdrop-filter: blur(8px);
-  border: 1px solid $al-gold-border;
-  border-top: none;
-  border-radius: 0 0 0.55rem 0;
-  height: 2.55rem;
-  box-sizing: border-box;
-}
-
-// Phase name
-.progress-content {
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 0.98rem;
-  font-weight: 600;
-  letter-spacing: 0.059rem;
-  color: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: center;
   white-space: nowrap;
+}
+
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 1rem;
+  height: 2.25rem;
+  box-sizing: border-box;
+  background: $al-grad-panel;
+  backdrop-filter: blur($al-blur);
+  -webkit-backdrop-filter: blur($al-blur);
+  border: 1px solid $al-gold-border;
+  border-radius: $al-radius-pill;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  font-family: $al-font-header;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: $al-track-label;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
 
   i {
-    margin-right: 0.4rem;
     font-size: 0.78rem;
-    opacity: 0.7;
+    color: $al-gold;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    // Keep label content from shifting when the timer digits change width.
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__slash {
+    color: $al-text-faint;
+    margin: 0 0.15rem;
+    font-weight: 400;
+  }
+
+  // Timer pill picks up a warm amber tint when in urgent mode (final 5s
+  // of a VOTING phase). Slight border bump + icon recoloring sell the
+  // deadline without stealing the show from the big Final-Five overlay.
+  &--timer.is-urgent {
+    border-color: rgba(255, 82, 82, 0.55);
+    color: #ffd9d9;
+    i { color: #ff7b7b; }
+    animation: time-pill-urgent 1s ease-in-out infinite;
   }
 }
 
-// Countdown number — collapses entirely when the phase hides the
-// countdown (info/intro phases) so the phase-info pill can shrink
-// to just the label + icon instead of reserving a timer slot.
-.timer {
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.059rem;
-  min-width: 2.4rem;
-  text-align: right;
-  transition: opacity 0.3s ease;
-  &.timer-hidden { display: none; }
+@keyframes time-pill-urgent {
+  0%, 100% { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); }
+  50%      { box-shadow: 0 4px 22px rgba(255, 82, 82, 0.35); }
 }
 
-// Progress bar — same width as the two pills combined
-.phase-progress-bar {
-  flex-basis: auto;
-  align-self: stretch;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 0 0 4px 4px;
-  overflow: hidden;
-  margin-top: 0;
-}
-
-.phase-progress-fill {
-  height: 100%;
-  border-radius: 0 0 4px 4px;
-  transition: width 100ms linear, background-color 0.5s ease;
-}
-
-// Old scene bar — hidden
-.progress-bar-scene {
-  display: none;
-}
-
-// ── Final-five vote countdown ──
-// Big number that flashes under the time pill during the final 5 seconds
-// of VOTING. Crossfade between consecutive ticks gives a breath rather
-// than a rapid swap.
+// ── Final-five vote countdown ─────────────────────────────────────
 .final-five-countdown {
   position: absolute;
   left: 50%;
-  top: calc(2.55rem + 0.5rem);
+  top: calc(2.25rem + 0.75rem);
   transform: translateX(-50%);
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 4.2rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -139,28 +88,22 @@
   line-height: 1;
 }
 
+// Legacy sibling — kept hidden; TimeBar sets display:none effectively.
+.progress-bar-scene { display: none; }
+
+// ── Responsive ────────────────────────────────────────────────────
 @media (max-width: 768px) {
+  .time-hud { gap: 0.35rem; }
+  .time-pill {
+    height: 1.85rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.7rem;
+    gap: 0.4rem;
+
+    i { font-size: 0.7rem; }
+  }
   .final-five-countdown {
     font-size: 3.2rem;
-    top: calc(2.1rem + 0.4rem);
-  }
-}
-
-// ── Responsive ──
-@media (max-width: 768px) {
-  .day-label {
-    font-size: 0.75rem;
-    padding: 0.45rem 0.75rem;
-    height: 2.1rem;
-  }
-  .phase-info {
-    padding: 0.45rem 0.85rem;
-    height: 2.1rem;
-  }
-  .progress-content {
-    font-size: 0.8rem;
-  }
-  .timer {
-    font-size: 0.95rem;
+    top: calc(1.85rem + 0.6rem);
   }
 }

@@ -88,7 +88,11 @@
 // hard attention away from the 3D scene.
 .hud-top {
   position: fixed;
-  top: 0;
+  // Floating pills — give them breathing room above so they hang
+  // under the viewport ceiling instead of clipping it. The old squared
+  // shelf design needed top:0; with the pill capsules we push down a
+  // hair so the rounded edges read cleanly.
+  top: 0.9rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 12;
