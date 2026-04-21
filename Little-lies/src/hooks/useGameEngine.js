@@ -623,11 +623,18 @@ export const GameEngineProvider = ({ children }) => {
           p.id === accusedId ? { ...p, isAlive: false } : p
         )
       );
+      // House rules control what's revealed when a player is lynched:
+      // - lastWills=false    → testament is never appended to the message
+      // - revealOnDeath=false → role label is hidden (replaced by "?")
+      const rules = game?.config?.rules || {};
+      const showWill = rules.lastWills !== false && !!accused.lastWill;
+      const showRole = rules.revealOnDeath !== false;
+      const roleLabel = showRole ? (accused.character?.label || '?') : '?';
       let elimMsg;
-      if (accused.lastWill) {
-        elimMsg = i18n.t('game:system.player_eliminated_will', { name: accused.profile.name, role: accused.character?.label, will: accused.lastWill });
+      if (showWill) {
+        elimMsg = i18n.t('game:system.player_eliminated_will', { name: accused.profile.name, role: roleLabel, will: accused.lastWill });
       } else {
-        elimMsg = i18n.t('game:system.player_eliminated', { name: accused.profile.name, role: accused.character?.label });
+        elimMsg = i18n.t('game:system.player_eliminated', { name: accused.profile.name, role: roleLabel });
       }
 
       // Write to chat immediately (not deferred to morning)
@@ -813,10 +820,15 @@ export const GameEngineProvider = ({ children }) => {
       if (game.phase === PHASE.VOTING && game.timer > 0) {
         const accusedId = checkVotingMajority();
         if (accusedId && game.trialsToday < MAX_TRIALS_PER_DAY) {
+          // House rule: if trialDefense is off, skip DEFENSE/JUDGMENT/LAST_WORDS
+          // and go straight to EXECUTION (the same branch computeNextPhase
+          // picks for end-of-timer resolution).
+          const trialDefenseOn = game?.config?.rules?.trialDefense !== false;
+          const nextPhase = trialDefenseOn ? PHASE.DEFENSE : PHASE.EXECUTION;
           setGame(prev => ({
             ...prev,
-            phase: PHASE.DEFENSE,
-            timer: dur('DEFENSE'),
+            phase: nextPhase,
+            timer: dur(trialDefenseOn ? 'DEFENSE' : 'EXECUTION'),
             phaseStartedAt: Date.now(),
             accusedId,
             trialsToday: prev.trialsToday + 1,

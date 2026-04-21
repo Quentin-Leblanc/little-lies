@@ -189,7 +189,16 @@ const PlayerActions = memo(function () {
     // and it doesn't move the majority math either way).
     if (vote === 'guilty' || vote === 'innocent') {
       const label = i18n.t(`common:${vote}`);
-      addChatSystem(`${me.profile.name} → ${label}`, 'vote');
+      // House rule "anonymousVotes=true" → the voter's name never appears
+      // in chat for the verdict either. Only the cast itself is announced,
+      // so the running tally stays visible without outing who leaned which
+      // way. The accused is known from the trial context, so mentioning
+      // them would be redundant.
+      const anonymous = game?.config?.rules?.anonymousVotes === true;
+      const line = anonymous
+        ? i18n.t('game:system.anonymous_verdict', { label, defaultValue: `Un vote → ${label}` })
+        : `${me.profile.name} → ${label}`;
+      addChatSystem(line, 'vote');
     }
   };
 

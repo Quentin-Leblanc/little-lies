@@ -259,7 +259,11 @@ const Player = () => {
                 </div>
             )}
 
-            {/* Last Will — always at bottom */}
+            {/* Last Will — always at bottom. Hidden when the host disabled
+                the "Last wills" house rule: no trigger, no dialog, no UI
+                affordance whatsoever so players can't even start drafting a
+                testament that would never be surfaced. */}
+            {game?.config?.rules?.lastWills !== false && (
             <div className="last-will-section">
                 <div className="last-will-trigger" onClick={() => setShowLwDialog(true)}>
                     <span className="lw-label">
@@ -270,9 +274,10 @@ const Player = () => {
                     </span>
                 </div>
             </div>
+            )}
 
             {/* Last Will dialog */}
-            {showLwDialog && (
+            {game?.config?.rules?.lastWills !== false && showLwDialog && (
                 <div className="lw-overlay" onClick={() => setShowLwDialog(false)}>
                     <div className="lw-dialog" onClick={(e) => e.stopPropagation()}>
                         <div className="lw-dialog-header">

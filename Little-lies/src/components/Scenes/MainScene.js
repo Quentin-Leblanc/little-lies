@@ -812,8 +812,13 @@ const MainScene = () => {
       {/* Lynch role reveal overlay — post-execution suspense moment.
           5s dedicated phase so the room has time to read the verdict
           ("X was judged guilty") and the role reveal ("Their role was…")
-          before the screen fades to night. */}
-      {phase === CONSTANTS.PHASE.EXECUTION_REVEAL && (() => {
+          before the screen fades to night. Skipped entirely when the
+          house rule "reveal on death" is off — the EXECUTION_REVEAL
+          phase still plays for its full duration (timer consistency)
+          but the overlay stays hidden, keeping the role secret. */}
+      {phase === CONSTANTS.PHASE.EXECUTION_REVEAL
+        && game?.config?.rules?.revealOnDeath !== false
+        && (() => {
         const executed = players.find((p) => p.id === game.accusedId);
         if (!executed?.character) return null;
         const role = executed.character;

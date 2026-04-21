@@ -83,6 +83,22 @@ export function computeNextPhase(currentPhase, context) {
 
     case PHASE.VOTING: {
       const canGoToTrial = accusedIfMajority && (game?.trialsToday || 0) < MAX_TRIALS_PER_DAY;
+      // House rule "trialDefense=false" → skip DEFENSE/JUDGMENT/LAST_WORDS
+      // and lynch the voted-out player immediately. The EXECUTION phase
+      // preserves the normal reveal + winner-check flow so the rest of the
+      // engine doesn't need to care about the skip.
+      const trialDefenseOn = game?.config?.rules?.trialDefense !== false;
+      if (canGoToTrial && !trialDefenseOn) {
+        return {
+          gameDelta: {
+            phase: PHASE.EXECUTION,
+            timer: dur('EXECUTION'),
+            accusedId: accusedIfMajority,
+            trialsToday: (game?.trialsToday || 0) + 1,
+          },
+          sideEffects: [],
+        };
+      }
       if (canGoToTrial) {
         return {
           gameDelta: {

@@ -346,13 +346,32 @@ export const EventsProvider = ({ children }) => {
     // it so the morning overlay can render name/flavor/role/will as
     // distinct styled blocks (role card, testament block) without
     // regex-parsing the chat message back apart.
+    // House rules gate what gets exposed in the chat and morning overlay.
+    //   revealOnDeath=false → chat says "X died" without the role, and the
+    //     KILL_RESULT carries no role* fields so the overlay can't render
+    //     a role card. The sidebar + graveyard read the same flags too.
+    //   lastWills=false → testament is never appended, never replicated.
+    const rules = game?.config?.rules || {};
+    const revealRoles = rules.revealOnDeath !== false;
+    const allowWills = rules.lastWills !== false;
+
     killedIds.forEach((targetId) => {
       const target = players.find((p) => p.id === targetId);
       const killInfo = killed[targetId];
       const flavor = getDeathFlavor(killInfo.type);
-      let deathMsg = i18n.t('game:death_messages.death_role_reveal', { name: target?.profile?.name, flavor, role: target?.character?.label });
-      if (target?.lastWill) {
-        deathMsg += i18n.t('game:death_messages.death_with_will', { will: target.lastWill });
+      const willToShow = allowWills ? target?.lastWill : null;
+      let deathMsg;
+      if (revealRoles) {
+        deathMsg = i18n.t('game:death_messages.death_role_reveal', { name: target?.profile?.name, flavor, role: target?.character?.label });
+      } else {
+        deathMsg = i18n.t('game:death_messages.death_no_reveal', {
+          name: target?.profile?.name,
+          flavor,
+          defaultValue: '{{name}} {{flavor}}',
+        });
+      }
+      if (willToShow) {
+        deathMsg += i18n.t('game:death_messages.death_with_will', { will: willToShow });
       }
       addEvent({
         type: 'KILL_RESULT',
@@ -367,13 +386,15 @@ export const EventsProvider = ({ children }) => {
           // the flavor narrative. Included here so the UI can render it
           // without re-deriving from the flavor string.
           killType: killInfo.type,
-          roleKey: target?.character?.key,
-          roleLabel: target?.character?.label,
-          roleIcon: target?.character?.icon,
-          roleColor: target?.character?.couleur,
-          roleTeam: target?.character?.team,
-          roleDescription: target?.character?.description,
-          lastWill: target?.lastWill || null,
+          // Role fields are stripped when the host rule hides the reveal,
+          // so clients can't peek at a role that the rules say is secret.
+          roleKey: revealRoles ? target?.character?.key : null,
+          roleLabel: revealRoles ? target?.character?.label : null,
+          roleIcon: revealRoles ? target?.character?.icon : null,
+          roleColor: revealRoles ? target?.character?.couleur : null,
+          roleTeam: revealRoles ? target?.character?.team : null,
+          roleDescription: revealRoles ? target?.character?.description : null,
+          lastWill: willToShow || null,
         },
         displayed: false,
       });
