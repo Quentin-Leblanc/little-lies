@@ -87,12 +87,34 @@
   padding: 0.353rem 0 0.235rem;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.471rem;
+
+  // "YOUR ROLE IS" kicker — small Cinzel gold label sitting above the big
+  // role name. Full-width basis + order:-1 so it always stacks on top
+  // regardless of the flex flow, and it never steals the icon's color
+  // (which is bound to the role colour via inline style on the parent).
+  .role-kicker {
+    flex: 0 0 100%;
+    order: -1;
+    font-family: $al-font-header;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: $al-track-label;
+    text-transform: uppercase;
+    color: $al-gold;
+    opacity: 0.8;
+    margin-bottom: 0.15rem;
+  }
 
   h2 {
     margin: 0;
-    font-size: 1.588rem; // was 1.294rem — headline role label
-    letter-spacing: 0.02em;
+    font-family: $al-font-header;
+    font-size: 1.9rem;
+    font-weight: 600;
+    letter-spacing: $al-track-title;
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
   }
 }
 

@@ -132,6 +132,7 @@ const Player = () => {
                     return (
                     <>
                         <div className="role-name" style={{ color: me.character.couleur }}>
+                            <span className="role-kicker">{t('game:role_sections.your_role_is', { defaultValue: 'Your role is' })}</span>
                             {me.character.icon && <i className={`fas ${me.character.icon}`}></i>}
                             <h2>{roleLabel}</h2>
                             {/* Details tooltip trigger — info icon at the top-right

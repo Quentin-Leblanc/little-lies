@@ -29,6 +29,10 @@ function Chat(props) {
   const [timeouts, setTimeouts] = useState({});
   const [messageTimestamps, setMessageTimestamps] = useState({});
   const [inputVisible, setInputVisible] = useState(false);
+  // Active tab — restricts the visible stream without touching the
+  // read-permission filter below. Everyone lands on the Village channel
+  // first, then can switch to whatever other channel their role unlocks.
+  const [activeTab, setActiveTab] = useState('village');
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -371,9 +375,44 @@ function Chat(props) {
     return false;
   };
 
-  // Show full game history — day separators provide visual breaks
-  const filteredMessages = (messages || [])
-    .filter(filterMessage);
+  // Permissions filter — strips messages the player shouldn't see at all.
+  const visibleMessages = (messages || []).filter(filterMessage);
+
+  // Which chat channels is the player allowed to read? Drives tab visibility.
+  const canSeeMafia = myTeam === 'mafia' || (me?.character?.key === 'spy' && me?.isAlive);
+  const canSeeCult = myTeam === 'cult';
+  const hasWhispers = visibleMessages.some((m) => m.chat === 'whisper');
+  const hasDeadChannel = isDead || me?.character?.key === 'blackmailer';
+
+  // Tab → message filter. System/vote messages (day separator, death report,
+  // vote count lines) belong to every active channel so the narrative thread
+  // stays coherent no matter which tab is open.
+  const isBroadcast = (m) =>
+    m.type === 'system' || m.type === 'whisper_notice' || (m.type === 'system' && m.color === 'vote');
+  const byTab = (tab) => (m) => {
+    if (isBroadcast(m)) return true;
+    if (tab === 'village')  return m.chat === 'default' || !m.chat;
+    if (tab === 'mafia')    return m.chat === 'mafia';
+    if (tab === 'cult')     return m.chat === 'cult';
+    if (tab === 'whispers') return m.chat === 'whisper';
+    if (tab === 'dead')     return m.chat === 'dead';
+    return true;
+  };
+
+  // Collapse broadcasts (system/vote) we don't want duplicated across
+  // tabs when there's nothing else to anchor them to.
+  const filteredMessages = visibleMessages.filter(byTab(activeTab));
+
+  // Counts for tab badges — only player (non-system) messages count, so
+  // broadcast lines (day separator, death report) don't inflate each tab.
+  const countChat = (pred) => visibleMessages.filter((m) => m.type !== 'system' && m.type !== 'whisper_notice' && pred(m)).length;
+  const tabCounts = {
+    village:  countChat((m) => m.chat === 'default' || !m.chat),
+    mafia:    countChat((m) => m.chat === 'mafia'),
+    cult:     countChat((m) => m.chat === 'cult'),
+    whispers: visibleMessages.filter((m) => m.chat === 'whisper').length,
+    dead:     countChat((m) => m.chat === 'dead'),
+  };
 
   // Find last day separator to gray everything before it
   // Only "--- Jour X ---" counts as separator (not "La nuit tombe" which is mid-day)
@@ -441,6 +480,78 @@ function Chat(props) {
       ref={chatContainerRef}
     >
       {isDead && <div className="dead-chat-banner"><i className="fas fa-ghost"></i> {t('game:chat.dead_chat_banner')}</div>}
+
+      {/* Tab bar — only shows tabs the current player can actually read.
+          Every player gets Village; Mafia/Cult/Whispers/Dead unlock based
+          on team, role (Spy/Blackmailer), and death state. The counts are
+          player-message counts so the badge tracks real chatter, not system
+          chatter (day separators, death reports) which is broadcast to all
+          tabs anyway. */}
+      <div className="chat-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'village'}
+          className={`chat-tab ${activeTab === 'village' ? 'is-active' : ''}`}
+          onClick={() => setActiveTab('village')}
+        >
+          <span>{t('game:chat.tabs.village', { defaultValue: 'Village' })}</span>
+          {tabCounts.village > 0 && <span className="chat-tab__count">{tabCounts.village}</span>}
+        </button>
+        {canSeeMafia && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'mafia'}
+            className={`chat-tab chat-tab--mafia ${activeTab === 'mafia' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('mafia')}
+          >
+            <i className="fas fa-moon" aria-hidden="true"></i>
+            <span>{t('game:chat.tabs.mafia', { defaultValue: 'Mafia' })}</span>
+            {tabCounts.mafia > 0 && <span className="chat-tab__count">{tabCounts.mafia}</span>}
+          </button>
+        )}
+        {canSeeCult && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'cult'}
+            className={`chat-tab chat-tab--cult ${activeTab === 'cult' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('cult')}
+          >
+            <i className="fas fa-hat-wizard" aria-hidden="true"></i>
+            <span>{t('game:chat.tabs.cult', { defaultValue: 'Cult' })}</span>
+            {tabCounts.cult > 0 && <span className="chat-tab__count">{tabCounts.cult}</span>}
+          </button>
+        )}
+        {hasWhispers && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'whispers'}
+            className={`chat-tab chat-tab--whispers ${activeTab === 'whispers' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('whispers')}
+          >
+            <i className="fas fa-comment-dots" aria-hidden="true"></i>
+            <span>{t('game:chat.tabs.whispers', { defaultValue: 'Whispers' })}</span>
+            {tabCounts.whispers > 0 && <span className="chat-tab__count">{tabCounts.whispers}</span>}
+          </button>
+        )}
+        {hasDeadChannel && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'dead'}
+            className={`chat-tab chat-tab--dead ${activeTab === 'dead' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('dead')}
+          >
+            <i className="fas fa-ghost" aria-hidden="true"></i>
+            <span>{t('game:chat.tabs.dead', { defaultValue: 'Dead' })}</span>
+            {tabCounts.dead > 0 && <span className="chat-tab__count">{tabCounts.dead}</span>}
+          </button>
+        )}
+      </div>
+
       <div className="chat-messages">
         {filteredMessages.map((message, index) => {
           // Admin messages are never grayed

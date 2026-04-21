@@ -41,6 +41,71 @@
   background: linear-gradient(160deg, rgba(8, 6, 10, 0.96) 0%, rgba(4, 3, 5, 0.98) 100%);
 }
 
+// ── Chat tabs — sits above the message list. Only the active tab picks
+// up the gold underline + color; counts render as a subtle pill next to
+// the label so the player can see unread chatter per channel at a
+// glance. Disabled role-based tabs (Mafia for town, Cult for non-cult)
+// simply don't render — no greyed-out ghost rows.
+.chat-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.2rem 0.6rem;
+  border-bottom: 1px solid $al-border-subtle;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.chat-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px; // overlap the container's bottom border
+  color: $al-text-mute;
+  font-family: $al-font-header;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: $al-track-label;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color $al-trans-fast, border-color $al-trans-fast;
+
+  i { font-size: 0.7rem; opacity: 0.75; }
+
+  &:hover { color: $al-text; }
+
+  &.is-active {
+    color: $al-gold;
+    border-bottom-color: $al-gold;
+
+    i { color: $al-gold; opacity: 1; }
+  }
+
+  &--mafia.is-active    { color: $al-faction-mafia; border-bottom-color: $al-faction-mafia; i { color: $al-faction-mafia; } }
+  &--cult.is-active     { color: $al-faction-cult;  border-bottom-color: $al-faction-cult;  i { color: $al-faction-cult; } }
+  &--whispers.is-active { color: $al-faction-whisper; border-bottom-color: $al-faction-whisper; i { color: $al-faction-whisper; } }
+  &--dead.is-active     { color: $al-text-dim; border-bottom-color: $al-text-dim; i { color: $al-text-dim; } }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.2rem;
+    height: 1.1rem;
+    padding: 0 0.35rem;
+    font-family: $al-font-body;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: $al-radius-pill;
+    background: rgba(255, 255, 255, 0.08);
+    color: $al-text;
+  }
+}
+
 .chat-dead-mode {
   background: linear-gradient(160deg, rgba(40, 28, 22, 0.92) 0%, rgba(16, 10, 8, 0.96) 100%);
   border-color: rgba(201, 168, 98, 0.1) !important;

@@ -178,6 +178,13 @@
     "prefix_dead": "[Dead]",
     "prefix_mafia": "[Mafia]",
     "prefix_cult": "[Cult]",
+    "tabs": {
+      "village": "Village",
+      "mafia": "Mafia",
+      "cult": "Cult",
+      "whispers": "Whispers",
+      "dead": "Dead"
+    },
     "whisper_to": "[PM → {{name}}]",
     "whisper_from": "[PM ← {{name}}]",
     "player_not_found": "Player \"{{name}}\" not found.",
@@ -218,7 +225,8 @@
     "details": "Role details",
     "information": "Information",
     "target": "Target",
-    "roles_title": "Roles"
+    "roles_title": "Roles",
+    "your_role_is": "Your role is"
   },
   "kill_source": {
     "label": "Attack",
