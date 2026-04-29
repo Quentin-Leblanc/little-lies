@@ -121,6 +121,48 @@ export default function SceneEditor() {
     window.alert('Layout copiée dans le presse-papiers (et console).');
   }, [config]);
 
+  // Télécharge la layout courante comme fichier .json — pratique pour
+  // versionner des snapshots de scènes sans passer par git. Le nom inclut
+  // la date pour différencier plusieurs sauvegardes.
+  const downloadJSON = useCallback(() => {
+    const json = JSON.stringify(config, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const date = new Date().toISOString().slice(0, 16).replace(':', '-');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `scene-v2-${date}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [config]);
+
+  // Charge un fichier .json depuis le disque (un snapshot précédemment
+  // téléchargé via "Sauvegarder en fichier").
+  const loadFromFile = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json,.json';
+    input.onchange = (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!parsed.elements || !Array.isArray(parsed.elements)) throw new Error('Pas de tableau elements');
+          setConfig(parsed);
+          setSelectedId(null);
+        } catch (err) {
+          window.alert('Fichier invalide: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }, []);
+
   const importJSON = useCallback(() => {
     const raw = window.prompt('Colle ici un export JSON SceneV2 :');
     if (!raw) return;
@@ -175,7 +217,11 @@ export default function SceneEditor() {
       <aside style={styles.panel}>
         <Section title="Layout">
           <div style={styles.row}>
-            <button style={styles.btn} onClick={exportJSON}>Exporter JSON</button>
+            <button style={styles.btn} onClick={downloadJSON} title="Télécharge un fichier scene-v2-<date>.json">💾 Sauver en fichier</button>
+            <button style={styles.btn} onClick={loadFromFile} title="Charge un fichier .json précédemment sauvé">📂 Charger fichier</button>
+          </div>
+          <div style={styles.row}>
+            <button style={styles.btn} onClick={exportJSON}>Exporter JSON (presse-pap.)</button>
             <button style={styles.btn} onClick={importJSON}>Importer JSON</button>
           </div>
           <div style={styles.row}>
