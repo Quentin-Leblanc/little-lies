@@ -1,196 +1,87 @@
-import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { Sky, Stars } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette, HueSaturation } from '@react-three/postprocessing';
-import { useMultiplayerState, getRoomCode } from 'playroomkit';
-import * as THREE from 'three';
+import React, { useRef, useState, useEffect } from 'react';
+import { useMultiplayerState } from 'playroomkit';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import Audio from '../../utils/AudioManager';
 import i18n from '../../trad/i18n';
 
-// Scene sub-modules (extracted from the old 3400-line file).
+// Side-effect import — registers the GLB preload hooks so the village
+// assets warm up in cache as soon as the game module loads. The R3F
+// payload itself is now hosted by UnifiedScene's <VillageView />.
 import './preloads';
-import { PLAYER_Y, PODIUM_POSITION } from './constants';
-import { getNightAmbiance, getGameSeed, LOBBY_MOODS, MOOD_DAY_ROLLS, MOOD_NIGHT_ROLLS } from './utils';
-import CameraController from './Camera/CameraController';
-import SceneLighting from './Lighting/SceneLighting';
-import GroundPlane from './Environment/GroundPlane';
-import Village from './Buildings/Village';
-import PlayerFigure from './Players/PlayerFigure';
-import DeadPlayerFigure from './Players/DeadPlayerFigure';
-import PausePlayerController from './Players/PausePlayerController';
-import Moon from './Atmosphere/Moon';
-import { DayFireflies } from './Atmosphere/Fireflies';
-import FloatingDust from './Atmosphere/FloatingDust';
-import WindLeaves from './Atmosphere/WindLeaves';
-import NightEmbers from './Atmosphere/NightEmbers';
-import GroundFog from './Weather/GroundFog';
-import VillageFogWall from './Weather/VillageFogWall';
-import HorizonMist from './Weather/HorizonMist';
-import NightRain from './Weather/NightRain';
-import NightLightning from './Weather/NightLightning';
-import TrialStormLighting from './Weather/TrialStormLighting';
-import NightDarkFog from './Weather/NightDarkFog';
-import NightCrows from './Wildlife/NightCrows';
-import DayRabbits from './Wildlife/DayRabbits';
-import ExecutionCrows from './Wildlife/ExecutionCrows';
-import DistantWindmill from './Environment/DistantWindmill';
-import CirclingBirds from './Atmosphere/CirclingBirds';
-import CandleRack from './Props/CandleRack';
+import { getNightAmbiance } from './utils';
 import PhaseTransitionFX from '../Effects/PhaseTransitionFX';
 
 import './MainScene.scss';
 
-// Lerp a hex color toward a target by amount 0..1. Used to blood-tint
-// the sky + fog as deaths accumulate during a game.
-const lerpHex = (hex, targetHex, amount) => {
-  const parse = (h) => [
-    parseInt(h.slice(1, 3), 16),
-    parseInt(h.slice(3, 5), 16),
-    parseInt(h.slice(5, 7), 16),
-  ];
-  const [r1, g1, b1] = parse(hex);
-  const [r2, g2, b2] = parse(targetHex);
-  const r = Math.round(r1 + (r2 - r1) * amount);
-  const g = Math.round(g1 + (g2 - g1) * amount);
-  const b = Math.round(b1 + (b2 - b1) * amount);
-  const pad = (n) => n.toString(16).padStart(2, '0');
-  return `#${pad(r)}${pad(g)}${pad(b)}`;
-};
-
 // ============================================================
-// MainScene — orchestrator. Owns phase-driven UI overlays, player
-// positions, walk-away/walk-in transitions, and wires every sub-scene
-// component together. All procedural geometry / particles / weather
-// / cameras live in sibling folders.
+// MainScene — HTML overlay orchestrator. The R3F village now lives
+// in <UnifiedScene><VillageView /></UnifiedScene>, so this component
+// no longer renders a Canvas. What it owns:
+//
+//   - phase-driven HTML overlays (blood vignette for the local victim,
+//     death report card, lynch role reveal, scene announcements,
+//     night-fade to/from black, night/day flavor text)
+//   - the random "flavor" text rotations tied to phase transitions
+//   - PhaseTransitionFX (radial pulses + cinematic letterbox bars)
+//
+// State that drives R3F output (player positions, camera focus, walk
+// transitions, pause-mode controls, sunset lighting) has been moved
+// to <VillageView /> which now consumes the same useGameEngine state
+// directly. Both copies compute deterministically from the same shared
+// state, so they stay in sync without extra coordination.
 // ============================================================
 const MainScene = () => {
-  const { game, getPlayers, getMe, CONSTANTS, trial, setTrial } = useGameEngine();
-  const [chatMessages] = useMultiplayerState('chatMessages', []);
+  const { game, getPlayers, getMe, CONSTANTS } = useGameEngine();
   const [events] = useMultiplayerState('events', []);
   const players = getPlayers();
   const me = getMe();
   const phase = game.phase;
-  const [adminCharScale] = useMultiplayerState('adminCharScale', 1.0);
-  const characterScale = adminCharScale || 1.0;
-  const isPaused = !!game.adminFreeRoam;
-  const isGameOver = game.status === CONSTANTS.GAME_ENDED;
-  const alivePlayers = players.filter((p) => p.isAlive);
-  const deadPlayers = players.filter((p) => !p.isAlive);
-  // Deaths-ratio drives the escalating "the village is bleeding" look:
-  // sky tint, fog closeness, crow count, extinguished candles. Clamped
-  // to 0..0.6 so a 100%-dead state doesn't black out everything — caps
-  // at the point where mood shift reads strongly without breaking the
-  // scene's readability.
-  const deathsCount = deadPlayers.length;
-  const totalPlayers = Math.max(players.length, 1);
-  const deathsRatio = Math.min(deathsCount / totalPlayers, 1) * 0.6;
 
-  // Per-game seed — roomCode is stable across replays in the same room
-  // (not useful for anti-repetition alone), but mixing in gameStartedAt
-  // (set once by startGame) rotates the seed every match. All clients
-  // compute the same value from shared state so village variance / moon
-  // phase / mood stay synchronized without extra networking.
-  const gameSeed = useMemo(
-    () => getGameSeed(getRoomCode() || '', game?.gameStartedAt || 0),
-    [game?.gameStartedAt],
-  );
-  // Lobby weather mood picked once at game start. Biases daily weather
-  // rolls toward a consistent feel (CLEAR / STORM / FOG / DUSK) so a
-  // whole game has an identity. DUSK doesn't lock weather but tints the
-  // sky toward warm sunset colors on top of the normal rolls.
-  const lobbyMood = LOBBY_MOODS[gameSeed % LOBBY_MOODS.length];
-  // Moon phase (0=new, 1=crescent, 2=half, 3=full). Rotates per game.
-  const moonPhase = (gameSeed >> 3) % 4;
-
-  // Pause mode — local player position, animation, rotation
-  const [pausePos, setPausePos] = useState(null);
-  const [pauseAnim, setPauseAnim] = useState('Idle');
-  const [pauseYaw, setPauseYaw] = useState(0);
-
-  const isTrialPhase = [
-    CONSTANTS.PHASE.DEFENSE, CONSTANTS.PHASE.JUDGMENT,
-    CONSTANTS.PHASE.LAST_WORDS, CONSTANTS.PHASE.EXECUTION,
-  ].includes(phase);
-
-  const isVotingPhase = phase === CONSTANTS.PHASE.VOTING;
-  const isJudgmentPhase = phase === CONSTANTS.PHASE.JUDGMENT;
-
-  // Black fade + sunset + overlay states — drive the night/day transition
-  // cinematic. All timers are tracked in a ref so a rapid phase change
-  // clears the pending fade chain.
+  // Black fade + overlay text drives the night/day transition cinematic.
+  // All timers are tracked in a ref so a rapid phase change clears the
+  // pending fade chain.
   const [nightFade, setNightFade] = useState('none'); // 'none' | 'to-black' | 'from-black'
-  const [isSunset, setIsSunset] = useState(false);
   const [showNightText, setShowNightText] = useState(false);
   const [showDayText, setShowDayText] = useState(false);
   const [nightAmbianceMsg, setNightAmbianceMsg] = useState(null);
   const [showDeathReport, setShowDeathReport] = useState(false);
   const [showBloodEffect, setShowBloodEffect] = useState(false);
   const [showExecutionFlash, setShowExecutionFlash] = useState(false);
-  // Random variants for DAY_RISING and peaceful_night — picked per DEATH
-  // REPORT entry so the phrase rotates instead of being the same every
-  // morning. Reset to null on leaving the phase so the next one re-rolls.
   const [dayRisingText, setDayRisingText] = useState(null);
   const [peacefulNightText, setPeacefulNightText] = useState(null);
-  // Night transition phrase — rotates between "La nuit tombe..." variants
-  // so the end-of-day fade doesn't always read the same line.
   const [nightTransitionText, setNightTransitionText] = useState(null);
-  // "No lynch" phrase — rotates between no_lynch_variants so the end-of-
-  // vote verdict announcement doesn't always read as the same line.
-  // Reset to null on non-NO_LYNCH phases so the next re-entry re-rolls.
   const [noLynchText, setNoLynchText] = useState(null);
-  // Death-reveal cinematic camera focus — when set, CameraController cuts
-  // to a close-up shot of this body (world-space [x, y, z]). Non-null for
-  // ~4s at the start of DEATH_REPORT when there's a fresh corpse to show.
-  const [deathFocusPos, setDeathFocusPos] = useState(null);
-  const deathCinematicForDay = useRef(null);
-  // Dead bodies used to fade out after DEATH_REPORT. They now persist as
-  // set dressing in the plaza center — makes the losses feel real and
-  // gives the scene more life between phases. These state vars are kept
-  // only to preserve the existing render branch until we simplify further.
 
+  // Gates — re-fire-once-per-day refs so chained pre-night phases
+  // (e.g. EXECUTION → EXECUTION_REVEAL → NIGHT_TRANSITION) don't
+  // re-roll the same flavor text three times in a row.
   const lastPhaseForFade = useRef(phase);
+  const fadeTimers = useRef([]);
+  const nightStartedForDay = useRef(null);
+  const introToDayFired = useRef(false);
+  const morningStartedForDay = useRef(null);
 
-  // Phases that lead directly to night (last phases before night falls).
-  // EXECUTION_REVEAL is intentionally excluded so the 5s role-reveal
-  // card isn't drowned out by a fade-to-black — the fade happens during
-  // the subsequent NIGHT_TRANSITION phase instead.
   const PRE_NIGHT_PHASES = [
     CONSTANTS.PHASE.NO_LYNCH, CONSTANTS.PHASE.SPARED,
     CONSTANTS.PHASE.EXECUTION,
     CONSTANTS.PHASE.NIGHT_TRANSITION,
   ];
-  const fadeTimers = useRef([]);
-  const walkTimer = useRef(null);
 
   useEffect(() => {
     fadeTimers.current.forEach(clearTimeout);
     fadeTimers.current = [];
 
-    // Pre-night: show players, start walk-away, then fade to black
-    if (phase === CONSTANTS.PHASE.LAST_WORDS) {
-      setIsSunset(true);
-    }
-
     if (PRE_NIGHT_PHASES.includes(phase)) {
-      setIsSunset(true);
-      // Gate first-pre-night-per-day logic. Without this, chains like
-      // NO_LYNCH → NIGHT_TRANSITION or EXECUTION → EXECUTION_REVEAL →
-      // NIGHT_TRANSITION re-fire this effect and pick a NEW random variant,
-      // which overwrites the one already on screen — the player saw two
-      // different transition lines flash back-to-back. Pick the text and
-      // schedule its reveal only on the first pre-night entry.
       const isFirstPreNightThisDay = nightStartedForDay.current !== game.dayCount;
 
       if (isFirstPreNightThisDay) {
+        nightStartedForDay.current = game.dayCount;
         const nightVariants = i18n.t('game:night_transition_variants', { returnObjects: true });
         if (Array.isArray(nightVariants) && nightVariants.length > 0) {
           setNightTransitionText(nightVariants[Math.floor(Math.random() * nightVariants.length)]);
         } else {
           setNightTransitionText(i18n.t('game:phases.NIGHT_TRANSITION'));
         }
-        // No-lynch phrase rotates on the same gate so players don't read
-        // "Tout le monde peut rentrer chez soi" every single skipped vote.
         if (phase === CONSTANTS.PHASE.NO_LYNCH) {
           const noLynchVariants = i18n.t('game:no_lynch_variants', { returnObjects: true });
           if (Array.isArray(noLynchVariants) && noLynchVariants.length > 0) {
@@ -200,55 +91,28 @@ const MainScene = () => {
           }
         }
       }
-      // Delay fade so sunset animation is fully visible (~5s), except for
-      // NIGHT_TRANSITION which follows an already-completed reveal —
-      // start the black fade immediately there so the short 2s phase
-      // actually has time to go dark before NIGHT kicks in.
       const fadeDelay = phase === CONSTANTS.PHASE.NIGHT_TRANSITION ? 0 : 4000;
       const textDelay = phase === CONSTANTS.PHASE.NIGHT_TRANSITION ? 0 : 3500;
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
       }, fadeDelay));
-      // Only schedule the text reveal on the first pre-night phase. On
-      // subsequent chained entries the text is already on screen (or the
-      // timer to show it is already queued) and re-scheduling would either
-      // re-trigger it or race with hide logic.
       if (isFirstPreNightThisDay) {
         fadeTimers.current.push(setTimeout(() => {
           setShowNightText(true);
         }, textDelay));
       }
-      // Trigger walk-away (separate timer, not cleared on phase change).
-      // IMPORTANT: only reveal players when we *start* the walk.
-      // Re-entering a PRE_NIGHT phase (e.g. EXECUTION → NIGHT_TRANSITION)
-      // must NOT re-show players if the walk already finished.
-      if (isFirstPreNightThisDay) {
-        nightStartedForDay.current = game.dayCount;
-        setNightPlayersHidden(false);
-        setNightTransition(true);
-        if (walkTimer.current) clearTimeout(walkTimer.current);
-        walkTimer.current = setTimeout(() => {
-          setNightTransition(false);
-          setNightPlayersHidden(true);
-        }, 4000);
-      }
     }
 
-    // Night starts: already black from pre-night, reveal night scene
     if (phase === CONSTANTS.PHASE.NIGHT && lastPhaseForFade.current !== CONSTANTS.PHASE.NIGHT) {
-      setNightPlayersHidden(true);
-      setNightTransition(false);
       fadeTimers.current.push(setTimeout(() => setShowNightText(false), 3000));
       setNightFade('from-black');
       fadeTimers.current.push(setTimeout(() => setNightFade('none'), 1500));
 
-      // Schedule fade-to-black before night ends (for night→day)
       const nightDuration = CONSTANTS.DURATIONS?.NIGHT || 30000;
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('to-black');
       }, nightDuration - 3000));
 
-      // Night ambiance messages — 3 staggered messages during the night
       const shuffled = [...getNightAmbiance()].sort(() => Math.random() - 0.5);
       fadeTimers.current.push(setTimeout(() => {
         setNightAmbianceMsg(shuffled[0]);
@@ -264,9 +128,7 @@ const MainScene = () => {
       }, 20000));
     }
 
-    // Leaving night: reveal day scene + reset sunset
     if (lastPhaseForFade.current === CONSTANTS.PHASE.NIGHT && phase !== CONSTANTS.PHASE.NIGHT) {
-      setIsSunset(false);
       setNightFade('from-black');
       fadeTimers.current.push(setTimeout(() => {
         setNightFade('none');
@@ -277,7 +139,7 @@ const MainScene = () => {
     return () => fadeTimers.current.forEach(clearTimeout);
   }, [phase]);
 
-  // Execution flash: red vignette during EXECUTION phase, before the text
+  // Execution flash — red vignette during EXECUTION phase, before the text.
   useEffect(() => {
     if (phase === CONSTANTS.PHASE.EXECUTION) {
       setShowExecutionFlash(true);
@@ -286,14 +148,9 @@ const MainScene = () => {
     setShowExecutionFlash(false);
   }, [phase]);
 
-  // Day-1 opening: the intro cinematic feeds straight into DISCUSSION
-  // (no DEATH_REPORT on day 1 — nobody died yet). When that transition
-  // fires, show a single "Le village se lève..." line so the first day
-  // actually has a moment before the chat + HUD fade in, without ever
-  // printing a misleading "peaceful night" or "Nuit 1" label. Gated on
-  // a ref that is re-armed every time a new INTRO_CINEMATIC starts so
-  // "Rejouer" replays the opener.
-  const introToDayFired = useRef(false);
+  // Day-1 opening — intro cinematic feeds directly into DISCUSSION.
+  // Drop a single "Le village se lève..." line so the first day actually
+  // breathes before the chat + HUD fade in.
   useEffect(() => {
     if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) {
       introToDayFired.current = false;
@@ -313,14 +170,10 @@ const MainScene = () => {
     return () => { clearTimeout(t0); clearTimeout(t1); };
   }, [phase, game.dayCount]);
 
-  // Death report sequence: "Le village se lève..." during day fade-in,
-  // then reveal deaths once the text has played out. Re-rolls a random
-  // variant for both the day-rise line and the peaceful-night fallback
-  // on each DEATH_REPORT entry so mornings don't feel copy-pasted.
-  // Gated on dayCount > 1: day 1 has no prior night (INTRO_CINEMATIC
-  // feeds straight into DISCUSSION), so if we ever land on DEATH_REPORT
-  // with dayCount=1 it's a stale/transient state — don't play the "pas
-  // une goutte de sang cette nuit" fallback or ring the death bell.
+  // Death report sequence — "Le village se lève..." → blood vignette
+  // → reveal deaths. Re-rolls flavor variants on each entry so mornings
+  // don't feel copy-pasted. Gated on dayCount > 1 (day 1 has no prior
+  // night so a stale DEATH_REPORT shouldn't ring the death bell).
   useEffect(() => {
     if (phase === CONSTANTS.PHASE.DEATH_REPORT && (game?.dayCount || 0) > 1) {
       const pickRandom = (key, fallback) => {
@@ -333,460 +186,47 @@ const MainScene = () => {
       setDayRisingText(pickRandom('game:day_rising_variants', i18n.t('game:phases.DAY_RISING')));
       setPeacefulNightText(pickRandom('game:peaceful_night_variants', i18n.t('game:system.peaceful_night')));
 
-      // Pick the freshly-killed victim(s) for the morning cinematic cut.
-      // Used both to decide whether to ring the death bell and to focus
-      // the camera close-up on the body.
       const killEvents = (events || []).filter(
         (e) => (e.type === 'KILL_RESULT' || e.type === 'disconnect') &&
-               e.dayCount === game.dayCount &&
-               e.content?.chatMessage
+          e.dayCount === game.dayCount &&
+          e.content?.chatMessage,
       );
-      const firstVictimId = killEvents[0]?.content?.target;
+
+      // First-fire-per-day gate. Without it, re-entering DEATH_REPORT
+      // (e.g. host reconnect) would ring the bell again.
+      const firstDeathReportThisDay = morningStartedForDay.current !== game.dayCount;
+      if (firstDeathReportThisDay) {
+        morningStartedForDay.current = game.dayCount;
+      }
 
       const t0 = setTimeout(() => setShowDayText(true), 800);
       const t1 = setTimeout(() => setShowDayText(false), 3000);
       const t2 = setTimeout(() => setShowBloodEffect(true), 3000);
       const t3 = setTimeout(() => {
         setShowDeathReport(true);
-        if (killEvents.length > 0) Audio.playDeathBell();
+        if (firstDeathReportThisDay && killEvents.length > 0) Audio.playDeathBell();
       }, 3300);
-
-      // Morning death cinematic — cut the camera to a close-up of the
-      // first victim once the "village awakens" text clears. Position
-      // is looked up at fire time (t4) because playerPositions is only
-      // refreshed once the new corpse lands in deadPlayers. Gated on
-      // dayCount so re-entering the effect in the same morning doesn't
-      // retrigger the cut.
-      let t4; let t5;
-      if (firstVictimId && deathCinematicForDay.current !== game.dayCount) {
-        deathCinematicForDay.current = game.dayCount;
-        t4 = setTimeout(() => {
-          const pos = playerPositions[firstVictimId]?.position;
-          if (pos) setDeathFocusPos(pos);
-        }, 3300);
-        t5 = setTimeout(() => setDeathFocusPos(null), 7200);
-      }
 
       return () => {
         clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
-        if (t4) clearTimeout(t4); if (t5) clearTimeout(t5);
       };
-    } else {
-      setShowDeathReport(false);
-      setShowBloodEffect(false);
-      setDeathFocusPos(null);
-      deathCinematicForDay.current = null;
     }
+    setShowDeathReport(false);
+    setShowBloodEffect(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
-
-  // Night walk-away / morning walk-in
-  const nightStartedForDay = useRef(null);
-  const morningStartedForDay = useRef(null);
-  const [nightTransition, setNightTransition] = useState(false);
-  const [morningTransition, setMorningTransition] = useState(false);
-  const [nightPlayersHidden, setNightPlayersHidden] = useState(false);
-  const morningTimer = useRef(null);
-
-  useEffect(() => {
-    // Reset when leaving night (show players again for day)
-    if (phase !== CONSTANTS.PHASE.NIGHT && !PRE_NIGHT_PHASES.includes(phase)) {
-      setNightPlayersHidden(false);
-    }
-    // Morning walk-in: NIGHT → DEATH_REPORT animates players back in
-    if (phase === CONSTANTS.PHASE.DEATH_REPORT && morningStartedForDay.current !== game.dayCount) {
-      morningStartedForDay.current = game.dayCount;
-      setNightPlayersHidden(false);
-      setMorningTransition(true);
-      if (morningTimer.current) clearTimeout(morningTimer.current);
-      morningTimer.current = setTimeout(() => setMorningTransition(false), 4000);
-    }
-  }, [phase]);
-
-  // Day circle positions (walk-away start) + house positions (walk-away end)
-  const dayPositions = useMemo(() => {
-    const positions = {};
-    // Tightened circle — players stand closer to the plaza center
-    const circleRadius = 4.0;
-    alivePlayers.forEach((p, i) => {
-      const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
-      positions[p.id] = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
-    });
-    return positions;
-  }, [alivePlayers.length]);
-
-  // House positions — where players walk to at end of day (radius 12)
-  const housePositions = useMemo(() => {
-    const positions = {};
-    alivePlayers.forEach((p, i) => {
-      const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
-      positions[p.id] = [Math.cos(angle) * 12, PLAYER_Y, Math.sin(angle) * 12];
-    });
-    return positions;
-  }, [alivePlayers.length]);
-
-  // Vote / judgment handlers live in the action panel (PlayerActions) —
-  // the 3D figures show state but don't own click handlers anymore.
-
-  // Calculate player positions + rotations based on phase
-  const playerPositions = useMemo(() => {
-    const positions = {};
-    // Tightened circle — matches dayPositions so discussion/voting phases
-    // keep the same layout as the walk-away start position.
-    const circleRadius = 4.0;
-
-    if (phase === CONSTANTS.PHASE.NIGHT) {
-      alivePlayers.forEach((p, i) => {
-        const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2;
-        const pos = [Math.cos(angle) * 8, PLAYER_Y, Math.sin(angle) * 8];
-        positions[p.id] = {
-          position: pos,
-          rotation: [0, Math.atan2(pos[0], pos[2]), 0], // face outward
-        };
-      });
-    } else {
-      // Day-phase circle — every alive player keeps the SAME spot from
-      // DISCUSSION through DEFENSE/JUDGMENT/EXECUTION. Previously the
-      // trial phases pulled the accused in front of the podium and
-      // re-laid the rest of the crowd around the missing slot, which
-      // drifted everyone's position mid-day. Per user feedback the day
-      // should feel still: the accused-ring under the feet already
-      // signals who's on trial, no need to physically move them.
-      alivePlayers.forEach((p, i) => {
-        const angle = (i / Math.max(alivePlayers.length, 1)) * Math.PI * 2 - Math.PI / 2;
-        const pos = [Math.cos(angle) * circleRadius, PLAYER_Y, Math.sin(angle) * circleRadius];
-        positions[p.id] = {
-          position: pos,
-          rotation: [0, Math.atan2(pos[0], pos[2]) + Math.PI, 0], // face center
-        };
-      });
-    }
-
-    // Dead players: scatter around the plaza center in a tight ring, with
-    // a deterministic rotation per body so corpses don't all lie the same
-    // way. Using the player id to seed both position and yaw keeps the
-    // placement stable across re-renders and across clients.
-    deadPlayers.forEach((p, i) => {
-      const seed = (p.id?.charCodeAt(0) || 0) + i * 37;
-      const angle = ((i * 2.399) + (seed % 17) * 0.1) % (Math.PI * 2); // golden-angle spread
-      const r = 1.2 + ((seed % 7) * 0.12);
-      const px = Math.cos(angle) * r;
-      const pz = Math.sin(angle) * r;
-      const yaw = (seed * 0.37) % (Math.PI * 2);
-      positions[p.id] = { position: [px, PLAYER_Y, pz], rotation: [0, yaw, 0] };
-    });
-
-    return positions;
-  }, [phase, alivePlayers.length, deadPlayers.length, game.accusedId]);
-
-  // Init/reset pause position when entering/leaving pause
-  useEffect(() => {
-    if (isPaused && me) {
-      const myPos = playerPositions[me.id];
-      setPausePos(myPos ? [...myPos.position] : [0, 0, 0]);
-    } else {
-      setPausePos(null);
-    }
-  }, [isPaused]);
-
-  const isExecutionShake = phase === CONSTANTS.PHASE.EXECUTION;
 
   return (
-    <div className={`main-scene-3d${isExecutionShake ? ' main-scene-3d--execution-shake' : ''}`}>
-      <Canvas
-        shadows="soft"
-        camera={{ position: [0, 9, 14], fov: 50 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.78 }}
-      >
-        <Suspense fallback={null}>
-          {/* Camera — pause: follows player, normal: cinematic */}
-          {isPaused && pausePos ? (
-            <PausePlayerController
-              pausePos={pausePos}
-              setPausePos={setPausePos}
-              setPauseAnim={setPauseAnim}
-              setPauseYaw={setPauseYaw}
-              playerRotation={playerPositions[me?.id]?.rotation?.[1] || 0}
-              otherPlayerPositions={alivePlayers.filter(p => p.id !== me?.id).map(p => playerPositions[p.id]?.position || [0,0,0])}
-            />
-          ) : (
-            <CameraController
-              phase={phase}
-              CONSTANTS={CONSTANTS}
-              dayCount={game.dayCount || 0}
-              deathFocusPos={deathFocusPos}
-              playerCount={players.length}
-              gameSeed={gameSeed}
-            />
-          )}
-
-          <SceneLighting isDay={game.isDay} isSunset={isSunset} />
-
-          {/* Trial storm — clouds gather and thunder builds during the
-              trial phases, climaxing in a single bright strike on
-              EXECUTION. Silent lighting-only; no thunder audio yet.
-              Build-up: DEFENSE + JUDGMENT. Climax pacing: LAST_WORDS.
-              Strike trigger: EXECUTION. Any other phase: disabled. */}
-          <TrialStormLighting
-            mode={
-              phase === CONSTANTS.PHASE.EXECUTION ? 'strike'
-              : phase === CONSTANTS.PHASE.LAST_WORDS ? 'climax'
-              : (phase === CONSTANTS.PHASE.DEFENSE || phase === CONSTANTS.PHASE.JUDGMENT) ? 'build'
-              : 'idle'
-            }
-          />
-
-          {/* Sky & atmosphere — deterministic weather driven by the
-              per-game lobbyMood (CLEAR / STORM / FOG / DUSK) rather than
-              a pure dayCount roll. Each mood has a 4-length rotation
-              that skews the daily weather toward a theme while keeping
-              at least one "break" day so the sequence isn't monotonic.
-              All clients derive the mood from the same gameSeed, so
-              they stay synchronized without extra multiplayer state. */}
-          {(() => {
-            const day = game.dayCount || 0;
-            const dayIdx = ((day % 4) + 4) % 4;
-            // INTRO_CINEMATIC overrides the mood roll: the 6s opening
-            // reel should always show a bright, presentational village
-            // regardless of the lobby's mood (STORM/FOG would darken it
-            // and the cinematic is supposed to *sell* the village to
-            // new players, not match the eventual atmosphere). DUSK
-            // tint is also skipped here — it comes back the moment
-            // DISCUSSION starts.
-            const isIntro = phase === CONSTANTS.PHASE.INTRO_CINEMATIC;
-            const rawDayRoll = isIntro ? 0 : MOOD_DAY_ROLLS[lobbyMood][dayIdx];
-            const rawNightWeather = MOOD_NIGHT_ROLLS[lobbyMood][dayIdx];
-            // Admin weather override: takes precedence over mood-roll when set
-            const aw = game.adminWeather;
-            const dayRoll = aw === 'sunny' ? 0 : aw === 'misty' ? 1 : aw === 'rainy' ? 3 : rawDayRoll;
-            const nightWeather = aw === 'clear' ? 0 : aw === 'rainy' ? 1 : aw === 'foggy' ? 2 : rawNightWeather;
-            const isSunny = dayRoll === 0;
-            const isRainyDay = dayRoll === 3;
-            const isMisty = !isSunny && !isRainyDay;
-            // DUSK: warm-tint the sky all day regardless of roll. Keeps
-            // the weather rolls doing their thing, just colorgraded like
-            // a sunset game. Disabled during INTRO_CINEMATIC (see above).
-            const isDusk = !isIntro && lobbyMood === 'DUSK';
-
-            if (game.isDay) {
-              // Sky color: warm blue sun, cold slate storm, mid grey mist.
-              // Blood-tinted progressively toward #4a1e1e as deaths pile
-              // up. DUSK lobby stacks a warm #e59c5f tint on top so the
-              // whole game feels "golden hour" — applied before the
-              // deaths tint so late-game DUSK goes blood-orange.
-              let baseSky = isSunny ? '#8fcff0' : isRainyDay ? '#5a6878' : '#909aa8';
-              if (isDusk) baseSky = lerpHex(baseSky, '#e59c5f', 0.55);
-              const skyColor = lerpHex(baseSky, '#4a1e1e', deathsRatio);
-              // Fog closes in as deaths accumulate — far plane shrinks
-              // up to ~35%. Sunny days still breathe at day 1, but at
-              // death-ratio 0.5 (half the lobby gone) the mountains
-              // dissolve into a tense grey wall.
-              const fogShrink = 1 - deathsRatio * 0.35;
-              const fogNear = (isSunny ? 50 : isRainyDay ? 8 : 12) * fogShrink;
-              const fogFar  = (isSunny ? 120 : isRainyDay ? 26 : 32) * fogShrink;
-              return (
-                <>
-                  <color attach="background" args={[skyColor]} />
-                  <fog
-                    attach="fog"
-                    args={[skyColor, fogNear, fogFar]}
-                  />
-                  <Sky
-                    sunPosition={[100, isRainyDay ? 8 : isSunny ? 60 : 22, 100]}
-                    turbidity={isRainyDay ? 26 : isSunny ? 4 : 12}
-                    rayleigh={isRainyDay ? 6 : isSunny ? 1.2 : 3}
-                  />
-                  <DayFireflies count={isRainyDay ? 8 : isSunny ? 70 : 40} />
-                  <FloatingDust count={isMisty ? 140 : isSunny ? 40 : 90} isDay />
-                  <WindLeaves count={isRainyDay ? 140 : isSunny ? 70 : 95} />
-                  {/* Ground + village fog: gated on actually-foggy weather
-                      so sunny afternoons don't carry the same oppressive
-                      low-visibility wall the old build always drew. */}
-                  {(isMisty || isRainyDay) && <GroundFog isDay />}
-                  {(isMisty || isRainyDay) && <VillageFogWall isDay />}
-                  {/* Always-on horizon haze — sits far past the village
-                      between the mountain rings so the far horizon
-                      always fades into fog, never shows a visible scene
-                      edge. Cheap because the Clouds instancer shares one
-                      draw call. */}
-                  <HorizonMist isDay />
-                  {isSunny && <DayRabbits count={8} />}
-                  {isRainyDay && <NightRain count={220} />}
-                  {isRainyDay && <NightLightning />}
-                  {/* Vultures circling overhead — more of them as deaths
-                      pile up. Living depth cue for the scene even when
-                      nothing else is happening. */}
-                  <CirclingBirds baseCount={3} deathsCount={deathsCount} />
-                </>
-              );
-            } else {
-              const isRainy = nightWeather === 1;
-              const isFoggy = nightWeather === 2;
-              // Night fog pass. The previous config stacked <fog> + always-
-              // on GroundFog + always-on NightDarkFog, and then doubled
-              // GroundFog + NightDarkFog again on foggy nights — result
-              // was that the plaza floor disappeared on ~every night.
-              // Now: only clear nights show a very light atmospheric fog;
-              // foggy/rainy nights still get the thick layer but without
-              // the double render. Near/far pushed out so the ground stays
-              // visible from the orbit camera (which sits ~14m up).
-              // Night base is near-black; blood-tint very slightly so
-              // late-game nights have a subtle warm-maroon undertone
-              // instead of the same cold black as night 1.
-              const nightSky = lerpHex('#060818', '#140408', deathsRatio);
-              const nightFogShrink = 1 - deathsRatio * 0.25;
-              return (
-                <>
-                  <color attach="background" args={[nightSky]} />
-                  <fog
-                    attach="fog"
-                    args={[
-                      nightSky,
-                      (isRainy ? 14 : isFoggy ? 12 : 22) * nightFogShrink,
-                      (isRainy ? 36 : isFoggy ? 38 : 60) * nightFogShrink,
-                    ]}
-                  />
-                  <Stars radius={80} depth={50} count={isRainy ? 500 : 3000} factor={4} saturation={0} fade speed={1} />
-                  <Moon phase={moonPhase} />
-                  <FloatingDust count={60} isDay={false} />
-                  <NightEmbers count={isRainy ? 30 : isFoggy ? 50 : 70} />
-                  {/* Ground-level fog reserved for weather that actually
-                      justifies it — clear nights get starlight + a clean
-                      ground. */}
-                  {(isFoggy || isRainy) && <GroundFog isDay={false} />}
-                  <VillageFogWall isDay={false} />
-                  <HorizonMist isDay={false} />
-                  {/* Crow count climbs with deaths — 4 base, +1 per
-                      death, capped at 10 so overdraw stays reasonable. */}
-                  <NightCrows count={Math.min(4 + deathsCount, 10)} />
-                  <NightDarkFog count={isFoggy ? 24 : isRainy ? 14 : 8} />
-                  {isRainy && <NightRain count={300} />}
-                  {isRainy && <NightLightning />}
-                </>
-              );
-            }
-          })()}
-
-          <GroundPlane isDay={game.isDay} />
-          <Village isDay={game.isDay} isTrialPhase={isTrialPhase} gameSeed={gameSeed} />
-
-          {/* Background decor — procedural landmarks placed between the
-              cottage ring (r ≈ 18) and the mountain ring (r ≈ 42). Both
-              are always-on so the depth cue reads consistently across
-              day and night. */}
-          <DistantWindmill position={[-28, 0, -26]} scale={1.8} />
-          <DistantWindmill position={[26, 0, -30]} scale={1.5} towerColor="#342a24" />
-
-          {/* Diegetic death counter — a row of candles by the church
-              that extinguishes one per death. Rotation orients the rack
-              toward the plaza so players can read it from the orbit. */}
-          <CandleRack position={[5.5, 0, -11]} rotation={[0, -0.35, 0]} deathsCount={deathsCount} />
-
-          {/* Alive players — hidden during night and after walk finishes */}
-          {!nightPlayersHidden && phase !== CONSTANTS.PHASE.NIGHT && alivePlayers.map((player) => {
-            const isMe = player.id === me?.id;
-            const isAccused = player.id === game.accusedId;
-            const showVoteBtn = isVotingPhase;
-            const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
-            const isAnimating = nightTransition || morningTransition;
-            // Night: walk circle → house. Morning: house → circle.
-            let usePos, startPos;
-            if (isPaused && isMe && pausePos) {
-              usePos = pausePos;
-              startPos = null;
-            } else if (nightTransition) {
-              usePos = housePositions[player.id] || pData.position;
-              startPos = dayPositions[player.id];
-            } else if (morningTransition) {
-              usePos = pData.position;
-              startPos = housePositions[player.id];
-            } else {
-              usePos = pData.position;
-              startPos = null;
-            }
-            const useRot = (isPaused && isMe) ? [0, pauseYaw + Math.PI, 0] : pData.rotation;
-            return (
-              <PlayerFigure
-                key={player.id}
-                player={player}
-                position={usePos}
-                rotation={useRot}
-                pauseAnim={(isPaused && isMe) ? pauseAnim : null}
-                startPosition={startPos}
-                isTransitioning={isAnimating}
-                fadeOnTransition={nightTransition}
-                transitionDuration={morningTransition ? 3.5 : 5}
-                color={player.profile?.color || '#ffffff'}
-                isAccused={isAccused}
-                showVote={showVoteBtn}
-                voteCount={trial?.suspects?.[player.id]?.suspectedBy?.length || 0}
-                totalAlive={alivePlayers.length}
-                characterScale={characterScale}
-                phase={phase}
-                CONSTANTS={CONSTANTS}
-                chatMessages={chatMessages}
-                dayCount={game.dayCount}
-                isGameOver={isGameOver}
-                isWinningTeam={isGameOver && (player.character?.team === game.winner)}
-              />
-            );
-          })}
-
-          {/* Dead players — persist as corpses in the plaza center (no label,
-              no highlight, no fade). Hidden at night so the villagers are
-              alone in the streets during the action phase. */}
-          {phase !== CONSTANTS.PHASE.NIGHT && deadPlayers.map((player) => {
-            const pData = playerPositions[player.id] || { position: [0, 0, 0], rotation: [0, 0, 0] };
-            return (
-              <DeadPlayerFigure
-                key={player.id}
-                player={player}
-                position={pData.position}
-                rotation={pData.rotation}
-              />
-            );
-          })}
-
-          {/* Execution crow scatter — 5 birds burst upward + outward
-              from above the gallows on EXECUTION entry. Mounted only
-              during the 3s EXECUTION phase so the instanced mesh is
-              absent otherwise. */}
-          {phase === CONSTANTS.PHASE.EXECUTION && (
-            <ExecutionCrows origin={[PODIUM_POSITION[0], 3.5, PODIUM_POSITION[2]]} />
-          )}
-
-          {/* Post-processing — minimal to avoid white artifacts.
-              HueSaturation pushes color punch without touching hue; kept
-              at +0.18 so greens/reds feel vivid but skin tones don't
-              cartoon out. Bumping exposure from 0.65 to 0.78 matches the
-              new saturation so the image doesn't feel flat. */}
-          <EffectComposer>
-            <Bloom
-              intensity={game.isDay ? 0.08 : 0.1}
-              luminanceThreshold={0.95}
-              luminanceSmoothing={0.2}
-              mipmapBlur
-            />
-            <HueSaturation saturation={0.18} />
-            <Vignette
-              offset={game.isDay ? 0.3 : 0.1}
-              darkness={game.isDay ? 0.35 : 0.85}
-            />
-          </EffectComposer>
-        </Suspense>
-      </Canvas>
-
+    <div className="main-scene-3d">
       {/* Phase-transition FX — radial pulse on DISCUSSION → VOTING and
           cinematic letterbox bars during the trial (DEFENSE / JUDGMENT
           / LAST_WORDS). Retracts on EXECUTION / SPARED / NO_LYNCH so
           the climax is literally the bars releasing. */}
       <PhaseTransitionFX phase={phase} CONSTANTS={CONSTANTS} />
 
-      {/* Blood effect — only shown to the player who actually died.
-          Before, every living villager got the bloody teeth vignette
-          each morning someone was killed, which flattened the "it's
-          YOU" punch of the effect. Now it fires exclusively for the
-          victim (and ignores disconnect-as-kill events that don't
-          have the same narrative weight). */}
+      {/* Blood effect — only the local player who actually died sees the
+          bloody teeth vignette. Every living villager getting it each
+          morning flattened the "it's YOU" punch of the effect. */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && showBloodEffect && (() => {
         if (!me?.id) return null;
         const wasKilled = (events || []).some(
@@ -809,63 +249,53 @@ const MainScene = () => {
         );
       })()}
 
-      {/* Lynch role reveal overlay — post-execution suspense moment.
-          5s dedicated phase so the room has time to read the verdict
-          ("X was judged guilty") and the role reveal ("Their role was…")
-          before the screen fades to night. Skipped entirely when the
-          house rule "reveal on death" is off — the EXECUTION_REVEAL
-          phase still plays for its full duration (timer consistency)
-          but the overlay stays hidden, keeping the role secret. */}
+      {/* Lynch role reveal — post-execution suspense moment. 5s dedicated
+          phase so the room has time to read "X was judged guilty" and
+          the role reveal before the screen fades to night. Skipped
+          entirely when the house rule "reveal on death" is off. */}
       {phase === CONSTANTS.PHASE.EXECUTION_REVEAL
         && game?.config?.rules?.revealOnDeath !== false
         && (() => {
-        const executed = players.find((p) => p.id === game.accusedId);
-        if (!executed?.character) return null;
-        const role = executed.character;
-        const teamLabel = i18n.t(`game:teams.${role.team}.short`, { defaultValue: role.team });
-        const roleLabel = i18n.t(`roles:${role.key}.label`, { defaultValue: role.label });
-        return (
-          <div className="lynch-reveal-overlay">
-            <div
-              className="lynch-reveal-halo"
-              style={{
-                background: `radial-gradient(ellipse at center, ${role.couleur}88 0%, ${role.couleur}44 25%, ${role.couleur}1c 50%, transparent 75%)`,
-              }}
-            />
-            <div
-              className="lynch-reveal-card"
-              style={{
-                borderColor: role.couleur,
-                boxShadow: `0 0 40px ${role.couleur}55, 0 0 100px ${role.couleur}2a`,
-              }}
-            >
-              <div className="lynch-reveal-verdict">
-                {i18n.t('game:lynch_reveal.verdict', { name: executed.profile?.name || '?', defaultValue: '{{name}} has been found guilty' })}
+          const executed = players.find((p) => p.id === game.accusedId);
+          if (!executed?.character) return null;
+          const role = executed.character;
+          const teamLabel = i18n.t(`game:teams.${role.team}.short`, { defaultValue: role.team });
+          const roleLabel = i18n.t(`roles:${role.key}.label`, { defaultValue: role.label });
+          return (
+            <div className="lynch-reveal-overlay">
+              <div
+                className="lynch-reveal-halo"
+                style={{
+                  background: `radial-gradient(ellipse at center, ${role.couleur}88 0%, ${role.couleur}44 25%, ${role.couleur}1c 50%, transparent 75%)`,
+                }}
+              />
+              <div
+                className="lynch-reveal-card"
+                style={{
+                  borderColor: role.couleur,
+                  boxShadow: `0 0 40px ${role.couleur}55, 0 0 100px ${role.couleur}2a`,
+                }}
+              >
+                <div className="lynch-reveal-verdict">
+                  {i18n.t('game:lynch_reveal.verdict', { name: executed.profile?.name || '?', defaultValue: '{{name}} has been found guilty' })}
+                </div>
+                <div className="lynch-reveal-role-label">
+                  {i18n.t('game:lynch_reveal.role_was', { defaultValue: 'Their role was:' })}
+                </div>
+                <div className="lynch-reveal-icon" style={{ color: role.couleur }}>
+                  <i className={`fas ${role.icon}`}></i>
+                </div>
+                <div className="lynch-reveal-role" style={{ color: role.couleur }}>{roleLabel}</div>
+                <div className="lynch-reveal-team" style={{ color: role.couleur }}>{teamLabel}</div>
               </div>
-              <div className="lynch-reveal-role-label">
-                {i18n.t('game:lynch_reveal.role_was', { defaultValue: 'Their role was:' })}
-              </div>
-              <div className="lynch-reveal-icon" style={{ color: role.couleur }}>
-                <i className={`fas ${role.icon}`}></i>
-              </div>
-              <div className="lynch-reveal-role" style={{ color: role.couleur }}>{roleLabel}</div>
-              <div className="lynch-reveal-team" style={{ color: role.couleur }}>{teamLabel}</div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
 
-      {/* Death report overlay — structured layout:
-          1) narrative line: "<victim> n'a pas survécu… <flavor>"
-          2) role card: icon + role label, highlighted in the role color
-          3) testament block (if the victim wrote a last will)
-          The old single-string regex approach concatenated everything
-          on one line, making the role reveal easy to miss. Disconnect
-          events still fall back to the plain chatMessage since they
-          don't carry structured role fields. */}
+      {/* Death report — narrative + role card + testament for each victim. */}
       {phase === CONSTANTS.PHASE.DEATH_REPORT && showDeathReport && (game?.dayCount || 0) > 1 && (() => {
         const killEvents = (events || []).filter(
-          e => (e.type === 'KILL_RESULT' || e.type === 'disconnect') && e.dayCount === game.dayCount && e.content?.chatMessage
+          (e) => (e.type === 'KILL_RESULT' || e.type === 'disconnect') && e.dayCount === game.dayCount && e.content?.chatMessage,
         );
         const hasDead = killEvents.length > 0;
 
@@ -878,25 +308,13 @@ const MainScene = () => {
                   const roleLabelI18n = c.roleKey
                     ? i18n.t(`roles:${c.roleKey}.label`, { defaultValue: c.roleLabel })
                     : c.roleLabel;
-                  // Build the narrative line without the role reveal so
-                  // the role is isolated in its own card below.
                   const narrative = c.victimName && c.flavor
                     ? i18n.t('game:death_messages.death_announce', {
-                        name: c.victimName,
-                        flavor: c.flavor,
-                        defaultValue: `${c.victimName} n'a pas survécu à la nuit... ${c.flavor}`,
-                      })
+                      name: c.victimName,
+                      flavor: c.flavor,
+                      defaultValue: `${c.victimName} n'a pas survécu à la nuit... ${c.flavor}`,
+                    })
                     : (c.chatMessage || '').split(/\n|📜/)[0];
-                  // Normalise the kill type into a readable label. Keeps
-                  // Attack-source + faction pills are intentionally NOT
-                  // surfaced here. The narrative line already encodes
-                  // the attack type ("criblé de balles" → mafia,
-                  // "déchiqueté" → werewolf, etc.) — leaving the kill
-                  // source / team faction as explicit text spoiled all
-                  // suspense (players knew the faction before the role
-                  // ever revealed). The killLabel/teamLabel/badge color
-                  // helpers were removed; if a post-game recap needs
-                  // them, recompute from c.killType / c.roleTeam there.
                   return (
                     <div key={i} className="death-report-entry">
                       <div className="death-desc">{narrative}</div>
@@ -938,7 +356,7 @@ const MainScene = () => {
         );
       })()}
 
-      {/* Phase announcements */}
+      {/* Scene announcements */}
       {phase === CONSTANTS.PHASE.NO_LYNCH && (
         <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 2.5s ease-out forwards' }}>
           <div className="announcement-text">{noLynchText || i18n.t('game:scene.no_lynch')}</div>
@@ -947,7 +365,7 @@ const MainScene = () => {
       {phase === CONSTANTS.PHASE.SPARED && (
         <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 3s ease-out forwards' }}>
           <div className="announcement-text announcement-spared">
-            {i18n.t('game:scene.spared', { name: players.find(p => p.id === game.accusedId)?.profile.name || '?' })}
+            {i18n.t('game:scene.spared', { name: players.find((p) => p.id === game.accusedId)?.profile.name || '?' })}
           </div>
         </div>
       )}
@@ -960,10 +378,9 @@ const MainScene = () => {
               </div>
             </div>
           )}
-          {/* Delayed 1s so flash + death anim play first */}
           <div className="scene-announcement" style={{ animation: 'announcement-auto-fade 2.5s ease-out 0.8s both' }}>
             <div className="announcement-text announcement-execution">
-              {i18n.t('game:scene.executed', { name: players.find(p => p.id === game.accusedId)?.profile.name || '?' })}
+              {i18n.t('game:scene.executed', { name: players.find((p) => p.id === game.accusedId)?.profile.name || '?' })}
             </div>
           </div>
         </>
