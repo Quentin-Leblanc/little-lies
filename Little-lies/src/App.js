@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePlayersList, getRoomCode } from 'playroomkit';
 import {
     Graveyard,
     Menu,
@@ -8,7 +9,6 @@ import {
     Chat,
     Player,
     Roles,
-    Time,
 } from './components';
 import { useGameEngine } from './hooks/useGameEngine';
 import GameComponent from './components/GameComponent/GameComponent';
@@ -17,7 +17,8 @@ import AdminPanel from './components/AdminPanel/AdminPanel';
 import RoleReveal from './components/RoleReveal/RoleReveal';
 import GameTutorial from './components/Tutorial/GameTutorial';
 import CustomLobby from './components/CustomLobby/CustomLobby';
-import StarryBackground from './utils/StarryBackground';
+import UnifiedScene from './components/Scenes/UnifiedScene';
+import TopBar from './components/TopBar';
 import LagIndicator from './components/LagIndicator/LagIndicator';
 import AmbientEffects from './utils/AmbientEffects';
 import i18n from './trad/i18n';
@@ -62,6 +63,17 @@ function App() {
     const me = getMe();
     const isSpectator = !!me?.isSpectator;
     const isNight = phase === CONSTANTS.PHASE.NIGHT || phase === CONSTANTS.PHASE.NIGHT_TRANSITION;
+
+    // TopBar data — room code (resolved async by PlayroomKit) + live
+    // player count. Both surface in the TopBar centre slot during the
+    // pre-game screens. Game-mode swaps in <Time /> instead.
+    const players = usePlayersList(true);
+    const [roomCode, setRoomCode] = useState('');
+    useEffect(() => {
+        const code = getRoomCode();
+        if (code && typeof code.then === 'function') code.then((c) => setRoomCode(c || ''));
+        else setRoomCode(code || '');
+    }, []);
     // Lobby ↔ Setup switch is driven directly by the shared game.status
     // so the guest moves in lockstep with the host. Previously this was a
     // local useState synced via an effect on [status] — if PlayroomKit
@@ -86,7 +98,6 @@ function App() {
     // DISCUSSION (Day 1 UI fully visible).
     const [showGameTutorial, setShowGameTutorial] = useState(false);
     const [gameTutorialArmed, setGameTutorialArmed] = useState(false);
-    const prevPhaseRef = useRef(null);
 
     const isGameOver = status === CONSTANTS.GAME_ENDED;
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -174,35 +185,27 @@ function App() {
         writeGameTutorialSeen();
     };
 
-    // Phase banner overlay
-    const [phaseBanner, setPhaseBanner] = useState(null);
-    useEffect(() => {
-        if (!isGameStarted) return;
-        const prev = prevPhaseRef.current;
-        prevPhaseRef.current = phase;
-        if (!prev || prev === phase) return;
-
-        const PHASE_BANNERS = {
-            // Voting banner removed — the action block now pulses to draw attention instead
-            [CONSTANTS.PHASE.DEFENSE]: { text: i18n.t('game:phases.DEFENSE'), icon: 'fa-shield', className: 'banner-defense' },
-            [CONSTANTS.PHASE.JUDGMENT]: { text: i18n.t('game:phases.JUDGMENT'), icon: 'fa-scale-balanced', className: 'banner-judgment' },
-            [CONSTANTS.PHASE.EXECUTION]: { text: i18n.t('game:phases.EXECUTION'), icon: 'fa-skull-crossbones', className: 'banner-execution' },
-        };
-
-        const banner = PHASE_BANNERS[phase];
-        if (banner) {
-            setPhaseBanner(banner);
-            const timer = setTimeout(() => setPhaseBanner(null), 2000);
-            return () => clearTimeout(timer);
-        }
-    }, [phase, isGameStarted]);
-
     // Pre-game: Lobby ↔ Setup with fade transition.
     // Same status flip ('role_selection') drives the switch for all players,
     // so host and guests see the transition at the same moment.
+    //
+    // The 3D backdrop (campfire scene) is owned by a single persistent
+    // <UnifiedScene /> mounted here — it survives the lobby→setup swap
+    // and CameraRig lerps between the "lobby" (intimate) and "setup"
+    // (pulled-back assembly) views as the screen changes. No more
+    // StarryBackground — the UnifiedScene already carries stars + moon
+    // + fire as part of the persistent atmosphere.
     if (!isGameStarted && !isGameOver) {
+        const sceneView = isSelectingRoles ? 'setup' : 'lobby';
+        const topBarMode = isSelectingRoles ? 'setup' : 'lobby';
         return (
-            <div className="App">
+            <div className="App has-topbar">
+                <UnifiedScene view={sceneView} />
+                <TopBar
+                    mode={topBarMode}
+                    roomCode={roomCode}
+                    playersCount={players.length}
+                />
                 <AnimatePresence mode="wait">
                     {!isSelectingRoles ? (
                         <motion.div
@@ -223,7 +226,6 @@ function App() {
                             transition={{ duration: 0.45, ease: 'easeOut' }}
                             style={{ width: '100%', height: '100%' }}
                         >
-                            <StarryBackground />
                             <Setup />
                         </motion.div>
                     )}
@@ -233,8 +235,22 @@ function App() {
     }
 
     // Main game - Grid layout
+    const inGameTopBarMode = isGameOver ? 'gameover' : 'game';
+    const topBarHidden = isGameStarted && phase === CONSTANTS.PHASE.INTRO_CINEMATIC;
     return (
-        <div className="App">
+        <div className={`App has-topbar ${topBarHidden ? 'topbar-cinematic-hidden' : ''}`}>
+            {/* The R3F village now lives inside <UnifiedScene view="game" />
+                — same persistent Canvas the lobby+setup used, just routed
+                to <VillageView /> instead of <LobbyView />. MainScene
+                kept the HTML overlays (blood, death-report, lynch-reveal,
+                scene-announcements, night-fade) but no longer mounts a
+                Canvas of its own. */}
+            <UnifiedScene view="game" />
+            <TopBar
+                mode={inGameTopBarMode}
+                roomCode={roomCode}
+                playersCount={players.length}
+            />
             {/* Game over overlay — held back while the initial RoleReveal
                 is still animating in, otherwise a game that ends during
                 the reveal (short round, lucky first-night kill) would
@@ -289,14 +305,6 @@ function App() {
                 <GameTutorial onClose={handleGameTutorialClose} />
             )}
 
-            {/* Phase transition banner — hidden during role reveal */}
-            {phaseBanner && !showRoleReveal && (
-                <div className={`phase-banner ${phaseBanner.className}`}>
-                    <i className={`fas ${phaseBanner.icon}`}></i>
-                    <span>{phaseBanner.text}</span>
-                </div>
-            )}
-
             {/* Spectator banner */}
             {isSpectator && (
                 <div className="spectator-banner">
@@ -311,7 +319,11 @@ function App() {
                 camera shots read as a cinematic. The .intro-cinematic-hide class fades them out
                 and back in when the phase flips to DISCUSSION. */}
             {(curtainReady || !showRoleReveal) && <GameComponent>
-                {/* 3D Scene — fullscreen background, always on */}
+                {/* HTML overlays for phase transitions (blood vignette,
+                    death report, lynch reveal, scene announcements,
+                    night-fade). The 3D village itself is rendered by
+                    <UnifiedScene /> above — MainScene no longer owns a
+                    Canvas. */}
                 <div className="layout-center">
                     <MainScene />
                 </div>
@@ -319,13 +331,12 @@ function App() {
                 {(() => {
                     const hideUi = isGameStarted && phase === CONSTANTS.PHASE.INTRO_CINEMATIC;
                     const uiClass = hideUi ? 'intro-cinematic-hide' : 'intro-cinematic-reveal';
+                    // Time HUD lives in the TopBar centre now; no more
+                    // floating .hud-top element — the persistent bar is
+                    // the single source of truth for "what phase / day /
+                    // timer am I on" across every screen.
                     return (
                         <>
-                            {/* HUD — fixed top center */}
-                            <div className={`hud-top ${uiClass}`}>
-                                <Time />
-                            </div>
-
                             <div className={`game-layout ${uiClass}`}>
                                 {/* Top-left — Menu + (Graveyard | Roles) */}
                                 <div className="layout-players">
