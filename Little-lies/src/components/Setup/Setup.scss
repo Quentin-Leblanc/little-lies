@@ -176,13 +176,15 @@
   }
 }
 
-// ── Draft picker (Mafia-SC2 style) ─────────────────────────────────
-// Two zones side by side: roster (selected) | catalogue (available).
-// No +/− steppers — click a catalogue tile to add, click a roster
+// ── Draft picker — two distinct zones side by side ────────────────
+// Left:  catalogue of available roles (single-column vertical list,
+//        grouped by faction)
+// Right: roster of selected roles (numbered slots, one after the other)
+// No +/− steppers — click a catalogue line to add, click a roster
 // slot to remove.
 .role-draft {
   display: grid;
-  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.55fr) minmax(13rem, 1fr);
   gap: 0.7rem;
   align-items: start;
 
@@ -191,21 +193,15 @@
   }
 }
 
-// ── Roster (left column — selected roles) ─────────────────────────
-.role-roster {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.5rem 0.55rem;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid $al-border-subtle;
-  border-radius: $al-radius-md;
-
+// Shared header for both zones — keeps catalogue/roster headers
+// visually consistent (same title size, same divider).
+.role-zone {
   &__head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     padding: 0 0.15rem 0.3rem;
+    margin-bottom: 0.3rem;
     border-bottom: 1px solid $al-border-subtle;
   }
 
@@ -225,6 +221,128 @@
     color: $al-gold;
   }
 
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-height: 26rem;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+  }
+}
+
+// ── Catalogue (left — available roles) ────────────────────────────
+.role-catalogue {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.55rem;
+  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid $al-border-subtle;
+  border-radius: $al-radius-md;
+}
+
+.role-catalogue__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  &--town    { --team: var(--al-town); }
+  &--mafia   { --team: var(--al-mafia); }
+  &--neutral { --team: var(--al-neutral); }
+  &--cult    { --team: var(--al-cult); }
+}
+
+.role-catalogue__faction {
+  font-family: $al-font-header;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: $al-track-label;
+  text-transform: uppercase;
+  color: var(--team);
+  padding: 0.15rem 0.25rem 0.05rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--team) 25%, transparent);
+  margin-bottom: 0.1rem;
+}
+
+.role-catalogue__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+// A single catalogue row — full-width clickable line with icon + label
+// and an optional ×N count on the right when already in the roster.
+.role-line {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border-radius: $al-radius-sm;
+  border: 1px solid transparent;
+  border-left: 2px solid color-mix(in srgb, var(--team) 30%, transparent);
+  background: transparent;
+  color: $al-text;
+  font-family: $al-font-body;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  min-height: 1.55rem;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--team) 10%, rgba(255, 255, 255, 0.03));
+    border-left-color: var(--team);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+  }
+
+  &.is-locked {
+    opacity: 0.4;
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &__icon {
+    width: 1rem;
+    font-size: 0.82rem;
+    text-align: center;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+    flex-shrink: 0;
+  }
+
+  &__name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__count {
+    font-family: $al-font-header;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--team);
+    flex-shrink: 0;
+  }
+}
+
+// ── Roster (right — selected roles, in order) ─────────────────────
+.role-roster {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.55rem;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid $al-border-subtle;
+  border-radius: $al-radius-md;
+
   &__list {
     list-style: none;
     margin: 0;
@@ -232,8 +350,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.18rem;
-    max-height: 22rem;
-    overflow-y: auto;
   }
 }
 
@@ -328,154 +444,8 @@
   }
 }
 
-// ── Catalogue (right column — available roles) ─────────────────────
-.role-catalogue {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.role-catalogue__section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-
-  &--town    { --team: var(--al-town); }
-  &--mafia   { --team: var(--al-mafia); }
-  &--neutral { --team: var(--al-neutral); }
-  &--cult    { --team: var(--al-cult); }
-}
-
-.role-catalogue__head {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.1rem 0;
-}
-
-.role-catalogue__chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.1rem 0.5rem;
-  border-radius: $al-radius-pill;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: $al-track-label;
-  text-transform: uppercase;
-  font-family: $al-font-header;
-  background: color-mix(in srgb, var(--team) 18%, transparent);
-  color: var(--team);
-  border: 1px solid color-mix(in srgb, var(--team) 35%, transparent);
-}
-
-.role-catalogue__count {
-  font-family: $al-font-header;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--team);
-}
-
-.role-catalogue__divider {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--team) 25%, transparent),
-    transparent
-  );
-}
-
-.role-catalogue__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-  gap: 0.3rem;
-
-  @media (max-width: 32rem) {
-    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
-  }
-}
-
-// Clickable role tile in the catalogue. Compact (~1.7rem tall),
-// icon + label, with a count badge in the top-right corner when the
-// role is already in the roster (non-unique roles can stack).
-.role-tile {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  width: 100%;
-  padding: 0.3rem 0.5rem;
-  border-radius: $al-radius-sm;
-  border: 1px solid color-mix(in srgb, var(--team) 22%, transparent);
-  background: rgba(255, 255, 255, 0.02);
-  color: $al-text;
-  font-family: $al-font-body;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-  min-height: 1.7rem;
-
-  &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--team) 14%, rgba(255, 255, 255, 0.04));
-    border-color: color-mix(in srgb, var(--team) 60%, transparent);
-    transform: translateY(-1px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    opacity: 0.32;
-    cursor: not-allowed;
-  }
-
-  &.is-locked {
-    opacity: 0.4;
-    filter: grayscale(0.35);
-  }
-
-  &__icon {
-    font-size: 0.85rem;
-    width: 1rem;
-    text-align: center;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
-    flex-shrink: 0;
-  }
-
-  &__name {
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__badge {
-    position: absolute;
-    top: -0.3rem;
-    right: -0.3rem;
-    min-width: 1.1rem;
-    height: 1.1rem;
-    padding: 0 0.25rem;
-    border-radius: $al-radius-pill;
-    background: var(--team);
-    color: #14100e;
-    font-family: $al-font-header;
-    font-size: 0.65rem;
-    font-weight: 800;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(0, 0, 0, 0.4);
-  }
-}
+// (Old catalogue grid/tile styles removed — replaced by the
+// .role-line list above. Roster slot styles continue below.)
 
 // ── Footer (balance · rules · CTA) ────────────────────────────────
 .setup-footer {
@@ -678,8 +648,11 @@
     border-bottom: 1px solid $al-border-subtle;
   }
 
-  > *:not(summary) {
-    padding: 0.85rem 0.95rem;
+  &__body {
+    padding: 0.7rem 0.85rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
   }
 }
 

@@ -108,12 +108,9 @@ const Setup = () => {
   return (
     <div className="setup-screen">
       <div className="setup-stage">
-        {/* ── Header ─────────────────────────────────────────────── */}
+        {/* ── Header (one line) ──────────────────────────────────── */}
         <header className="setup-heading">
-          <div>
-            <h1 className="setup-title">{t('setup:assemble_title')}</h1>
-            <p className="setup-subtitle">{t('setup:assemble_subtitle')}</p>
-          </div>
+          <h1 className="setup-title">{t('setup:assemble_title')}</h1>
           <div className="setup-heading-badges">
             <div className="setup-host-badge">
               <i className="fas fa-crown"></i>
@@ -158,10 +155,12 @@ const Setup = () => {
           </div>
         )}
 
-        {/* ── Role list (grouped by faction) ─────────────────────── */}
+        {/* ── Catalogue + Roster (two distinct zones) ────────────── */}
         <Roles />
 
-        {/* ── Footer: balance · rules · CTA ──────────────────────── */}
+        {/* ── Footer: balance verdict + CTA (rules + advanced config
+                are tucked into the `<details>` below so the main
+                screen reads cleanly). ─────────────────────────────── */}
         <footer className="setup-footer">
           <Balance
             town={townCount}
@@ -171,12 +170,6 @@ const Setup = () => {
             total={rolesSelected.length}
             isUnbalanced={isUnbalanced}
             missingThreat={missingThreat}
-          />
-
-          <HouseRules
-            rules={game.config?.rules}
-            onChange={(rules) => handleConfigChange({ ...game.config, rules })}
-            disabled={!host}
           />
 
           {host ? (
@@ -195,14 +188,23 @@ const Setup = () => {
           )}
         </footer>
 
-        {/* Advanced game config (durations) — kept behind a collapsible
-            panel so it doesn't clutter the new single-column flow. */}
+        {/* Rules + advanced game config moved behind a single
+            collapsible panel so the main flow stays focused on
+            "pick roles → launch". The host can still tweak everything,
+            but it doesn't dominate the screen anymore. */}
         {host && (
           <details className="setup-advanced">
             <summary>
-              <i className="fas fa-sliders" aria-hidden="true"></i> {t('setup:advanced_config', { defaultValue: 'Configuration avancée' })}
+              <i className="fas fa-sliders" aria-hidden="true"></i> {t('setup:advanced_config', { defaultValue: 'Configuration & règles' })}
             </summary>
-            <GameConfig config={game.config} onConfigChange={handleConfigChange} />
+            <div className="setup-advanced__body">
+              <HouseRules
+                rules={game.config?.rules}
+                onChange={(rules) => handleConfigChange({ ...game.config, rules })}
+                disabled={!host}
+              />
+              <GameConfig config={game.config} onConfigChange={handleConfigChange} />
+            </div>
           </details>
         )}
       </div>

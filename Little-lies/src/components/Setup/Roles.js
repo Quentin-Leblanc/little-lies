@@ -2,29 +2,27 @@ import { isHost, usePlayersList } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 
-// Faction ordering. Roles outside these four teams (legacy "evil",
-// future expansions) bucket under "neutral" so they still appear
-// somewhere instead of vanishing.
+// Faction ordering. Roles outside these four teams bucket under
+// "neutral" so they still appear somewhere instead of vanishing.
 const FACTIONS = ['town', 'mafia', 'neutral', 'cult'];
-
 const bucketFor = (team) => (FACTIONS.includes(team) ? team : 'neutral');
 
 // ─────────────────────────────────────────────────────────────────────
-// Roles — Mafia-SC2 style draft picker. Two zones, no +/- buttons:
+// Roles — two distinct zones, side by side:
 //
-//   ┌─────────────────────────────────┬──────────────────────────┐
-//   │ ROSTER (4/8)                    │ AVAILABLE ROLES          │
-//   │   1. 🛡 Villageois              │ ▸ Town                   │
-//   │   2. 🛡 Villageois              │   🛡 V  🔍 Sh  💊 Dr ...  │
-//   │   3. 🔍 Sheriff                 │ ▸ Mafia                  │
-//   │   4. 🩸 Parrain                 │   🩸 Gf 🔪 Mf  ...        │
-//   │   5. + slot vide                │ ▸ Neutre / ▸ Culte       │
-//   └─────────────────────────────────┴──────────────────────────┘
+//   ┌────────────────────────────┬──────────────────────────┐
+//   │ DISPONIBLES (gauche)       │ SÉLECTIONNÉS (droite)    │
+//   │   ▸ Town                   │   1. 🛡 Villageois       │
+//   │     🛡 Villageois  (2)     │   2. 🛡 Villageois       │
+//   │     🔍 Sheriff    (1)      │   3. 🔍 Sheriff          │
+//   │   ▸ Mafia                  │   — slot 4               │
+//   │     🩸 Parrain             │   — slot 5               │
+//   │   ...                      │   ...                    │
+//   └────────────────────────────┴──────────────────────────┘
 //
-// Click a catalogue tile → add to roster.
-// Click a roster row → remove that instance.
-// Unique roles dim out in the catalogue once picked; non-unique stay
-// active with a small badge showing how many are already in the roster.
+// Click any row in the catalogue → adds to the roster.
+// Click a filled roster slot → removes that instance.
+// Both zones are simple vertical lists (no grids, no tiles).
 // ─────────────────────────────────────────────────────────────────────
 const Roles = () => {
   const { t } = useTranslation(['setup', 'game', 'roles']);
@@ -40,8 +38,6 @@ const Roles = () => {
     setRolesSelected([...rolesSelected, role]);
   };
 
-  // Remove the role at a specific index in the roster (the slot
-  // clicked). Preserves insertion order for the rest of the roster.
   const removeAt = (index) => {
     if (!host) return;
     setRolesSelected(rolesSelected.filter((_, i) => i !== index));
@@ -49,9 +45,7 @@ const Roles = () => {
 
   const slotsLeft = nbPlayers - rolesSelected.length;
 
-  // Group catalogue roles by faction. Villageois anchors first in the
-  // town section so the base citizen is always the most reachable pick;
-  // the rest sorts alphabetically by label within each faction.
+  // Group catalogue roles by faction; villageois anchors first in town.
   const grouped = FACTIONS.reduce((acc, f) => ({ ...acc, [f]: [] }), {});
   rolesAvailable.forEach((role) => {
     grouped[bucketFor(role.team)].push(role);
@@ -64,8 +58,6 @@ const Roles = () => {
     });
   });
 
-  // Build the roster slot list — selected roles first, then empty
-  // slots up to nbPlayers so the host can see how many seats remain.
   const rosterSlots = [
     ...rolesSelected.map((role, i) => ({ kind: 'filled', role, index: i })),
     ...Array.from({ length: Math.max(0, slotsLeft) }, (_, i) => ({
@@ -76,24 +68,87 @@ const Roles = () => {
 
   return (
     <div className="role-draft">
-      {/* ── Roster (selected) ───────────────────────────────────── */}
-      <aside className="role-roster" aria-label={t('setup:roster_title', { defaultValue: 'Roster' })}>
-        <header className="role-roster__head">
-          <span className="role-roster__title">
-            {t('setup:roster_title', { defaultValue: 'Roster' })}
+      {/* ── Catalogue (left — available roles) ────────────────── */}
+      <section
+        className="role-catalogue"
+        aria-label={t('setup:catalogue_title', { defaultValue: 'Rôles disponibles' })}
+      >
+        <header className="role-zone__head">
+          <span className="role-zone__title">
+            {t('setup:catalogue_title', { defaultValue: 'Rôles disponibles' })}
           </span>
-          <span className="role-roster__count">
+        </header>
+        <div className="role-zone__body">
+          {FACTIONS.map((faction) => {
+            const roles = grouped[faction];
+            if (!roles.length) return null;
+            return (
+              <div
+                key={faction}
+                className={`role-catalogue__section role-catalogue__section--${faction}`}
+              >
+                <div className="role-catalogue__faction">
+                  {t(`game:teams.${faction}.short`)}
+                </div>
+                <ul className="role-catalogue__list">
+                  {roles.map((role) => {
+                    const count = countOf(role.key);
+                    const isUniqueTaken = role.unique && count >= 1;
+                    const canAdd = host && slotsLeft > 0 && !isUniqueTaken;
+                    return (
+                      <li key={role.key}>
+                        <button
+                          type="button"
+                          className={`role-line role-line--${faction} ${isUniqueTaken ? 'is-locked' : ''}`}
+                          onClick={() => addRole(role)}
+                          disabled={!canAdd}
+                          title={role.description || role.label}
+                        >
+                          <span
+                            className="role-line__icon"
+                            style={{ color: role.couleur }}
+                            aria-hidden="true"
+                          >
+                            <i className={`fas ${role.icon}`} />
+                          </span>
+                          <span className="role-line__name">{role.label}</span>
+                          {count > 0 && (
+                            <span className="role-line__count" aria-label={`${count} sélectionné(s)`}>
+                              ×{count}
+                            </span>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Roster (right — selected roles, in order) ─────────── */}
+      <aside
+        className="role-roster"
+        aria-label={t('setup:roster_title', { defaultValue: 'Sélectionnés' })}
+      >
+        <header className="role-zone__head">
+          <span className="role-zone__title">
+            {t('setup:roster_title', { defaultValue: 'Sélectionnés' })}
+          </span>
+          <span className="role-zone__count">
             {rolesSelected.length}/{nbPlayers}
           </span>
         </header>
-        <ul className="role-roster__list">
+        <ul className="role-zone__body role-roster__list">
           {rosterSlots.map((slot, i) => {
             if (slot.kind === 'empty') {
               return (
                 <li key={`empty-${i}`} className="role-slot role-slot--empty">
                   <span className="role-slot__num">{slot.slotNumber}</span>
                   <span className="role-slot__placeholder">
-                    {t('setup:roster_empty_slot', { defaultValue: '— libre' })}
+                    {t('setup:roster_empty_slot', { defaultValue: 'libre' })}
                   </span>
                 </li>
               );
@@ -128,63 +183,6 @@ const Roles = () => {
           })}
         </ul>
       </aside>
-
-      {/* ── Catalogue (available) ────────────────────────────────── */}
-      <section className="role-catalogue" aria-label={t('setup:catalogue_title', { defaultValue: 'Available roles' })}>
-        {FACTIONS.map((faction) => {
-          const roles = grouped[faction];
-          if (!roles.length) return null;
-          const picked = rolesSelected.filter((r) => bucketFor(r?.team) === faction).length;
-          return (
-            <div
-              key={faction}
-              className={`role-catalogue__section role-catalogue__section--${faction}`}
-            >
-              <header className="role-catalogue__head">
-                <span className={`role-catalogue__chip role-catalogue__chip--${faction}`}>
-                  {t(`game:teams.${faction}.short`)}
-                </span>
-                {picked > 0 && (
-                  <span className="role-catalogue__count">{picked}</span>
-                )}
-                <span className="role-catalogue__divider" aria-hidden="true" />
-              </header>
-              <ul className="role-catalogue__list">
-                {roles.map((role) => {
-                  const count = countOf(role.key);
-                  const isUniqueTaken = role.unique && count >= 1;
-                  const canAdd = host && slotsLeft > 0 && !isUniqueTaken;
-                  return (
-                    <li key={role.key}>
-                      <button
-                        type="button"
-                        className={`role-tile role-tile--${faction} ${count > 0 ? 'has-count' : ''} ${isUniqueTaken ? 'is-locked' : ''}`}
-                        onClick={() => addRole(role)}
-                        disabled={!canAdd}
-                        title={role.description || role.label}
-                      >
-                        <span
-                          className="role-tile__icon"
-                          style={{ color: role.couleur }}
-                          aria-hidden="true"
-                        >
-                          <i className={`fas ${role.icon}`} />
-                        </span>
-                        <span className="role-tile__name">{role.label}</span>
-                        {count > 0 && (
-                          <span className="role-tile__badge" aria-label={`${count} sélectionné(s)`}>
-                            {count}
-                          </span>
-                        )}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          );
-        })}
-      </section>
     </div>
   );
 };
