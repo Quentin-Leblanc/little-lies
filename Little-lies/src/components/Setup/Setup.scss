@@ -176,17 +176,169 @@
   }
 }
 
-// ── Role list ─────────────────────────────────────────────────────
-.role-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
+// ── Draft picker (Mafia-SC2 style) ─────────────────────────────────
+// Two zones side by side: roster (selected) | catalogue (available).
+// No +/− steppers — click a catalogue tile to add, click a roster
+// slot to remove.
+.role-draft {
+  display: grid;
+  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+
+  @media (max-width: 44rem) {
+    grid-template-columns: 1fr;
+  }
 }
 
-.role-section {
+// ── Roster (left column — selected roles) ─────────────────────────
+.role-roster {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
+  padding: 0.5rem 0.55rem;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid $al-border-subtle;
+  border-radius: $al-radius-md;
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0 0.15rem 0.3rem;
+    border-bottom: 1px solid $al-border-subtle;
+  }
+
+  &__title {
+    font-family: $al-font-header;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: $al-track-label;
+    text-transform: uppercase;
+    color: $al-gold-soft;
+  }
+
+  &__count {
+    font-family: $al-font-header;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $al-gold;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.18rem;
+    max-height: 22rem;
+    overflow-y: auto;
+  }
+}
+
+.role-slot {
+  display: block;
+
+  &--town    { --team: var(--al-town); }
+  &--mafia   { --team: var(--al-mafia); }
+  &--neutral { --team: var(--al-neutral); }
+  &--cult    { --team: var(--al-cult); }
+
+  &__num {
+    font-family: $al-font-header;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: $al-text-mute;
+    width: 1.1rem;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  &--empty {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.22rem 0.45rem;
+    border-radius: $al-radius-sm;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    color: $al-text-mute;
+    font-size: 0.72rem;
+    font-style: italic;
+    min-height: 1.6rem;
+  }
+
+  &__placeholder { opacity: 0.6; }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.22rem 0.45rem;
+    border-radius: $al-radius-sm;
+    border: 1px solid transparent;
+    border-left: 2px solid var(--team);
+    background: color-mix(in srgb, var(--team) 10%, rgba(0, 0, 0, 0.2));
+    color: $al-text;
+    font-family: $al-font-body;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    text-align: left;
+    min-height: 1.6rem;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--team) 20%, rgba(0, 0, 0, 0.2));
+
+      .role-slot__remove {
+        opacity: 1;
+        color: $al-blood-hot;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__icon {
+    font-size: 0.85rem;
+    width: 1rem;
+    text-align: center;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+    flex-shrink: 0;
+  }
+
+  &__name {
+    flex: 1;
+    font-size: 0.76rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__remove {
+    font-size: 0.7rem;
+    color: $al-text-mute;
+    opacity: 0.5;
+    transition: opacity 0.15s ease, color 0.15s ease;
+    flex-shrink: 0;
+  }
+}
+
+// ── Catalogue (right column — available roles) ─────────────────────
+.role-catalogue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.role-catalogue__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 
   &--town    { --team: var(--al-town); }
   &--mafia   { --team: var(--al-mafia); }
@@ -194,19 +346,19 @@
   &--cult    { --team: var(--al-cult); }
 }
 
-.role-section__head {
+.role-catalogue__head {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   padding: 0.1rem 0;
 }
 
-.role-section__chip {
+.role-catalogue__chip {
   display: inline-flex;
   align-items: center;
-  padding: 0.12rem 0.55rem;
+  padding: 0.1rem 0.5rem;
   border-radius: $al-radius-pill;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
@@ -216,15 +368,14 @@
   border: 1px solid color-mix(in srgb, var(--team) 35%, transparent);
 }
 
-.role-section__count {
-  font-size: 0.75rem;
+.role-catalogue__count {
+  font-family: $al-font-header;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--team);
-  min-width: 1ch;
-  font-family: $al-font-header;
 }
 
-.role-section__divider {
+.role-catalogue__divider {
   flex: 1;
   height: 1px;
   background: linear-gradient(
@@ -234,120 +385,95 @@
   );
 }
 
-// Two-column grid so 4 factions × N roles fit in the viewport
-// without scrolling. Roles flow into 2 columns within each section;
-// at <40rem we collapse to a single column (mobile).
-.role-section__list {
+.role-catalogue__list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.22rem 0.45rem;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.3rem;
 
-  @media (max-width: 40rem) {
-    grid-template-columns: 1fr;
+  @media (max-width: 32rem) {
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
   }
 }
 
-// ── Role row — compact form (description hidden, surfaced via the
-// row's `title` attribute as a hover tooltip).
-.role-row {
-  display: grid;
-  grid-template-columns: 1.4rem 1fr 1.1rem auto;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.28rem 0.45rem;
-  border-radius: $al-radius-sm;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.015);
-  border-left: 2px solid color-mix(in srgb, var(--team) 35%, transparent);
-  transition: background 0.18s ease, border-color 0.18s ease;
-  min-height: 1.85rem;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.045);
-    border-left-color: color-mix(in srgb, var(--team) 75%, transparent);
-  }
-
-  &.is-selected {
-    background: color-mix(in srgb, var(--team) 10%, rgba(0, 0, 0, 0.2));
-    border-left-color: var(--team);
-  }
-}
-
-.role-row__icon {
-  font-size: 0.85rem;
-  text-align: center;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
-}
-
-.role-row__text {
+// Clickable role tile in the catalogue. Compact (~1.7rem tall),
+// icon + label, with a count badge in the top-right corner when the
+// role is already in the roster (non-unique roles can stack).
+.role-tile {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.role-row__name {
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.3rem 0.5rem;
+  border-radius: $al-radius-sm;
+  border: 1px solid color-mix(in srgb, var(--team) 22%, transparent);
+  background: rgba(255, 255, 255, 0.02);
+  color: $al-text;
   font-family: $al-font-body;
+  font-size: 0.72rem;
   font-weight: 600;
-  font-size: 0.78rem;
-  color: $al-text;
   letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-// Description no longer rendered inline (the row's `title` attribute
-// carries it as a hover tooltip). Kept in the cascade in case a future
-// layout brings it back at wider breakpoints.
-.role-row__desc { display: none; }
-
-.role-row__count {
-  text-align: center;
-  font-family: $al-font-header;
-  font-weight: 700;
-  font-size: 0.78rem;
-  color: var(--team);
-  min-width: 1rem;
-}
-
-.role-row__stepper {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-}
-
-.stepper-btn {
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 50%;
-  border: 1px solid $al-border-subtle;
-  background: rgba(255, 255, 255, 0.04);
-  color: $al-text;
-  font-size: 0.85rem;
-  line-height: 1;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: $al-font-body;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  min-height: 1.7rem;
 
   &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--team) 18%, rgba(255, 255, 255, 0.06));
-    border-color: color-mix(in srgb, var(--team) 50%, transparent);
-    color: $al-text;
+    background: color-mix(in srgb, var(--team) 14%, rgba(255, 255, 255, 0.04));
+    border-color: color-mix(in srgb, var(--team) 60%, transparent);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
   }
 
   &:disabled {
-    opacity: 0.28;
+    opacity: 0.32;
     cursor: not-allowed;
   }
 
-  &--plus:not(:disabled) {
-    color: var(--team);
+  &.is-locked {
+    opacity: 0.4;
+    filter: grayscale(0.35);
+  }
+
+  &__icon {
+    font-size: 0.85rem;
+    width: 1rem;
+    text-align: center;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+    flex-shrink: 0;
+  }
+
+  &__name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__badge {
+    position: absolute;
+    top: -0.3rem;
+    right: -0.3rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.25rem;
+    border-radius: $al-radius-pill;
+    background: var(--team);
+    color: #14100e;
+    font-family: $al-font-header;
+    font-size: 0.65rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -557,10 +683,27 @@
   }
 }
 
+// ── Chat overlap fix ──────────────────────────────────────────────
+// The LobbyChat is position:fixed at bottom-left (40vw × 21rem) and
+// the centered Setup stage runs through that zone on common
+// viewports. Shrink the chat while we're in setup mode so the stage
+// stays unobstructed; the chat is still accessible, just compact.
+.setup-screen .lobby-chat {
+  width: clamp(14rem, 22vw, 22rem);
+  max-width: 22rem;
+  height: 13rem;
+  max-height: 13rem;
+  font-size: 0.78rem;
+}
+
+// Bottom padding so the very last footer rows of the stage clear the
+// shrunken chat sitting at bottom-left.
+.setup-screen { padding-bottom: 15rem; }
+
 // ── Mobile / narrow viewports ─────────────────────────────────────
 @media (max-width: 36rem) {
   .setup-screen {
-    padding: 1rem 0.5rem 5rem;
+    padding: 1rem 0.5rem 14rem;
   }
 
   .setup-stage {
@@ -573,11 +716,17 @@
     gap: 0.4rem;
   }
 
-  .role-row {
-    grid-template-columns: 1.25rem 1fr auto;
-    gap: 0.35rem;
-    padding: 0.22rem 0.35rem;
+  .role-draft {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
 
-    &__count { display: none; }
+  .role-roster__list {
+    max-height: 12rem;
+  }
+
+  .role-tile {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.68rem;
   }
 }
