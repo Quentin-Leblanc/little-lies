@@ -2,14 +2,12 @@ import { isHost, usePlayersList } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
 
-const TEAM_ORDER = ['town', 'mafia', 'cult', 'neutral'];
+// Faction ordering for the section list. Roles outside these four teams
+// (legacy "evil", future expansions) bucket under "neutral" so they still
+// appear somewhere instead of vanishing.
+const FACTIONS = ['town', 'mafia', 'neutral', 'cult'];
 
-// Within a team, villageois anchors first so the grid reads "base citizen
-// first, everything else after". Falls back to alphabetical for the rest.
-const roleSortKey = (role) => {
-  if (role.key === 'villageois') return '';
-  return role.label;
-};
+const bucketFor = (team) => (FACTIONS.includes(team) ? team : 'neutral');
 
 const Roles = () => {
   const { t } = useTranslation(['setup', 'game', 'roles']);
@@ -35,68 +33,98 @@ const Roles = () => {
     setRolesSelected(rolesSelected.filter((_, i) => i !== lastIndex));
   };
 
-  const sortedRoles = [...rolesAvailable].sort((a, b) => {
-    const ta = TEAM_ORDER.indexOf(a.team);
-    const tb = TEAM_ORDER.indexOf(b.team);
-    if (ta !== tb) return ta - tb;
-    return roleSortKey(a).localeCompare(roleSortKey(b));
-  });
-
   const slotsLeft = nbPlayers - rolesSelected.length;
 
+  // Group available roles by faction. Villageois always anchors first in
+  // the town section so the base citizen reads as the default pick; the
+  // rest sorts alphabetically by label within each faction.
+  const grouped = FACTIONS.reduce((acc, f) => ({ ...acc, [f]: [] }), {});
+  rolesAvailable.forEach((role) => {
+    grouped[bucketFor(role.team)].push(role);
+  });
+  FACTIONS.forEach((f) => {
+    grouped[f].sort((a, b) => {
+      if (a.key === 'villageois') return -1;
+      if (b.key === 'villageois') return 1;
+      return a.label.localeCompare(b.label);
+    });
+  });
+
+  const factionCount = (f) => rolesSelected.filter((r) => bucketFor(r?.team) === f).length;
+
   return (
-    <div className="role-grid">
-      {sortedRoles.map((role) => {
-        const count = countOf(role.key);
-        const isUniqueTaken = role.unique && count >= 1;
-        const canAdd = host && slotsLeft > 0 && !isUniqueTaken;
-        const canRemove = host && count > 0;
-
+    <div className="role-list">
+      {FACTIONS.map((faction) => {
+        const roles = grouped[faction];
+        if (!roles.length) return null;
+        const picked = factionCount(faction);
         return (
-          <div
-            key={role.key}
-            className={`role-card role-card--${role.team} ${count > 0 ? 'is-selected' : ''}`}
-            title={role.description}
+          <section
+            key={faction}
+            className={`role-section role-section--${faction}`}
           >
-            {count > 0 && <span className="role-card__badge">{count}</span>}
-
-            <div className="role-card__head">
-              <span className="role-card__icon" style={{ color: role.couleur }}>
-                <i className={`fas ${role.icon}`} />
+            <header className="role-section__head">
+              <span className={`role-section__chip role-section__chip--${faction}`}>
+                {t(`game:teams.${faction}.short`)}
               </span>
-              <span className="role-card__name">{role.label}</span>
-            </div>
+              <span className="role-section__count">{picked}</span>
+              <span className="role-section__divider" aria-hidden="true" />
+            </header>
 
-            <div className="role-card__footer">
-              <span className={`team-pill team-pill--${role.team}`}>
-                {t(`game:teams.${role.team}.short`)}
-              </span>
-              {/* Stepper pair — always rendered so the card layout stays
-                  stable whether or not the role is picked. − is disabled
-                  when count is zero, + is disabled when the roster is
-                  full or the role is unique-already-taken. */}
-              <div className="role-card__stepper">
-                <button
-                  type="button"
-                  className="stepper-btn stepper-btn--minus"
-                  onClick={() => removeRole(role)}
-                  disabled={!canRemove}
-                  aria-label={`−1 ${role.label}`}
-                >
-                  −
-                </button>
-                <button
-                  type="button"
-                  className="stepper-btn stepper-btn--plus"
-                  onClick={() => addRole(role)}
-                  disabled={!canAdd}
-                  aria-label={`+1 ${role.label}`}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
+            <ul className="role-section__list">
+              {roles.map((role) => {
+                const count = countOf(role.key);
+                const isUniqueTaken = role.unique && count >= 1;
+                const canAdd = host && slotsLeft > 0 && !isUniqueTaken;
+                const canRemove = host && count > 0;
+
+                return (
+                  <li
+                    key={role.key}
+                    className={`role-row role-row--${faction} ${count > 0 ? 'is-selected' : ''}`}
+                    title={role.description || role.label}
+                  >
+                    <span
+                      className="role-row__icon"
+                      style={{ color: role.couleur }}
+                      aria-hidden="true"
+                    >
+                      <i className={`fas ${role.icon}`} />
+                    </span>
+
+                    <div className="role-row__text">
+                      <span className="role-row__name">{role.label}</span>
+                    </div>
+
+                    <div className="role-row__count" aria-live="polite">
+                      {count > 0 ? count : ''}
+                    </div>
+
+                    <div className="role-row__stepper">
+                      <button
+                        type="button"
+                        className="stepper-btn stepper-btn--minus"
+                        onClick={() => removeRole(role)}
+                        disabled={!canRemove}
+                        aria-label={`−1 ${role.label}`}
+                      >
+                        −
+                      </button>
+                      <button
+                        type="button"
+                        className="stepper-btn stepper-btn--plus"
+                        onClick={() => addRole(role)}
+                        disabled={!canAdd}
+                        aria-label={`+1 ${role.label}`}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
         );
       })}
     </div>

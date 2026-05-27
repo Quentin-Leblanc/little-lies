@@ -107,62 +107,62 @@ const Setup = () => {
 
   return (
     <div className="setup-screen">
-      <div className="setup-grid">
-        {/* ── Left: role grid ───────────────────────────────────────── */}
-        <section className="setup-main">
-          <header className="setup-heading">
-            <div>
-              <h1 className="setup-title">{t('setup:assemble_title')}</h1>
-              <p className="setup-subtitle">{t('setup:assemble_subtitle')}</p>
+      <div className="setup-stage">
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <header className="setup-heading">
+          <div>
+            <h1 className="setup-title">{t('setup:assemble_title')}</h1>
+            <p className="setup-subtitle">{t('setup:assemble_subtitle')}</p>
+          </div>
+          <div className="setup-heading-badges">
+            <div className="setup-host-badge">
+              <i className="fas fa-crown"></i>
+              <span>{hostName}</span>
             </div>
-            <div className="setup-heading-badges">
-              <div className="setup-host-badge">
-                <i className="fas fa-crown"></i>
-                <span>{hostName}</span>
-              </div>
-              <div className="setup-players-badge">
-                <i className="fas fa-users"></i>
-                <span>{rolesSelected.length}/{players.length}</span>
-                {players.length < MIN_PLAYERS && (
-                  <span className="min-hint">
-                    ({t('common:min_players', { count: MIN_PLAYERS })})
-                  </span>
-                )}
-              </div>
+            <div className="setup-players-badge">
+              <i className="fas fa-users"></i>
+              <span>{rolesSelected.length}/{players.length}</span>
+              {players.length < MIN_PLAYERS && (
+                <span className="min-hint">
+                  ({t('common:min_players', { count: MIN_PLAYERS })})
+                </span>
+              )}
             </div>
-          </header>
+          </div>
+        </header>
 
-          {!host && (
-            <div className="setup-host-notice">
-              <i className="fas fa-crown"></i> {t('setup:host_configuring', { host: hostName })}
+        {!host && (
+          <div className="setup-host-notice">
+            <i className="fas fa-crown"></i> {t('setup:host_configuring', { host: hostName })}
+          </div>
+        )}
+
+        {/* ── Presets row ────────────────────────────────────────── */}
+        {matchingPresets.length > 0 && (
+          <div className="setup-presets">
+            <span className="presets-label">{t('setup:presets')}</span>
+            <div className="presets-list">
+              {matchingPresets.map(([key, preset]) => (
+                <button
+                  key={key}
+                  className={`preset-btn ${key.startsWith('beginner') ? 'preset-beginner' : ''}`}
+                  onClick={() => applyPreset(preset)}
+                  title={t(`setup:presets_list.${key}.desc`)}
+                  disabled={!host}
+                >
+                  {key.startsWith('beginner') && <i className="fas fa-graduation-cap"></i>}
+                  {t(`setup:presets_list.${key}.label`)}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {matchingPresets.length > 0 && (
-            <div className="setup-presets">
-              <span className="presets-label">{t('setup:presets')}</span>
-              <div className="presets-list">
-                {matchingPresets.map(([key, preset]) => (
-                  <button
-                    key={key}
-                    className={`preset-btn ${key.startsWith('beginner') ? 'preset-beginner' : ''}`}
-                    onClick={() => applyPreset(preset)}
-                    title={t(`setup:presets_list.${key}.desc`)}
-                    disabled={!host}
-                  >
-                    {key.startsWith('beginner') && <i className="fas fa-graduation-cap"></i>}
-                    {t(`setup:presets_list.${key}.label`)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+        {/* ── Role list (grouped by faction) ─────────────────────── */}
+        <Roles />
 
-          <Roles />
-        </section>
-
-        {/* ── Right: balance + house rules + CTA ───────────────────── */}
-        <aside className="setup-sidebar">
+        {/* ── Footer: balance · rules · CTA ──────────────────────── */}
+        <footer className="setup-footer">
           <Balance
             town={townCount}
             mafia={mafiaCount}
@@ -179,8 +179,6 @@ const Setup = () => {
             disabled={!host}
           />
 
-          <GameConfig config={game.config} onConfigChange={handleConfigChange} />
-
           {host ? (
             <button
               className={`seal-btn ${canStart ? 'ready' : ''}`}
@@ -195,7 +193,18 @@ const Setup = () => {
               <i className="fas fa-hourglass-half"></i> {t('setup:waiting_host', { host: hostName })}
             </div>
           )}
-        </aside>
+        </footer>
+
+        {/* Advanced game config (durations) — kept behind a collapsible
+            panel so it doesn't clutter the new single-column flow. */}
+        {host && (
+          <details className="setup-advanced">
+            <summary>
+              <i className="fas fa-sliders" aria-hidden="true"></i> {t('setup:advanced_config', { defaultValue: 'Configuration avancée' })}
+            </summary>
+            <GameConfig config={game.config} onConfigChange={handleConfigChange} />
+          </details>
+        )}
       </div>
 
       {/* Persistent chat — same multiplayer state as the lobby */}

@@ -15,6 +15,9 @@ const RULE_KEYS = ['trialDefense', 'lastWills', 'revealOnDeath', 'anonymousVotes
 
 export const resolveRules = (rules) => ({ ...DEFAULT_RULES, ...(rules || {}) });
 
+// Compact chip row — each rule renders as a single tap-toggleable chip
+// with its label and an on/off dot. Replaces the previous full-row
+// switches that took the same vertical space as the role list.
 const HouseRules = ({ rules, onChange, disabled }) => {
   const { t } = useTranslation(['setup']);
   const current = resolveRules(rules);
@@ -25,37 +28,26 @@ const HouseRules = ({ rules, onChange, disabled }) => {
   };
 
   return (
-    <section className="setup-panel rules-panel">
-      <header className="panel-title">
-        <i className="fas fa-scroll"></i>
-        <span>{t('setup:rules.title')}</span>
-      </header>
-
-      <ul className="rules-list">
-        {RULE_KEYS.map((key) => {
-          const on = !!current[key];
-          return (
-            <li key={key} className={`rule-row ${on ? 'is-on' : 'is-off'}`}>
-              <div className="rule-row__text">
-                <span className="rule-row__label">{t(`setup:rules.${key}.label`)}</span>
-                <span className="rule-row__hint">{t(`setup:rules.${key}.hint`)}</span>
-              </div>
-              <button
-                type="button"
-                className={`rule-toggle ${on ? 'is-on' : ''}`}
-                onClick={() => toggle(key)}
-                disabled={disabled}
-                role="switch"
-                aria-checked={on}
-                aria-label={t(`setup:rules.${key}.label`)}
-              >
-                <span className="rule-toggle__dot" />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
+    <div className="rules-chips" role="group" aria-label={t('setup:rules.title')}>
+      {RULE_KEYS.map((key) => {
+        const on = !!current[key];
+        return (
+          <button
+            key={key}
+            type="button"
+            className={`rule-chip ${on ? 'is-on' : 'is-off'}`}
+            onClick={() => toggle(key)}
+            disabled={disabled}
+            role="switch"
+            aria-checked={on}
+            title={t(`setup:rules.${key}.hint`)}
+          >
+            <span className={`rule-chip__dot ${on ? 'is-on' : ''}`} aria-hidden="true" />
+            <span className="rule-chip__label">{t(`setup:rules.${key}.label`)}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 };
 

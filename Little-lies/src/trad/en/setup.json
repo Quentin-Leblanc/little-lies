@@ -1,6 +1,7 @@
 {
   "title": "Game configuration",
   "assemble_title": "Assemble the village",
+  "topbar_label": "Roles",
   "assemble_subtitle": "Choose who rides in. The rest will be strangers by sundown...",
   "seal_the_roster": "Start the game",
   "slots": "slots",

@@ -1,6 +1,7 @@
 {
   "title": "Configuration de la partie",
   "assemble_title": "Que le village s'assemble",
+  "topbar_label": "Rôles",
   "assemble_subtitle": "Choisis qui entre au village. Les autres ne seront que des ombres au crépuscule...",
   "seal_the_roster": "Commencer la partie",
   "slots": "slots",

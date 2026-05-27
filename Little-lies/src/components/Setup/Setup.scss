@@ -10,82 +10,84 @@
 }
 
 // ── Setup Screen ──────────────────────────────────────────────────
+// Transparent background — the UnifiedScene canvas behind App.js
+// owns the visual backdrop now (campfire view), so this screen is
+// purely an HTML overlay sitting above it.
 .setup-screen {
   position: relative;
   z-index: 10;
   min-height: 100vh;
-  padding: 2.35rem 1.6rem 8rem;
+  padding: 1.4rem 1rem 5rem;
+  overflow-y: auto;
   background: radial-gradient(
-    ellipse 110% 60% at 50% 120%,
-    rgba(169, 104, 48, 0.28) 0%,
-    rgba(50, 25, 10, 0.12) 40%,
+    ellipse 100% 55% at 50% 110%,
+    rgba(169, 104, 48, 0.22) 0%,
+    rgba(50, 25, 10, 0.10) 40%,
     transparent 70%
   );
 }
 
-.setup-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 22rem;
-  gap: 1.4rem;
-  max-width: 78rem;
-  margin: 0 auto;
-  align-items: start;
-}
-
-// ── Main (left) panel ─────────────────────────────────────────────
-.setup-main,
-.setup-panel {
+// Single centered card — wider than before (62rem instead of 56rem)
+// to give the 2-column role list room to breathe. Paddings dialled
+// down so the whole page fits in a typical viewport without scroll
+// on a 4-faction roster.
+.setup-stage {
   @include al-card;
-  padding: 1.6rem 1.8rem;
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.05rem 1.25rem 1.15rem;
   border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
+// ── Header ────────────────────────────────────────────────────────
 .setup-heading {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.3rem;
-  padding-bottom: 1rem;
+  gap: 0.8rem;
+  padding-bottom: 0.55rem;
   border-bottom: 1px solid $al-border-subtle;
 }
 
 .setup-title {
   font-family: $al-font-header;
-  font-size: 1.45rem;
+  font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: $al-track-title;
   color: $al-gold;
-  margin: 0 0 0.25rem;
+  margin: 0;
   padding: 0;
-  // Global .App { text-align: center } bleeds into every descendant, so
-  // we explicitly reset the heading here to sit flush with the subtitle
-  // and the rest of the setup card content.
   text-align: left;
-  // Cinzel has a fair bit of left side-bearing at large sizes, which —
-  // combined with letter-spacing — drifts the first glyph a few pixels
-  // to the right. A tiny negative text-indent pulls it back onto the
-  // container edge without clipping the "Q".
   text-indent: -0.04em;
   text-transform: uppercase;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
 }
 
-
+// Subtitle hidden by default — the title + the TopBar pill already
+// communicate "this is role selection". Re-shown on wider screens
+// where there's room for a flavor line.
 .setup-subtitle {
-  font-family: $al-font-body;
-  font-size: 0.82rem;
-  color: $al-text-mute;
-  margin: 0;
-  font-style: italic;
-  letter-spacing: 0.02em;
-  text-align: left; // override global .App { text-align: center }
+  display: none;
+
+  @media (min-width: 56rem) {
+    display: block;
+    font-family: $al-font-body;
+    font-size: 0.74rem;
+    color: $al-text-mute;
+    margin: 0.2rem 0 0;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    text-align: left;
+  }
 }
 
 .setup-heading-badges {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   flex-shrink: 0;
 }
 
@@ -93,9 +95,9 @@
 .setup-players-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.75rem;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
   font-weight: 600;
   border-radius: $al-radius-pill;
   border: 1px solid $al-gold-border;
@@ -103,7 +105,7 @@
   color: $al-gold-soft;
   font-family: $al-font-body;
 
-  i { font-size: 0.7rem; color: $al-gold; }
+  i { font-size: 0.65rem; color: $al-gold; }
 }
 
 .setup-players-badge {
@@ -115,520 +117,467 @@
 
   .min-hint {
     color: $al-blood-hot;
-    font-size: 0.7rem;
-    margin-left: 0.2rem;
+    font-size: 0.65rem;
+    margin-left: 0.15rem;
   }
 }
 
 .setup-host-notice {
-  text-align: center;
-  padding: 0.55rem 0.9rem;
-  margin-bottom: 1rem;
+  font-size: 0.74rem;
+  color: $al-gold-soft;
   background: $al-gold-glow;
   border: 1px solid $al-gold-border;
+  padding: 0.35rem 0.7rem;
   border-radius: $al-radius-md;
-  color: $al-gold-soft;
-  font-size: 0.82rem;
-  font-family: $al-font-body;
-
-  i { margin-right: 0.3rem; color: $al-gold; }
-}
-
-.setup-waiting {
-  @include al-card;
-  text-align: center;
-  padding: 0.85rem;
-  color: $al-text-mute;
-  font-size: 0.85rem;
   font-style: italic;
-  font-family: $al-font-body;
-  animation: setup-blink 2s ease-in-out infinite;
 
-  i { margin-right: 0.35rem; }
+  i { color: $al-gold; margin-right: 0.3rem; }
 }
 
-@keyframes setup-blink {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.5; }
-}
-
-// ── Presets row ───────────────────────────────────────────────────
+// ── Presets ───────────────────────────────────────────────────────
 .setup-presets {
   display: flex;
   align-items: center;
+  gap: 0.4rem;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-bottom: 1.1rem;
+  padding: 0;
 }
 
 .presets-label {
-  font-family: $al-font-header;
-  font-size: 0.65rem;
-  color: $al-text-faint;
-  text-transform: uppercase;
+  font-size: 0.62rem;
   letter-spacing: $al-track-label;
-  font-weight: 600;
-  margin-right: 0.3rem;
+  text-transform: uppercase;
+  color: $al-text-mute;
+  font-family: $al-font-header;
 }
 
 .presets-list {
   display: flex;
-  gap: 0.35rem;
   flex-wrap: wrap;
+  gap: 0.3rem;
 }
 
 .preset-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-family: $al-font-header;
-  font-size: 0.72rem;
-  letter-spacing: $al-track-button;
-  padding: 0.3rem 0.85rem;
-  background: $al-bg-subtle;
-  border: 1px solid $al-border-subtle;
-  color: $al-text-dim;
-  border-radius: $al-radius-pill;
-  cursor: pointer;
-  transition: all $al-trans-fast;
+  @include al-btn-ghost;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 
-  &:hover:not(:disabled) {
-    border-color: $al-gold-border-hv;
-    background: $al-gold-glow;
-    color: $al-gold-soft;
-    transform: translateY(-1px);
-  }
-
-  &.preset-beginner {
-    border-color: rgba(106, 154, 78, 0.35);
-    color: rgba(170, 220, 140, 0.85);
-
-    &:hover:not(:disabled) {
-      background: rgba(106, 154, 78, 0.15);
-      border-color: rgba(106, 154, 78, 0.6);
-      color: #cde9a2;
-    }
+  &.preset-beginner i {
+    color: $al-gold;
+    margin-right: 0.25rem;
+    font-size: 0.62rem;
   }
 
   &:disabled {
-    opacity: 0.45;
+    opacity: 0.4;
     cursor: not-allowed;
   }
-
-  i { font-size: 0.65rem; }
 }
 
-// ── Role grid ─────────────────────────────────────────────────────
-.role-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
-  gap: 0.65rem;
-}
-
-.role-card {
-  --team: #{$al-text};
-  position: relative;
+// ── Role list ─────────────────────────────────────────────────────
+.role-list {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  padding: 0.75rem 0.85rem;
-  background: linear-gradient(160deg, rgba(24, 18, 14, 0.92), rgba(10, 7, 5, 0.96));
-  border: 1px solid $al-border-subtle;
-  border-radius: $al-radius-md;
-  transition: border-color $al-trans-fast, background $al-trans-fast,
-              box-shadow $al-trans-fast;
-  user-select: none;
+}
 
-  // Hover: just a border-color shift. The previous translateY(-1px)
-  // lifted the card a pixel — combined with the border swap, it felt
-  // like a snap. Holding position keeps the grid static.
-  &:hover {
-    border-color: color-mix(in srgb, var(--team) 40%, transparent);
-  }
-
-  // Selected state — card picks up the team tint so a filled roster reads
-  // at a glance.
-  &.is-selected {
-    border-color: color-mix(in srgb, var(--team) 55%, transparent);
-    background:
-      linear-gradient(160deg,
-        color-mix(in srgb, var(--team) 18%, rgba(24, 18, 14, 0.92)),
-        color-mix(in srgb, var(--team) 6%, rgba(10, 7, 5, 0.96)));
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--team) 25%, transparent),
-                0 4px 14px color-mix(in srgb, var(--team) 18%, transparent);
-  }
+.role-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 
   &--town    { --team: var(--al-town); }
   &--mafia   { --team: var(--al-mafia); }
-  &--cult    { --team: var(--al-cult); }
   &--neutral { --team: var(--al-neutral); }
-
-  &__head {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-right: 1.8rem; // leave room for the top-right count badge
-  }
-
-  &__icon {
-    font-size: 0.85rem;
-    width: 1.1rem;
-    text-align: center;
-  }
-
-  &__name {
-    font-family: $al-font-header;
-    font-size: 0.78rem;
-    letter-spacing: $al-track-label;
-    text-transform: uppercase;
-    color: $al-text;
-    font-weight: 600;
-  }
-
-  // Count badge — top-right corner, only shown once the role has ≥1
-  // instance picked. Absolute positioning so the rest of the layout
-  // never reflows when it appears.
-  &__badge {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.55rem;
-    min-width: 1.3rem;
-    height: 1.3rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 0.35rem;
-    border-radius: $al-radius-pill;
-    font-family: $al-font-header;
-    font-size: 0.72rem;
-    font-weight: 700;
-    background: var(--team);
-    color: $al-bg-deep;
-    box-sizing: border-box;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-  }
-
-  // Footer row — pill on the left, −/+ stepper on the right.
-  &__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-top: auto;
-  }
-
-  // Side-by-side stepper pair. Deliberately without a number between the
-  // buttons — the count lives in the top-right badge — so the stepper
-  // reads as a compact control, not a spinner.
-  &__stepper {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
+  &--cult    { --team: var(--al-cult); }
 }
 
-.stepper-btn {
-  width: 1.35rem;
-  height: 1.35rem;
+.role-section__head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.1rem 0;
+}
+
+.role-section__chip {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid color-mix(in srgb, var(--team) 35%, $al-border-subtle);
-  color: $al-text;
-  border-radius: 50%;
-  font-family: $al-font-body;
-  font-size: 0.95rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: background $al-trans-fast, border-color $al-trans-fast,
-              color $al-trans-fast, transform $al-trans-fast;
-
-  &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--team) 30%, rgba(0, 0, 0, 0.5));
-    border-color: var(--team);
-    color: var(--team);
-    transform: scale(1.06);
-  }
-
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-}
-
-.team-pill {
-  align-self: flex-start;
-  font-family: $al-font-body;
-  font-size: 0.6rem;
+  padding: 0.12rem 0.55rem;
+  border-radius: $al-radius-pill;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
-  padding: 0.15rem 0.55rem;
-  border-radius: $al-radius-pill;
+  font-family: $al-font-header;
   background: color-mix(in srgb, var(--team) 18%, transparent);
   color: var(--team);
   border: 1px solid color-mix(in srgb, var(--team) 35%, transparent);
 }
 
-// ── Sidebar panels ────────────────────────────────────────────────
-.setup-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  position: sticky;
-  top: 1.6rem;
-}
-
-.setup-panel {
-  padding: 1.1rem 1.25rem;
-}
-
-.panel-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.9rem;
+.role-section__count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--team);
+  min-width: 1ch;
   font-family: $al-font-header;
-  font-size: 0.78rem;
-  letter-spacing: $al-track-label;
-  text-transform: uppercase;
-  color: $al-gold;
-  font-weight: 600;
-
-  i { font-size: 0.8rem; }
 }
 
-// Balance bars
-.balance-panel {
-  .balance-rows {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-  }
+.role-section__divider {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--team) 25%, transparent),
+    transparent
+  );
 }
 
-.balance-row {
-  --faction: var(--al-town);
-  display: grid;
-  grid-template-columns: 4.6rem 1fr auto;
-  align-items: center;
-  gap: 0.55rem;
-  font-family: $al-font-body;
-  font-size: 0.72rem;
-
-  &--town    { --faction: var(--al-town); }
-  &--mafia   { --faction: var(--al-mafia); }
-  &--neutral { --faction: var(--al-neutral); }
-  &--cult    { --faction: var(--al-cult); }
-
-  &__label {
-    color: $al-text-dim;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.68rem;
-  }
-
-  &__track {
-    position: relative;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-
-  &__fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 0;
-    background: linear-gradient(90deg,
-      color-mix(in srgb, var(--faction) 85%, transparent) 0%,
-      var(--faction) 100%);
-    border-radius: inherit;
-    transition: width $al-trans;
-  }
-
-  &__pct {
-    color: var(--faction);
-    font-weight: 600;
-    font-size: 0.7rem;
-    min-width: 2.4rem;
-    text-align: right;
-  }
-}
-
-.balance-verdict {
-  margin: 0.95rem 0 0;
-  padding: 0.55rem 0.75rem;
-  border-radius: $al-radius-sm;
-  background: $al-bg-subtle;
-  border: 1px solid $al-border-subtle;
-  font-family: $al-font-body;
-  font-size: 0.74rem;
-  font-style: italic;
-  color: $al-text-dim;
-  line-height: 1.35;
-
-  &.is-warning {
-    color: $al-warn;
-    border-color: rgba(200, 138, 58, 0.3);
-    background: rgba(200, 138, 58, 0.08);
-  }
-
-  &.is-danger {
-    color: $al-blood-hot;
-    border-color: rgba(160, 40, 40, 0.35);
-    background: rgba(160, 40, 40, 0.08);
-  }
-}
-
-// House rules list + toggles
-.rules-list {
+// Two-column grid so 4 factions × N roles fit in the viewport
+// without scrolling. Roles flow into 2 columns within each section;
+// at <40rem we collapse to a single column (mobile).
+.role-section__list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.22rem 0.45rem;
+
+  @media (max-width: 40rem) {
+    grid-template-columns: 1fr;
+  }
 }
 
-.rule-row {
-  display: flex;
+// ── Role row — compact form (description hidden, surfaced via the
+// row's `title` attribute as a hover tooltip).
+.role-row {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr 1.1rem auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px dashed $al-border-subtle;
+  gap: 0.45rem;
+  padding: 0.28rem 0.45rem;
+  border-radius: $al-radius-sm;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.015);
+  border-left: 2px solid color-mix(in srgb, var(--team) 35%, transparent);
+  transition: background 0.18s ease, border-color 0.18s ease;
+  min-height: 1.85rem;
 
-  &:last-child { border-bottom: 0; }
-
-  &.is-off {
-    .rule-row__label { color: $al-text-faint; }
-    .rule-row__hint  { color: $al-text-faint; opacity: 0.65; }
+  &:hover {
+    background: rgba(255, 255, 255, 0.045);
+    border-left-color: color-mix(in srgb, var(--team) 75%, transparent);
   }
 
-  &__text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    min-width: 0;
+  &.is-selected {
+    background: color-mix(in srgb, var(--team) 10%, rgba(0, 0, 0, 0.2));
+    border-left-color: var(--team);
   }
+}
 
-  &__label {
-    font-family: $al-font-body;
-    font-size: 0.78rem;
-    font-weight: 600;
+.role-row__icon {
+  font-size: 0.85rem;
+  text-align: center;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+}
+
+.role-row__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.role-row__name {
+  font-family: $al-font-body;
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: $al-text;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Description no longer rendered inline (the row's `title` attribute
+// carries it as a hover tooltip). Kept in the cascade in case a future
+// layout brings it back at wider breakpoints.
+.role-row__desc { display: none; }
+
+.role-row__count {
+  text-align: center;
+  font-family: $al-font-header;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--team);
+  min-width: 1rem;
+}
+
+.role-row__stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.stepper-btn {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 1px solid $al-border-subtle;
+  background: rgba(255, 255, 255, 0.04);
+  color: $al-text;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $al-font-body;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--team) 18%, rgba(255, 255, 255, 0.06));
+    border-color: color-mix(in srgb, var(--team) 50%, transparent);
     color: $al-text;
   }
 
-  &__hint {
-    font-family: $al-font-body;
-    font-size: 0.68rem;
-    color: $al-text-faint;
-    line-height: 1.3;
-  }
-}
-
-.rule-toggle {
-  position: relative;
-  flex-shrink: 0;
-  width: 2.1rem;
-  height: 1.15rem;
-  border: 1px solid $al-border-soft;
-  background: rgba(0, 0, 0, 0.45);
-  border-radius: $al-radius-pill;
-  cursor: pointer;
-  padding: 0;
-  transition: background $al-trans-fast, border-color $al-trans-fast;
-
-  &__dot {
-    position: absolute;
-    top: 50%;
-    left: 0.15rem;
-    width: 0.85rem;
-    height: 0.85rem;
-    border-radius: 50%;
-    background: $al-text-mute;
-    transform: translateY(-50%);
-    transition: left $al-trans-fast, background $al-trans-fast;
-  }
-
-  &.is-on {
-    background: $al-grad-gold;
-    border-color: $al-gold-border-hv;
-
-    .rule-toggle__dot {
-      left: calc(100% - 1rem);
-      background: #fff;
-    }
-  }
-
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
-}
-
-// ── "Seal the Roster" CTA ─────────────────────────────────────────
-.seal-btn {
-  @include al-btn-base;
-  & {
-    width: 100%;
-    padding: 0.95rem 1.2rem;
-    font-family: $al-font-header;
-    font-size: 0.88rem;
-    font-weight: 700;
-    letter-spacing: $al-track-label;
-    text-transform: uppercase;
-    border-radius: $al-radius-md;
-    border: 1px solid $al-border-subtle;
-    background: $al-bg-subtle;
-    color: $al-text-faint;
+  &:disabled {
+    opacity: 0.28;
     cursor: not-allowed;
   }
 
-  i { font-size: 0.85rem; }
+  &--plus:not(:disabled) {
+    color: var(--team);
+  }
+}
+
+// ── Footer (balance · rules · CTA) ────────────────────────────────
+.setup-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid $al-border-subtle;
+}
+
+.balance-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  color: $al-text-dim;
+  font-family: $al-font-body;
+
+  > i {
+    color: $al-gold;
+    font-size: 0.78rem;
+  }
+
+  &__counts {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  &__seg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1rem;
+    font-weight: 700;
+    font-family: $al-font-header;
+
+    &--town { color: $al-faction-town; }
+    &--mafia { color: $al-faction-mafia; }
+    &--neutral { color: $al-faction-neutral; }
+    &--cult { color: $al-faction-cult; }
+  }
+
+  &__letter {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-left: 0.05rem;
+  }
+
+  &__dot {
+    margin: 0 0.15rem;
+    color: $al-text-mute;
+    font-weight: 400;
+  }
+
+  &__verdict {
+    font-style: italic;
+    color: $al-text-mute;
+    font-size: 0.7rem;
+    margin-left: auto;
+  }
+
+  &.is-ok &__verdict { color: $al-gold-soft; }
+  &.is-warning &__verdict { color: #d69a4b; }
+  &.is-danger &__verdict { color: $al-blood-hot; font-weight: 600; }
+}
+
+.rules-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.rule-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0.18rem 0.55rem 0.18rem 0.4rem;
+  border-radius: $al-radius-pill;
+  border: 1px solid $al-border-subtle;
+  background: rgba(255, 255, 255, 0.02);
+  color: $al-text-dim;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-family: $al-font-body;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &__dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: $al-text-mute;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+
+    &.is-on {
+      background: $al-gold;
+      box-shadow: 0 0 6px rgba(201, 168, 98, 0.55);
+    }
+  }
+
+  &.is-on {
+    color: $al-gold-soft;
+    border-color: $al-gold-border;
+    background: $al-gold-glow;
+  }
+
+  &:hover:not(:disabled) {
+    color: $al-text;
+    border-color: $al-gold-border;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ── CTA + waiting ─────────────────────────────────────────────────
+.seal-btn {
+  @include al-btn-primary;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  letter-spacing: $al-track-button;
+  text-transform: uppercase;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: $al-font-header;
+  border-radius: $al-radius-md;
+  transition: filter 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+
+  i { font-size: 0.8rem; }
 
   &.ready {
     background: $al-grad-gold;
-    color: $al-gold-text;
-    border-color: $al-gold-border-hv;
-    box-shadow: $al-glow-gold;
-    cursor: pointer;
+    color: #14100e;
+    border-color: $al-gold-rich;
+    box-shadow: 0 0 22px rgba(201, 168, 98, 0.35);
 
-    &:hover:not(:disabled) {
-      background: $al-grad-gold-hv;
-      box-shadow: $al-glow-gold-hv;
+    &:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 0 30px rgba(201, 168, 98, 0.55);
       transform: translateY(-1px);
     }
   }
 
-  &:disabled { pointer-events: none; }
-}
-
-// Make the legacy GameConfig (phase durations collapsible) fit the sidebar
-.setup-sidebar .game-config { margin: 0; }
-
-// ── Responsive ────────────────────────────────────────────────────
-@media (max-width: 1024px) {
-  .setup-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .setup-sidebar {
-    position: static;
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
 }
 
-@media (max-width: 768px) {
-  .setup-screen { padding: 1rem 0.7rem 6rem; }
-  .setup-main,
-  .setup-panel { padding: 1rem 1rem; }
+.setup-waiting {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1rem;
+  border: 1px dashed $al-border-subtle;
+  border-radius: $al-radius-md;
+  color: $al-text-mute;
+  font-size: 0.78rem;
+  font-style: italic;
+
+  i { color: $al-gold; }
+}
+
+// ── Advanced config (collapsible) ─────────────────────────────────
+.setup-advanced {
+  margin-top: 0.2rem;
+  border: 1px solid $al-border-subtle;
+  border-radius: $al-radius-sm;
+  background: rgba(0, 0, 0, 0.15);
+
+  > summary {
+    cursor: pointer;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.7rem;
+    font-family: $al-font-header;
+    letter-spacing: $al-track-label;
+    text-transform: uppercase;
+    color: $al-text-dim;
+    list-style: none;
+
+    &::-webkit-details-marker { display: none; }
+
+    i { color: $al-gold; margin-right: 0.4rem; }
+
+    &:hover { color: $al-gold-soft; }
+  }
+
+  &[open] > summary {
+    color: $al-gold-soft;
+    border-bottom: 1px solid $al-border-subtle;
+  }
+
+  > *:not(summary) {
+    padding: 0.85rem 0.95rem;
+  }
+}
+
+// ── Mobile / narrow viewports ─────────────────────────────────────
+@media (max-width: 36rem) {
+  .setup-screen {
+    padding: 1rem 0.5rem 5rem;
+  }
+
+  .setup-stage {
+    padding: 0.85rem 0.8rem 0.95rem;
+  }
+
   .setup-heading {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.6rem;
+    align-items: stretch;
+    gap: 0.4rem;
   }
-  .setup-title { font-size: 1.1rem; }
-  .role-grid { grid-template-columns: repeat(auto-fill, minmax(8.8rem, 1fr)); }
+
+  .role-row {
+    grid-template-columns: 1.25rem 1fr auto;
+    gap: 0.35rem;
+    padding: 0.22rem 0.35rem;
+
+    &__count { display: none; }
+  }
 }
