@@ -1,0 +1,422 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+// ─────────────────────────────────────────────────────────────────────
+// TopBar — fixed persistent header above every screen.
+//
+// Sits on top of the UnifiedScene canvas (z-index 0) and below modals
+// (3000+). Pointer events are restricted to its own surface so clicks
+// on the 3D scene aren't blocked by the bar's transparent gutters.
+// ─────────────────────────────────────────────────────────────────────
+
+$topbar-h: 3rem;
+$topbar-h-compact: 2.5rem;
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: $topbar-h;
+  padding: 0 1rem;
+  // Sits above the in-game GameOver overlay (1000) so the bar stays
+  // visible across that screen, but below the role-reveal curtain
+  // (2000) and the spotlight tutorial (4000+) so cinematic moments
+  // can still take over the full canvas.
+  z-index: 1050;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  font-family: $al-font-body;
+  // Smoked-glass backdrop so the bar stays legible over any scene
+  // without painting a hard line across the screen. Tilted slightly
+  // warm to match the campfire palette below.
+  background: linear-gradient(
+    180deg,
+    rgba(10, 7, 5, 0.78) 0%,
+    rgba(10, 7, 5, 0.55) 60%,
+    rgba(10, 7, 5, 0) 100%
+  );
+  backdrop-filter: blur(8px) saturate(1.05);
+  -webkit-backdrop-filter: blur(8px) saturate(1.05);
+  // Pointer events ON for the actual bar surface — children handle
+  // their own clicks.
+  pointer-events: auto;
+  // Disable default text alignment from .App so the bar is left/center/right
+  // as the grid intends.
+  text-align: left;
+
+  &--compact {
+    height: $topbar-h-compact;
+    padding: 0 0.7rem;
+    gap: 0.6rem;
+
+    .topbar-logo__text { font-size: 0.78rem; }
+    .topbar-profile__body { display: none; }
+    .topbar-profile { padding: 0.2rem 0.35rem; }
+    .topbar-icon-btn { width: 1.7rem; height: 1.7rem; font-size: 0.8rem; }
+  }
+}
+
+// ── Left: logo ────────────────────────────────────────────────────
+.topbar-left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.topbar-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: default;
+
+  &__text {
+    font-family: $al-font-header;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: $al-track-title;
+    color: $al-gold;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+  }
+}
+
+// ── Middle: contextual ───────────────────────────────────────────
+.topbar-middle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  // Time HUD ships its own positioning — restrain it so it stays in
+  // the centre slot instead of escaping with position:fixed.
+  > * { position: static !important; }
+}
+
+.topbar-centre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.topbar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: $al-radius-pill;
+  border: 1px solid $al-border-subtle;
+  background: rgba(255, 255, 255, 0.02);
+  color: $al-text-dim;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+
+  > i {
+    color: $al-gold-soft;
+    font-size: 0.7rem;
+  }
+
+  &__label {
+    text-transform: uppercase;
+    letter-spacing: $al-track-label;
+    color: $al-text-mute;
+    font-size: 0.62rem;
+  }
+
+  &__value {
+    color: $al-text;
+    font-family: $al-font-header;
+    letter-spacing: 0.04em;
+  }
+
+  &--players { color: $al-faction-town; }
+  &--players > i { color: $al-faction-town; }
+  &--players .topbar-pill__value { color: $al-faction-town; }
+
+  &--accent {
+    border-color: $al-gold-border;
+    background: $al-gold-glow;
+    > i { color: $al-gold; }
+    .topbar-pill__value { color: $al-gold-soft; }
+  }
+}
+
+// ── Right: profile · help · volume ───────────────────────────────
+.topbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.topbar-icon-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid $al-border-subtle;
+  background: rgba(255, 255, 255, 0.03);
+  color: $al-text-dim;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: $al-gold-glow;
+    border-color: $al-gold-border;
+    color: $al-gold-soft;
+  }
+
+  &--help i { font-size: 0.78rem; }
+}
+
+// ── Profile chip ──────────────────────────────────────────────────
+.topbar-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.3rem;
+  border-radius: $al-radius-pill;
+  border: 1px solid $al-border-subtle;
+  background: rgba(255, 255, 255, 0.02);
+  color: $al-text;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  text-align: left;
+  font-family: $al-font-body;
+
+  &:hover {
+    background: $al-gold-glow;
+    border-color: $al-gold-border;
+  }
+
+  &__avatar {
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    background: $al-grad-gold;
+    color: #14100e;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    overflow: hidden;
+    font-family: $al-font-header;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: $al-text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 8rem;
+  }
+
+  &__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  &__level {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: $al-gold-soft;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: $al-font-header;
+  }
+
+  &__xp-bar {
+    display: inline-block;
+    width: 3rem;
+    height: 0.3rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: $al-radius-pill;
+    overflow: hidden;
+  }
+
+  &__xp-fill {
+    display: block;
+    height: 100%;
+    background: $al-grad-gold;
+    transition: width 0.4s ease;
+  }
+
+  &--guest {
+    color: $al-gold-soft;
+
+    > i { color: $al-gold; }
+  }
+
+  // "+N" floater that pops above the chip when XP increases. Lives
+  // inside the chip so it inherits any future repositioning of the
+  // bar. Auto-removed by the React effect after 1.6s.
+  &__gain {
+    position: absolute;
+    top: -0.55rem;
+    right: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: $al-radius-pill;
+    background: $al-grad-gold;
+    color: #14100e;
+    font-family: $al-font-header;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    box-shadow: 0 4px 14px rgba(201, 168, 98, 0.55);
+    animation: topbar-xp-pop 1.6s ease-out forwards;
+    pointer-events: none;
+  }
+
+  &.is-gaining .topbar-profile__xp-fill {
+    animation: topbar-xp-bar-pulse 0.9s ease-out;
+  }
+
+  position: relative; // anchor for the absolute __gain badge
+}
+
+@keyframes topbar-xp-pop {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.85); }
+  20%  { opacity: 1; transform: translateY(-4px) scale(1.08); }
+  60%  { opacity: 1; transform: translateY(-6px) scale(1); }
+  100% { opacity: 0; transform: translateY(-14px) scale(0.95); }
+}
+
+@keyframes topbar-xp-bar-pulse {
+  0%, 100% { box-shadow: none; filter: none; }
+  35%      { box-shadow: 0 0 8px rgba(201, 168, 98, 0.85); filter: brightness(1.4); }
+}
+
+// ── Volume popup ──────────────────────────────────────────────────
+.topbar-volume {
+  position: relative;
+  display: inline-flex;
+
+  &__popup {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: $al-radius-md;
+    border: 1px solid $al-border-subtle;
+    background: rgba(10, 7, 5, 0.95);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+    min-width: 11rem;
+  }
+
+  &__mute {
+    background: none;
+    border: none;
+    color: $al-gold-soft;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover { color: $al-gold; }
+  }
+
+  &__slider {
+    flex: 1;
+    accent-color: $al-gold;
+    height: 0.25rem;
+  }
+
+  &__value {
+    font-family: $al-font-header;
+    font-size: 0.72rem;
+    color: $al-gold-soft;
+    min-width: 1.6rem;
+    text-align: right;
+  }
+}
+
+// ── Mobile / narrow viewports ─────────────────────────────────────
+@media (max-width: 38rem) {
+  .topbar {
+    padding: 0 0.5rem;
+    gap: 0.4rem;
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .topbar-logo__text { font-size: 0.7rem; }
+
+  .topbar-profile__body { display: none; }
+  .topbar-profile { padding: 0.2rem 0.3rem; }
+
+  .topbar-pill__label { display: none; }
+}
+
+// Reserve top space on the screens that own a scrolling overlay so the
+// bar never covers the first row of content. The setup page already
+// scrolls; we just bump the inner padding.
+.setup-screen { padding-top: calc(#{$topbar-h} + 1.1rem) !important; }
+
+// Lobby panel is position:absolute against the App root — push it down
+// below the bar so the title doesn't sit hidden behind the chrome.
+.has-topbar .lobby-panel {
+  top: $topbar-h;
+  height: calc(100% - #{$topbar-h});
+}
+
+// In-game volume / config / menu floaters that used to live at the top
+// of the screen need to clear the bar too. The .menu-bar in the game
+// HUD anchors top-left and would otherwise jam under the logo.
+.has-topbar .menu-container,
+.has-topbar .layout-players {
+  margin-top: $topbar-h-compact;
+}
+
+// GameOver overlay reserves room at the top for the bar so the recap
+// card doesn't slide up under the TopBar's smoked-glass chrome.
+.has-topbar .go-overlay {
+  padding-top: $topbar-h;
+  align-items: flex-start;
+}
+.has-topbar .go-container {
+  margin-top: 1.2rem;
+}
+
+// During INTRO_CINEMATIC the bar fades out so the 6s opening reads
+// as a clean cinematic. Re-enters on the same timing as the rest of
+// the HUD (`.intro-cinematic-reveal` from App.scss).
+.topbar-cinematic-hidden .topbar {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}

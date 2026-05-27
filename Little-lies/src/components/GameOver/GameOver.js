@@ -322,31 +322,8 @@ const GameOver = () => {
     return () => Audio.stopLobbyMusic();
   }, []);
 
-  // Volume controls (mirrors CustomLobby behaviour)
-  const [muted, setMuted] = useState(Audio.isMuted());
-  const [volume, setVolumeState] = useState(Audio.getVolume());
-  const [volumeOpen, setVolumeOpen] = useState(false);
-  const volumeRef = useRef(null);
-
-  useEffect(() => {
-    if (!volumeOpen) return;
-    const onDoc = (e) => {
-      if (!volumeRef.current?.contains(e.target)) setVolumeOpen(false);
-    };
-    const t = setTimeout(() => document.addEventListener('pointerdown', onDoc), 0);
-    return () => { clearTimeout(t); document.removeEventListener('pointerdown', onDoc); };
-  }, [volumeOpen]);
-
-  const handleToggleMute = () => {
-    const m = Audio.toggleMute();
-    setMuted(m);
-  };
-  const handleVolumeChange = (e) => {
-    const v = parseFloat(e.target.value);
-    setVolumeState(v);
-    Audio.setVolume(v);
-    if (v > 0 && muted) { Audio.toggleMute(); setMuted(false); }
-  };
+  // Volume control moved to the persistent TopBar — the in-game-over
+  // screen no longer needs to surface it inline.
 
   // Soft entry into the panel. The intermediate splash was removed so
   // we drive the panel reveal directly: a quick fade in, then the recap
@@ -412,41 +389,7 @@ const GameOver = () => {
     <>
       {stage === 'panel' && (
         <div className="go-overlay">
-          {/* Volume control — floating top-left, same UX as lobby */}
-          <div className="go-volume" ref={volumeRef}>
-            <button
-              className="go-mute-btn"
-              onClick={() => setVolumeOpen((o) => !o)}
-              title={muted || volume === 0 ? t('menu:unmute') : t('menu:volume')}
-              aria-label={t('menu:volume')}
-            >
-              <i className={`fas ${muted || volume === 0 ? 'fa-volume-mute' : volume < 0.4 ? 'fa-volume-down' : 'fa-volume-up'}`} aria-hidden="true"></i>
-            </button>
-            {volumeOpen && (
-              <div className="go-volume-popup">
-                <button
-                  className="go-volume-mute"
-                  onClick={handleToggleMute}
-                  title={muted ? t('menu:unmute') : t('menu:mute')}
-                  aria-label={muted ? t('menu:unmute') : t('menu:mute')}
-                >
-                  <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
-                </button>
-                <div className="go-volume-slider-wrap">
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.02"
-                    value={muted ? 0 : volume}
-                    onChange={handleVolumeChange}
-                    className="go-volume-slider"
-                  />
-                </div>
-                <span className="go-volume-value">{Math.round((muted ? 0 : volume) * 100)}</span>
-              </div>
-            )}
-          </div>
+          {/* Volume control is now in the persistent TopBar. */}
 
           <Particles type={particleType} />
           <div className="go-halo" style={{ '--halo-color': teamStyle.color }} />
