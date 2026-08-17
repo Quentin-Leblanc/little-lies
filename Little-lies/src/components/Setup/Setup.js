@@ -108,24 +108,18 @@ const Setup = () => {
   return (
     <div className="setup-screen">
       <div className="setup-stage">
-        {/* ── Header (one line) ──────────────────────────────────── */}
+        {/* ── Header (one line) ───────────────────────────────────
+            The host name and players count both already appear in
+            the persistent TopBar — keep the title here, drop the
+            badges, only flash a "min N" hint if the room is short
+            on players. */}
         <header className="setup-heading">
           <h1 className="setup-title">{t('setup:assemble_title')}</h1>
-          <div className="setup-heading-badges">
-            <div className="setup-host-badge">
-              <i className="fas fa-crown"></i>
-              <span>{hostName}</span>
-            </div>
-            <div className="setup-players-badge">
-              <i className="fas fa-users"></i>
-              <span>{rolesSelected.length}/{players.length}</span>
-              {players.length < MIN_PLAYERS && (
-                <span className="min-hint">
-                  ({t('common:min_players', { count: MIN_PLAYERS })})
-                </span>
-              )}
-            </div>
-          </div>
+          {players.length < MIN_PLAYERS && (
+            <span className="setup-min-hint">
+              {t('common:min_players_required', { count: MIN_PLAYERS, defaultValue: `Minimum ${MIN_PLAYERS} joueurs` })}
+            </span>
+          )}
         </header>
 
         {!host && (

@@ -6,7 +6,7 @@ import i18n from '../../trad/i18n';
 import { useGameEngine } from '../../hooks/useGameEngine';
 import { useEvents } from '../../hooks/useEvents';
 import Audio from '../../utils/AudioManager';
-import { toTextCss, buildPlayerNamePillStyle } from '../../utils/playerColor';
+import { buildPlayerNamePillStyle } from '../../utils/playerColor';
 import './playerActions.scss';
 
 const ACTION_COLORS = {
@@ -164,12 +164,11 @@ const PlayerActions = memo(function () {
       newSuspects[suspectedPlayerId].suspectedBy.push(me.id);
     }
     setTrial({ suspects: newSuspects, votes: latestTrial.votes || {} });
-    const targetPlayer = players.find(p => p.id === suspectedPlayerId);
-    const totalVotes = newSuspects[suspectedPlayerId]?.suspectedBy?.length || 0;
-    const aliveCount = players.filter(p => p.isAlive).length;
-    if (targetPlayer) {
-      addChatSystem(`Vote ${targetPlayer.profile.name} (${totalVotes}/${aliveCount})`, 'vote');
-    }
+    // No chat announcement on each vote click — the live tally in the
+    // sidebar (`vote-count-num` next to each player row) is the single
+    // source of truth. Pushing one "Vote X (n/m)" line per click used to
+    // flood the chat (16 lines per voting phase with 8 players) and
+    // drowned the actual discussion.
   };
 
   // --- Judgment handlers ---
@@ -289,17 +288,6 @@ const PlayerActions = memo(function () {
   // Jailor: get jail target for night display
   const jailTarget = me.character?.key === 'jailor' ? Events.getMyActionTarget('JAIL') : null;
 
-  // Phase header text
-  const getPhaseHeader = () => {
-    if (isNightPhase) return { text: t('game:phase_headers.night_actions'), icon: 'fa-moon', color: '#8899cc' };
-    if (isVotingPhase) return { text: t('game:phase_headers.voting_phase'), icon: 'fa-gavel', color: '#ffa502' };
-    if (isJudgmentPhase) return { text: t('game:phase_headers.judgment'), icon: 'fa-scale-balanced', color: '#cc88ff' };
-    if (isDefensePhase) return { text: t('game:phase_headers.defense'), icon: 'fa-shield', color: '#ff6666' };
-    if (isDiscussionPhase) return { text: t('game:phase_headers.discussion'), icon: 'fa-comments', color: '#ffffff' };
-    return null;
-  };
-  const phaseHeader = getPhaseHeader();
-
   return (
     <>
       {isDead && createPortal(
@@ -369,36 +357,11 @@ const PlayerActions = memo(function () {
           </div>
         )}
 
-        {/* Phase context panel — fixed height container to prevent layout shift */}
+        {/* Phase context panel — fixed height container to prevent layout shift.
+            Judgment buttons live in the big center overlay above; jurors get
+            no sidebar duplicate, only Defense/Last-Words recap cards (useful
+            because the accused is the only one talking in chat then). */}
         <div className="phase-context-slot">
-          {/* Judgment phase — sidebar recap (buttons also shown as big center overlay) */}
-          {isJudgmentPhase && accusedPlayer && me.id !== game.accusedId && me.isAlive && (
-            <div className="judgment-panel">
-              <p>{t('game:gameover.is_accused', { name: accusedPlayer.profile.name })}</p>
-              <div className="judgment-buttons">
-                <button
-                  className={`primaryBtn judgment-innocent ${myJudgmentVote === 'innocent' ? 'active' : ''}`}
-                  onClick={() => handleJudgmentVote('innocent')}
-                  disabled={!!myJudgmentVote}
-                  aria-pressed={myJudgmentVote === 'innocent'}
-                  aria-label={t('common:innocent')}
-                >
-                  {t('common:innocent')}
-                </button>
-                <button
-                  className={`primaryBtn judgment-guilty ${myJudgmentVote === 'guilty' ? 'active' : ''}`}
-                  onClick={() => handleJudgmentVote('guilty')}
-                  disabled={!!myJudgmentVote}
-                  aria-pressed={myJudgmentVote === 'guilty'}
-                  aria-label={t('common:guilty')}
-                >
-                  {t('common:guilty')}
-                </button>
-              </div>
-              <p className="judgment-hint">{t('game:judgment_default_guilty', { defaultValue: 'Guilty by default — vote Innocent to save' })}</p>
-            </div>
-          )}
-
           {/* Defense phase */}
           {isDefensePhase && accusedPlayer && (
             <div className="defense-panel">
@@ -410,13 +373,6 @@ const PlayerActions = memo(function () {
           {isLastWordsPhase && accusedPlayer && (
             <div className="defense-panel">
               <p>{t('game:gameover.last_words', { name: accusedPlayer.profile.name })}</p>
-            </div>
-          )}
-
-          {/* Phase header */}
-          {phaseHeader && me.isAlive && (
-            <div className="phase-header" style={{ color: phaseHeader.color }}>
-              <i className={`fas ${phaseHeader.icon}`}></i> {phaseHeader.text}
             </div>
           )}
         </div>
@@ -452,7 +408,7 @@ const PlayerActions = memo(function () {
                     title={player.connected !== false ? '' : 'offline'}
                   ></i>
                   <span className="player-name-text" style={player.isAlive ? liveText : { color: '#555' }}>
-                    {player.profile.name}{player.id === me.id ? ` (${t('common:you')})` : ''}
+                    {player.profile.name}
                   </span>
                   {player.isRevealed && (
                     <span className="revealed-badge" title={t('game:player_list.mayor_revealed')}>

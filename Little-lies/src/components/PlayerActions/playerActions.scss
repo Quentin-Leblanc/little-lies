@@ -73,32 +73,6 @@
   flex-direction: column;
 }
 
-.vote-arrow-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.471rem;
-  padding: 0.353rem 0.588rem;
-  margin-bottom: 0.353rem;
-  color: #ffa502;
-  font-family: 'Cinzel', serif;
-  font-size: 0.828rem;
-  font-weight: 700;
-  letter-spacing: 0.059rem;
-  animation: vote-pulse 1.5s ease-in-out infinite;
-
-  i { animation: vote-bounce 1s ease-in-out infinite; }
-}
-
-@keyframes vote-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
-@keyframes vote-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(3px); }
-}
-
 .player-list-title {
   display: none;
 }
@@ -134,50 +108,45 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.471rem 0.588rem;
-  margin-bottom: 0.353rem;
-  border-radius: 0.235rem;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
-  font-weight: bold;
-  font-size: 1.004rem;
-  // Warm near-black rows with a faint gold hairline so the player list
-  // aligns with the sidebar's themed panels instead of reading as flat
-  // rgba-black stripes.
-  background: linear-gradient(160deg, rgba(30, 23, 18, 0.88) 0%, rgba(14, 10, 8, 0.94) 100%);
-  // Stable height — sized as if a vote button were always present so
-  // adding/removing the button at phase change doesn't snap the row
-  // height (which used to ripple the whole list and made the layout jump).
-  min-height: 2.94rem;
-  transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
-  // Neutral border only — no per-player color outline (used to be set
-  // inline as the player's hex; user wanted the rows to read uniformly).
-  border: 1px solid $al-gold-border;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  padding: 0.55rem 0.75rem;
+  margin-bottom: 0.4rem;
+  border-radius: $al-radius-sm;
+  font-weight: 700;
+  font-size: 1rem;
+  // Solid HUD-dark row — gradient noise removed for a cleaner Clash
+  // tile feel. Per-state colored rings layer on top via the modifier
+  // classes below.
+  background: rgba(40, 32, 60, 0.75);
+  min-height: 2.95rem;
+  color: $al-text-on-dark;
+  transition: background 0.15s, box-shadow 0.15s, border-color 0.15s;
+  border: 1px solid $al-hud-border;
 
   &:hover {
-    filter: brightness(1.08);
+    background: rgba(50, 40, 70, 0.85);
+    border-color: rgba(245, 236, 214, 0.35);
   }
 
-  // Cosmetic state rings stack on top of the neutral border without
-  // replacing the player-color treatment (text only).
+  // Cosmetic state rings — solid colored borders, no glow noise.
   &.accused {
-    box-shadow: 0 0 0 2px #ff4444, 0 0 12px rgba(255, 68, 68, 0.45);
-    border-color: rgba(255, 68, 68, 0.7) !important;
+    border-color: $al-blood !important;
+    box-shadow: 0 0 0 1px $al-blood;
   }
 
   &.is-me {
-    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35), 0 2px 8px rgba(0, 0, 0, 0.3);
+    border-color: $al-gold !important;
+    box-shadow: 0 0 0 1px $al-gold;
   }
 
   &.night-target {
-    box-shadow: 0 0 0 2px #ff4444, 0 0 12px rgba(255, 68, 68, 0.35);
-    border-color: rgba(255, 68, 68, 0.6) !important;
+    border-color: $al-blood !important;
+    box-shadow: 0 0 0 1px $al-blood-hot;
   }
 
   &.is-dead {
-    opacity: 0.5;
-    border-color: rgba(255, 255, 255, 0.05) !important;
-    .player-name-text { color: #555 !important; text-shadow: none; }
+    opacity: 0.45;
+    border-color: $al-hud-border !important;
+    .player-name-text { color: $al-text-on-dark-dim !important; }
   }
 }
 
@@ -260,117 +229,75 @@
   }
 }
 
-// Judgment panel
-.judgment-panel {
-  text-align: center;
-  padding: 0.588rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 0.294rem;
-
-  p {
-    margin: 0 0 0.471rem 0;
-    font-family: 'Cinzel', serif;
-    font-size: 0.945rem;
-  }
-}
-
-.judgment-buttons {
-  display: flex;
-  gap: 0.353rem;
-  justify-content: center;
-  flex-wrap: wrap;
-
-  button {
-    padding: 0.4rem 0.9rem;
-    font-size: 0.863rem;
-    font-weight: 900;
-    letter-spacing: 0.08rem;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 0.235rem;
-    color: #000;
-    text-shadow: none;
-    transition: background 0.2s ease, transform 0.15s ease;
-
-    &.judgment-guilty {
-      background: #c9a7a2;
-      &:hover:not(:disabled), &.active { background: #b89189; }
-    }
-    &.judgment-innocent {
-      background: #b7cdb0;
-      &:hover:not(:disabled), &.active { background: #a2bf9a; }
-    }
-    &.judgment-abstain {
-      background: #bfbfbf;
-      &:hover:not(:disabled), &.active { background: #a8a8a8; }
-    }
-    &:disabled:not(.active) { opacity: 0.4; }
-  }
-}
-
-// Defense panel
+// Defense panel — sidebar recap during the DEFENSE phase. Solid
+// blood-tinted tile so the urgency of the accused's plea reads at a
+// glance against the dark HUD.
 .defense-panel {
   text-align: center;
-  padding: 0.588rem;
-  background-color: rgba(255, 68, 68, 0.1);
-  border-radius: 0.294rem;
-  border: 1px solid rgba(255, 68, 68, 0.3);
+  padding: 0.7rem 0.85rem;
+  background: rgba(224, 56, 62, 0.18);
+  border-radius: $al-radius-sm;
+  border: 1.5px solid $al-blood;
+  color: $al-text-on-dark;
 
   p {
     margin: 0;
-    font-size: 0.887rem;
+    font-size: 0.95rem;
+    font-weight: 600;
   }
 }
 
-// Action confirmation
+// Action confirmation — green tile after a night action commits.
 .action-confirmation {
   text-align: center;
-  padding: 0.471rem 0.706rem;
-  background: rgba(0, 185, 106, 0.15);
-  border: 1px solid rgba(0, 185, 106, 0.3);
-  border-radius: 0.235rem;
-  color: #00b96a;
-  font-size: 0.887rem;
-  font-weight: bold;
+  padding: 0.55rem 0.75rem;
+  background: rgba(92, 178, 85, 0.18);
+  border: 1.5px solid $al-success;
+  border-radius: $al-radius-sm;
+  color: $al-success;
+  font-size: 0.92rem;
+  font-weight: 800;
 
   i {
-    margin-right: 0.235rem;
+    margin-right: 0.3rem;
   }
 }
 
-// Mayor reveal — the label used to read at 0.647rem and was easy to
-// miss inside the action stack. Pulled up to 0.882rem so it reads as a
-// proper CTA next to the player list row heights.
+// Mayor reveal — gold CTA inside the action stack.
 .reveal-btn {
   width: 100%;
-  font-size: 0.882rem;
-  padding: 0.412rem 0.471rem;
-  background: rgba(255, 215, 0, 0.15);
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  border-radius: 0.235rem;
-  color: #ffd700;
+  font-size: 0.92rem;
+  padding: 0.55rem 0.65rem;
+  background: rgba(240, 184, 64, 0.18);
+  border: 1.5px solid $al-gold;
+  border-radius: $al-radius-sm;
+  color: $al-gold-hot;
   cursor: pointer;
   box-sizing: border-box;
-  font-weight: 600;
+  font-weight: 800;
+  margin: 0;
+  box-shadow: none;
+  transition: background 0.15s, border-color 0.15s;
 
-  i { margin-right: 0.294rem; }
+  i { margin-right: 0.35rem; }
 
   &:hover {
-    background: rgba(255, 215, 0, 0.3);
+    background: rgba(240, 184, 64, 0.3);
+    border-color: $al-gold-hot;
   }
 }
 
 .revealed-banner {
   text-align: center;
-  padding: 0.353rem 0.588rem;
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 0.235rem;
-  color: #ffd700;
-  font-size: 0.828rem;
-  font-weight: bold;
+  padding: 0.45rem 0.65rem;
+  background: rgba(240, 184, 64, 0.15);
+  border: 1.5px solid $al-gold;
+  border-radius: $al-radius-sm;
+  color: $al-gold-hot;
+  font-size: 0.88rem;
+  font-weight: 800;
 
-  i { margin-right: 0.235rem; }
+  i { margin-right: 0.3rem; }
 }
 
 .player-name-cell {
@@ -465,22 +392,6 @@
 
 .player-name-text {
   font-weight: 800;
-}
-
-// Phase header
-.phase-header {
-  display: flex;
-  align-items: center;
-  gap: 0.353rem;
-  font-family: 'Cinzel', serif;
-  font-size: 0.71rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.088rem;
-  padding: 0.235rem 0;
-  opacity: 0.8;
-
-  i { font-size: 0.651rem; }
 }
 
 // Action feedback
@@ -591,15 +502,6 @@
   }
 }
 
-// Judgment hint
-.judgment-hint {
-  text-align: center;
-  font-size: 0.71rem;
-  color: #888;
-  font-style: italic;
-  margin: 0.235rem 0 0;
-}
-
 /* ── Big centered judgment verdict overlay ── */
 .judgment-center-overlay {
   position: fixed;
@@ -616,18 +518,19 @@
 }
 
 .judgment-center-title {
-  font-family: 'Cinzel', serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #fff;
+  font-family: $al-font-header;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: $al-text-on-dark;
   text-align: center;
-  letter-spacing: 0.15rem;
-  padding: 0.7rem 1.8rem;
-  background: rgba(8, 8, 18, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.6rem;
+  letter-spacing: 0.12em;
+  padding: 0.75rem 2rem;
+  background: rgba(30, 24, 50, 0.85);
+  border: 1.5px solid $al-gold;
+  border-radius: $al-radius-md;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur($al-blur);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
 }
 
 .judgment-center-buttons {
@@ -636,27 +539,29 @@
   pointer-events: auto;
 }
 
-// Judgment verdict buttons — Innocent / Guilty. Static, no movement.
-// Hover darkens & adds a glow ring so it reads as "activated" not "lifted".
+// Judgment verdict buttons — Innocent / Guilty. Clash-style chunky
+// tiles with bevel-band shadow underneath; press-down on :active.
 .judgment-center-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 9.5rem;
+  min-width: 10rem;
   padding: 1rem 2rem;
-  border-radius: $al-radius-sm;
-  border: 1px solid transparent;
+  border-radius: $al-radius-md;
+  border: 2px solid transparent;
   font-family: $al-font-header;
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   font-weight: 900;
-  letter-spacing: 0.14rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  color: #000;
+  margin: 0;
   text-shadow: none;
-  -webkit-text-stroke: 0;
-  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s, color 0.2s;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+  transition: background 0.18s, box-shadow 0.18s, border-color 0.18s, transform 0.08s ease;
+
+  &:active:not(:disabled) {
+    transform: translateY(2px);
+  }
 
   &:disabled {
     cursor: not-allowed;
@@ -665,45 +570,45 @@
   }
 
   &.active {
-    box-shadow: 0 0 0 2px rgba(255, 230, 190, 0.6), 0 6px 18px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 0 3px $al-gold, 0 6px 0 rgba(43, 31, 18, 0.4);
   }
 }
 
-// Innocent — aged parchment green, like moss on stone
+// Innocent — bright leaf green
 .judgment-center-innocent {
-  background: #7a9068;
-  color: #0f1208;
+  background: $al-success;
+  color: #0f1d09;
+  box-shadow: 0 5px 0 #3d7a36, 0 8px 22px rgba(0, 0, 0, 0.45);
 
   &:hover:not(:disabled) {
-    background: #8ea67b;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), 0 0 20px rgba(122, 144, 104, 0.45);
-    border-color: rgba(122, 144, 104, 0.8);
+    background: lighten($al-success, 6%);
+    border-color: #fff;
   }
 }
 
-// Guilty — werewolf blood red
+// Guilty — saturated blood red
 .judgment-center-guilty {
-  background: #8b1a1a;
+  background: $al-blood;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 5px 0 $al-blood-deep, 0 8px 22px rgba(0, 0, 0, 0.45);
 
   &:hover:not(:disabled) {
-    background: #a02828;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), $al-glow-blood;
-    border-color: $al-blood-hot;
+    background: $al-blood-hot;
+    border-color: #fff;
   }
 }
 
 .judgment-center-hint {
-  font-family: 'Cinzel', serif;
-  font-size: 0.85rem;
-  letter-spacing: 0.18rem;
+  font-family: $al-font-header;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.65);
-  padding: 0.4rem 1rem;
-  background: rgba(8, 8, 18, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.4rem;
+  color: $al-text-on-dark-mute;
+  padding: 0.5rem 1.1rem;
+  background: rgba(30, 24, 50, 0.65);
+  border: 1px solid $al-hud-border;
+  border-radius: $al-radius-sm;
 }
 
 @keyframes judgment-center-in {

@@ -214,13 +214,13 @@
 }
 
 %ll-dialog-panel {
-  background: $al-grad-panel;
-  border: 1px solid $al-gold-border;
+  background: $al-grad-hud-panel;
+  border: 1px solid $al-hud-border;
   border-radius: $al-radius-md;
-  box-shadow: $al-shadow-panel, inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur($al-blur-strong);
   font-family: $al-font-body;
-  color: #d6d6d6;
+  color: $al-text-on-dark;
   text-align: left;
   animation: dialog-slide-in 0.3s ease-out;
   display: flex;

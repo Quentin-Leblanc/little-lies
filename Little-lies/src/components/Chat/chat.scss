@@ -16,24 +16,25 @@
 }
 
 .chat-container {
-  background: $al-grad-panel;
-  padding: 0.471rem 0.706rem;
+  background: $al-grad-hud-panel;
+  padding: 0.5rem 0.75rem;
   width: 100%;
   height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  font-size: 0.882rem;
+  font-size: 0.9rem;
+  color: $al-text-on-dark;
   box-sizing: border-box;
   position: relative;
   border-radius: $al-radius-md;
-  border: 1px solid $al-gold-border;
-  backdrop-filter: blur($al-blur-soft);
+  border: 1px solid $al-hud-border;
+  backdrop-filter: blur($al-blur);
   transition: box-shadow 0.4s, border-color 0.4s;
 
   &.highlight-discussion {
-    box-shadow: 0 0 18px rgba(201, 168, 98, 0.28), inset 0 0 14px rgba(201, 168, 98, 0.06);
-    border-color: $al-gold-border-hv;
+    box-shadow: 0 0 0 2px $al-gold, 0 0 22px $al-gold-glow-strong;
+    border-color: $al-gold;
   }
 }
 
@@ -51,7 +52,9 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.15rem 0.2rem 0.6rem;
-  border-bottom: 1px solid $al-border-subtle;
+  // Chat sits on a dark HUD surface, so we need the on-dark border
+  // tokens — the cream-card border-subtle would be invisible here.
+  border-bottom: 1px solid $al-border-dark-subtle;
   margin-bottom: 0.35rem;
   flex-wrap: wrap;
 }
@@ -64,19 +67,20 @@
   background: transparent;
   border: 0;
   border-bottom: 2px solid transparent;
-  margin-bottom: -1px; // overlap the container's bottom border
-  color: $al-text-mute;
+  margin: 0 0 -1px 0; // overlap the container's bottom border
+  color: $al-text-on-dark-mute;
   font-family: $al-font-header;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
   cursor: pointer;
+  box-shadow: none;
   transition: color $al-trans-fast, border-color $al-trans-fast;
 
-  i { font-size: 0.7rem; opacity: 0.75; }
+  i { font-size: 0.72rem; opacity: 0.8; }
 
-  &:hover { color: $al-text; }
+  &:hover { color: $al-text-on-dark; background: transparent; }
 
   &.is-active {
     color: $al-gold;
@@ -88,21 +92,21 @@
   &--mafia.is-active    { color: $al-faction-mafia; border-bottom-color: $al-faction-mafia; i { color: $al-faction-mafia; } }
   &--cult.is-active     { color: $al-faction-cult;  border-bottom-color: $al-faction-cult;  i { color: $al-faction-cult; } }
   &--whispers.is-active { color: $al-faction-whisper; border-bottom-color: $al-faction-whisper; i { color: $al-faction-whisper; } }
-  &--dead.is-active     { color: $al-text-dim; border-bottom-color: $al-text-dim; i { color: $al-text-dim; } }
+  &--dead.is-active     { color: $al-text-on-dark-mute; border-bottom-color: $al-text-on-dark-mute; i { color: $al-text-on-dark-mute; } }
 
   &__count {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 1.2rem;
+    min-width: 1.25rem;
     height: 1.1rem;
-    padding: 0 0.35rem;
+    padding: 0 0.4rem;
     font-family: $al-font-body;
-    font-size: 0.65rem;
-    font-weight: 700;
+    font-size: 0.68rem;
+    font-weight: 800;
     border-radius: $al-radius-pill;
-    background: rgba(255, 255, 255, 0.08);
-    color: $al-text;
+    background: rgba(245, 236, 214, 0.18);
+    color: $al-text-on-dark;
   }
 }
 

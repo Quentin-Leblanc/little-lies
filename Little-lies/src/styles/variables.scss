@@ -3,157 +3,199 @@
 // Components import this file and compose via _mixins.scss.
 
 // ─────────────────────────────────────────────
-// IDENTITY — Dark nocturnal + signature gold + action blue
+// IDENTITY — "Mystical Clear" (Clash-Royale-ish)
 // ─────────────────────────────────────────────
+// Direction: lighten away from the gothic black-on-gold look. Panels
+// are cream parchment with thick borders and chunky drop shadows;
+// the page background stays mystical (dusk violet → indigo) so the
+// 3D scene still anchors the mood. Faction colors are saturated
+// enough to read at a glance.
 
-// Dark backgrounds — warm blacks (werewolf night, parchment-aged feel)
-// Shifted from cold blue-black to warmer brown-black so the UI reads as
-// "old village lit by torches" rather than "cinematic studio logo".
-$al-bg-abyss:   #050404;    // deepest — vignette edges, curtain
-$al-bg-deep:    #0b0908;    // primary panels
-$al-bg-panel:   #14100e;    // lifted panels/cards
-$al-bg-lifted:  #1d1813;    // nested surfaces
-$al-bg-subtle:  rgba(255, 230, 190, 0.03);
-$al-bg-hover:   rgba(255, 230, 190, 0.06);
+// Page backgrounds — "dusk violet", twilight before the night.
+// Used when the 3D scene isn't covering the area (rare, since the
+// UnifiedScene canvas spans everything). Kept as a fallback.
+$al-bg-abyss:   #1a1530;    // deepest dusk — vignette/curtain
+$al-bg-deep:    #2a2348;    // primary page background fallback
+$al-bg-panel:   #fbf3df;    // CREAM PARCHMENT — main card surface
+$al-bg-lifted:  #f5e7c0;    // tinted cream — nested panels, inputs
 
-// Overlay veils (for modals/vignettes) — heavier for werewolf mood
-$al-veil-soft:   rgba(0, 0, 0, 0.55);
-$al-veil:        rgba(0, 0, 0, 0.78);
-$al-veil-strong: rgba(0, 0, 0, 0.92);
+// Subtle surfaces (hover/glow on cream cards)
+$al-bg-subtle:  rgba(43, 31, 18, 0.04);
+$al-bg-hover:   rgba(43, 31, 18, 0.08);
 
-// Signature gold — aged parchment, not bright yellow
-// Retained as anchor of identity but deepened toward brass/brown so it
-// reads as "oil lamp on old paper" instead of "luxury brand gold".
-$al-gold:        #c9a862;    // anchor — titles, key labels (was #f3cc74)
-$al-gold-hot:    #d9b870;    // highlight (was #ffcc66)
-$al-gold-soft:   #e8d49a;    // glow
-$al-gold-rich:   #a88547;    // gradient mid (was #e5b65e)
-$al-gold-dim:    #6b4e22;    // gradient dark-end (was #b08040)
-$al-gold-text:   #ffffff;    // text-on-gold (white — dark text on gold read too muted)
+// Veils (modal backdrops over the 3D scene) — softer than before
+// since we're not hiding a black background anymore.
+$al-veil-soft:   rgba(20, 16, 40, 0.55);
+$al-veil:        rgba(20, 16, 40, 0.72);
+$al-veil-strong: rgba(20, 16, 40, 0.88);
+
+// Signature gold — saturated, candy-bright for the Clash feel.
+// Used for CTAs, key highlights, ceremonial titles.
+$al-gold:        #f0b840;    // anchor — bright saturated gold
+$al-gold-hot:    #ffc961;    // highlight / hover
+$al-gold-soft:   #fbd989;    // soft glow
+$al-gold-rich:   #d49224;    // gradient mid (deeper for depth)
+$al-gold-dim:    #9a6610;    // gradient dark-end + borders on gold buttons
+$al-gold-text:   #3a2410;    // text-on-gold (dark brown — readable on bright gold)
 
 // Gold helpers (alpha for surfaces)
-$al-gold-border:      rgba(201, 168, 98, 0.22);
-$al-gold-border-hv:   rgba(201, 168, 98, 0.45);
-$al-gold-glow:        rgba(201, 168, 98, 0.14);
-$al-gold-glow-strong: rgba(201, 168, 98, 0.3);
+$al-gold-border:      rgba(212, 146, 36, 0.45);
+$al-gold-border-hv:   rgba(212, 146, 36, 0.75);
+$al-gold-glow:        rgba(240, 184, 64, 0.18);
+$al-gold-glow-strong: rgba(240, 184, 64, 0.35);
 
-// Primary action — cold moon blue (desaturated, "nocturnal" not "tech")
-// Shifted from #5b8dff (bright tech blue) to a darker steel/moonstone
-// that sits quietly next to the gold and doesn't shout modernity.
-$al-blue:           #5a7290;
-$al-blue-end:       #334860;
-$al-blue-hv:        #6b84a4;
-$al-blue-hv-end:    #425a76;
-$al-blue-glow:      rgba(60, 85, 115, 0.4);
-$al-blue-glow-hv:   rgba(80, 110, 145, 0.6);
+// Primary action — saturated sky blue (Clash-style action color).
+// Replaces the muted moonstone — too washed-out for buttons that
+// should pop on a cream panel.
+$al-blue:           #4a8fd6;
+$al-blue-end:       #2d6db1;
+$al-blue-hv:        #5fa2e8;
+$al-blue-hv-end:    #3d7fc4;
+$al-blue-glow:      rgba(74, 143, 214, 0.35);
+$al-blue-glow-hv:   rgba(95, 162, 232, 0.5);
 
-// Blood — werewolf signature. Replaces the "danger red" as a proper
-// faction/ceremonial color. Use for lynch, kick, blood moon, critical
-// actions. Deep wine > bright UI red.
-$al-blood:       #8b1a1a;
-$al-blood-deep:  #5a0f0f;
-$al-blood-hot:   #a02828;
-$al-blood-glow:  rgba(139, 26, 26, 0.45);
+// Blood — saturated, candy-red. For lynch/kick/danger CTAs.
+$al-blood:       #e0383e;
+$al-blood-deep:  #a92128;
+$al-blood-hot:   #ed5258;
+$al-blood-glow:  rgba(224, 56, 62, 0.4);
 
-// Semantic — realigned around werewolf palette
-$al-danger:      $al-blood-hot;    // legacy alias → now blood
+// Semantic
+$al-danger:      $al-blood;
 $al-danger-deep: $al-blood-deep;
 $al-danger-glow: $al-blood-glow;
-$al-success:     #6a9a4e;    // mossy green (was bright #78ff78)
-$al-warn:        #c88a3a;    // amber (was #ffa502)
-$al-mystic:      #8a5ca8;    // dusk purple (was #a96edd)
+$al-success:     #5cb255;    // bright leaf green
+$al-warn:        #f4a14a;    // saturated amber
+$al-mystic:      #a06ed8;    // saturated violet
 
-// Role factions (for role pills, chat colors)
-$al-faction-mafia:   #cc2222;
-$al-faction-cult:    #a96edd;
-$al-faction-whisper: #ff6bb5;
-$al-faction-town:    #8ec3ff;
-$al-faction-neutral: #c2a75d;
+// Role factions — saturated, bold (easy to distinguish at a glance)
+$al-faction-town:    #4a8fd6;    // sky blue
+$al-faction-mafia:   #e0383e;    // candy red
+$al-faction-cult:    #a06ed8;    // saturated violet
+$al-faction-whisper: #f57bb8;    // pink
+$al-faction-neutral: #e8a833;    // warm amber
 
-// Text
-$al-text:      #f0f0f0;
-$al-text-dim:  #aaa;
-$al-text-mute: #888;
-$al-text-faint: #666;
+// Text — split into "on light" (cards) and "on dark" (HUD pills, scene)
+$al-text-on-light:      #2b1f12;    // primary text on cream cards
+$al-text-on-light-mute: #6b5a45;    // secondary on cream
+$al-text-on-light-dim:  #8a7860;    // tertiary on cream
 
-// Borders
-$al-border-subtle: rgba(255, 255, 255, 0.08);
-$al-border-soft:   rgba(255, 255, 255, 0.15);
-$al-border-strong: rgba(255, 255, 255, 0.22);
+$al-text-on-dark:       #f5ecd6;    // primary text on dark HUD pills
+$al-text-on-dark-mute:  #c3b491;    // secondary on dark
+$al-text-on-dark-dim:   #8a7f66;    // tertiary on dark
+
+// Default text aliases — default to "on light" because most surfaces
+// (cards, dialogs, lobby panels, setup stage) are cream now.
+$al-text:      $al-text-on-light;
+$al-text-dim:  $al-text-on-light-mute;
+$al-text-mute: $al-text-on-light-dim;
+$al-text-faint: #b0a288;
+
+// Borders — for cream cards we want a definite dark edge.
+$al-border-strong: rgba(43, 31, 18, 0.35);    // strong card border
+$al-border-soft:   rgba(43, 31, 18, 0.18);    // subtle inner divider
+$al-border-subtle: rgba(43, 31, 18, 0.10);    // hairline
+
+// Dark-surface borders (for HUD pills that stay dark)
+$al-border-dark-strong: rgba(245, 236, 214, 0.28);
+$al-border-dark-soft:   rgba(245, 236, 214, 0.15);
+$al-border-dark-subtle: rgba(245, 236, 214, 0.08);
+
+// HUD pill surface — kept dark because pills float over varying 3D
+// scene backgrounds (day sky / night sky / interior) and need
+// guaranteed contrast.
+$al-hud-bg:         rgba(30, 24, 50, 0.82);
+$al-hud-bg-lifted:  rgba(40, 32, 60, 0.88);
+$al-hud-border:     rgba(245, 236, 214, 0.22);
 
 // ─────────────────────────────────────────────
 // TYPOGRAPHY
 // ─────────────────────────────────────────────
+// Cinzel kept for titles (mystique anchor). Body switched from
+// Chakra Petch (techy, narrow) to Nunito (rounder, much more
+// readable — the Clash UI font cousin).
 $al-font-header: 'Cinzel', serif;
-$al-font-body:   'Chakra Petch', 'Space Grotesk', 'Segoe UI', sans-serif;
+$al-font-body:   'Nunito', 'Segoe UI', sans-serif;
 $al-font-mono:   'Courier New', monospace;
 
-// Letter-spacings (identity — Cinzel titles breathe)
-$al-track-title:  0.12em;
-$al-track-label:  0.08em;
-$al-track-button: 0.03em;
+// Letter-spacings (titles still breathe)
+$al-track-title:  0.08em;
+$al-track-label:  0.06em;
+$al-track-button: 0.02em;
 
 // ─────────────────────────────────────────────
 // GRADIENTS
 // ─────────────────────────────────────────────
-$al-grad-primary:    linear-gradient(90deg, $al-blue 0%, $al-blue-end 100%);
-$al-grad-primary-hv: linear-gradient(90deg, $al-blue-hv 0%, $al-blue-hv-end 100%);
-$al-grad-gold:       linear-gradient(90deg, $al-gold-rich 0%, $al-gold-dim 100%);
-$al-grad-gold-hv:    linear-gradient(90deg, $al-gold-hot 0%, $al-gold-rich 100%);
-$al-grad-gold-rich:  linear-gradient(90deg, $al-gold-dim 0%, $al-gold-hot 50%, $al-gold 100%);
-$al-grad-danger:     linear-gradient(90deg, $al-danger 0%, $al-danger-deep 100%);
+$al-grad-primary:    linear-gradient(180deg, $al-blue-hv 0%, $al-blue-end 100%);
+$al-grad-primary-hv: linear-gradient(180deg, lighten($al-blue-hv, 4%) 0%, $al-blue 100%);
+$al-grad-gold:       linear-gradient(180deg, $al-gold-hot 0%, $al-gold-rich 100%);
+$al-grad-gold-hv:    linear-gradient(180deg, lighten($al-gold-hot, 4%) 0%, $al-gold 100%);
+$al-grad-gold-rich:  linear-gradient(180deg, $al-gold-hot 0%, $al-gold 50%, $al-gold-rich 100%);
+$al-grad-danger:     linear-gradient(180deg, $al-blood-hot 0%, $al-blood-deep 100%);
 
-// Panel gradient — warm black with a subtle brown undertone (old oak,
-// candle-lit tavern). Replaces the cold blue-grey gradient.
-$al-grad-panel:      linear-gradient(160deg, rgba(26, 20, 16, 0.94) 0%, rgba(8, 6, 5, 0.97) 100%);
-$al-grad-panel-lite: linear-gradient(160deg, rgba(36, 28, 22, 0.9) 0%, rgba(14, 10, 8, 0.95) 100%);
+// Panel gradient — cream parchment with a hint of warmer tint at top.
+// Replaces the warm-black "candle-lit tavern" gradient.
+$al-grad-panel:      linear-gradient(180deg, #fdf6e3 0%, #f4e7c2 100%);
+$al-grad-panel-lite: linear-gradient(180deg, #fffaef 0%, #f8edd0 100%);
 
-// Blood gradient (lynch button, danger CTAs)
-$al-grad-blood:      linear-gradient(90deg, $al-blood-hot 0%, $al-blood-deep 100%);
-$al-grad-blood-hv:   linear-gradient(90deg, lighten($al-blood-hot, 6%) 0%, lighten($al-blood-deep, 6%) 100%);
+// Page background gradient — dusk twilight. Goes under the 3D scene
+// so it's only visible if the scene fails to render.
+$al-grad-page: linear-gradient(180deg, #2a2348 0%, #1a1530 100%);
 
-// Radial vignette (overlays) — deeper, more werewolf/horror
-$al-vignette: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.92) 100%);
+// HUD panel gradient — dark glass, used by in-game floating panels
+// (sidebar, chat, time pills, menu modal) that sit over the 3D
+// village. Stays dark independently of the cream "card" theme.
+$al-grad-hud-panel: linear-gradient(180deg, rgba(40, 32, 60, 0.88) 0%, rgba(28, 22, 44, 0.92) 100%);
+$al-grad-hud-panel-lite: linear-gradient(180deg, rgba(50, 40, 70, 0.85) 0%, rgba(36, 28, 54, 0.9) 100%);
+
+// Blood gradient
+$al-grad-blood:      linear-gradient(180deg, $al-blood-hot 0%, $al-blood-deep 100%);
+$al-grad-blood-hv:   linear-gradient(180deg, lighten($al-blood-hot, 4%) 0%, $al-blood 100%);
+
+// Radial vignette (overlays) — dusk violet instead of pitch black
+$al-vignette: radial-gradient(ellipse at center, rgba(20, 16, 40, 0.3) 0%, rgba(20, 16, 40, 0.88) 100%);
 
 // ─────────────────────────────────────────────
-// SHADOWS + GLOWS
+// SHADOWS — "chunky drop" for the floating-card feel
 // ─────────────────────────────────────────────
-$al-shadow-panel:  0 8px 40px rgba(0, 0, 0, 0.5);
-$al-shadow-card:   0 6px 22px rgba(0, 0, 0, 0.4);
-$al-shadow-btn:    0 3px 10px rgba(0, 0, 0, 0.3);
-$al-shadow-btn-hv: 0 6px 22px rgba(0, 0, 0, 0.5);
-$al-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+// Two-stop shadow: a sharp dark band underneath (the "bevel") plus a
+// soft ambient blur for depth. This is what gives the cards their
+// Clash Royale "floating tile" look.
+$al-shadow-panel:  0 6px 0 rgba(43, 31, 18, 0.22), 0 14px 30px rgba(20, 16, 40, 0.35);
+$al-shadow-card:   0 4px 0 rgba(43, 31, 18, 0.18), 0 8px 20px rgba(20, 16, 40, 0.28);
+$al-shadow-btn:    0 3px 0 rgba(43, 31, 18, 0.35), 0 5px 12px rgba(20, 16, 40, 0.25);
+$al-shadow-btn-hv: 0 4px 0 rgba(43, 31, 18, 0.4), 0 7px 16px rgba(20, 16, 40, 0.32);
+$al-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 
-// Button definition — neutral drop + subtle inset border. The colored
-// diffuse glow was removed (too "web-CTA"): we keep a quiet dark shadow
-// for depth and an inset hairline to delineate the button edge.
-$al-glow-primary:    0 2px 6px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-$al-glow-primary-hv: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
-$al-glow-gold:       0 2px 6px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 230, 190, 0.08);
-$al-glow-gold-hv:    0 3px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 230, 190, 0.22);
-$al-glow-blood:      0 2px 6px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 180, 180, 0.08);
-$al-glow-blood-hv:   0 3px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 200, 200, 0.18);
+// Button glow definitions — kept for back-compat; map onto the new
+// chunky shadow style.
+$al-glow-primary:    $al-shadow-btn, inset 0 1px 0 rgba(255, 255, 255, 0.25);
+$al-glow-primary-hv: $al-shadow-btn-hv, inset 0 1px 0 rgba(255, 255, 255, 0.35);
+$al-glow-gold:       $al-shadow-btn, inset 0 1px 0 rgba(255, 240, 200, 0.45);
+$al-glow-gold-hv:    $al-shadow-btn-hv, inset 0 1px 0 rgba(255, 240, 200, 0.55);
+$al-glow-blood:      $al-shadow-btn, inset 0 1px 0 rgba(255, 200, 200, 0.35);
+$al-glow-blood-hv:   $al-shadow-btn-hv, inset 0 1px 0 rgba(255, 200, 200, 0.45);
 $al-glow-danger:     $al-glow-blood;
 
 // ─────────────────────────────────────────────
-// RADII
+// RADII — bumped to feel chunkier (Clash style)
 // ─────────────────────────────────────────────
-$al-radius-xs:   0.235rem;
-$al-radius-sm:   0.353rem;
-$al-radius-md:   0.588rem;
-$al-radius-lg:   0.941rem;
-$al-radius-xl:   1.412rem;
+$al-radius-xs:   0.25rem;
+$al-radius-sm:   0.4rem;
+$al-radius-md:   0.7rem;
+$al-radius-lg:   1.1rem;
+$al-radius-xl:   1.6rem;
 $al-radius-pill: 999px;
 
 // ─────────────────────────────────────────────
-// BLUR (glassmorphism)
+// BLUR — kept for legacy uses; cream cards don't need glassmorphism
 // ─────────────────────────────────────────────
-$al-blur-soft:   6px;
-$al-blur:        8px;
-$al-blur-strong: 12px;
+$al-blur-soft:   4px;
+$al-blur:        6px;
+$al-blur-strong: 10px;
 
 // ─────────────────────────────────────────────
-// Z-INDEX (clear layering)
+// Z-INDEX
 // ─────────────────────────────────────────────
 $al-z-scene:    0;
 $al-z-hud:      10;
@@ -167,11 +209,11 @@ $al-z-toast:    3000;
 // ─────────────────────────────────────────────
 // TRANSITIONS
 // ─────────────────────────────────────────────
-$al-trans-fast: 0.15s ease;
-$al-trans:      0.25s ease;
-$al-trans-slow: 0.45s ease;
+$al-trans-fast: 0.12s ease;
+$al-trans:      0.2s ease;
+$al-trans-slow: 0.4s ease;
 
-// Easing for bounce/pop
+// Easing for bounce/pop (used on press-down effects)
 $al-ease-pop: cubic-bezier(0.2, 0.9, 0.3, 1.1);
 
 // ═════════════════════════════════════════════
@@ -182,9 +224,9 @@ $al-ease-pop: cubic-bezier(0.2, 0.9, 0.3, 1.1);
 $gradient-rainbow: linear-gradient(145deg, rgba(0,185,106,1) 0%, rgba(0,131,255,1) 100%);
 $gradient-redBlue: linear-gradient(145deg, rgb(255, 0, 0) 0%, rgba(0,131,255,1) 100%);
 $green:    rgba(0,185,106,1);
-$blue:     #2f82ff;
-$darkBlue: #0d5fcc;
-$red:      #a10000;
+$blue:     #4a8fd6;
+$darkBlue: #2d6db1;
+$red:      #e0383e;
 
 // 3D Scene — Day Palette
 $day-sky:   #87CEEB;

@@ -112,13 +112,29 @@ const Time = () => {
   // Final-five recoloring only applies in VOTING.
   const urgentClass = phase === 'VOTING' && timeRemaining > 0 && timeRemaining <= 5 ? 'is-urgent' : '';
 
+  // Dramatic phases get a one-shot color flash + persistent tinted border on
+  // the phase pill — replaces the giant center "phase banner" overlay that
+  // used to fight the HUD for the player's attention. The `key` on the
+  // motion element forces a remount on phase change so the CSS entry
+  // animation fires fresh each transition.
+  const dramaticPhaseClass = phase ? `time-pill--phase-${phase.toLowerCase()}` : '';
+
   return (
     <div className="time-hud">
       {/* Pill 1 — day counter + phase name */}
-      <div className="time-pill">
-        <i className="fas fa-book" aria-hidden="true"></i>
-        <span className="time-pill__label">{phaseLabel}</span>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`phase-pill-${phase}`}
+          className={`time-pill time-pill--phase ${dramaticPhaseClass}`}
+          initial={{ opacity: 0.4 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0.4 }}
+          transition={{ duration: 0.25 }}
+        >
+          <i className="fas fa-book" aria-hidden="true"></i>
+          <span className="time-pill__label">{phaseLabel}</span>
+        </motion.div>
+      </AnimatePresence>
 
       {/* Pill 2 — day/night + countdown */}
       <AnimatePresence mode="wait">
@@ -145,67 +161,6 @@ const Time = () => {
       </div>
 
       <FinalFiveCountdown phase={phase} timeRemaining={timeRemaining} />
-    </div>
-  );
-};
-
-/** Progress bar rendered inside the 3D scene container — kept intact. */
-export const TimeBar = () => {
-  const {
-    game: { timer, phase, dayCount, adminFreeRoam, phaseStartedAt },
-    CONSTANTS,
-  } = useGameEngine();
-
-  const isPaused = !!adminFreeRoam;
-  const totalDuration = CONSTANTS.DURATIONS[phase] || 30000;
-  const [localTimer, setLocalTimer] = useState(timer);
-
-  useEffect(() => {
-    if (isPaused) return;
-    if (phaseStartedAt) {
-      const elapsed = Date.now() - phaseStartedAt;
-      setLocalTimer(Math.max(totalDuration - elapsed, 0));
-    } else {
-      setLocalTimer(timer);
-    }
-  }, [phaseStartedAt, timer, totalDuration, isPaused]);
-
-  useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(() => {
-      setLocalTimer((prev) => Math.max(prev - 100, 0));
-    }, 100);
-    return () => clearInterval(interval);
-  }, [isPaused, phase]);
-
-  const isInfoPhase = CONSTANTS.INFO_PHASES?.includes(phase) || false;
-  const isFirstDayDiscussion = dayCount === 1 && phase === 'DISCUSSION';
-  if (phase === 'NIGHT' || phase === 'NIGHT_TRANSITION' || isInfoPhase || isFirstDayDiscussion) return null;
-
-  const DAY_PHASE_ORDER = ['DEATH_REPORT', 'DISCUSSION', 'VOTING', 'DEFENSE', 'JUDGMENT', 'LAST_WORDS', 'EXECUTION', 'NO_LYNCH', 'SPARED'];
-  const currentIdx = DAY_PHASE_ORDER.indexOf(phase);
-  const currentRemaining = localTimer;
-  let futureTime = 0;
-  for (let i = currentIdx + 1; i < DAY_PHASE_ORDER.length; i++) {
-    const p = DAY_PHASE_ORDER[i];
-    if (p === 'DEFENSE' || p === 'JUDGMENT' || p === 'LAST_WORDS' || p === 'EXECUTION' || p === 'SPARED') break;
-    futureTime += CONSTANTS.DURATIONS[p] || 0;
-  }
-  const totalDayTime = (CONSTANTS.DURATIONS.DISCUSSION || 30000) + (CONSTANTS.DURATIONS.VOTING || 30000);
-  const totalRemaining = currentRemaining + futureTime;
-  const progressPercentage = Math.min((totalRemaining / totalDayTime) * 100, 100);
-
-  let barColor;
-  if (progressPercentage <= 25) barColor = '#ff4757';
-  else if (progressPercentage <= 55) barColor = '#ffa502';
-  else barColor = '#44cc44';
-
-  return (
-    <div className="progress-bar-scene">
-      <div
-        className="progress-bar-fill"
-        style={{ width: `${progressPercentage}%`, backgroundColor: barColor }}
-      />
     </div>
   );
 };

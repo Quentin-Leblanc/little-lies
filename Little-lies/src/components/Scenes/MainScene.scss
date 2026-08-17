@@ -1,3 +1,5 @@
+@import '../../styles/variables';
+
 // 3D Chat bubble — parchment-style speech bubble displaying the player's
 // last chat message. Pops in, holds, then fades (controlled by JS).
 //
@@ -229,34 +231,37 @@
 }
 
 .announcement-text {
-  font-family: 'Cinzel', serif;
-  font-size: 1.529rem;
-  font-weight: 700;
-  color: #f0e4c8;
-  padding: 0.824rem 2.118rem;
-  background: linear-gradient(160deg, rgba(22, 16, 12, 0.85) 0%, rgba(8, 6, 5, 0.9) 100%);
-  border: 1px solid rgba(201, 168, 98, 0.22);
-  border-radius: 0.471rem;
-  backdrop-filter: blur(6px);
+  font-family: $al-font-header;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: $al-text-on-dark;
+  padding: 0.95rem 2.2rem;
+  background: linear-gradient(180deg, rgba(40, 32, 60, 0.92) 0%, rgba(28, 22, 44, 0.95) 100%);
+  border: 1.5px solid $al-gold;
+  border-radius: $al-radius-md;
+  backdrop-filter: blur($al-blur);
   animation: announcement-fade-in 0.5s ease-out;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 24px $al-gold-glow;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 
   &.announcement-spared {
-    color: #a8c68c;
-    background: linear-gradient(160deg, rgba(32, 40, 22, 0.85) 0%, rgba(14, 18, 10, 0.9) 100%);
-    border-color: rgba(122, 154, 104, 0.35);
+    color: #d4f0c8;
+    background: linear-gradient(180deg, rgba(35, 60, 35, 0.92) 0%, rgba(22, 40, 22, 0.95) 100%);
+    border-color: $al-success;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 24px rgba(92, 178, 85, 0.35);
   }
 
   &.announcement-execution {
-    color: #e5a5a5;
-    background: linear-gradient(160deg, rgba(60, 14, 14, 0.85) 0%, rgba(28, 8, 8, 0.9) 100%);
-    border-color: rgba(139, 26, 26, 0.4);
+    color: #ffd5d5;
+    background: linear-gradient(180deg, rgba(80, 20, 20, 0.92) 0%, rgba(50, 12, 12, 0.95) 100%);
+    border-color: $al-blood;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 24px $al-blood-glow;
   }
 
   &.announcement-report {
-    font-size: 1.176rem;
+    font-size: 1.2rem;
     text-align: center;
-    line-height: 1.8;
+    line-height: 1.7;
   }
 }
 
@@ -590,25 +595,25 @@
 .death-meta-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.28rem 0.72rem;
-  border-radius: 1rem;
-  font-size: 0.85rem;
-  background: rgba(30, 20, 20, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #e8e8e8;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: $al-radius-pill;
+  font-size: 0.88rem;
+  background: rgba(30, 24, 50, 0.7);
+  border: 1.5px solid $al-gold-rich;
+  color: $al-text-on-dark;
   backdrop-filter: blur(4px);
 
-  i { font-size: 0.8rem; opacity: 0.85; }
-  .death-meta-label { opacity: 0.7; letter-spacing: 0.04em; font-size: 0.75rem; text-transform: uppercase; }
-  strong { font-weight: 700; letter-spacing: 0.03em; }
+  i { font-size: 0.85rem; color: $al-gold-hot; }
+  .death-meta-label { color: $al-text-on-dark-mute; letter-spacing: 0.05em; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+  strong { font-weight: 800; letter-spacing: 0.02em; }
 }
 
 .death-meta-attack {
-  border-color: rgba(220, 80, 80, 0.45);
+  border-color: $al-blood;
   color: #ffcccc;
-  background: rgba(50, 20, 20, 0.6);
-  i { color: #ff8080; }
+  background: rgba(80, 20, 20, 0.7);
+  i { color: $al-blood-hot; }
 }
 
 /* Role card — the second beat of the morning reveal. Per user feedback

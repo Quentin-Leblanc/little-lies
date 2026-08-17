@@ -21,21 +21,21 @@
   padding: 0.45rem 1rem;
   height: 2.25rem;
   box-sizing: border-box;
-  background: $al-grad-panel;
+  background: $al-grad-hud-panel;
   backdrop-filter: blur($al-blur);
   -webkit-backdrop-filter: blur($al-blur);
-  border: 1px solid $al-gold-border;
+  border: 1px solid $al-hud-border;
   border-radius: $al-radius-pill;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   font-family: $al-font-header;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.92);
+  color: $al-text-on-dark;
 
   i {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     color: $al-gold;
     flex-shrink: 0;
   }
@@ -69,6 +69,65 @@
   50%      { box-shadow: 0 4px 22px rgba(255, 82, 82, 0.35); }
 }
 
+// ── Dramatic phase tint on the phase pill ─────────────────────────
+// Replaces the giant center "phase banner" that used to flash every
+// transition. The phase pill gets a one-shot flash + a persistent
+// tinted border for the whole phase. Each dramatic phase has its own
+// colorway: DEFENSE / EXECUTION red, JUDGMENT violet, NIGHT blue.
+.time-pill--phase-defense {
+  border-color: rgba(255, 100, 100, 0.7);
+  color: #ffd9d9;
+  i { color: #ff7777; }
+  animation: phase-pill-flash-red 1s ease-out 1;
+}
+
+.time-pill--phase-judgment {
+  border-color: rgba(200, 130, 255, 0.7);
+  color: #e9d4ff;
+  i { color: #cc88ff; }
+  animation: phase-pill-flash-violet 1s ease-out 1;
+}
+
+.time-pill--phase-execution,
+.time-pill--phase-execution_reveal {
+  border-color: rgba(255, 60, 60, 0.85);
+  color: #ffd5d5;
+  i { color: #ff4444; }
+  animation: phase-pill-flash-blood 1.1s ease-out 1;
+}
+
+.time-pill--phase-night,
+.time-pill--phase-night_transition {
+  border-color: rgba(120, 140, 220, 0.55);
+  color: #d2dcff;
+  i { color: #8899cc; }
+  animation: phase-pill-flash-blue 1s ease-out 1;
+}
+
+@keyframes phase-pill-flash-red {
+  0%   { transform: scale(0.88); box-shadow: 0 0 0 0 rgba(255, 100, 100, 0); }
+  35%  { transform: scale(1.06); box-shadow: 0 0 32px 6px rgba(255, 100, 100, 0.55); }
+  100% { transform: scale(1);    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); }
+}
+
+@keyframes phase-pill-flash-violet {
+  0%   { transform: scale(0.88); box-shadow: 0 0 0 0 rgba(200, 130, 255, 0); }
+  35%  { transform: scale(1.06); box-shadow: 0 0 32px 6px rgba(200, 130, 255, 0.55); }
+  100% { transform: scale(1);    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); }
+}
+
+@keyframes phase-pill-flash-blood {
+  0%   { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(255, 60, 60, 0); }
+  30%  { transform: scale(1.08); box-shadow: 0 0 40px 8px rgba(255, 60, 60, 0.65); }
+  100% { transform: scale(1);    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); }
+}
+
+@keyframes phase-pill-flash-blue {
+  0%   { transform: scale(0.9);  box-shadow: 0 0 0 0 rgba(120, 140, 220, 0); }
+  35%  { transform: scale(1.05); box-shadow: 0 0 28px 6px rgba(120, 140, 220, 0.5); }
+  100% { transform: scale(1);    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); }
+}
+
 // ── Final-five vote countdown ─────────────────────────────────────
 .final-five-countdown {
   position: absolute;
@@ -87,9 +146,6 @@
   pointer-events: none;
   line-height: 1;
 }
-
-// Legacy sibling — kept hidden; TimeBar sets display:none effectively.
-.progress-bar-scene { display: none; }
 
 // ── Responsive ────────────────────────────────────────────────────
 @media (max-width: 768px) {

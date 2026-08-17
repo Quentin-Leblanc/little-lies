@@ -49,21 +49,33 @@
   justify-content: space-between;
   gap: 0.8rem;
   padding-bottom: 0.55rem;
-  border-bottom: 1px solid $al-border-subtle;
+  border-bottom: 1px solid $al-border-soft;
 }
 
 .setup-title {
   font-family: $al-font-header;
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   letter-spacing: $al-track-title;
-  color: $al-gold;
+  color: $al-gold-dim;
   margin: 0;
   padding: 0;
   text-align: left;
-  text-indent: -0.04em;
   text-transform: uppercase;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+}
+
+// Min-players hint pill, only shown when room is short on players.
+.setup-min-hint {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border-radius: $al-radius-pill;
+  background: rgba(224, 56, 62, 0.15);
+  border: 1px solid $al-blood;
+  color: $al-blood-deep;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
 }
 
 // Subtitle hidden by default — the title + the TopBar pill already
@@ -123,32 +135,37 @@
 }
 
 .setup-host-notice {
-  font-size: 0.74rem;
-  color: $al-gold-soft;
-  background: $al-gold-glow;
-  border: 1px solid $al-gold-border;
-  padding: 0.35rem 0.7rem;
-  border-radius: $al-radius-md;
+  font-size: 0.8rem;
+  color: $al-gold-dim;
+  background: rgba(240, 184, 64, 0.15);
+  border: 1px solid $al-gold-rich;
+  padding: 0.4rem 0.75rem;
+  border-radius: $al-radius-sm;
   font-style: italic;
+  font-weight: 600;
 
-  i { color: $al-gold; margin-right: 0.3rem; }
+  i { color: $al-gold-rich; margin-right: 0.35rem; }
 }
 
 // ── Presets ───────────────────────────────────────────────────────
 .setup-presets {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  padding: 0;
+  padding: 0.55rem 0.7rem;
+  background: rgba(255, 250, 235, 0.55);
+  border: 1px solid $al-border-soft;
+  border-radius: $al-radius-sm;
 }
 
 .presets-label {
-  font-size: 0.62rem;
+  font-size: 0.7rem;
+  font-weight: 800;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
-  color: $al-text-mute;
-  font-family: $al-font-header;
+  color: $al-text-on-light-mute;
+  font-family: $al-font-body;
 }
 
 .presets-list {
@@ -158,20 +175,35 @@
 }
 
 .preset-btn {
-  @include al-btn-ghost;
-  padding: 0.22rem 0.65rem;
-  font-size: 0.65rem;
-  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
+  border-radius: $al-radius-pill;
+  border: 1px solid $al-border-strong;
+  background: #fffaef;
+  color: $al-text-on-light;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: $al-gold-soft;
+    border-color: $al-gold-rich;
+  }
 
   &.preset-beginner i {
-    color: $al-gold;
-    margin-right: 0.25rem;
-    font-size: 0.62rem;
+    color: $al-gold-rich;
+    margin-right: 0.3rem;
+    font-size: 0.65rem;
   }
 
   &:disabled {
-    opacity: 0.4;
+    opacity: 0.45;
     cursor: not-allowed;
   }
 }
@@ -194,37 +226,37 @@
 }
 
 // Shared header for both zones — keeps catalogue/roster headers
-// visually consistent (same title size, same divider).
+// visually consistent.
 .role-zone {
   &__head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 0 0.15rem 0.3rem;
-    margin-bottom: 0.3rem;
-    border-bottom: 1px solid $al-border-subtle;
+    padding: 0 0.2rem 0.35rem;
+    margin-bottom: 0.35rem;
+    border-bottom: 1px solid $al-border-soft;
   }
 
   &__title {
     font-family: $al-font-header;
-    font-size: 0.7rem;
+    font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: $al-track-label;
     text-transform: uppercase;
-    color: $al-gold-soft;
+    color: $al-gold-dim;
   }
 
   &__count {
     font-family: $al-font-header;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: $al-gold;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: $al-gold-rich;
   }
 
   &__body {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.4rem;
     max-height: 26rem;
     overflow-y: auto;
     padding-right: 0.2rem;
@@ -235,9 +267,9 @@
 .role-catalogue {
   display: flex;
   flex-direction: column;
-  padding: 0.5rem 0.55rem;
-  background: rgba(0, 0, 0, 0.12);
-  border: 1px solid $al-border-subtle;
+  padding: 0.6rem 0.65rem;
+  background: rgba(255, 250, 235, 0.5);
+  border: 1px solid $al-border-soft;
   border-radius: $al-radius-md;
 }
 
@@ -254,14 +286,14 @@
 
 .role-catalogue__faction {
   font-family: $al-font-header;
-  font-size: 0.6rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 800;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
   color: var(--team);
-  padding: 0.15rem 0.25rem 0.05rem;
-  border-bottom: 1px dashed color-mix(in srgb, var(--team) 25%, transparent);
-  margin-bottom: 0.1rem;
+  padding: 0.2rem 0.25rem 0.1rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--team) 45%, transparent);
+  margin-bottom: 0.15rem;
 }
 
 .role-catalogue__list {
@@ -269,60 +301,69 @@
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+
+  // The <li> wrappers are layout-invisible — the .role-line button
+  // becomes the direct flex child, otherwise each li stays block and
+  // chips end up stacked vertically again.
+  > li { display: contents; }
 }
 
-// A single catalogue row — full-width clickable line with icon + label
-// and an optional ×N count on the right when already in the roster.
+// A single catalogue chip — inline pill-shaped button with icon + label
+// and an optional ×N count when already in the roster. Chips wrap
+// horizontally within their faction section so 10+ roles per team fit
+// in a few rows instead of stacking 10 lines tall.
 .role-line {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  width: 100%;
-  padding: 0.25rem 0.5rem;
-  border-radius: $al-radius-sm;
-  border: 1px solid transparent;
-  border-left: 2px solid color-mix(in srgb, var(--team) 30%, transparent);
-  background: transparent;
-  color: $al-text;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  margin: 0;
+  border-radius: $al-radius-pill;
+  border: 1.5px solid color-mix(in srgb, var(--team) 55%, transparent);
+  background: color-mix(in srgb, var(--team) 12%, #fffaef);
+  color: $al-text-on-light;
   font-family: $al-font-body;
-  font-size: 0.74rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s ease, border-color 0.15s ease;
-  min-height: 1.55rem;
+  box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+  min-height: 1.6rem;
+  white-space: nowrap;
 
   &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--team) 10%, rgba(255, 255, 255, 0.03));
-    border-left-color: var(--team);
+    background: color-mix(in srgb, var(--team) 25%, #fffaef);
+    border-color: var(--team);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: none;
   }
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.38;
+    opacity: 0.4;
   }
 
   &.is-locked {
     opacity: 0.4;
     text-decoration: line-through;
-    text-decoration-color: rgba(255, 255, 255, 0.3);
+    text-decoration-color: rgba(43, 31, 18, 0.4);
   }
 
   &__icon {
-    width: 1rem;
     font-size: 0.82rem;
     text-align: center;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
     flex-shrink: 0;
   }
 
   &__name {
-    flex: 1;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   &__count {
@@ -331,6 +372,7 @@
     font-weight: 800;
     color: var(--team);
     flex-shrink: 0;
+    margin-left: 0.1rem;
   }
 }
 
@@ -338,9 +380,9 @@
 .role-roster {
   display: flex;
   flex-direction: column;
-  padding: 0.5rem 0.55rem;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid $al-border-subtle;
+  padding: 0.6rem 0.65rem;
+  background: rgba(43, 31, 18, 0.06);
+  border: 1px solid $al-border-soft;
   border-radius: $al-radius-md;
 
   &__list {
@@ -349,7 +391,7 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.18rem;
+    gap: 0.25rem;
   }
 }
 
@@ -363,10 +405,10 @@
 
   &__num {
     font-family: $al-font-header;
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: $al-text-mute;
-    width: 1.1rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: $al-text-on-light-mute;
+    width: 1.2rem;
     text-align: right;
     flex-shrink: 0;
   }
@@ -374,42 +416,48 @@
   &--empty {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.22rem 0.45rem;
+    gap: 0.45rem;
+    padding: 0.3rem 0.55rem;
     border-radius: $al-radius-sm;
-    border: 1px dashed rgba(255, 255, 255, 0.08);
-    color: $al-text-mute;
-    font-size: 0.72rem;
+    border: 1px dashed $al-border-soft;
+    color: $al-text-on-light-dim;
+    font-size: 0.75rem;
     font-style: italic;
-    min-height: 1.6rem;
+    min-height: 1.7rem;
   }
 
-  &__placeholder { opacity: 0.6; }
+  &__placeholder { opacity: 0.7; }
 
   &__btn {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.45rem;
     width: 100%;
-    padding: 0.22rem 0.45rem;
+    padding: 0.3rem 0.55rem;
+    margin: 0;
     border-radius: $al-radius-sm;
-    border: 1px solid transparent;
-    border-left: 2px solid var(--team);
-    background: color-mix(in srgb, var(--team) 10%, rgba(0, 0, 0, 0.2));
-    color: $al-text;
+    border: 1.5px solid var(--team);
+    background: color-mix(in srgb, var(--team) 15%, #fffaef);
+    color: $al-text-on-light;
     font-family: $al-font-body;
     cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
     text-align: left;
-    min-height: 1.6rem;
+    min-height: 1.7rem;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--team) 20%, rgba(0, 0, 0, 0.2));
+      background: color-mix(in srgb, var(--team) 25%, #fffaef);
 
       .role-slot__remove {
         opacity: 1;
-        color: $al-blood-hot;
+        color: $al-blood;
       }
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: none;
     }
 
     &:disabled {
@@ -419,26 +467,25 @@
   }
 
   &__icon {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     width: 1rem;
     text-align: center;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
     flex-shrink: 0;
   }
 
   &__name {
     flex: 1;
-    font-size: 0.76rem;
-    font-weight: 600;
+    font-size: 0.82rem;
+    font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   &__remove {
-    font-size: 0.7rem;
-    color: $al-text-mute;
-    opacity: 0.5;
+    font-size: 0.75rem;
+    color: $al-text-on-light-dim;
+    opacity: 0.6;
     transition: opacity 0.15s ease, color 0.15s ease;
     flex-shrink: 0;
   }
@@ -451,66 +498,78 @@
 .setup-footer {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid $al-border-subtle;
+  gap: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid $al-border-soft;
 }
 
+// Balance summary — compact row showing T/M/N/C counts + a status
+// verdict. The intro icon was dropping unnecessary "decor"; rely on
+// the colored count chips alone to read the team mix at a glance.
 .balance-summary {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.45rem;
-  font-size: 0.74rem;
-  color: $al-text-dim;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $al-text-on-light;
   font-family: $al-font-body;
+  padding: 0.5rem 0.7rem;
+  background: rgba(255, 250, 235, 0.55);
+  border: 1px solid $al-border-soft;
+  border-radius: $al-radius-sm;
 
   > i {
-    color: $al-gold;
-    font-size: 0.78rem;
+    color: $al-gold-rich;
+    font-size: 0.9rem;
   }
 
   &__counts {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.4rem;
   }
 
   &__seg {
     display: inline-flex;
     align-items: center;
-    gap: 0.1rem;
-    font-weight: 700;
+    gap: 0.15rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: $al-radius-pill;
+    font-weight: 800;
     font-family: $al-font-header;
+    background: #fffaef;
+    border: 1px solid currentColor;
 
-    &--town { color: $al-faction-town; }
-    &--mafia { color: $al-faction-mafia; }
+    &--town    { color: $al-faction-town; }
+    &--mafia   { color: $al-faction-mafia; }
     &--neutral { color: $al-faction-neutral; }
-    &--cult { color: $al-faction-cult; }
+    &--cult    { color: $al-faction-cult; }
   }
 
   &__letter {
-    font-size: 0.65rem;
-    opacity: 0.7;
-    margin-left: 0.05rem;
+    font-size: 0.68rem;
+    opacity: 0.85;
+    margin-left: 0.1rem;
+    text-transform: uppercase;
   }
 
-  &__dot {
-    margin: 0 0.15rem;
-    color: $al-text-mute;
-    font-weight: 400;
-  }
+  // Separator dots between team segments — kept hidden because each
+  // chip is now self-contained and the gap handles spacing.
+  &__dot { display: none; }
 
   &__verdict {
     font-style: italic;
-    color: $al-text-mute;
-    font-size: 0.7rem;
+    color: $al-text-on-light-mute;
+    font-size: 0.82rem;
+    font-weight: 700;
     margin-left: auto;
   }
 
-  &.is-ok &__verdict { color: $al-gold-soft; }
-  &.is-warning &__verdict { color: #d69a4b; }
-  &.is-danger &__verdict { color: $al-blood-hot; font-weight: 600; }
+  &.is-ok &__verdict { color: $al-success; }
+  &.is-warning &__verdict { color: darken($al-warn, 12%); }
+  &.is-danger &__verdict { color: $al-blood-deep; font-weight: 800; }
 }
 
 .rules-chips {
@@ -522,42 +581,44 @@
 .rule-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.32rem;
-  padding: 0.18rem 0.55rem 0.18rem 0.4rem;
+  gap: 0.4rem;
+  padding: 0.25rem 0.7rem 0.25rem 0.45rem;
+  margin: 0;
   border-radius: $al-radius-pill;
-  border: 1px solid $al-border-subtle;
-  background: rgba(255, 255, 255, 0.02);
-  color: $al-text-dim;
-  font-size: 0.65rem;
-  font-weight: 600;
+  border: 1px solid $al-border-strong;
+  background: #fffaef;
+  color: $al-text-on-light-mute;
+  font-size: 0.72rem;
+  font-weight: 700;
   letter-spacing: 0.02em;
   font-family: $al-font-body;
   cursor: pointer;
+  box-shadow: 0 1px 0 rgba(43, 31, 18, 0.12);
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 
   &__dot {
-    width: 0.45rem;
-    height: 0.45rem;
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 50%;
-    background: $al-text-mute;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+    background: $al-text-on-light-dim;
+    box-shadow: inset 0 0 0 1px rgba(43, 31, 18, 0.25);
     transition: background 0.15s ease, box-shadow 0.15s ease;
 
     &.is-on {
       background: $al-gold;
-      box-shadow: 0 0 6px rgba(201, 168, 98, 0.55);
+      box-shadow: 0 0 0 1px $al-gold-rich, 0 0 6px $al-gold-glow-strong;
     }
   }
 
   &.is-on {
-    color: $al-gold-soft;
-    border-color: $al-gold-border;
-    background: $al-gold-glow;
+    color: $al-gold-dim;
+    border-color: $al-gold-rich;
+    background: rgba(240, 184, 64, 0.18);
   }
 
   &:hover:not(:disabled) {
-    color: $al-text;
-    border-color: $al-gold-border;
+    color: $al-text-on-light;
+    border-color: $al-gold-rich;
   }
 
   &:disabled {
@@ -570,37 +631,31 @@
 .seal-btn {
   @include al-btn-primary;
   width: 100%;
-  padding: 0.7rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.8rem 1rem;
+  font-size: 0.95rem;
   letter-spacing: $al-track-button;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 800;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   font-family: $al-font-header;
   border-radius: $al-radius-md;
-  transition: filter 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+  margin: 0;
 
-  i { font-size: 0.8rem; }
+  i { font-size: 0.85rem; }
 
   &.ready {
     background: $al-grad-gold;
-    color: #14100e;
-    border-color: $al-gold-rich;
-    box-shadow: 0 0 22px rgba(201, 168, 98, 0.35);
+    color: $al-gold-text;
+    box-shadow: $al-glow-gold;
+    text-shadow: none;
 
     &:hover {
-      filter: brightness(1.06);
-      box-shadow: 0 0 30px rgba(201, 168, 98, 0.55);
-      transform: translateY(-1px);
+      background: $al-grad-gold-hv;
+      box-shadow: $al-glow-gold-hv;
     }
-  }
-
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
   }
 }
 
@@ -608,51 +663,53 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  padding: 0.6rem 1rem;
-  border: 1px dashed $al-border-subtle;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border: 1px dashed $al-border-strong;
   border-radius: $al-radius-md;
-  color: $al-text-mute;
-  font-size: 0.78rem;
+  color: $al-text-on-light-mute;
+  font-size: 0.85rem;
   font-style: italic;
+  font-weight: 600;
 
-  i { color: $al-gold; }
+  i { color: $al-gold-rich; }
 }
 
 // ── Advanced config (collapsible) ─────────────────────────────────
 .setup-advanced {
-  margin-top: 0.2rem;
-  border: 1px solid $al-border-subtle;
+  margin-top: 0.3rem;
+  border: 1px solid $al-border-soft;
   border-radius: $al-radius-sm;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(43, 31, 18, 0.04);
 
   > summary {
     cursor: pointer;
-    padding: 0.4rem 0.7rem;
-    font-size: 0.7rem;
-    font-family: $al-font-header;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    font-family: $al-font-body;
     letter-spacing: $al-track-label;
     text-transform: uppercase;
-    color: $al-text-dim;
+    color: $al-text-on-light;
     list-style: none;
 
     &::-webkit-details-marker { display: none; }
 
-    i { color: $al-gold; margin-right: 0.4rem; }
+    i { color: $al-gold-rich; margin-right: 0.5rem; }
 
-    &:hover { color: $al-gold-soft; }
+    &:hover { color: $al-gold-dim; }
   }
 
   &[open] > summary {
-    color: $al-gold-soft;
-    border-bottom: 1px solid $al-border-subtle;
+    color: $al-gold-dim;
+    border-bottom: 1px solid $al-border-soft;
   }
 
   &__body {
-    padding: 0.7rem 0.85rem 0.85rem;
+    padding: 0.8rem 0.9rem 0.9rem;
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
+    gap: 0.8rem;
   }
 }
 

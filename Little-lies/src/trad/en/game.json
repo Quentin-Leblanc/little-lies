@@ -15,13 +15,6 @@
     "NO_LYNCH": "No lynch",
     "SPARED": "Spared"
   },
-  "phase_headers": {
-    "night_actions": "Night actions",
-    "voting_phase": "Vote",
-    "judgment": "Judgment",
-    "defense": "Defense",
-    "discussion": "Discussion"
-  },
   "day_label": "Day {{count}}",
   "night_label": "Night {{count}}",
   "system": {
@@ -31,7 +24,6 @@
     "judgment_guilty": "Guilty! ({{guilty}} vs {{innocent}})",
     "judgment_acquitted": "Acquitted! ({{guilty}} vs {{innocent}})",
     "anonymous_verdict": "A vote → {{label}}",
-    "vote_count": "Vote {{name}} ({{votes}}/{{total}})",
     "skip_vote": "{{name}} wants to skip — Skip ({{count}}/{{total}})",
     "mayor_reveal": "{{name}} revealed themselves as Mayor! Their votes count triple.",
     "player_eliminated": "{{name}} was eliminated by the village. Their role was: {{role}}.",
@@ -251,8 +243,10 @@
     "empty": "No deaths yet."
   },
   "no_ability": "No special ability",
+  "last_will_title": "Last Will",
   "last_will_placeholder": "Your last will...",
   "last_will_placeholder_write": "E.g.: I checked Alex on night 2, he's clean. Don't trust Sam...",
+  "last_will_chat_hint": "Also available via {{cmd}} in chat",
   "last_will_none": "No last will left.",
   "xp": {
     "participation": "Participation",

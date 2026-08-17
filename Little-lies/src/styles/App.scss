@@ -211,15 +211,6 @@
   pointer-events: auto;
 }
 
-// === PHASE BANNER ===
-@keyframes banner-in {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); filter: blur(8px); }
-  12% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0); }
-  18% { transform: translate(-50%, -50%) scale(1); }
-  75% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); filter: blur(4px); }
-}
-
 .spectator-banner {
   position: fixed;
   top: 0.6rem;
@@ -243,64 +234,6 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 
   i { font-size: 0.78rem; color: $al-gold-hot; }
-}
-
-.phase-banner {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 800;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  gap: 1.059rem;
-  padding: 0;
-  background: none;
-  border: none;
-  font-family: 'Cinzel', serif;
-  font-size: 2.471rem;
-  font-weight: 700;
-  letter-spacing: 0.235rem;
-  text-transform: uppercase;
-  animation: banner-in 2s ease-out forwards;
-
-  i { font-size: 2.235rem; }
-
-  &.banner-night {
-    color: #8899cc;
-    text-shadow: 0 0 30px rgba(100, 120, 200, 0.6), 0 2px 8px rgba(0,0,0,0.8);
-  }
-
-  &.banner-morning {
-    color: #ffcc44;
-    text-shadow: 0 0 30px rgba(255, 200, 60, 0.5), 0 2px 8px rgba(0,0,0,0.8);
-  }
-
-  &.banner-day {
-    color: #78ff78;
-    text-shadow: 0 0 30px rgba(120, 255, 120, 0.4), 0 2px 8px rgba(0,0,0,0.8);
-  }
-
-  &.banner-vote {
-    color: #ffa502;
-    text-shadow: 0 0 30px rgba(255, 165, 2, 0.5), 0 2px 8px rgba(0,0,0,0.8);
-  }
-
-  &.banner-defense {
-    color: #ff6666;
-    text-shadow: 0 0 30px rgba(255, 100, 100, 0.5), 0 2px 8px rgba(0,0,0,0.8);
-  }
-
-  &.banner-judgment {
-    color: #cc88ff;
-    text-shadow: 0 0 30px rgba(200, 130, 255, 0.5), 0 2px 8px rgba(0,0,0,0.8);
-  }
-
-  &.banner-execution {
-    color: #ff4444;
-    text-shadow: 0 0 40px rgba(255, 0, 0, 0.6), 0 2px 8px rgba(0,0,0,0.8);
-  }
 }
 
 // Background layer (day/night transition + starry bg)
@@ -345,37 +278,6 @@
   z-index: 19;
 
   &.show { display: block; }
-}
-
-// Vote arrow on 3D scene — points right to sidebar
-.vote-scene-arrow {
-  position: fixed;
-  right: 22.941rem;
-  top: 45%;
-  transform: translateY(-50%);
-  z-index: 12;
-  pointer-events: none;
-  animation: vote-arrow-bounce 1.2s ease-in-out infinite;
-
-  i {
-    font-size: 1.647rem;
-    color: #ffa502;
-    filter: drop-shadow(0 0 8px rgba(255, 165, 2, 0.6)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
-  }
-}
-
-@keyframes vote-arrow-bounce {
-  0%, 100% { transform: translateY(-50%) translateX(0); opacity: 0.7; }
-  50% { transform: translateY(-50%) translateX(6px); opacity: 1; }
-}
-
-// Phase banner responsive
-@media (max-width: $bp-mobile) {
-  .phase-banner {
-    font-size: 1.647rem;
-    letter-spacing: 0.118rem;
-    i { font-size: 1.412rem; }
-  }
 }
 
 // ── "La nuit tombe sur le village…" beat on the closed curtain ──

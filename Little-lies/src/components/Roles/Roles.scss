@@ -2,15 +2,15 @@
 
 .roles-list-box {
   margin-bottom: 0;
-  padding: 0.471rem 0.588rem;
+  padding: 0.5rem 0.6rem;
   flex: 1;
-  // Themed panel — warm near-black with oak-like undertone matching the
-  // chat/player blocks. Replaces the pure rgba black that stood out
-  // against the rest of the UI family.
-  background: $al-grad-panel;
+  // In-game HUD surface — dark glass so the box reads cleanly over
+  // the 3D village scene.
+  background: $al-grad-hud-panel;
   backdrop-filter: blur(3px);
-  border-radius: 0.471rem;
-  border: 1px solid $al-gold-border;
+  color: $al-text-on-dark;
+  border-radius: $al-radius-sm;
+  border: 1px solid $al-hud-border;
 
   h3 {
     font-family: 'Cinzel', serif;

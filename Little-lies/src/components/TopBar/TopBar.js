@@ -186,24 +186,17 @@ const VolumeControl = () => {
 };
 
 // ── Centre slot ──────────────────────────────────────────────────
-const LobbyCentre = ({ roomCode, playersCount }) => {
-  const { t } = useTranslation(['setup', 'common']);
-  return (
-    <div className="topbar-centre topbar-centre--lobby">
-      {roomCode && (
-        <span className="topbar-pill">
-          <i className="fas fa-door-closed" aria-hidden="true"></i>
-          <span className="topbar-pill__label">{t('setup:room_code', { defaultValue: 'Code' })}</span>
-          <span className="topbar-pill__value">{roomCode}</span>
-        </span>
-      )}
-      <span className="topbar-pill topbar-pill--players">
-        <i className="fas fa-users" aria-hidden="true"></i>
-        <span className="topbar-pill__value">{playersCount}</span>
-      </span>
-    </div>
-  );
-};
+// Lobby centre — just the player count pill. Room code was redundant
+// (the lobby panel already shows it with a copy button, so duplicating
+// in the topbar added noise without adding utility).
+const LobbyCentre = ({ playersCount }) => (
+  <div className="topbar-centre topbar-centre--lobby">
+    <span className="topbar-pill topbar-pill--players">
+      <i className="fas fa-users" aria-hidden="true"></i>
+      <span className="topbar-pill__value">{playersCount}</span>
+    </span>
+  </div>
+);
 
 const SetupCentre = ({ roomCode, playersCount }) => {
   const { t } = useTranslation(['setup', 'common']);
@@ -260,7 +253,7 @@ const TopBar = ({ mode = 'lobby', roomCode = '', playersCount = 0 }) => {
         </div>
 
         <div className="topbar-middle">
-          {mode === 'lobby' && <LobbyCentre roomCode={roomCode} playersCount={playersCount} />}
+          {mode === 'lobby' && <LobbyCentre playersCount={playersCount} />}
           {mode === 'setup' && <SetupCentre roomCode={roomCode} playersCount={playersCount} />}
           {mode === 'game' && <Time />}
           {mode === 'gameover' && <GameOverCentre />}

@@ -555,14 +555,6 @@ const CustomLobby = () => {
     setTimeout(() => setCopied(false), 1800);
   };
 
-  const newLobby = () => {
-    const url = new URL(window.location.href);
-    const hadRoomCode = url.searchParams.has('r');
-    url.searchParams.delete('r');
-    if (hadRoomCode) window.location.href = url.toString();
-    else window.location.reload();
-  };
-
   return (
     <div className="custom-lobby-container">
       {/* 3D scene is mounted at App.js level via <UnifiedScene /> and
@@ -755,8 +747,7 @@ const CustomLobby = () => {
                       <span className="player-number">#{idx + 1}</span>
                       <span className="player-dot" style={{ background: getColorCSS(p.getState?.()?.profile?.color) || '#888' }} />
                       <span className="player-list-name">{n}</span>
-                      {isH && <span className="player-badge host">{t('common:host')}</span>}
-                      {isMe && <span className="player-badge me">{t('common:me')}</span>}
+                      {isH && <i className="fas fa-crown player-host-icon" title={t('common:host')} aria-hidden="true"></i>}
                       {isHost() && !isMe && !isH && (
                         <button
                           className="player-kick-btn"
@@ -783,9 +774,6 @@ const CustomLobby = () => {
             ) : (
               <p className="lobby-waiting"><i className="fas fa-hourglass-half"></i> {t('setup:waiting_host', { host: playroom_players[0]?.getState?.()?.profile?.name || 'host' })}</p>
             )}
-            <button className="lobby-btn lobby-btn-ghost" onClick={newLobby}>
-              <i className="fas fa-plus"></i> {t('common:new_lobby')}
-            </button>
           </div>
 
           {/* Tutorial / Stats / Auth / Volume moved to the persistent

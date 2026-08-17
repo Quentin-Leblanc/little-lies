@@ -268,7 +268,7 @@ const Player = () => {
             <div className="last-will-section">
                 <div className="last-will-trigger" onClick={() => setShowLwDialog(true)}>
                     <span className="lw-label">
-                        <i className="fas fa-scroll"></i> Last Will
+                        <i className="fas fa-scroll"></i> {t('game:last_will_title')}
                     </span>
                     <span className="lw-preview">
                         {lastWill ? lastWill.substring(0, 30) + (lastWill.length > 30 ? '...' : '') : t('game:last_will_placeholder')}
@@ -282,7 +282,7 @@ const Player = () => {
                 <div className="lw-overlay" onClick={() => setShowLwDialog(false)}>
                     <div className="lw-dialog" onClick={(e) => e.stopPropagation()}>
                         <div className="lw-dialog-header">
-                            <h3><i className="fas fa-scroll"></i> Last Will</h3>
+                            <h3><i className="fas fa-scroll"></i> {t('game:last_will_title')}</h3>
                             <button className="close-button" onClick={() => setShowLwDialog(false)}>X</button>
                         </div>
                         {me.isAlive ? (
@@ -296,7 +296,7 @@ const Player = () => {
                                     autoFocus
                                 />
                                 <p className="lw-hint">
-                                    {lastWill.length}/300 — Aussi accessible via <code>-lw</code> dans le chat
+                                    {lastWill.length}/300 — {t('game:last_will_chat_hint', { cmd: '-lw' })}
                                 </p>
                             </>
                         ) : (

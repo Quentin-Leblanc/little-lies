@@ -27,20 +27,20 @@
 
 .role-container {
   position: relative; // anchor for the details tooltip popover
-  padding: 0.588rem;
-  padding-bottom: 0.706rem;
-  margin-bottom: 0.353rem;
+  padding: 0.65rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
   text-align: left;
   border-radius: $al-radius-md;
-  background: $al-grad-panel;
-  backdrop-filter: blur($al-blur-soft);
-  border: 1px solid $al-gold-border;
+  // Dark HUD surface — sidebar floats over the 3D village so we keep
+  // a dark glass tile here (cream parchment would clash with the
+  // varying day/night sky). Text inside uses the on-dark token set.
+  background: $al-hud-bg-lifted;
+  color: $al-text-on-dark;
+  backdrop-filter: blur($al-blur);
+  border: 1px solid $al-hud-border;
   flex-shrink: 0;
-  box-shadow: $al-shadow-card;
-  // Widened from 26rem so the 3 cells (description / objective / abilities)
-  // each have room to breathe now that they have their own card framing.
-  // Still caps below the sidebar (40vw ≈ 32rem at 1440w) and the inner
-  // grid collapses to 1 column under 820px.
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
   max-width: 32rem;
 
   // White pulse that fires once at game start so players notice their role
@@ -163,19 +163,19 @@
 
   .role-details-tooltip {
     position: absolute;
-    top: calc(100% + 0.47rem);
+    top: calc(100% + 0.5rem);
     right: 0;
     width: 32rem;
     max-width: calc(100vw - 2rem);
-    padding: 0.824rem 0.941rem;
-    background: $al-grad-panel;
-    border: 1px solid $al-gold-border-hv;
+    padding: 0.85rem 1rem;
+    background: $al-grad-hud-panel;
+    border: 1px solid $al-gold;
     border-radius: $al-radius-sm;
-    box-shadow: $al-shadow-panel;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
     z-index: $al-z-dialog;
     animation: role-tooltip-fade 0.2s ease-out;
     text-align: left;
-    color: $al-text;
+    color: $al-text-on-dark;
 
     &::before {
       content: '';
@@ -184,9 +184,9 @@
       right: 0.412rem;
       width: 0.706rem;
       height: 0.706rem;
-      background: rgba(22, 16, 12, 0.98);
-      border-left: 1px solid $al-gold-border-hv;
-      border-top: 1px solid $al-gold-border-hv;
+      background: rgba(40, 32, 60, 0.95);
+      border-left: 1px solid $al-gold;
+      border-top: 1px solid $al-gold;
       transform: rotate(45deg);
     }
   }
@@ -214,58 +214,57 @@
 }
 
 .role-section-title {
-  font-family: 'Cinzel', serif;
-  font-size: 0.824rem; // was 0.647rem
+  font-family: $al-font-header;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.088rem;
-  color: #e6e6e6;
-  margin: 0.588rem 0 0.235rem 0;
-  font-weight: 600;
-  i { margin-right: 0.294rem; font-size: 0.706rem; }
+  letter-spacing: 0.08em;
+  color: $al-text-on-dark;
+  margin: 0.6rem 0 0.25rem 0;
+  font-weight: 700;
+  i { margin-right: 0.35rem; font-size: 0.75rem; }
 }
 
 // Emphasised title for the "Abilities" / Capacités section — reuses
 // the same layout but larger and with the gold accent used in the
 // role-detail popover so both views share the same visual language.
 .role-section-title-abilities {
-  font-size: 1rem; // was 0.94rem
-  color: #ffc857;
+  font-size: 1.05rem;
+  color: $al-gold;
   letter-spacing: 0.05em;
   margin-top: 0.8rem;
 
-  i { font-size: 0.94rem; color: #ffc857; margin-right: 0.4rem; }
+  i { font-size: 1rem; color: $al-gold; margin-right: 0.45rem; }
 }
 
 // Section heading for the mechanics-detail bullets (faction nuance, win
 // conditions, edge cases). Different accent from abilities so the two
 // enrichment panels are visually distinct at a glance.
 .role-section-title-details {
-  font-size: 0.941rem;
-  color: #a0c8ff;
+  font-size: 0.95rem;
+  color: $al-faction-town;
   letter-spacing: 0.05em;
-  margin-top: 0.706rem;
+  margin-top: 0.75rem;
 
-  i { font-size: 0.824rem; color: #a0c8ff; margin-right: 0.4rem; }
+  i { font-size: 0.85rem; color: $al-faction-town; margin-right: 0.4rem; }
 }
 
 .role-description {
   margin: 0;
-  font-size: 0.941rem;
-  color: #f0f0f0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: $al-text-on-dark;
   line-height: 1.55;
 
   strong {
-    font-weight: 700;
+    font-weight: 800;
     color: #fff;
   }
 }
 
 .role-objective {
-  // Card owns the accent border-left + padding now, so this drops to a
-  // plain italic block for the objective copy. Size matches description
-  // so the two top cells read as siblings.
-  font-size: 0.941rem;
-  color: #f0f0f0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: $al-text-on-dark;
   font-style: italic;
   line-height: 1.5;
   margin: 0;
@@ -298,41 +297,29 @@
 // empty stub next to it.
 .role-info-cell {
   min-width: 0;
-  padding: 0.529rem 0.706rem 0.588rem;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-left: 3px solid rgba(255, 255, 255, 0.35);
-  border-radius: 0.353rem;
+  padding: 0.7rem 0.85rem 0.75rem;
+  background: rgba(20, 16, 36, 0.55);
+  border: 1px solid rgba(245, 236, 214, 0.1);
+  border-left: 3px solid rgba(245, 236, 214, 0.3);
+  border-radius: $al-radius-sm;
   display: flex;
   flex-direction: column;
-  gap: 0.294rem;
+  gap: 0.35rem;
 
+  // Description — steel blue accent (info)
   &:nth-child(1) {
-    position: relative;
-    overflow: hidden;
-    border-left-color: #7eb3ff;
-    border-color: rgba(126, 179, 255, 0.38);
-    background:
-      radial-gradient(
-        ellipse at 15% 0%,
-        rgba(126, 179, 255, 0.18),
-        rgba(126, 179, 255, 0.06) 45%,
-        rgba(255, 255, 255, 0.035) 75%
-      );
-    box-shadow:
-      0 0 0 1px rgba(126, 179, 255, 0.08),
-      0 0 12px rgba(126, 179, 255, 0.14),
-      inset 0 0 18px rgba(126, 179, 255, 0.06);
-    > .role-section-title { color: #a9c8ff; i { color: inherit; } }
+    border-left-color: $al-faction-town;
+    > .role-section-title { color: $al-faction-town; i { color: inherit; } }
   }
+  // Objective — warm amber (goal)
   &:nth-child(2) {
-    border-left-color: #ffb05a;
-    > .role-section-title { color: #ffc890; i { color: inherit; } }
+    border-left-color: $al-warn;
+    > .role-section-title { color: $al-warn; i { color: inherit; } }
   }
+  // Abilities — gold (power), full-width
   &:nth-child(3) {
     grid-column: 1 / -1;
-    border-left-color: #ffc857;
-    background: rgba(255, 200, 87, 0.05);
+    border-left-color: $al-gold;
   }
 
   // Section titles in cells don't need a top margin — the cell padding
@@ -546,11 +533,11 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 0.471rem;
-  margin-top: 0.941rem;
-  background: $al-grad-panel;
-  border: 1px solid $al-gold-border;
-  border-radius: 0.353rem;
+  padding: 0.5rem;
+  margin-top: 0.95rem;
+  background: $al-grad-hud-panel;
+  border: 1px solid $al-hud-border;
+  border-radius: $al-radius-sm;
   box-sizing: border-box;
 }
 
@@ -565,36 +552,33 @@
 }
 
 .last-will-trigger {
-  padding: 0.824rem 0.941rem;
-  min-height: 3.529rem;
-  // Was rgba(15,12,8,0.7) with blur — translucent enough that the 3D
-  // scene behind bled through and made the testament strip hard to
-  // read. Now near-opaque so the widget sits as a solid UI chip.
-  background: linear-gradient(180deg, rgba(22, 18, 12, 0.96), rgba(14, 11, 7, 0.98));
-  border: 2px solid rgba(200, 169, 110, 0.45);
-  border-radius: 0.471rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  padding: 0.85rem 1rem;
+  min-height: 3.6rem;
+  background: $al-hud-bg-lifted;
+  border: 1.5px solid $al-gold-rich;
+  border-radius: $al-radius-sm;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: background 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 
   &:hover {
-    background: linear-gradient(180deg, rgba(40, 32, 20, 0.96), rgba(28, 22, 14, 0.98));
-    border-color: rgba(200, 169, 110, 0.65);
+    background: rgba(50, 40, 70, 0.92);
+    border-color: $al-gold;
   }
 
   .lw-label {
-    color: #c8a96e;
-    font-weight: bold;
-    font-size: 0.882rem;
-    i { margin-right: 0.353rem; }
+    color: $al-gold-hot;
+    font-weight: 800;
+    font-size: 0.9rem;
+    i { margin-right: 0.4rem; }
   }
 
   .lw-preview {
-    font-size: 0.765rem;
-    color: #888;
+    font-size: 0.8rem;
+    color: $al-text-on-dark-mute;
     font-style: italic;
     max-width: 55%;
     white-space: nowrap;
@@ -689,97 +673,103 @@
 }
 
 
-/* Team members block */
+/* Team members block — solid HUD-dark tile to match the rest of the
+   in-game sidebar. The accent color (mafia red / cult violet) is on
+   the title only; the rows themselves stay neutral. */
 .team-block {
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 68, 68, 0.15);
-  border-radius: 0.471rem;
-  padding: 0.588rem;
-  margin-bottom: 0.353rem;
+  background: $al-hud-bg-lifted;
+  border: 1px solid $al-hud-border;
+  border-radius: $al-radius-sm;
+  padding: 0.7rem 0.75rem;
+  margin-bottom: 0.4rem;
 }
 
 .team-block-title {
-  font-family: 'Cinzel', serif;
-  font-size: 0.765rem;
+  font-family: $al-font-header;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.088rem;
-  color: #ff6666;
-  margin: 0 0 0.471rem 0;
-  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: $al-faction-mafia;
+  margin: 0 0 0.5rem 0;
+  font-weight: 800;
 }
 
 .team-member {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.294rem 0.471rem;
-  margin-bottom: 0.176rem;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 0.235rem;
-  font-size: 0.824rem;
-  font-weight: 600;
+  padding: 0.35rem 0.55rem;
+  margin-bottom: 0.25rem;
+  background: rgba(20, 16, 36, 0.55);
+  border: 1px solid rgba(245, 236, 214, 0.08);
+  border-radius: $al-radius-xs;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $al-text-on-dark;
 }
 
 .team-member-role {
-  font-size: 0.706rem;
+  font-size: 0.75rem;
   font-style: italic;
+  font-weight: 600;
 }
 
 .team-member-dead {
-  font-size: 0.647rem;
-  color: #666;
-  margin-left: 0.353rem;
+  font-size: 0.7rem;
+  color: $al-text-on-dark-dim;
+  margin-left: 0.4rem;
 }
 
 /* Night-info reveal panel — rendered below the action sidebar in Player.js.
    Replaces the old `.notifications` block that lived inside `.role-container`
    and drowned the investigate reveal in the role description text. */
 .night-info-panel {
-  margin-top: 0.471rem;
-  padding: 0.706rem 0.882rem;
-  background: linear-gradient(180deg, rgba(18,18,28,0.92), rgba(32,32,48,0.88));
-  border: 1px solid rgba(255, 210, 130, 0.22);
-  border-left: 3px solid #ffcc66;
-  border-radius: 0.353rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  margin-top: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  background: $al-hud-bg-lifted;
+  border: 1px solid $al-hud-border;
+  border-left: 3px solid $al-gold;
+  border-radius: $al-radius-sm;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   animation: night-info-panel-fade 0.55s ease-out both;
 
   .night-info-title {
     display: block;
-    font-weight: 600;
-    font-size: 0.824rem;
-    letter-spacing: 1px;
+    font-family: $al-font-header;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #ffcc66;
-    margin-bottom: 0.412rem;
-    i { margin-right: 0.294rem; }
+    color: $al-gold;
+    margin-bottom: 0.5rem;
+    i { margin-right: 0.35rem; }
   }
 
   .night-info-item {
-    font-size: 0.941rem;
-    color: #eaeaea;
-    line-height: 1.45;
-    padding: 0.294rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: $al-text-on-dark;
+    line-height: 1.5;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(245, 236, 214, 0.08);
     opacity: 0;
     animation: night-info-item-fade 0.45s ease-out forwards;
 
     &:last-child { border-bottom: none; }
   }
 
-  // Reveal headline (investigate / investigate_role) — gold accent, ~15%
-  // larger, inline block background so it clearly sits apart from regular
-  // notifications (roleblocked, healed, bodyguard-sacrifice, etc.).
+  // Reveal headline (investigate / investigate_role) — gold accent
+  // tile so it clearly sits apart from regular notifications.
   .night-info-item.night-info-key {
-    font-size: 1.088rem;
-    font-weight: 600;
-    color: #ffe580;
-    background: rgba(255, 210, 130, 0.08);
-    border-left: 2px solid rgba(255, 210, 130, 0.55);
-    padding: 0.471rem 0.588rem;
-    margin: 0.235rem 0;
-    border-radius: 0.235rem;
-    border-bottom: none;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: $al-gold-hot;
+    background: rgba(240, 184, 64, 0.12);
+    border: 1px solid $al-gold;
+    padding: 0.55rem 0.65rem;
+    margin: 0.3rem 0;
+    border-radius: $al-radius-xs;
+    border-bottom: 1px solid $al-gold;
   }
 }
 

@@ -64,44 +64,42 @@ html, body, #root {
     width: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Chakra Petch', 'Space Grotesk', 'Segoe UI', sans-serif;
+    font-family: $al-font-body;
+    background: $al-grad-page;
 }
 .App {
     height: 100%;
 }
-// Native button default — kept deliberately unstyled-ish so utility
-// buttons look like they belong in the werewolf UI without having to
-// tokenize every single one. Component-level buttons override via mixins.
+// Native button default — fallback for utility buttons that don't go
+// through al-btn-* mixins. Light cream tile with thick dark border.
 button {
-    background-color: #1a1410;
-    color: $al-text;
-    border: 1px solid rgba(201, 168, 98, 0.18);
-    padding: 0.588rem 1.176rem;
-    font-size: 0.941rem;
+    background: #ede0bf;
+    color: $al-text-on-light;
+    border: 1px solid $al-border-strong;
+    padding: 0.5rem 1rem;
+    font-size: 0.92rem;
     font-family: $al-font-body;
-    text-transform: capitalize;
+    font-weight: 700;
+    text-transform: none;
     border-radius: $al-radius-sm;
     cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
-    margin: 0.294rem;
+    transition: background $al-trans, box-shadow $al-trans-fast, transform 0.08s ease;
+    box-shadow: 0 2px 0 rgba(43, 31, 18, 0.18);
+    margin: 0.25rem;
 
     &:hover {
-        background-color: #241b14;
-        border-color: rgba(201, 168, 98, 0.35);
+        background: #f5e9c8;
     }
 
     &:active {
-        background-color: #0e0a06;
-        box-shadow: none;
         transform: translateY(1px);
+        box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
     }
 
     &:disabled {
-        background-color: #2a2420;
-        color: #666;
+        background: #c4b89e;
+        color: #8a7860;
         cursor: not-allowed;
-        border-color: #3a332c;
     }
 }
 
@@ -143,7 +141,7 @@ h1, h2 {
 
 // Global minimum font size for game UI
 .game-layout {
-    font-size: 0.882rem;
+    font-size: 0.9rem;
 
     p, span, li, div, label, input, textarea {
         font-size: inherit;
@@ -153,6 +151,7 @@ h1, h2 {
     background: $al-grad-gold;
     color: $al-gold-text;
     border-color: transparent;
+    font-weight: 800;
     &:hover {
         background: $al-grad-gold-hv;
         border-color: transparent;
