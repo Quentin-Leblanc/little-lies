@@ -102,29 +102,31 @@ describe('Neutral roles win conditions', () => {
 });
 
 describe('Cult roles', () => {
-  test('cult leader exists, is unique, detects as suspect', () => {
-    const cl = ROLE_DATA.find((r) => r.key === 'cult_leader');
-    expect(cl).toBeDefined();
-    expect(cl.team).toBe('cult');
-    expect(cl.unique).toBe(true);
-    expect(cl.detectResult).toBe('suspect');
+  // The cult is flat by design — no leader, no CONVERT action. Every
+  // cultist casts an equal-weight CULT_VOTE and a conversion only lands
+  // when all the alive cultists converge on the same target. See the
+  // comment block above the role in roles.js.
+  test('cultist exists, is not unique, detects as suspect', () => {
+    const c = ROLE_DATA.find((r) => r.key === 'cultist');
+    expect(c).toBeDefined();
+    expect(c.team).toBe('cult');
+    expect(c.unique).toBeUndefined();
+    expect(c.detectResult).toBe('suspect');
   });
 
-  test('cult leader has a CONVERT action at night', () => {
-    const cl = ROLE_DATA.find((r) => r.key === 'cult_leader');
-    const convert = cl.actions.find((a) => a.type === 'CONVERT');
-    expect(convert).toBeDefined();
-    expect(convert.require).toContain('isNight');
-    expect(convert.targets).toBe('notMyTeam');
-  });
-
-  test('cult member exists, has CULT_VOTE action', () => {
-    const cm = ROLE_DATA.find((r) => r.key === 'cult_member');
-    expect(cm).toBeDefined();
-    expect(cm.team).toBe('cult');
-    const vote = cm.actions.find((a) => a.type === 'CULT_VOTE');
+  test('cultist has a CULT_VOTE action at night, targeting outside the cult', () => {
+    const c = ROLE_DATA.find((r) => r.key === 'cultist');
+    const vote = c.actions.find((a) => a.type === 'CULT_VOTE');
     expect(vote).toBeDefined();
     expect(vote.require).toContain('isNight');
+    expect(vote.targets).toBe('notMyTeam');
+  });
+
+  test('no role carries a CONVERT action — conversion goes through CULT_VOTE', () => {
+    const withConvert = ROLE_DATA.filter((r) =>
+      r.actions.some((a) => a.type === 'CONVERT'),
+    );
+    expect(withConvert).toEqual([]);
   });
 
   test('cult roles share the cult_evil category', () => {
