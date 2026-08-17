@@ -1,9 +1,10 @@
+@import '../../styles/variables';
 .game-config {
   margin-bottom: 0.706rem;
 }
 
 .config-toggle {
-  font-size: 0.706rem;
+  font-size: $al-fs-label;
   padding: 0.294rem 0.706rem;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid #444;
@@ -25,7 +26,7 @@
   border-radius: 0.471rem;
 
   h3 {
-    font-size: 0.765rem;
+    font-size: $al-fs-small;
     margin: 0 0 0.588rem 0;
     color: #aaa;
   }
@@ -41,7 +42,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.706rem;
+  font-size: $al-fs-label;
   color: #ccc;
 
   label {
@@ -52,7 +53,7 @@
 .config-reset {
   margin-top: 0.706rem;
   width: 100%;
-  font-size: 0.706rem;
+  font-size: $al-fs-label;
   padding: 0.353rem 0.706rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid #444;
@@ -82,7 +83,7 @@
     color: white;
     border-radius: 0.235rem;
     padding: 0.176rem 0.353rem;
-    font-size: 0.706rem;
+    font-size: $al-fs-label;
     text-align: center;
 
     &:focus {
@@ -93,6 +94,6 @@
 
   span {
     color: #666;
-    font-size: 0.647rem;
+    font-size: $al-fs-label;
   }
 }

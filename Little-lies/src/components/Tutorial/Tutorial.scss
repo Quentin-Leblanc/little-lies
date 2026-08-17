@@ -31,7 +31,7 @@
 
   h2 {
     font-family: $al-font-header;
-    font-size: 1.2rem;
+    font-size: $al-fs-lead;
     margin: 0;
     color: $al-gold-dim;
     i { margin-right: 0.5rem; color: $al-gold-rich; }
@@ -41,7 +41,7 @@
     background: rgba(224, 56, 62, 0.15);
     border: 1px solid $al-blood;
     color: $al-blood-deep;
-    font-size: 0.85rem;
+    font-size: $al-fs-small;
     font-weight: 800;
     padding: 0.3rem 0.7rem;
     cursor: pointer;
@@ -88,7 +88,7 @@
   animation: tutorial-step-in 0.35s ease-out;
 
   .tutorial-icon {
-    font-size: 2.5rem;
+    font-size: $al-fs-display;
     color: $al-gold-rich;
     margin-bottom: 0.75rem;
     filter: drop-shadow(0 2px 4px rgba(43, 31, 18, 0.25));
@@ -96,14 +96,14 @@
 
   h3 {
     font-family: $al-font-header;
-    font-size: 1.2rem;
+    font-size: $al-fs-lead;
     font-weight: 700;
     color: $al-gold-dim;
     margin: 0 0 0.75rem;
   }
 
   p {
-    font-size: 0.95rem;
+    font-size: $al-fs-body;
     line-height: 1.6;
     font-weight: 500;
     color: $al-text-on-light;
@@ -123,7 +123,7 @@
   @include al-btn-secondary;
   & {
     padding: 0.5rem 1.1rem;
-    font-size: 0.95rem;
+    font-size: $al-fs-body;
   }
   i { margin: 0 0.25rem; }
 }
@@ -132,7 +132,7 @@
   @include al-btn-gold;
   & {
     padding: 0.5rem 1.1rem;
-    font-size: 0.95rem;
+    font-size: $al-fs-body;
     margin-left: auto;
   }
   i { margin: 0 0.25rem; }
@@ -142,7 +142,7 @@
   @include al-btn-secondary;
   & {
     padding: 0.5rem 1.1rem;
-    font-size: 0.95rem;
+    font-size: $al-fs-body;
   }
   i { margin: 0 0.25rem; }
 }
@@ -162,7 +162,7 @@
   border-top: 1px solid $al-border-soft;
   border-radius: 0;
   box-shadow: none;
-  font-size: 0.82rem;
+  font-size: $al-fs-small;
   font-weight: 700;
   color: $al-text-on-light-mute;
   cursor: pointer;
@@ -195,7 +195,7 @@
   border: 1px solid $al-gold-rich;
   border-radius: $al-radius-sm;
   padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
@@ -208,5 +208,5 @@
     border-color: $al-gold-dim;
   }
 
-  i { font-size: 0.85rem; }
+  i { font-size: $al-fs-small; }
 }

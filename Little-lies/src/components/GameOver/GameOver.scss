@@ -48,7 +48,7 @@
 
 .go-intermediate-eyebrow {
   font-family: $al-font-header;
-  font-size: 0.8rem;
+  font-size: $al-fs-small;
   letter-spacing: 0.3rem;
   text-transform: uppercase;
   color: #888;
@@ -57,7 +57,7 @@
 
 .go-intermediate-title {
   font-family: $al-font-header;
-  font-size: 2.4rem;
+  font-size: $al-fs-display;
   font-weight: 800;
   letter-spacing: 0.18rem;
   text-align: center;
@@ -67,7 +67,7 @@
   justify-content: center;
   gap: 0.7rem;
 
-  i { font-size: 2rem; }
+  i { font-size: $al-fs-display; }
 }
 
 .go-intermediate-roles {
@@ -85,7 +85,7 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 0.4rem;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   animation: go-intermediate-row-in 0.35s ease-out both;
 
   @for $i from 1 through 15 {
@@ -142,7 +142,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #bbb;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -185,7 +185,7 @@
   border: none;
   color: #bbb;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: $al-fs-small;
   padding: 0.1rem 0.3rem;
   transition: color 0.15s;
 
@@ -245,7 +245,7 @@
 
 .go-volume-value {
   color: #888;
-  font-size: 0.65rem;
+  font-size: $al-fs-label;
   font-variant-numeric: tabular-nums;
   min-width: 1.5rem;
   text-align: center;
@@ -322,12 +322,12 @@
   animation: go-ring-pulse 2.5s ease-in-out infinite;
   box-shadow: 0 0 20px color-mix(in srgb, var(--ring-color, #fff) 30%, transparent);
 
-  i { font-size: 1.647rem; }
+  i { font-size: $al-fs-title; }
 }
 
 .go-title {
   font-family: $al-font-header;
-  font-size: 2rem;
+  font-size: $al-fs-display;
   margin: 0;
   letter-spacing: 2px;
   animation: go-title-in 0.8s ease-out 0.4s both;
@@ -335,7 +335,7 @@
 
 .go-subtitle {
   color: #888;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   margin: 0.235rem 0 0;
   animation: go-fade-up 0.6s ease-out 0.6s both;
 }
@@ -348,7 +348,7 @@
   padding: 0.471rem 1.412rem;
   border-radius: 1.765rem;
   font-family: $al-font-header;
-  font-size: 1.2rem;
+  font-size: $al-fs-lead;
   font-weight: 700;
   letter-spacing: 2px;
   margin: 0.8rem 0;
@@ -388,13 +388,13 @@
 
 .go-stat-value {
   font-family: $al-font-header;
-  font-size: 1.6rem;
+  font-size: $al-fs-title;
   font-weight: 700;
   color: #fff;
 }
 
 .go-stat-label {
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   color: #666;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -418,7 +418,7 @@
 
 .go-neutral-item {
   color: #daa520;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   padding: 0.176rem 0;
   i { margin-right: 0.353rem; }
   strong { color: #f0c040; }
@@ -451,7 +451,7 @@
 
 .go-xp-total {
   font-family: $al-font-header;
-  font-size: 1.3rem;
+  font-size: $al-fs-lead;
   font-weight: 700;
   color: #6bb5ff;
   margin-bottom: 0.235rem;
@@ -465,7 +465,7 @@
 }
 
 .go-xp-item {
-  font-size: 0.7rem;
+  font-size: $al-fs-label;
   color: #88b0dd;
   background: rgba(47, 130, 255, 0.08);
   padding: 2px 0.471rem;
@@ -473,7 +473,7 @@
 }
 
 .go-xp-hint {
-  font-size: 0.7rem;
+  font-size: $al-fs-label;
   color: #666;
   margin: 0.353rem 0 0;
   i { margin-right: 0.235rem; }
@@ -482,7 +482,7 @@
 .go-recap-title {
   font-family: $al-font-header;
   color: #777;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   text-transform: uppercase;
   letter-spacing: 2px;
   margin: 0 0 0.588rem;
@@ -505,13 +505,13 @@
   padding: 0.294rem 0.588rem;
   border-left: 3px solid;
   border-radius: 0 0.235rem 0.235rem 0;
-  font-size: 0.8rem;
+  font-size: $al-fs-small;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.088rem;
   margin-bottom: 0.235rem;
 
-  .fa-trophy { font-size: 0.75rem; }
+  .fa-trophy { font-size: $al-fs-small; }
 }
 
 .go-player-row {
@@ -533,16 +533,16 @@
 .go-player-name {
   flex: 1;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: $al-fs-body;
   display: flex;
   align-items: center;
   gap: 0.353rem;
 
-  i { font-size: 0.75rem; }
+  i { font-size: $al-fs-small; }
 }
 
 .go-me-badge {
-  font-size: 0.6rem;
+  font-size: $al-fs-label;
   background: rgba(255, 255, 255, 0.1);
   color: #aaa;
   padding: 1px 0.353rem;
@@ -555,14 +555,14 @@
 .go-player-role {
   flex: 0.8;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: $al-fs-small;
   font-style: italic;
 }
 
 .go-player-status {
   flex: 0.6;
   text-align: right;
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -570,12 +570,12 @@
 
   &.alive {
     color: #78ff78;
-    i { font-size: 0.6rem; }
+    i { font-size: $al-fs-label; }
   }
 
   &.dead {
     color: #666;
-    i { font-size: 0.6rem; }
+    i { font-size: $al-fs-label; }
   }
 }
 
@@ -592,7 +592,7 @@
   @include al-btn-base;
   & {
     padding: 0.588rem 1.294rem;
-    font-size: 0.9rem;
+    font-size: $al-fs-body;
   }
   i { margin-right: 0.353rem; }
 }
@@ -602,7 +602,7 @@
   @include al-btn-gold;
   & {
     padding: 0.588rem 1.294rem;
-    font-size: 0.9rem;
+    font-size: $al-fs-body;
   }
   i { margin-right: 0.353rem; }
 }
@@ -612,7 +612,7 @@
   @include al-btn-primary;
   & {
     padding: 0.588rem 1.294rem;
-    font-size: 0.9rem;
+    font-size: $al-fs-body;
   }
   i { margin-right: 0.353rem; }
 }
@@ -621,7 +621,7 @@
   @include al-btn-secondary;
   & {
     padding: 0.588rem 1.294rem;
-    font-size: 0.9rem;
+    font-size: $al-fs-body;
   }
 }
 
@@ -637,7 +637,7 @@
   border: 1px dashed rgba(255, 255, 255, 0.18);
   color: #bbb;
   padding: 0.5rem 1.1rem;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -748,13 +748,13 @@
   }
 
   .go-title {
-    font-size: 1.5rem;
+    font-size: $al-fs-title;
   }
 
   .go-icon-ring {
     width: 3.294rem;
     height: 3.294rem;
-    i { font-size: 1.294rem; }
+    i { font-size: $al-fs-lead; }
   }
 
   .go-stats {
@@ -763,7 +763,7 @@
 
   .go-stat { padding: 0 0.824rem; }
 
-  .go-stat-value { font-size: 1.3rem; }
+  .go-stat-value { font-size: $al-fs-lead; }
 
   .go-player-row {
     padding: 0.294rem 0.353rem;
@@ -790,7 +790,7 @@
   gap: 0.5rem;
   padding: 0.55rem 1.2rem;
   font-family: $al-font-header;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   font-weight: 700;
   letter-spacing: 0.04em;
   background: linear-gradient(90deg, #a88547 0%, #6b4e22 100%);
@@ -805,7 +805,7 @@
     background: linear-gradient(90deg, #d9b870 0%, #a88547 100%);
   }
 
-  i { font-size: 0.85rem; }
+  i { font-size: $al-fs-small; }
 }
 
 // ── Embedded auth panel inside GameOver (keeps the screen visible) ──
@@ -827,7 +827,7 @@
   border: none;
   color: #d9b870;
   font-family: $al-font-header;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   letter-spacing: 0.05em;
   cursor: pointer;
   padding: 0.2rem 0.4rem;
@@ -835,12 +835,12 @@
   transition: color 0.2s ease, background 0.2s ease;
 
   &:hover { color: #fff; background: rgba(255, 230, 190, 0.06); }
-  i { font-size: 0.75rem; }
+  i { font-size: $al-fs-small; }
 }
 
 .go-auth-title {
   font-family: $al-font-header;
-  font-size: 1.2rem;
+  font-size: $al-fs-lead;
   font-weight: 700;
   text-align: center;
   color: #fff;
@@ -865,13 +865,13 @@
   border-radius: 0.4rem;
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
-  font-size: 0.9rem;
+  font-size: $al-fs-body;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 
   &:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.35); }
-  i { font-size: 1rem; }
+  i { font-size: $al-fs-lead; }
   &.google i { color: #fff; }
 }
 
@@ -880,7 +880,7 @@
   align-items: center;
   gap: 0.6rem;
   color: rgba(255, 255, 255, 0.4);
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 
@@ -903,7 +903,7 @@
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 0.35rem;
     color: #fff;
-    font-size: 0.92rem;
+    font-size: $al-fs-body;
     font-family: inherit;
 
     &:focus {
@@ -939,10 +939,10 @@
   align-items: center;
   gap: 0.4rem;
   margin: 0.2rem 0 0;
-  font-size: 0.83rem;
+  font-size: $al-fs-small;
   letter-spacing: 0.02em;
 
-  i { font-size: 0.85rem; }
+  i { font-size: $al-fs-small; }
 }
 
 .go-auth-error { color: #ff8080; }
@@ -959,13 +959,13 @@
     background: none;
     border: none;
     color: rgba(255, 255, 255, 0.6);
-    font-size: 0.85rem;
+    font-size: $al-fs-small;
     cursor: pointer;
     padding: 0.25rem;
     transition: color 0.2s ease;
 
     strong { color: #d9b870; font-weight: 700; }
     &:hover { color: #fff; strong { color: #fff; } }
-    i { margin-right: 0.3rem; font-size: 0.75rem; }
+    i { margin-right: 0.3rem; font-size: $al-fs-small; }
   }
 }

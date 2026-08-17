@@ -38,7 +38,7 @@
   background: rgba(0, 0, 0, 0.4);
   color: #aaa;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   padding: 0;
   display: flex;
   align-items: center;
@@ -50,14 +50,14 @@
 .survey-modal-title {
   margin: 0;
   font-family: $al-font-header;
-  font-size: 1.3rem;
+  font-size: $al-fs-lead;
   color: #eee;
   text-align: center;
 }
 
 .survey-modal-subtitle {
   margin: 0.3rem 0 1.1rem;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   color: #888;
   text-align: center;
 }
@@ -67,7 +67,7 @@
 }
 
 .survey-modal-label {
-  font-size: 0.82rem;
+  font-size: $al-fs-small;
   color: #bbb;
   margin-bottom: 0.45rem;
   font-weight: 600;
@@ -86,7 +86,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #888;
-  font-size: 1.2rem;
+  font-size: $al-fs-lead;
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
@@ -124,7 +124,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #aaa;
   border-radius: 0.4rem;
-  font-size: 0.8rem;
+  font-size: $al-fs-small;
   cursor: pointer;
   transition: all 0.15s;
 
@@ -144,7 +144,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.4rem;
   color: #ddd;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   font-family: inherit;
   resize: vertical;
   box-sizing: border-box;
@@ -155,7 +155,7 @@
 
 .survey-modal-error {
   color: #ff8a8a;
-  font-size: 0.78rem;
+  font-size: $al-fs-small;
   margin: 0 0 0.6rem;
 
   i { margin-right: 0.3rem; }
@@ -172,7 +172,7 @@
   background: none;
   border: none;
   color: #888;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   cursor: pointer;
   padding: 0.4rem 0.8rem;
 
@@ -182,7 +182,7 @@
 
 .survey-submit {
   padding: 0.45rem 1.1rem;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   background: linear-gradient(135deg, #2f82ff 0%, #0d5fcc 100%);
   border: none;
   color: white;
@@ -206,10 +206,10 @@
   justify-content: center;
   gap: 0.6rem;
   color: #ddd;
-  font-size: 1rem;
+  font-size: $al-fs-lead;
   padding: 2.5rem 1rem;
 
-  i { font-size: 1.4rem; }
+  i { font-size: $al-fs-title; }
 }
 
 /* Thanks screen — big heading + confetti + action buttons */
@@ -225,7 +225,7 @@
 }
 
 .survey-thanks-heart {
-  font-size: 2.6rem;
+  font-size: $al-fs-display;
   color: #ff4da6;
   filter: drop-shadow(0 0 14px rgba(255, 77, 166, 0.5));
   margin-bottom: 0.6rem;
@@ -234,7 +234,7 @@
 
 .survey-thanks-title {
   font-family: $al-font-header;
-  font-size: 2.2rem;
+  font-size: $al-fs-display;
   font-weight: 800;
   letter-spacing: 0.12rem;
   color: #fff;
@@ -244,7 +244,7 @@
 }
 
 .survey-thanks-sub {
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   color: #bbb;
   margin: 0 0 1.5rem;
   max-width: 26rem;
@@ -253,7 +253,7 @@
 }
 
 .survey-thanks-warning {
-  font-size: 0.78rem;
+  font-size: $al-fs-small;
   color: #ffba66;
   margin: 0 0 0.8rem;
   background: rgba(255, 186, 102, 0.08);
@@ -279,13 +279,13 @@
   gap: 0.45rem;
   padding: 0.6rem 1.3rem;
   border-radius: 0.5rem;
-  font-size: 0.9rem;
+  font-size: $al-fs-body;
   font-weight: 600;
   cursor: pointer;
   border: none;
   transition: all 0.2s;
 
-  i { font-size: 0.85rem; }
+  i { font-size: $al-fs-small; }
 }
 
 .survey-thanks-btn-primary {

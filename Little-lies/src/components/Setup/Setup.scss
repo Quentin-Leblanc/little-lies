@@ -54,7 +54,7 @@
 
 .setup-title {
   font-family: $al-font-header;
-  font-size: 1.25rem;
+  font-size: $al-fs-lead;
   font-weight: 700;
   letter-spacing: $al-track-title;
   color: $al-gold-dim;
@@ -73,7 +73,7 @@
   background: rgba(224, 56, 62, 0.15);
   border: 1px solid $al-blood;
   color: $al-blood-deep;
-  font-size: 0.72rem;
+  font-size: $al-fs-label;
   font-weight: 800;
   letter-spacing: 0.03em;
 }
@@ -87,7 +87,7 @@
   @media (min-width: 56rem) {
     display: block;
     font-family: $al-font-body;
-    font-size: 0.74rem;
+    font-size: $al-fs-label;
     color: $al-text-mute;
     margin: 0.2rem 0 0;
     font-style: italic;
@@ -109,7 +109,7 @@
   align-items: center;
   gap: 0.3rem;
   padding: 0.2rem 0.6rem;
-  font-size: 0.7rem;
+  font-size: $al-fs-label;
   font-weight: 600;
   border-radius: $al-radius-pill;
   border: 1px solid $al-gold-border;
@@ -117,7 +117,7 @@
   color: $al-gold-soft;
   font-family: $al-font-body;
 
-  i { font-size: 0.65rem; color: $al-gold; }
+  i { font-size: $al-fs-label; color: $al-gold; }
 }
 
 .setup-players-badge {
@@ -129,13 +129,13 @@
 
   .min-hint {
     color: $al-blood-hot;
-    font-size: 0.65rem;
+    font-size: $al-fs-label;
     margin-left: 0.15rem;
   }
 }
 
 .setup-host-notice {
-  font-size: 0.8rem;
+  font-size: $al-fs-small;
   color: $al-gold-dim;
   background: rgba(240, 184, 64, 0.15);
   border: 1px solid $al-gold-rich;
@@ -160,7 +160,7 @@
 }
 
 .presets-label {
-  font-size: 0.7rem;
+  font-size: $al-fs-label;
   font-weight: 800;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
@@ -179,7 +179,7 @@
   align-items: center;
   padding: 0.3rem 0.75rem;
   margin: 0;
-  font-size: 0.72rem;
+  font-size: $al-fs-label;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -199,7 +199,7 @@
   &.preset-beginner i {
     color: $al-gold-rich;
     margin-right: 0.3rem;
-    font-size: 0.65rem;
+    font-size: $al-fs-label;
   }
 
   &:disabled {
@@ -239,7 +239,7 @@
 
   &__title {
     font-family: $al-font-header;
-    font-size: 0.78rem;
+    font-size: $al-fs-small;
     font-weight: 700;
     letter-spacing: $al-track-label;
     text-transform: uppercase;
@@ -248,7 +248,7 @@
 
   &__count {
     font-family: $al-font-header;
-    font-size: 0.85rem;
+    font-size: $al-fs-small;
     font-weight: 800;
     color: $al-gold-rich;
   }
@@ -286,7 +286,7 @@
 
 .role-catalogue__faction {
   font-family: $al-font-header;
-  font-size: 0.7rem;
+  font-size: $al-fs-label;
   font-weight: 800;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
@@ -326,7 +326,7 @@
   background: color-mix(in srgb, var(--team) 12%, #fffaef);
   color: $al-text-on-light;
   font-family: $al-font-body;
-  font-size: 0.78rem;
+  font-size: $al-fs-small;
   font-weight: 700;
   cursor: pointer;
   text-align: left;
@@ -357,7 +357,7 @@
   }
 
   &__icon {
-    font-size: 0.82rem;
+    font-size: $al-fs-small;
     text-align: center;
     flex-shrink: 0;
   }
@@ -368,7 +368,7 @@
 
   &__count {
     font-family: $al-font-header;
-    font-size: 0.7rem;
+    font-size: $al-fs-label;
     font-weight: 800;
     color: var(--team);
     flex-shrink: 0;
@@ -405,7 +405,7 @@
 
   &__num {
     font-family: $al-font-header;
-    font-size: 0.72rem;
+    font-size: $al-fs-label;
     font-weight: 800;
     color: $al-text-on-light-mute;
     width: 1.2rem;
@@ -421,7 +421,7 @@
     border-radius: $al-radius-sm;
     border: 1px dashed $al-border-soft;
     color: $al-text-on-light-dim;
-    font-size: 0.75rem;
+    font-size: $al-fs-small;
     font-style: italic;
     min-height: 1.7rem;
   }
@@ -467,7 +467,7 @@
   }
 
   &__icon {
-    font-size: 0.9rem;
+    font-size: $al-fs-body;
     width: 1rem;
     text-align: center;
     flex-shrink: 0;
@@ -475,7 +475,7 @@
 
   &__name {
     flex: 1;
-    font-size: 0.82rem;
+    font-size: $al-fs-small;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -483,7 +483,7 @@
   }
 
   &__remove {
-    font-size: 0.75rem;
+    font-size: $al-fs-small;
     color: $al-text-on-light-dim;
     opacity: 0.6;
     transition: opacity 0.15s ease, color 0.15s ease;
@@ -511,7 +511,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.45rem;
-  font-size: 0.82rem;
+  font-size: $al-fs-small;
   font-weight: 700;
   color: $al-text-on-light;
   font-family: $al-font-body;
@@ -522,7 +522,7 @@
 
   > i {
     color: $al-gold-rich;
-    font-size: 0.9rem;
+    font-size: $al-fs-body;
   }
 
   &__counts {
@@ -549,7 +549,7 @@
   }
 
   &__letter {
-    font-size: 0.68rem;
+    font-size: $al-fs-label;
     opacity: 0.85;
     margin-left: 0.1rem;
     text-transform: uppercase;
@@ -562,7 +562,7 @@
   &__verdict {
     font-style: italic;
     color: $al-text-on-light-mute;
-    font-size: 0.82rem;
+    font-size: $al-fs-small;
     font-weight: 700;
     margin-left: auto;
   }
@@ -588,7 +588,7 @@
   border: 1px solid $al-border-strong;
   background: #fffaef;
   color: $al-text-on-light-mute;
-  font-size: 0.72rem;
+  font-size: $al-fs-label;
   font-weight: 700;
   letter-spacing: 0.02em;
   font-family: $al-font-body;
@@ -632,7 +632,7 @@
   @include al-btn-primary;
   width: 100%;
   padding: 0.8rem 1rem;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   letter-spacing: $al-track-button;
   text-transform: uppercase;
   font-weight: 800;
@@ -644,7 +644,7 @@
   border-radius: $al-radius-md;
   margin: 0;
 
-  i { font-size: 0.85rem; }
+  i { font-size: $al-fs-small; }
 
   &.ready {
     background: $al-grad-gold;
@@ -668,7 +668,7 @@
   border: 1px dashed $al-border-strong;
   border-radius: $al-radius-md;
   color: $al-text-on-light-mute;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   font-style: italic;
   font-weight: 600;
 
@@ -685,7 +685,7 @@
   > summary {
     cursor: pointer;
     padding: 0.5rem 0.8rem;
-    font-size: 0.78rem;
+    font-size: $al-fs-small;
     font-weight: 800;
     font-family: $al-font-body;
     letter-spacing: $al-track-label;
@@ -723,7 +723,7 @@
   max-width: 22rem;
   height: 13rem;
   max-height: 13rem;
-  font-size: 0.78rem;
+  font-size: $al-fs-small;
 }
 
 // Bottom padding so the very last footer rows of the stage clear the
@@ -757,6 +757,6 @@
 
   .role-tile {
     padding: 0.25rem 0.4rem;
-    font-size: 0.68rem;
+    font-size: $al-fs-label;
   }
 }

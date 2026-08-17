@@ -52,10 +52,10 @@ $topbar-h-compact: 2.5rem;
     padding: 0 0.7rem;
     gap: 0.6rem;
 
-    .topbar-logo__text { font-size: 0.78rem; }
+    .topbar-logo__text { font-size: $al-fs-small; }
     .topbar-profile__body { display: none; }
     .topbar-profile { padding: 0.2rem 0.35rem; }
-    .topbar-icon-btn { width: 1.7rem; height: 1.7rem; font-size: 0.8rem; }
+    .topbar-icon-btn { width: 1.7rem; height: 1.7rem; font-size: $al-fs-small; }
   }
 }
 
@@ -74,7 +74,7 @@ $topbar-h-compact: 2.5rem;
 
   &__text {
     font-family: $al-font-header;
-    font-size: 0.95rem;
+    font-size: $al-fs-body;
     font-weight: 600;
     letter-spacing: $al-track-title;
     color: $al-gold;
@@ -112,21 +112,21 @@ $topbar-h-compact: 2.5rem;
   border: 1px solid $al-border-dark-strong;
   background: rgba(30, 24, 50, 0.6);
   color: $al-text-on-dark;
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   font-weight: 700;
   letter-spacing: 0.03em;
   white-space: nowrap;
 
   > i {
     color: $al-gold;
-    font-size: 0.72rem;
+    font-size: $al-fs-label;
   }
 
   &__label {
     text-transform: uppercase;
     letter-spacing: $al-track-label;
     color: $al-text-on-dark-mute;
-    font-size: 0.62rem;
+    font-size: $al-fs-label;
   }
 
   &__value {
@@ -164,7 +164,7 @@ $topbar-h-compact: 2.5rem;
   border: 1px solid $al-border-dark-strong;
   background: rgba(30, 24, 50, 0.5);
   color: $al-text-on-dark-mute;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   margin: 0;
   padding: 0;
   display: inline-flex;
@@ -180,7 +180,7 @@ $topbar-h-compact: 2.5rem;
     color: $al-gold-hot;
   }
 
-  &--help i { font-size: 0.78rem; }
+  &--help i { font-size: $al-fs-small; }
 
   // Discord keeps its own brand colour on hover instead of the gold
   // used by the game's own affordances — it reads as "this leaves the
@@ -189,7 +189,7 @@ $topbar-h-compact: 2.5rem;
     text-decoration: none;
     color: $al-text-on-dark-mute;
 
-    i { font-size: 0.92rem; }
+    i { font-size: $al-fs-body; }
 
     &:hover {
       background: rgba(88, 101, 242, 0.25);
@@ -209,7 +209,7 @@ $topbar-h-compact: 2.5rem;
   border: 1px solid $al-border-dark-strong;
   background: rgba(30, 24, 50, 0.5);
   color: $al-text-on-dark;
-  font-size: 0.78rem;
+  font-size: $al-fs-small;
   margin: 0;
   cursor: pointer;
   box-shadow: none;
@@ -232,7 +232,7 @@ $topbar-h-compact: 2.5rem;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 0.85rem;
+    font-size: $al-fs-small;
     overflow: hidden;
     font-family: $al-font-header;
 
@@ -252,7 +252,7 @@ $topbar-h-compact: 2.5rem;
 
   &__name {
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: $al-fs-small;
     color: $al-text-on-dark;
     white-space: nowrap;
     overflow: hidden;
@@ -267,7 +267,7 @@ $topbar-h-compact: 2.5rem;
   }
 
   &__level {
-    font-size: 0.64rem;
+    font-size: $al-fs-label;
     font-weight: 700;
     color: $al-gold-hot;
     letter-spacing: 0.05em;
@@ -310,7 +310,7 @@ $topbar-h-compact: 2.5rem;
     background: $al-grad-gold;
     color: $al-gold-text;
     font-family: $al-font-header;
-    font-size: 0.65rem;
+    font-size: $al-fs-label;
     font-weight: 800;
     letter-spacing: 0.04em;
     box-shadow: 0 4px 14px $al-gold-glow-strong;
@@ -364,7 +364,7 @@ $topbar-h-compact: 2.5rem;
     border: none;
     color: $al-gold-soft;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: $al-fs-small;
     padding: 0;
     width: 1.4rem;
     height: 1.4rem;
@@ -383,7 +383,7 @@ $topbar-h-compact: 2.5rem;
 
   &__value {
     font-family: $al-font-header;
-    font-size: 0.72rem;
+    font-size: $al-fs-label;
     color: $al-gold-soft;
     min-width: 1.6rem;
     text-align: right;
@@ -398,7 +398,7 @@ $topbar-h-compact: 2.5rem;
     grid-template-columns: auto 1fr auto;
   }
 
-  .topbar-logo__text { font-size: 0.7rem; }
+  .topbar-logo__text { font-size: $al-fs-label; }
 
   .topbar-profile__body { display: none; }
   .topbar-profile { padding: 0.2rem 0.3rem; }

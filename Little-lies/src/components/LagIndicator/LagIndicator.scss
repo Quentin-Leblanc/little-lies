@@ -1,10 +1,11 @@
+@import '../../styles/variables';
 .lag-indicator {
   position: fixed;
   bottom: 0.824rem;
   left: 0.824rem;
   z-index: 15;
   color: #ff6633;
-  font-size: 0.941rem;
+  font-size: $al-fs-body;
   animation: lag-blink 1s ease-in-out infinite;
   pointer-events: none;
   filter: drop-shadow(0 0 4px rgba(255, 100, 50, 0.6));

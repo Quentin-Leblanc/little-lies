@@ -93,7 +93,7 @@
 
 .loading-title {
   font-family: $al-font-header;
-  font-size: 2.6rem;
+  font-size: $al-fs-display;
   font-weight: 700;
   color: $al-gold;
   letter-spacing: 0.412rem;
@@ -144,7 +144,7 @@
 
 .loading-text {
   font-family: $al-font-header;
-  font-size: 0.88rem;
+  font-size: $al-fs-body;
   font-style: italic;
   font-weight: 500;
   color: rgba(232, 212, 154, 0.7);
@@ -156,7 +156,7 @@
 
 .loading-percent {
   font-family: $al-font-header;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   font-weight: 600;
   color: $al-gold-hot;
   letter-spacing: 0.176rem;
@@ -185,7 +185,7 @@
 // slot" at a glance. Pending stays muted grey, ready lights up green
 // with the same pop animation as before.
 .waiting-dot-indicator {
-  font-size: 0.9rem;
+  font-size: $al-fs-body;
   line-height: 1;
   transition: color 0.4s ease, text-shadow 0.4s ease, transform 0.3s ease;
 
@@ -202,7 +202,7 @@
 }
 
 .waiting-dot-name {
-  font-size: 0.65rem;
+  font-size: $al-fs-label;
   color: rgba(255, 255, 255, 0.4);
   letter-spacing: 0.029rem;
 
@@ -219,7 +219,7 @@
   gap: 0.25rem;
   padding: 0.18rem 0.5rem;
   font-family: $al-font-body;
-  font-size: 0.6rem;
+  font-size: $al-fs-label;
   font-weight: 600;
   letter-spacing: 0.05rem;
   text-transform: uppercase;
@@ -231,7 +231,7 @@
   animation: kick-btn-appear 0.35s ease-out;
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 
-  i { font-size: 0.7rem; }
+  i { font-size: $al-fs-label; }
 
   &:hover {
     color: #ffdede;
@@ -265,7 +265,7 @@
 .typewriter-text {
   font-family: $al-font-header;
   color: #ccd;
-  font-size: 1.5rem;
+  font-size: $al-fs-title;
   margin: 0.471rem 0;
   letter-spacing: 0.059rem;
 }
@@ -283,7 +283,7 @@
 
 .reveal-sub {
   font-family: $al-font-header;
-  font-size: 1rem;
+  font-size: $al-fs-lead;
   color: #667;
   margin: 0.235rem 0;
 }
@@ -291,7 +291,7 @@
 // Big title above the card — "Votre rôle est" / "Your role is"
 .reveal-title {
   font-family: $al-font-header;
-  font-size: 2.8rem;
+  font-size: $al-fs-display;
   font-weight: 800;
   color: #fff;
   letter-spacing: 0.35rem;
@@ -348,7 +348,7 @@
 // immediately without the old card border telling the whole story.
 .card-team-pill {
   font-family: $al-font-header;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   text-transform: uppercase;
   letter-spacing: 0.2rem;
   font-weight: 700;
@@ -363,7 +363,7 @@
 // drops the need for a card frame to anchor the eye. Size trimmed from
 // 6.5rem to 4.5rem so the icon doesn't dwarf the role name next to it.
 .card-icon {
-  font-size: 4.5rem;
+  font-size: $al-fs-display-lg;
   line-height: 1;
   filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor);
   margin: 0.235rem 0;
@@ -375,7 +375,7 @@
 
 .card-name {
   font-family: $al-font-header;
-  font-size: 3rem;
+  font-size: $al-fs-display-lg;
   font-weight: 800;
   letter-spacing: 0.12rem;
   text-shadow:
@@ -391,14 +391,14 @@
 }
 
 .card-description {
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   color: #c5c5c5;
   margin: 0.471rem 0;
   line-height: 1.45;
 }
 
 .card-objective {
-  font-size: 1rem;
+  font-size: $al-fs-lead;
   color: #e0e0e0;
   font-style: italic;
   margin: 0.588rem auto;
@@ -410,7 +410,7 @@
 
 .card-exec-target {
   color: #ff7a7a;
-  font-size: 0.88rem;
+  font-size: $al-fs-body;
   font-weight: bold;
   margin-top: 0.471rem;
   text-shadow: 0 0 10px rgba(255, 80, 80, 0.45);
@@ -432,7 +432,7 @@
   padding: 0.294rem 0.824rem;
   border-radius: 0.941rem;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   color: #ebebeb;
   letter-spacing: 0.03em;
 }
@@ -493,7 +493,7 @@
   right: 0;
   text-align: center;
   color: #889;
-  font-size: 1rem;
+  font-size: $al-fs-lead;
   font-family: $al-font-header;
   font-style: italic;
   pointer-events: none;

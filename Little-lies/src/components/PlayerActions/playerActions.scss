@@ -112,7 +112,7 @@
   margin-bottom: 0.4rem;
   border-radius: $al-radius-sm;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: $al-fs-lead;
   // Solid HUD-dark row — gradient noise removed for a cleaner Clash
   // tile feel. Per-state colored rings layer on top via the modifier
   // classes below.
@@ -157,7 +157,7 @@
 
   button {
     padding: 0.353rem 0.824rem;
-    font-size: 0.887rem;
+    font-size: $al-fs-body;
     margin: 0;
   }
 }
@@ -165,7 +165,7 @@
 .vote-count-num {
   min-width: 1.176rem;
   text-align: center;
-  font-size: 1.004rem;
+  font-size: $al-fs-lead;
   font-weight: bold;
   color: #fff;
 }
@@ -218,14 +218,14 @@
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 0.4rem;
     color: #fff;
-    font-size: 1rem;
+    font-size: $al-fs-lead;
     font-weight: 600;
     letter-spacing: 0.03em;
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
-    i { font-size: 1.1rem; }
+    i { font-size: $al-fs-lead; }
   }
 }
 
@@ -242,7 +242,7 @@
 
   p {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: $al-fs-body;
     font-weight: 600;
   }
 }
@@ -255,7 +255,7 @@
   border: 1.5px solid $al-success;
   border-radius: $al-radius-sm;
   color: $al-success;
-  font-size: 0.92rem;
+  font-size: $al-fs-body;
   font-weight: 800;
 
   i {
@@ -266,7 +266,7 @@
 // Mayor reveal — gold CTA inside the action stack.
 .reveal-btn {
   width: 100%;
-  font-size: 0.92rem;
+  font-size: $al-fs-body;
   padding: 0.55rem 0.65rem;
   background: rgba(240, 184, 64, 0.18);
   border: 1.5px solid $al-gold;
@@ -294,7 +294,7 @@
   border: 1.5px solid $al-gold;
   border-radius: $al-radius-sm;
   color: $al-gold-hot;
-  font-size: 0.88rem;
+  font-size: $al-fs-body;
   font-weight: 800;
 
   i { margin-right: 0.3rem; }
@@ -323,20 +323,20 @@
 }
 
 .player-color-icon {
-  font-size: 0.769rem;
+  font-size: $al-fs-small;
   flex-shrink: 0;
 }
 
 .revealed-badge {
   color: #ffd700;
-  font-size: 0.769rem;
+  font-size: $al-fs-small;
 }
 
 // Vote button — inline in the player row. Static hover (no movement),
 // werewolf blood for the active "I'm voting them" state.
 .vote-btn {
   padding: 0.235rem 0.706rem;
-  font-size: 0.769rem;
+  font-size: $al-fs-small;
   margin: 0;
   background: #1a1410;
   color: $al-text;
@@ -374,7 +374,7 @@
 // attribute on the icon.
 .player-status-icon {
   flex-shrink: 0;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   line-height: 1;
   &.is-alive { color: #b8b8b8; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7); }
   &.is-dead  { color: #444; text-shadow: none; }
@@ -402,7 +402,7 @@
   border: 1px solid rgba(0, 185, 106, 0.25);
   border-radius: 0.235rem;
   color: #00b96a;
-  font-size: 0.828rem;
+  font-size: $al-fs-small;
   font-weight: 600;
   animation: feedback-in 0.3s ease-out;
 
@@ -417,7 +417,7 @@
 // Blackmailed badge
 .blackmailed-badge {
   color: #ff6666;
-  font-size: 0.71rem;
+  font-size: $al-fs-label;
   margin-left: 0.118rem;
   animation: blink-slow 2s ease-in-out infinite;
 }
@@ -430,7 +430,7 @@
 // Disconnecting badge
 .disconnecting-badge {
   color: #ff8800;
-  font-size: 0.71rem;
+  font-size: $al-fs-label;
   margin-left: 0.118rem;
   animation: dc-blink 1s ease-in-out infinite;
 }
@@ -443,7 +443,7 @@
 // AFK badge
 .afk-badge {
   color: #999;
-  font-size: 0.643rem;
+  font-size: $al-fs-label;
   margin-left: 0.25rem;
   padding: 0.05rem 0.3rem;
   background: rgba(255, 255, 255, 0.06);
@@ -466,7 +466,7 @@
 // state and locked state are signalled by glow + border, not by scaling.
 .action-btn {
   padding: 0.294rem 0.706rem;
-  font-size: 0.828rem;
+  font-size: $al-fs-small;
   margin: 0;
   border-radius: $al-radius-xs;
   cursor: pointer;
@@ -519,7 +519,7 @@
 
 .judgment-center-title {
   font-family: $al-font-header;
-  font-size: 1.9rem;
+  font-size: $al-fs-title;
   font-weight: 800;
   color: $al-text-on-dark;
   text-align: center;
@@ -550,7 +550,7 @@
   border-radius: $al-radius-md;
   border: 2px solid transparent;
   font-family: $al-font-header;
-  font-size: 1.4rem;
+  font-size: $al-fs-title;
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -600,7 +600,7 @@
 
 .judgment-center-hint {
   font-family: $al-font-header;
-  font-size: 0.88rem;
+  font-size: $al-fs-body;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -617,31 +617,31 @@
 }
 
 @media (max-width: 768px) {
-  .judgment-center-title { font-size: 1.2rem; padding: 0.5rem 1rem; }
+  .judgment-center-title { font-size: $al-fs-lead; padding: 0.5rem 1rem; }
   .judgment-center-buttons { gap: 1rem; }
   .judgment-center-btn {
     min-width: 7rem;
     padding: 0.75rem 1.1rem;
-    font-size: 1rem;
+    font-size: $al-fs-lead;
   }
 }
 
 // Disabled action hint (e.g. Vigilante night 1)
 .action-hint-disabled {
-  font-size: 0.769rem;
+  font-size: $al-fs-small;
   color: #666;
   padding: 0.235rem 0.588rem;
   border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 0.235rem;
   opacity: 0.5;
 
-  i { margin-right: 0.235rem; font-size: 0.651rem; }
+  i { margin-right: 0.235rem; font-size: $al-fs-label; }
 }
 
 .dead-label {
   color: #555;
   font-style: italic;
-  font-size: 0.71rem;
+  font-size: $al-fs-label;
 }
 
 .player-list-item.is-dead {

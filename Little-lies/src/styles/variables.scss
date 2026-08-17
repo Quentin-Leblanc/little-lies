@@ -123,6 +123,39 @@ $al-track-title:  0.08em;
 $al-track-label:  0.06em;
 $al-track-button: 0.02em;
 
+// ── Type scale — CLOSED SET ──────────────────────────────────────
+// Five interface sizes. Not four, not six. Components used to invent
+// their own values case by case (0.7 / 0.706 / 0.71 / 0.72 …) which
+// produced screens where six near-identical sizes fought over the
+// hierarchy without ever establishing one — 69 distinct values across
+// 481 declarations.
+//
+// Adding a value here is a design decision, not a convenience. If a
+// piece of text doesn't fit one of these, the question is what it's
+// doing on that screen, not which new size it needs.
+// Anchored on 1rem for running text: with the 14px root floor set in
+// global.scss, body copy lands at 14px on the smallest screens and 17px
+// on a 2560px monitor. Ratio ~1.2 between steps — close enough to read
+// as a deliberate progression, far enough apart that two neighbouring
+// steps can never be confused for each other.
+$al-fs-label:  0.75rem;   // uppercase labels, chips, counters
+$al-fs-small:  0.875rem;  // secondary text, hints, timestamps
+$al-fs-body:   1rem;      // running text, buttons, chat
+$al-fs-lead:   1.25rem;   // block titles, dialog headings
+$al-fs-title:  1.75rem;   // screen titles (one per screen)
+
+// Display sizes — full-screen dramatic beats ONLY: the role reveal
+// card, the game-over verdict, the curtain text. Never interface
+// chrome. Kept apart from the scale above so "make it bigger" on a
+// panel can't reach for them.
+$al-fs-display:    2.4rem;
+$al-fs-display-lg: 3.6rem;
+
+// Two weights, nothing between. Bold carries emphasis; anything that
+// needs more than bold needs colour or space, not a third weight.
+$al-fw-normal: 400;
+$al-fw-bold:   700;
+
 // ─────────────────────────────────────────────
 // GRADIENTS
 // ─────────────────────────────────────────────

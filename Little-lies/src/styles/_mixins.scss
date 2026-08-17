@@ -17,7 +17,7 @@
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
   font-family: $al-font-body;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   font-weight: 800;
   letter-spacing: $al-track-button;
   border-radius: $al-radius-md;
@@ -120,7 +120,7 @@
   & {
     background: none;
     color: $al-text-on-light-mute;
-    font-size: 0.875rem;
+    font-size: $al-fs-body;
     padding: 0.5rem 0.8rem;
     text-shadow: none;
     box-shadow: none;
@@ -262,7 +262,7 @@
 // Section label — small caps. Dimmer than title but still readable.
 @mixin al-label {
   font-family: $al-font-body;
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   font-weight: 800;
   letter-spacing: $al-track-label;
   text-transform: uppercase;

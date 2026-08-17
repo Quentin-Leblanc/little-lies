@@ -28,14 +28,14 @@
   border-radius: $al-radius-pill;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   font-family: $al-font-header;
-  font-size: 0.82rem;
+  font-size: $al-fs-small;
   font-weight: 700;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
   color: $al-text-on-dark;
 
   i {
-    font-size: 0.8rem;
+    font-size: $al-fs-small;
     color: $al-gold;
     flex-shrink: 0;
   }
@@ -135,7 +135,7 @@
   top: calc(2.25rem + 0.75rem);
   transform: translateX(-50%);
   font-family: $al-font-header;
-  font-size: 4.2rem;
+  font-size: $al-fs-display-lg;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: #ff5252;
@@ -153,13 +153,13 @@
   .time-pill {
     height: 1.85rem;
     padding: 0.3rem 0.75rem;
-    font-size: 0.7rem;
+    font-size: $al-fs-label;
     gap: 0.4rem;
 
-    i { font-size: 0.7rem; }
+    i { font-size: $al-fs-label; }
   }
   .final-five-countdown {
-    font-size: 3.2rem;
+    font-size: $al-fs-display-lg;
     top: calc(1.85rem + 0.6rem);
   }
 }

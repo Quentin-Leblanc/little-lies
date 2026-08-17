@@ -49,7 +49,7 @@
 
   h2 {
     font-family: $al-font-header;
-    font-size: 1.176rem;
+    font-size: $al-fs-lead;
     margin: 0;
     color: $al-gold;
     letter-spacing: $al-track-label;
@@ -57,7 +57,7 @@
 
   h3 {
     font-family: $al-font-header;
-    font-size: 0.941rem;
+    font-size: $al-fs-body;
     margin: 1.059rem 0 0.471rem;
     color: $al-gold-rich;
     letter-spacing: 0.047rem;
@@ -87,7 +87,7 @@
   overflow-y: auto;
   padding: 1.059rem 1.412rem 1.412rem;
   line-height: 1.5;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   word-break: break-word;
 
   // Firefox
@@ -113,7 +113,7 @@
   border: 1px solid rgba(255, 68, 68, 0.35);
   color: #ff8080;
   font-family: $al-font-body;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   font-weight: 600;
   padding: 0.235rem 0.647rem;
   cursor: pointer;
@@ -142,14 +142,14 @@
 .log-message {
   margin: 0;
   padding: 0.294rem 0.588rem;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   line-height: 1.45;
   border-radius: 0.235rem;
   color: #d0d0d0;
 
   &:nth-child(odd) { background: rgba(255, 255, 255, 0.03); }
 
-  strong { font-size: 0.824rem; }
+  strong { font-size: $al-fs-small; }
 }
 
 .log-empty {
@@ -172,7 +172,7 @@
 
   > p {
     color: #b8b8b8;
-    font-size: 0.824rem;
+    font-size: $al-fs-small;
     line-height: 1.6;
     margin: 0 0 0.706rem;
   }
@@ -182,7 +182,7 @@
      another piece of body copy. */
   > .help-intro-summary {
     color: #e6d9b8;
-    font-size: 0.941rem;
+    font-size: $al-fs-body;
     line-height: 1.65;
     margin: 0 0 1rem;
     padding: 0.706rem 0.941rem;
@@ -213,7 +213,7 @@
 
 .room-code-label {
   display: block;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   color: #888;
   margin-bottom: 0.471rem;
 }
@@ -235,21 +235,21 @@
 
   .room-code-value {
     font-family: 'Courier New', monospace;
-    font-size: 1.412rem;
+    font-size: $al-fs-title;
     font-weight: bold;
     color: #fff;
     letter-spacing: 0.235rem;
   }
 
   i {
-    font-size: 0.941rem;
+    font-size: $al-fs-body;
     color: #888;
   }
 }
 
 .copied-feedback {
   display: block;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   color: #78ff78;
   margin-top: 0.353rem;
 }
@@ -274,7 +274,7 @@
   height: 2.118rem;
   border-radius: 0.353rem;
   cursor: pointer;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   padding: 0;
   margin: 0;
   display: flex;
@@ -335,7 +335,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.471rem;
   color: #888;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   cursor: pointer;
   transition: all 0.2s;
   margin: 0;
@@ -352,8 +352,8 @@
     color: #a0c4ff;
   }
 
-  .lang-flag { font-size: 1.059rem; }
-  .lang-label { font-size: 0.765rem; font-weight: 600; }
+  .lang-flag { font-size: $al-fs-lead; }
+  .lang-label { font-size: $al-fs-small; font-weight: 600; }
 }
 
 .legal-btn {
@@ -362,7 +362,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #999;
   font-family: $al-font-body;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   padding: 0.588rem;
   border-radius: 0.471rem;
   cursor: pointer;
@@ -383,7 +383,7 @@
   border: 1px solid rgba(255, 68, 68, 0.4);
   color: #ff4444;
   font-family: $al-font-body;
-  font-size: 0.882rem;
+  font-size: $al-fs-body;
   padding: 0.706rem;
   border-radius: 0.471rem;
   cursor: pointer;
@@ -411,7 +411,7 @@
 
 .help-phase {
   padding: 0.353rem 0.588rem;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   line-height: 1.4;
   color: #ccc;
   background: rgba(255, 255, 255, 0.03);
@@ -433,7 +433,7 @@
 
   li {
     padding: 0.235rem 0;
-    font-size: 0.824rem;
+    font-size: $al-fs-small;
     color: #ccc;
     line-height: 1.4;
   }
@@ -446,7 +446,7 @@
     border-radius: 0.176rem;
     border: 1px solid rgba(255, 205, 130, 0.18);
     font-family: 'Courier New', monospace;
-    font-size: 0.765rem;
+    font-size: $al-fs-small;
   }
 }
 
@@ -476,13 +476,13 @@
     gap: 0.471rem;
     margin-bottom: 0.294rem;
 
-    i { font-size: 0.941rem; }
-    strong { font-size: 0.882rem; }
+    i { font-size: $al-fs-body; }
+    strong { font-size: $al-fs-body; }
   }
 
   p {
     margin: 0.235rem 0;
-    font-size: 0.765rem;
+    font-size: $al-fs-small;
     color: #c8c8c8;
     line-height: 1.45;
   }
@@ -499,7 +499,7 @@
 
     li {
       position: relative;
-      font-size: 0.706rem;
+      font-size: $al-fs-label;
       color: #c0c0c0;
       line-height: 1.4;
       padding: 0.176rem 0 0.176rem 0.824rem;
@@ -510,7 +510,7 @@
         left: 0.118rem;
         top: 0.176rem;
         color: rgba(255, 205, 130, 0.55);
-        font-size: 0.824rem;
+        font-size: $al-fs-small;
         line-height: 1;
       }
 
@@ -521,7 +521,7 @@
   .help-objective {
     display: block;
     margin-top: 0.294rem;
-    font-size: 0.706rem;
+    font-size: $al-fs-label;
     color: #999;
     font-style: italic;
     padding-top: 0.235rem;

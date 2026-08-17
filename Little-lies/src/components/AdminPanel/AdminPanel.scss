@@ -1,3 +1,4 @@
+@import '../../styles/variables';
 // Admin toggle button (visible only to admins)
 .admin-toggle {
   position: fixed;
@@ -12,7 +13,7 @@
   cursor: pointer;
   z-index: 20;
   padding: 0;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,7 +27,7 @@
 .admin-pw-input {
   width: 5.882rem;
   padding: 0.176rem 0.353rem;
-  font-size: 0.647rem;
+  font-size: $al-fs-label;
   background: rgba(0, 0, 0, 0.8);
   border: 1px solid #333;
   border-radius: 3px;
@@ -36,7 +37,7 @@
 
 .admin-pw-btn, .admin-pw-close {
   padding: 0.176rem 0.353rem;
-  font-size: 0.588rem;
+  font-size: $al-fs-label;
   background: #222;
   color: #888;
   border: 1px solid #333;
@@ -45,7 +46,7 @@
 }
 
 .admin-pw-error {
-  font-size: 0.588rem;
+  font-size: $al-fs-label;
   color: #ff4444;
 }
 
@@ -63,7 +64,7 @@
   padding: 0.941rem;
   z-index: 999;
   backdrop-filter: blur(10px);
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
 }
 
@@ -72,7 +73,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.706rem;
-  font-size: 0.882rem;
+  font-size: $al-fs-body;
   font-weight: bold;
   color: #ff4444;
 
@@ -84,7 +85,7 @@
   border: none;
   color: #666;
   cursor: pointer;
-  font-size: 0.706rem;
+  font-size: $al-fs-label;
   &:hover { color: #fff; }
 }
 
@@ -100,7 +101,7 @@
   width: 100%;
   padding: 0.471rem 0.706rem;
   margin-bottom: 0.294rem;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.235rem;
@@ -133,7 +134,7 @@
 
 .admin-label {
   display: block;
-  font-size: 0.706rem;
+  font-size: $al-fs-label;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.059rem;
@@ -153,7 +154,7 @@
 .admin-input {
   flex: 1;
   padding: 0.353rem 0.588rem;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.235rem;
@@ -178,7 +179,7 @@
   align-items: center;
   padding: 0.235rem 0.471rem;
   border-radius: 0.235rem;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   font-weight: 500;
 
   &.admin-player-dead {
@@ -192,7 +193,7 @@
   border-radius: 0.235rem;
   color: #ff4444;
   padding: 0.176rem 0.471rem;
-  font-size: 0.647rem;
+  font-size: $al-fs-label;
   cursor: pointer;
   transition: all 0.15s;
 
@@ -203,14 +204,14 @@
 }
 
 .admin-dead-tag {
-  font-size: 0.588rem;
+  font-size: $al-fs-label;
   color: #555;
   font-style: italic;
 }
 
 .admin-send {
   padding: 0.294rem 0.588rem;
-  font-size: 0.706rem;
+  font-size: $al-fs-label;
   background: rgba(255, 68, 68, 0.2);
   border: 1px solid rgba(255, 68, 68, 0.3);
   border-radius: 0.235rem;
@@ -232,7 +233,7 @@
   border-radius: 0.235rem;
   color: #ffaa44;
   padding: 0.176rem 0.471rem;
-  font-size: 0.647rem;
+  font-size: $al-fs-label;
   cursor: pointer;
   transition: all 0.15s;
 
@@ -250,7 +251,7 @@
 
 .admin-weather-btn {
   padding: 0.353rem 0.588rem;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 0.235rem;
@@ -280,6 +281,6 @@
 .admin-xp-status {
   display: block;
   margin-top: 0.294rem;
-  font-size: 0.647rem;
+  font-size: $al-fs-label;
   color: #88ff88;
 }

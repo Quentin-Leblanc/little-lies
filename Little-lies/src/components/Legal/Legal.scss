@@ -39,7 +39,7 @@
   h2 {
     margin: 0;
     font-family: $al-font-header;
-    font-size: 1.1rem;
+    font-size: $al-fs-lead;
     color: #ddd;
   }
 }
@@ -47,7 +47,7 @@
 .legal-content {
   padding: 1.176rem 1.412rem;
   overflow-y: auto;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   color: #bbb;
   line-height: 1.6;
 
@@ -57,13 +57,13 @@
 
   h3 {
     font-family: $al-font-header;
-    font-size: 0.9rem;
+    font-size: $al-fs-body;
     color: #ddd;
     margin: 0 0 0.471rem;
 
     i {
       margin-right: 0.471rem;
-      font-size: 0.8rem;
+      font-size: $al-fs-small;
       color: #888;
     }
   }
@@ -102,25 +102,25 @@
 
   strong {
     color: #ccc;
-    font-size: 0.8rem;
+    font-size: $al-fs-small;
   }
 
   span {
     color: #777;
-    font-size: 0.75rem;
+    font-size: $al-fs-small;
   }
 }
 
 .legal-credits-text {
   color: #999;
-  font-size: 0.78rem;
+  font-size: $al-fs-small;
   margin: 0;
   line-height: 1.55;
 }
 
 .legal-assets-intro {
   color: #999;
-  font-size: 0.78rem;
+  font-size: $al-fs-small;
   margin: 0 0 0.5rem;
 }
 
@@ -137,19 +137,19 @@
 
   strong {
     color: #ddd;
-    font-size: 0.8rem;
+    font-size: $al-fs-small;
   }
 
   .legal-asset-role {
     color: #777;
-    font-size: 0.7rem;
+    font-size: $al-fs-label;
     margin-top: 1px;
   }
 }
 
 .legal-asset-link {
   color: #8a9ed6;
-  font-size: 0.72rem;
+  font-size: $al-fs-label;
   text-decoration: none;
   white-space: nowrap;
   padding: 0.2rem 0.4rem;
@@ -158,7 +158,7 @@
 
   i {
     margin-left: 0.3rem;
-    font-size: 0.6rem;
+    font-size: $al-fs-label;
     opacity: 0.7;
   }
 
@@ -170,7 +170,7 @@
 
 .legal-asset-license {
   color: #666;
-  font-size: 0.7rem;
+  font-size: $al-fs-label;
   font-style: italic;
   margin-top: 0.6rem !important;
   line-height: 1.5;
@@ -179,6 +179,6 @@
 .legal-version {
   text-align: center;
   color: #555;
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   margin-top: 0.941rem;
 }

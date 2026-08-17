@@ -24,7 +24,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.35) inset;
   font-family: $al-font-header;
   font-weight: 600;
-  font-size: 0.62rem;
+  font-size: $al-fs-label;
   color: #2a1a05;
   line-height: 1.25;
   text-align: center;
@@ -120,7 +120,7 @@
 }
 
 .scene-alive-count {
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   color: rgba(255, 255, 255, 0.5);
   background: rgba(0, 0, 0, 0.3);
   padding: 0.176rem 0.706rem;
@@ -134,7 +134,7 @@
   border: 2px solid #888;
   border-radius: 0.353rem;
   padding: 0.294rem 0.941rem;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   font-family: $al-font-header;
   font-weight: bold;
   cursor: pointer;
@@ -159,7 +159,7 @@
 
   .vote-3d-count {
     margin-left: 0.235rem;
-    font-size: 0.647rem;
+    font-size: $al-fs-label;
     opacity: 0.8;
     font-weight: normal;
   }
@@ -183,7 +183,7 @@
   border: 1px solid rgba(201, 168, 98, 0.35);
   border-radius: 0.353rem;
   padding: 0.235rem 0.706rem;
-  font-size: 0.706rem;
+  font-size: $al-fs-label;
   font-family: $al-font-header;
   font-weight: bold;
   cursor: pointer;
@@ -232,7 +232,7 @@
 
 .announcement-text {
   font-family: $al-font-header;
-  font-size: 1.6rem;
+  font-size: $al-fs-title;
   font-weight: 800;
   color: $al-text-on-dark;
   padding: 0.95rem 2.2rem;
@@ -259,7 +259,7 @@
   }
 
   &.announcement-report {
-    font-size: 1.2rem;
+    font-size: $al-fs-lead;
     text-align: center;
     line-height: 1.7;
   }
@@ -400,7 +400,7 @@
 
 .lynch-reveal-verdict {
   font-family: $al-font-header;
-  font-size: 2rem;
+  font-size: $al-fs-display;
   font-weight: 800;
   color: #c23a3a;
   letter-spacing: 0.14rem;
@@ -411,7 +411,7 @@
 
 .lynch-reveal-role-label {
   font-family: $al-font-header;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   color: #aaa;
   letter-spacing: 0.22rem;
   text-transform: uppercase;
@@ -419,7 +419,7 @@
 }
 
 .lynch-reveal-team {
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   letter-spacing: 0.25rem;
   text-transform: uppercase;
   font-weight: 700;
@@ -427,7 +427,7 @@
 }
 
 .lynch-reveal-icon {
-  font-size: 3.2rem;
+  font-size: $al-fs-display-lg;
   margin: 0.1rem 0;
   filter: drop-shadow(0 0 12px currentColor);
   animation: lynch-reveal-icon-in 0.6s ease-out 0.4s both;
@@ -435,7 +435,7 @@
 
 .lynch-reveal-role {
   font-family: $al-font-header;
-  font-size: 2.3rem;
+  font-size: $al-fs-display;
   font-weight: 800;
   letter-spacing: 0.18rem;
   text-transform: uppercase;
@@ -455,9 +455,9 @@
 
 @media (max-width: 768px) {
   .lynch-reveal-card { min-width: 85vw; padding: 1.4rem 1rem; }
-  .lynch-reveal-verdict { font-size: 1.3rem; }
-  .lynch-reveal-role { font-size: 1.5rem; }
-  .lynch-reveal-icon { font-size: 2.3rem; }
+  .lynch-reveal-verdict { font-size: $al-fs-lead; }
+  .lynch-reveal-role { font-size: $al-fs-title; }
+  .lynch-reveal-icon { font-size: $al-fs-display; }
 }
 
 @keyframes lynch-reveal-fade {
@@ -499,7 +499,7 @@
 }
 
 .death-report-icon {
-  font-size: 3.5rem;
+  font-size: $al-fs-display-lg;
   margin-bottom: 0.471rem;
 
   .has-dead & {
@@ -527,7 +527,7 @@
 .death-name {
   display: block;
   font-family: $al-font-header;
-  font-size: 2.4rem;
+  font-size: $al-fs-display;
   font-weight: 700;
   color: #ff3333;
   text-shadow: 0 0 24px rgba(200, 30, 30, 0.6), 0 2px 8px rgba(0, 0, 0, 0.8);
@@ -536,7 +536,7 @@
 
 .death-desc {
   display: block;
-  font-size: 1.15rem;
+  font-size: $al-fs-lead;
   color: rgba(220, 210, 220, 0.85);
   font-style: italic;
   margin-top: 0.471rem;
@@ -556,7 +556,7 @@
 
 .death-role-reveal {
   display: block;
-  font-size: 1.2rem;
+  font-size: $al-fs-lead;
   font-weight: 700;
   color: #ff6666;
   font-style: normal;
@@ -598,14 +598,14 @@
   gap: 0.45rem;
   padding: 0.35rem 0.8rem;
   border-radius: $al-radius-pill;
-  font-size: 0.88rem;
+  font-size: $al-fs-body;
   background: rgba(30, 24, 50, 0.7);
   border: 1.5px solid $al-gold-rich;
   color: $al-text-on-dark;
   backdrop-filter: blur(4px);
 
-  i { font-size: 0.85rem; color: $al-gold-hot; }
-  .death-meta-label { color: $al-text-on-dark-mute; letter-spacing: 0.05em; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+  i { font-size: $al-fs-small; color: $al-gold-hot; }
+  .death-meta-label { color: $al-text-on-dark-mute; letter-spacing: 0.05em; font-size: $al-fs-label; font-weight: 700; text-transform: uppercase; }
   strong { font-weight: 800; letter-spacing: 0.02em; }
 }
 
@@ -668,7 +668,7 @@
    the 3-4s morning overlay. */
 .death-role-desc {
   font-family: $al-font-body;
-  font-size: 0.86rem;
+  font-size: $al-fs-small;
   color: rgba(230, 225, 215, 0.8);
   font-style: italic;
   line-height: 1.45;
@@ -679,7 +679,7 @@
 
 .death-role-label {
   font-family: $al-font-header;
-  font-size: 0.85rem;
+  font-size: $al-fs-small;
   letter-spacing: 0.16rem;
   text-transform: uppercase;
   color: rgba(230, 220, 220, 0.7);
@@ -690,12 +690,12 @@
   align-items: center;
   gap: 0.65rem;
   font-family: $al-font-header;
-  font-size: 1.55rem;
+  font-size: $al-fs-title;
   font-weight: 800;
   letter-spacing: 0.08rem;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
   i {
-    font-size: 1.55rem;
+    font-size: $al-fs-title;
     filter: drop-shadow(0 0 8px currentColor);
   }
 }
@@ -711,7 +711,7 @@
   border-left: 3px solid rgba(200, 170, 90, 0.65);
   border-radius: 0 0.35rem 0.35rem 0;
   color: rgba(240, 225, 200, 0.92);
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   line-height: 1.45;
   opacity: 0;
   animation: role-reveal-fade 0.9s ease-out 2.3s forwards;
@@ -724,7 +724,7 @@
   font-weight: 700;
   letter-spacing: 0.08rem;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   color: rgba(200, 170, 90, 0.9);
   margin-right: 0.25rem;
   flex-shrink: 0;
@@ -742,7 +742,7 @@
 
 .death-report-safe {
   font-family: $al-font-header;
-  font-size: 2.2rem;
+  font-size: $al-fs-display;
   font-weight: 800;
   color: #f0f0f0;
   text-align: center;
@@ -769,10 +769,10 @@
     max-width: 90vw;
   }
   .death-name {
-    font-size: 1.6rem;
+    font-size: $al-fs-title;
   }
   .death-desc {
-    font-size: 1rem;
+    font-size: $al-fs-lead;
   }
 }
 
@@ -796,7 +796,7 @@
 
 .night-ambiance-text {
   font-family: $al-font-header;
-  font-size: 1.294rem;
+  font-size: $al-fs-lead;
   font-style: italic;
   color: rgba(232, 212, 154, 0.85);
   padding: 0.706rem 1.765rem;
@@ -879,7 +879,7 @@
 
 .night-text-content {
   font-family: $al-font-header;
-  font-size: 2.118rem;
+  font-size: $al-fs-display;
   letter-spacing: 0.235rem;
   padding: 0.824rem 2.118rem;
 
@@ -905,7 +905,7 @@
   // Body font rather than a third family: Nunito is already loaded and
   // renders mixed case, which is the whole point here.
   font-family: $al-font-body;
-  font-size: 0.95rem;
+  font-size: $al-fs-body;
   font-style: italic;
   letter-spacing: 0.04rem;
   padding: 0.45rem 1rem;

@@ -11,7 +11,7 @@
   position: absolute;
   bottom: 2.647rem;
   right: 1.176rem;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   color: #ff8686;
 }
 
@@ -23,7 +23,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  font-size: 0.9rem;
+  font-size: $al-fs-body;
   color: $al-text-on-dark;
   box-sizing: border-box;
   position: relative;
@@ -70,7 +70,7 @@
   margin: 0 0 -1px 0; // overlap the container's bottom border
   color: $al-text-on-dark-mute;
   font-family: $al-font-header;
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   font-weight: 700;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
@@ -78,7 +78,7 @@
   box-shadow: none;
   transition: color $al-trans-fast, border-color $al-trans-fast;
 
-  i { font-size: 0.72rem; opacity: 0.8; }
+  i { font-size: $al-fs-label; opacity: 0.8; }
 
   &:hover { color: $al-text-on-dark; background: transparent; }
 
@@ -102,7 +102,7 @@
     height: 1.1rem;
     padding: 0 0.4rem;
     font-family: $al-font-body;
-    font-size: 0.68rem;
+    font-size: $al-fs-label;
     font-weight: 800;
     border-radius: $al-radius-pill;
     background: rgba(245, 236, 214, 0.18);
@@ -144,7 +144,7 @@
 .dead-chat-banner {
   text-align: center;
   color: #888;
-  font-size: 0.824rem;
+  font-size: $al-fs-small;
   padding: 0.235rem;
   border-bottom: 1px solid rgba(255,255,255,0.1);
   margin-bottom: 0.294rem;
@@ -161,7 +161,7 @@
   text-align: center;
 
   i {
-    font-size: 2.5rem;
+    font-size: $al-fs-display;
     margin-bottom: 0.588rem;
     color: #445;
   }
@@ -169,11 +169,11 @@
   p {
     margin: 0.235rem 0;
     font-family: $al-font-header;
-    font-size: 0.941rem;
+    font-size: $al-fs-body;
   }
 
   .chat-night-sub {
-    font-size: 0.824rem;
+    font-size: $al-fs-small;
     color: #556;
     font-family: inherit;
   }
@@ -209,7 +209,7 @@
   &.msg-whisper-notice {
     .chat-message {
       color: #888;
-      font-size: 0.765rem;
+      font-size: $al-fs-small;
       font-style: italic;
     }
     .chat-message-background { opacity: 0; }
@@ -244,7 +244,7 @@
     .chat-message, .chat-day-separator {
       color: #c8daf0 !important;
       font-weight: 600;
-      font-size: 0.765rem;
+      font-size: $al-fs-small;
     }
   }
 
@@ -284,7 +284,7 @@
 //          colours stay readable at a moderate 0.32 opacity.
 .chat-message {
   position: relative;
-  font-size: 1.05rem !important;
+  font-size: $al-fs-lead !important;
   line-height: 1.45;
   width: 100%;
   color: #fff;
@@ -305,27 +305,27 @@
 
 .whisper-prefix {
   color: #da70d6;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   margin-right: 0.235rem;
   font-weight: bold;
 }
 
 .dead-prefix {
   color: #666;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   margin-right: 0.235rem;
 }
 
 .mafia-prefix {
   color: #ff4444;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   margin-right: 0.235rem;
   font-weight: bold;
 }
 
 .cult-prefix {
   color: #a96edd;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   margin-right: 0.235rem;
   font-weight: bold;
 }
@@ -338,7 +338,7 @@
 .chat-day-separator {
   text-align: left;
   color: #fff;
-  font-size: 0.706rem;
+  font-size: $al-fs-label;
   padding: 0.176rem 0;
   font-style: italic;
   margin-top: 0.235rem;
@@ -356,7 +356,7 @@
 
 .chat-input-name {
   font-weight: bold;
-  font-size: 0.765rem;
+  font-size: $al-fs-small;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -379,7 +379,7 @@
 
 .chat-input-hint-outside {
   text-align: left;
-  font-size: 0.882rem;
+  font-size: $al-fs-body;
   color: #ddd;
   padding: 0.353rem 0.235rem;
   margin-top: 0.235rem;
@@ -389,7 +389,7 @@
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 0.176rem;
     padding: 0.059rem 0.294rem;
-    font-size: 0.824rem;
+    font-size: $al-fs-small;
     color: #888;
   }
 }
@@ -407,11 +407,11 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.471rem;
   color: #aaa;
-  font-size: 0.75rem;
+  font-size: $al-fs-small;
   font-style: italic;
   letter-spacing: 0.02rem;
   user-select: none;
-  i { color: #888; font-size: 0.75rem; }
+  i { color: #888; font-size: $al-fs-small; }
 }
 
 .chat-input {
@@ -421,7 +421,7 @@
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 0.235rem;
   padding: 0.55rem 0.75rem;
-  font-size: 1.12rem;
+  font-size: $al-fs-lead;
   font-family: inherit;
   transition: border-color 0.2s;
 
@@ -476,16 +476,16 @@
 @media (max-width: 768px) {
   .chat-container {
     padding: 0.235rem 0.471rem;
-    font-size: 0.706rem;
+    font-size: $al-fs-label;
   }
   .chat-input {
-    font-size: 0.824rem;
+    font-size: $al-fs-small;
     padding: 0.471rem 0.588rem;
     min-height: 2.118rem;
   }
   .chat-send-button {
     padding: 0.471rem 0.824rem;
-    font-size: 0.824rem;
+    font-size: $al-fs-small;
     min-height: 2.118rem;
   }
 }

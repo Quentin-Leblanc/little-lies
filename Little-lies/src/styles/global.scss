@@ -55,8 +55,19 @@ a[aria-disabled='true'],
 }
 
 html {
-    // Designed at 2560px (17px). Scales proportionally down to ~1660px (11px min).
-    font-size: clamp(11px, 0.664vw, 17px);
+    // The whole UI was authored on a 2560px monitor and the root size
+    // scaled with viewport width, so every rem in the app shrank on
+    // smaller screens: body text landed at 11.7px on a 1920px laptop
+    // and 10.1px below 1660px. The interface was only legible on the
+    // machine it was designed on.
+    //
+    // The floor is now 14px. Large screens keep the exact behaviour
+    // they had (still 17px at 2560px), so nothing changes there — but
+    // no player ever reads the game at 10px again.
+    //
+    // Do not lower this floor to fit more content on screen. If a panel
+    // overflows at 14px, the panel holds too much.
+    font-size: clamp(14px, 0.664vw, 17px);
 }
 
 html, body, #root {
@@ -77,7 +88,7 @@ button {
     color: $al-text-on-light;
     border: 1px solid $al-border-strong;
     padding: 0.5rem 1rem;
-    font-size: 0.92rem;
+    font-size: $al-fs-body;
     font-family: $al-font-body;
     font-weight: 700;
     text-transform: none;
@@ -141,7 +152,7 @@ h1, h2 {
 
 // Global minimum font size for game UI
 .game-layout {
-    font-size: 0.9rem;
+    font-size: $al-fs-body;
 
     p, span, li, div, label, input, textarea {
         font-size: inherit;
