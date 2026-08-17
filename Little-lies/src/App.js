@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePlayersList, getRoomCode } from 'playroomkit';
 import {
-    Graveyard,
     MainScene,
     Setup,
     Chat,
     Player,
-    Roles,
+    Village,
 } from './components';
 import { useGameEngine } from './hooks/useGameEngine';
 import GameComponent from './components/GameComponent/GameComponent';
@@ -279,16 +278,13 @@ function App() {
                     return (
                         <>
                             <div className={`game-layout ${uiClass}`}>
-                                {/* Top-left — who's still in the village.
-                                    The old Menu bar that sat above this
-                                    block moved into the TopBar: it
-                                    duplicated the title, help and sound
-                                    the TopBar already carried. */}
+                                {/* Top-left — the board reference: roles in
+                                    play + the dead. Was two boxes drawn in
+                                    two opposite themes; now one panel. The
+                                    Menu bar that sat above them moved into
+                                    the TopBar. */}
                                 <div className="layout-players">
-                                    <div className="players-row">
-                                        <Graveyard />
-                                        <Roles />
-                                    </div>
+                                    <Village />
                                 </div>
                                 <AdminPanel />
 

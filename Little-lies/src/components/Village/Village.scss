@@ -1,0 +1,295 @@
+@import '../../styles/variables';
+
+// ─────────────────────────────────────────────────────────────────────
+// Village — one panel, one surface.
+//
+// The two boxes this replaces were drawn in opposite themes: the
+// graveyard used the cream `al-card` (dark text on light) while the
+// role list used the dark HUD glass (light text on dark). Side by side,
+// over the same 3D scene. This panel commits to the single in-game
+// surface: dark glass, light text.
+// ─────────────────────────────────────────────────────────────────────
+
+.village-box {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: $al-grad-hud-panel;
+  backdrop-filter: blur(3px);
+  border: 1px solid $al-hud-border;
+  border-radius: $al-radius-md;
+  color: $al-text-on-dark;
+  overflow: hidden;
+}
+
+.village-section {
+  & + & {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid $al-border-dark-subtle;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.4rem;
+    font-family: $al-font-body;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: $al-track-label;
+    text-transform: uppercase;
+    color: $al-text-on-dark-dim;
+
+    i {
+      font-size: 0.7rem;
+      color: $al-text-on-dark-dim;
+    }
+  }
+
+  &__count {
+    margin-left: auto;
+    padding: 0.05rem 0.4rem;
+    border-radius: $al-radius-pill;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid $al-border-dark-subtle;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: $al-text-on-dark-mute;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.village-empty {
+  margin: 0;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: $al-text-on-dark-dim;
+}
+
+.village-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+// ── Role chip (in play) ──
+.village-role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.18rem 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid;
+  border-radius: $al-radius-pill;
+  box-shadow: none;
+  font-family: $al-font-body;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background $al-trans-fast, transform $al-trans-fast;
+
+  i { font-size: 0.8em; }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.11);
+    transform: translateY(-1px);
+  }
+
+  &__count {
+    padding: 0 0.25rem;
+    border-radius: $al-radius-pill;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.85em;
+    color: $al-text-on-dark-mute;
+  }
+}
+
+// ── Dead chip ──
+.village-dead-chip {
+  --dot: #{$al-text-on-dark-dim};
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.22rem 0.55rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid color-mix(in srgb, var(--dot) 30%, $al-border-dark-subtle);
+  border-radius: $al-radius-pill;
+  box-shadow: none;
+  font-family: $al-font-body;
+  font-size: 0.68rem;
+  color: $al-text-on-dark;
+  cursor: default;
+  transition: border-color $al-trans-fast, background $al-trans-fast;
+
+  &.has-will {
+    cursor: pointer;
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--dot) 55%, $al-border-dark-subtle);
+      background: rgba(0, 0, 0, 0.42);
+    }
+  }
+
+  &.is-active {
+    border-color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 12%, rgba(0, 0, 0, 0.5));
+  }
+
+  // Read-only chips keep the styling; only the cursor changes.
+  &:disabled { cursor: default; }
+
+  &__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex-shrink: 0;
+  }
+
+  &__name { font-weight: 700; }
+  &__sep { color: $al-text-on-dark-dim; }
+  &__role { color: var(--dot); }
+
+  &__scroll {
+    font-size: 0.62rem;
+    color: $al-gold;
+    opacity: 0.75;
+  }
+}
+
+// Last will opens in one slot below the row, so several wills never
+// stack inside the chip flow.
+.village-will-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: $al-radius-sm;
+  border-left: 2px solid $al-gold;
+  background: rgba(240, 184, 64, 0.09);
+  font-size: 0.72rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: $al-text-on-dark-mute;
+
+  i { color: $al-gold; margin-top: 0.12rem; }
+  p { margin: 0; }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Role detail dialog — opened from a role chip.
+// Anchored to the top of the viewport rather than centred: the panel
+// itself lives at the top of the screen, and centring cropped the
+// dialog on short viewports.
+// ─────────────────────────────────────────────────────────────────────
+.role-detail-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4.5rem;
+  background: $al-veil;
+  backdrop-filter: blur(3px);
+  z-index: 900;
+  overflow-y: auto;
+}
+
+.role-detail-dialog {
+  width: 90%;
+  max-width: 24.7rem;
+  max-height: calc(100vh - 6rem);
+  padding: 1.15rem;
+  background: $al-grad-hud-panel;
+  border: 1px solid $al-hud-border;
+  border-radius: $al-radius-md;
+  color: $al-text-on-dark;
+  overflow-y: auto;
+  animation: role-detail-slide-in 0.2s ease-out;
+}
+
+@keyframes role-detail-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.role-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+.role-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  i { font-size: 1.4rem; }
+  h3 {
+    margin: 0;
+    font-family: $al-font-header;
+    font-size: 1.15rem;
+  }
+}
+
+.role-detail-team {
+  margin-bottom: 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: $al-track-title;
+  text-transform: uppercase;
+}
+
+.role-detail-desc {
+  margin: 0.45rem 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: $al-text-on-dark-mute;
+}
+
+.role-detail-obj {
+  margin: 0.45rem 0;
+  padding: 0.45rem;
+  border-left: 2px solid $al-border-dark-soft;
+  font-size: 0.76rem;
+  font-style: italic;
+  color: $al-text-on-dark-dim;
+}
+
+.role-detail-abilities {
+  margin-top: 1rem;
+  padding: 0.8rem 0.9rem;
+  background: rgba(240, 184, 64, 0.07);
+  border-left: 3px solid $al-gold;
+  border-radius: $al-radius-sm;
+
+  .role-detail-abilities-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 0.5rem;
+    font-family: $al-font-header;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: $al-track-button;
+    color: $al-gold;
+
+    i { font-size: 0.9rem; }
+  }
+
+  ul { list-style: none; padding: 0; margin: 0; }
+
+  li {
+    padding: 0.35rem 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+
+    strong { color: $al-gold-soft; margin-right: 0.25rem; }
+    & + li { border-top: 1px dashed rgba(240, 184, 64, 0.18); }
+  }
+}

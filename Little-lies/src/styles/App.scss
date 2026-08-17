@@ -153,7 +153,9 @@
   & > * { position: relative; z-index: 1; }
 }
 
-// Top-left — Menu + (Graveyard | Roles) side by side
+// Top-left — the Village panel (roles in play + the dead). Capped so a
+// long roster scrolls inside the panel instead of pushing down the
+// board; the 3D scene stays readable underneath.
 .layout-players {
   grid-area: players;
   overflow: visible;
@@ -162,16 +164,9 @@
   background: none;
   display: flex;
   flex-direction: column;
-  gap: 0.235rem;
   pointer-events: auto;
-
-  // Graveyard + Roles on one row — spaced from menu
-  .players-row {
-    display: flex;
-    gap: 0.353rem;
-    align-items: stretch;
-    margin-top: 0.941rem;
-  }
+  width: 22rem;
+  max-width: 40vw;
 }
 
 // Center — 3D scene fullscreen behind everything
