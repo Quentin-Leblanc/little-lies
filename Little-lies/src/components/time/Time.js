@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
+import Audio from '../../utils/AudioManager';
 import './Time.scss';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Big "5… 4… 3… 2… 1" overlay that pops in during the last 5 seconds of
 // VOTING. Unchanged from the original Time HUD — just kept local to this
@@ -14,9 +15,14 @@ const FINAL_FIVE_COLORS = {
   2: '#ff5252',
   1: '#ff3344',
 };
-const FinalFiveCountdown = ({ phase, timeRemaining }) => {
-  const active = phase === 'VOTING' && timeRemaining > 0 && timeRemaining <= 5;
+// Grows as the clock runs out: 5 is a discreet reminder, 1 fills the
+// screen. The old version jumped straight to full size at 5, which read
+// as an alarm going off rather than time draining away.
+const FINAL_FIVE_SCALE = { 5: 0.5, 4: 0.62, 3: 0.76, 2: 0.9, 1: 1.08 };
+
+const FinalFiveCountdown = ({ active, timeRemaining }) => {
   const color = FINAL_FIVE_COLORS[timeRemaining] || '#ff5252';
+  const scale = FINAL_FIVE_SCALE[timeRemaining] || 1;
   const rgb = color.replace('#', '');
   const r = parseInt(rgb.substring(0, 2), 16);
   const g = parseInt(rgb.substring(2, 4), 16);
@@ -33,10 +39,13 @@ const FinalFiveCountdown = ({ phase, timeRemaining }) => {
           key={`finalfive-${timeRemaining}`}
           className="final-five-countdown"
           style={{ color, textShadow }}
-          initial={{ opacity: 0, scale: 0.6, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 1.4, y: 4 }}
-          transition={{ duration: 0.45, ease: [0.2, 0.9, 0.3, 1.1] }}
+          // x: '-50%' does the horizontal centring here rather than in
+          // CSS — motion composes its own transform and would discard a
+          // stylesheet translateX.
+          initial={{ opacity: 0, scale: scale * 0.75, x: '-50%', y: -8 }}
+          animate={{ opacity: 1, scale, x: '-50%', y: 0 }}
+          exit={{ opacity: 0, scale: scale * 1.3, x: '-50%', y: 4 }}
+          transition={{ duration: 0.42, ease: [0.2, 0.9, 0.3, 1.1] }}
         >
           {timeRemaining}
         </motion.div>
@@ -91,6 +100,25 @@ const Time = () => {
     return () => clearInterval(interval);
   }, [isPaused, phase]);
 
+  // Audible warning on the last three seconds, so a player who looked
+  // away doesn't lose an un-taken action. Keyed on "phase + second" so
+  // the 100ms interval above can't fire the same second twice and a
+  // phase change re-arms it cleanly.
+  //
+  // Declared here, above the cinematic early-return: a hook after a
+  // conditional return changes the hook order between renders and React
+  // throws the moment the intro ends.
+  const lastBeepRef = useRef(null);
+  useEffect(() => {
+    if (isPaused || isInfoPhase) return;
+    const secs = Math.floor(localTimer / 1000);
+    if (secs > 3 || secs < 1) return;
+    const stamp = `${phase}-${secs}`;
+    if (lastBeepRef.current === stamp) return;
+    lastBeepRef.current = stamp;
+    Audio.playCountdownTick(secs);
+  }, [localTimer, phase, isPaused, isInfoPhase]);
+
   // Opening cinematic: no UI.
   if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) return null;
 
@@ -109,12 +137,12 @@ const Time = () => {
   const dayNightKey = isDay ? 'day' : 'night';
   const dayNightShort = t(`common:${dayNightKey}`, { defaultValue: dayNightKey }).toUpperCase();
   const dayNumberText = isDay ? `${dayCount}` : dayCount.toString().padStart(2, '0');
-  const midLabel = isPaused
-    ? 'PAUSE'
-    : (showCountdown ? `${dayNightShort} ${dayNumberText} · ${formatMs(localTimer)}` : `${dayNightShort} ${dayNumberText}`);
+  const midLabel = isPaused ? 'PAUSE' : `${dayNightShort} ${dayNumberText}`;
 
-  // Final-five recoloring only applies in VOTING.
-  const urgentClass = phase === 'VOTING' && timeRemaining > 0 && timeRemaining <= 5 ? 'is-urgent' : '';
+  // The last five seconds of ANY phase with a deadline, not just voting:
+  // a night action left untaken is lost exactly the same way a vote is.
+  const isFinalFive = showCountdown && !isPaused && timeRemaining > 0 && timeRemaining <= 5;
+  const urgentClass = isFinalFive ? 'is-urgent' : '';
 
   // Dramatic phases get a one-shot color flash + persistent tinted border on
   // the phase pill — replaces the giant center "phase banner" overlay that
@@ -125,38 +153,37 @@ const Time = () => {
 
   return (
     <div className="time-hud">
-      {/* Pill 1 — day counter + phase name */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`phase-pill-${phase}`}
-          className={`time-pill time-pill--phase ${dramaticPhaseClass}`}
-          initial={{ opacity: 0.4 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0.4 }}
-          transition={{ duration: 0.25 }}
-        >
-          <i className="fas fa-book" aria-hidden="true"></i>
-          <span className="time-pill__label">{phaseLabel}</span>
-        </motion.div>
-      </AnimatePresence>
+      {/* Pill 1 — phase name + seconds left, side by side. The countdown
+          lives here: "what's happening" and "how long have I got" are
+          one question and belong in one place.
 
-      {/* Pill 2 — day/night + countdown */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          className={`time-pill time-pill--timer ${urgentClass}`}
-          key={midLabel}
-          initial={{ opacity: 0.3 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0.3 }}
-          transition={{ duration: 0.25 }}
-        >
-          <i
-            className={`fas ${isPaused ? 'fa-pause' : (isDay ? 'fa-sun' : 'fa-moon')}`}
-            aria-hidden="true"
-          ></i>
-          <span className="time-pill__label">{midLabel}</span>
-        </motion.div>
-      </AnimatePresence>
+          NO opacity animation anywhere in this HUD. The old version
+          wrapped the timer pill in AnimatePresence keyed on a label
+          containing the seconds, so it unmounted and remounted every
+          single tick — that was the once-a-second blink. The phase pill
+          is now a plain element that simply stays on screen; the
+          phase-change cue is the CSS colour flash below
+          (.time-pill--phase-*), which fires once and never touches
+          opacity. */}
+      <div
+        key={`phase-pill-${phase}`}
+        className={`time-pill time-pill--phase ${dramaticPhaseClass} ${urgentClass}`}
+      >
+        <i className="fas fa-book" aria-hidden="true"></i>
+        <span className="time-pill__label">{phaseLabel}</span>
+        {showCountdown && !isPaused && (
+          <span className="time-pill__seconds">{formatMs(localTimer)}</span>
+        )}
+      </div>
+
+      {/* Pill 2 — day / night counter. Static: no per-second key. */}
+      <div className="time-pill time-pill--timer">
+        <i
+          className={`fas ${isPaused ? 'fa-pause' : (isDay ? 'fa-sun' : 'fa-moon')}`}
+          aria-hidden="true"
+        ></i>
+        <span className="time-pill__label">{midLabel}</span>
+      </div>
 
       {/* Pill 3 — alive / total */}
       <div className="time-pill">
@@ -164,7 +191,7 @@ const Time = () => {
         <span className="time-pill__label">{aliveCount}<span className="time-pill__slash"> / </span>{totalCount}</span>
       </div>
 
-      <FinalFiveCountdown phase={phase} timeRemaining={timeRemaining} />
+      <FinalFiveCountdown active={isFinalFive} timeRemaining={timeRemaining} />
     </div>
   );
 };

@@ -27,9 +27,13 @@
   border: 1px solid $al-hud-border;
   border-radius: $al-radius-pill;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-  font-family: $al-font-header;
-  font-size: $al-fs-small;
-  font-weight: 700;
+  // Cinzel at small size made the phase name hard to read at a glance —
+  // it's a capitals-only display serif and this is the one label a
+  // player checks constantly. Body face, one step up, still uppercase
+  // for the HUD register.
+  font-family: $al-font-body;
+  font-size: $al-fs-body;
+  font-weight: $al-fw-bold;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
   color: $al-text-on-dark;
@@ -47,15 +51,31 @@
     font-variant-numeric: tabular-nums;
   }
 
+  // Seconds remaining, sitting beside the phase name. Tabular figures
+  // and a fixed min-width so the pill doesn't twitch as digits change.
+  &__seconds {
+    margin-left: 0.15rem;
+    padding-left: 0.55rem;
+    border-left: 1px solid $al-border-dark-soft;
+    min-width: 3.1rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: $al-gold-hot;
+    letter-spacing: 0.02em;
+  }
+
+  &--phase.is-urgent &__seconds { color: #ff8a8a; }
+
   &__slash {
     color: $al-text-faint;
     margin: 0 0.15rem;
     font-weight: 400;
   }
 
-  // Timer pill picks up a warm amber tint when in urgent mode (final 5s
-  // of a VOTING phase). Slight border bump + icon recoloring sell the
-  // deadline without stealing the show from the big Final-Five overlay.
+  // Urgent tint in the last 5s of any phase with a deadline. Slight
+  // border bump + icon recolouring sell it without stealing the show
+  // from the big Final-Five overlay below.
+  &--phase.is-urgent,
   &--timer.is-urgent {
     border-color: rgba(255, 82, 82, 0.55);
     color: #ffd9d9;
@@ -129,15 +149,21 @@
 }
 
 // ── Final-five vote countdown ─────────────────────────────────────
+// Sits under the phase pill. Centring is done by framer (x: '-50%'),
+// NOT by a CSS transform: motion writes its own transform string from
+// the animated values, which would drop a stylesheet translateX and
+// shunt the number off to the right.
 .final-five-countdown {
   position: absolute;
   left: 50%;
   top: calc(2.25rem + 0.75rem);
-  transform: translateX(-50%);
-  font-family: $al-font-header;
+  transform-origin: top center;
+  // Body face, heavy: these are digits read in a fraction of a second
+  // from across the room, not a ceremonial title.
+  font-family: $al-font-body;
   font-size: $al-fs-display-lg;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-weight: 900;
+  letter-spacing: 0.02em;
   color: #ff5252;
   text-shadow:
     0 0 16px rgba(255, 80, 80, 0.55),

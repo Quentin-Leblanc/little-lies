@@ -74,7 +74,11 @@ const ChatBubble = ({ playerId, chatMessages, dayCount, phase }) => {
     <Html
       position={[0, 2.9, 0]}
       center
-      distanceFactor={7}
+      // drei scales the HTML by distanceFactor/distance, so this is the
+      // on-screen size of the bubble. 7 made it legible only when the
+      // camera was close; from the day-phase overview shot the text was
+      // a smudge. 10 keeps it readable at the widest game camera.
+      distanceFactor={10}
       zIndexRange={[5, 0]}
       style={{ pointerEvents: 'none' }}
     >

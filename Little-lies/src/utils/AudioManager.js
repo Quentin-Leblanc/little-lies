@@ -165,6 +165,27 @@ export const playTick = () => {
   playTone(600, 0.05, 'square');
 };
 
+/**
+ * Final-seconds countdown cue — fires at 3, 2 and 1 to warn the table
+ * that the phase is about to advance and an un-taken action is about to
+ * be lost.
+ *
+ * Synthesised rather than sampled on purpose: it costs no asset, no
+ * network request and no licence, it can't clip or arrive late, and the
+ * pitch can be tuned exactly. Three and two share a pitch, one lands a
+ * fourth higher and rings slightly longer — the shape everyone already
+ * reads as "time's up".
+ *
+ * @param {number} secondsLeft 3, 2 or 1
+ */
+export const playCountdownTick = (secondsLeft) => {
+  if (secondsLeft === 1) {
+    playTone(1175, 0.22, 'triangle');
+  } else {
+    playTone(880, 0.11, 'triangle');
+  }
+};
+
 /** Action blocked (roleblock by Escort/Consort) */
 export const playActionBlocked = () => {
   playFile('/sounds/doorClose_1.ogg', 0.55);
@@ -259,7 +280,7 @@ export default {
   setVolume, getVolume, toggleMute, isMuted,
   playNightStart, playDayStart, playVote, playDeath,
   playExecution, playSpared, playActionSelect,
-  playVictory, playDefeat, playTick, playDoorClose,
+  playVictory, playDefeat, playTick, playCountdownTick, playDoorClose,
   playDeathBell, playActionBlocked, playJailed,
   playLobbyMusic, stopLobbyMusic,
 };
