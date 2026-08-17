@@ -122,5 +122,10 @@
   "role_unique": "Un seul par partie",
   "role_unique_short": "unique",
   "role_add_one": "Ajouter un {{name}}",
-  "role_remove_one": "Retirer un {{name}}"
+  "role_remove_one": "Retirer un {{name}}",
+  "deck_title": "Le deck",
+  "deck_hint": "Clic pour ajouter · clic droit pour retirer",
+  "deck_hint_guest": "L'hôte compose la partie",
+  "bag_title": "Dans la partie",
+  "bag_empty": "Choisis des cartes à gauche pour composer la partie."
 }

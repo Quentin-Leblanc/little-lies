@@ -1,6 +1,8 @@
+import { useRef } from 'react';
 import { isHost, usePlayersList } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import { useGameEngine } from '../../hooks/useGameEngine';
+import RoleCard from '../RoleCard/RoleCard';
 
 // Faction ordering. Roles outside these four teams bucket under
 // "neutral" so they still appear somewhere instead of vanishing.
@@ -8,26 +10,22 @@ const FACTIONS = ['town', 'mafia', 'neutral', 'cult'];
 const bucketFor = (team) => (FACTIONS.includes(team) ? team : 'neutral');
 
 // ─────────────────────────────────────────────────────────────────────
-// Roles — one list, one stepper per row.
+// Roles — the draft table.
 //
-//   VILLAGE                                    3
-//     🛡  Villageois          −   2   +
-//     ⭐  Sheriff             −   1   +
-//     💉  Docteur             −   0   +
-//   MAFIA                                      1
-//     🔫  Mafioso             −   1   +
+//   ┌──────────────────────────────┬────────────────────┐
+//   │  LE DECK (toutes les cartes) │  DANS LA PARTIE    │
+//   │  grille de cartes par camp   │  cartes choisies   │
+//   │  clic → un gros chiffre      │  clic → en retire  │
+//   │  s'affiche sur la carte      │  une               │
+//   └──────────────────────────────┴────────────────────┘
 //
-// What this replaces: two side-by-side zones — a catalogue you clicked
-// to add from, and a numbered roster you clicked to remove from. Three
-// problems with that. It asked the player to hold two lists and their
-// relationship in their head. It repeated duplicates as separate rows
-// ("1. Villageois", "2. Villageois") instead of counting them. And it
-// numbered the roster slots, which encoded nothing at all — roles are
-// shuffled and dealt at random, so slot 3 means exactly as much as
-// slot 7.
+// Left is the deck: every role, always in the same place, so the host
+// builds muscle memory for where a card lives. Clicking one adds a copy
+// and paints the count straight onto its art.
 //
-// Setting up a werewolf game is one question: how many of each role?
-// So there is one list, and each row answers it.
+// Right is the bag: only what's actually going into this game. It's a
+// different surface on purpose — deck and bag must never be mistaken
+// for one another.
 // ─────────────────────────────────────────────────────────────────────
 const Roles = () => {
   const { t } = useTranslation(['setup', 'game', 'roles']);
@@ -38,23 +36,46 @@ const Roles = () => {
   const countOf = (key) => rolesSelected.filter((r) => r.key === key).length;
   const slotsLeft = nbPlayers - rolesSelected.length;
 
-  const addRole = (role) => {
-    if (!host || slotsLeft <= 0) return;
-    if (role.unique && countOf(role.key) >= 1) return;
-    setRolesSelected([...rolesSelected, role]);
+  // Two clicks inside the same frame both read the same `rolesSelected`
+  // from their closure, so the second one writes the same array again
+  // and a click is silently lost — exactly what a host does when they
+  // double-tap a card to add two villagers. PlayroomKit's setter takes
+  // no updater callback (see CLAUDE.md), so the live value is tracked
+  // in a ref and every mutation reads through it.
+  const liveRef = useRef(rolesSelected);
+  liveRef.current = rolesSelected;
+
+  const commit = (next) => {
+    liveRef.current = next;
+    setRolesSelected(next);
   };
 
-  // Removes the last instance of that role — with a count-based list
-  // there's no meaningful "which one", they're identical.
+  const addRole = (role) => {
+    if (!host) return;
+    const live = liveRef.current;
+    if (nbPlayers - live.length <= 0) return;
+    if (role.unique && live.some((r) => r.key === role.key)) return;
+    commit([...live, role]);
+  };
+
+  // Removes the last copy — with a count-based deck there is no
+  // meaningful "which one", the copies are identical.
   const removeRole = (key) => {
     if (!host) return;
-    const last = rolesSelected.map((r) => r.key).lastIndexOf(key);
+    const live = liveRef.current;
+    const last = live.map((r) => r.key).lastIndexOf(key);
     if (last === -1) return;
-    setRolesSelected(rolesSelected.filter((_, i) => i !== last));
+    commit(live.filter((_, i) => i !== last));
   };
 
-  // Group by faction; villageois anchors first in town since it's the
-  // filler role people reach for.
+  // Left-click adds, right-click removes. The right panel is the
+  // discoverable way to remove; this is the shortcut for people who
+  // find it.
+  const onCardContext = (e, role) => {
+    e.preventDefault();
+    removeRole(role.key);
+  };
+
   const grouped = FACTIONS.reduce((acc, f) => ({ ...acc, [f]: [] }), {});
   rolesAvailable.forEach((role) => {
     grouped[bucketFor(role.team)].push(role);
@@ -70,83 +91,108 @@ const Roles = () => {
   const factionTotal = (faction) =>
     rolesSelected.filter((r) => bucketFor(r.team) === faction).length;
 
+  // The bag, collapsed to one entry per role with its count — a bag
+  // holding three villagers is one stack of three, not three rows.
+  const bagStacks = [];
+  rolesSelected.forEach((role) => {
+    const found = bagStacks.find((s) => s.role.key === role.key);
+    if (found) found.count += 1;
+    else bagStacks.push({ role, count: 1 });
+  });
+
   return (
-    <div className="role-picker">
-      {/* Running total — the one number that decides whether the game
-          can start. Sticky so it stays readable while scrolling a long
-          faction list. */}
-      <div className={`role-picker__tally ${slotsLeft === 0 ? 'is-complete' : ''}`}>
-        <span className="role-picker__tally-count">
-          {rolesSelected.length}<span className="role-picker__tally-sep">/</span>{nbPlayers}
-        </span>
-        <span className="role-picker__tally-label">
+    <div className="draft">
+      {/* ── Left: the deck ─────────────────────────────────────── */}
+      <section className="draft-deck" aria-label={t('setup:deck_title', { defaultValue: 'Le deck' })}>
+        <header className="draft-panel__head">
+          <span className="draft-panel__title">{t('setup:deck_title', { defaultValue: 'Le deck' })}</span>
+          <span className="draft-panel__hint">
+            {host
+              ? t('setup:deck_hint', { defaultValue: 'Clic pour ajouter · clic droit pour retirer' })
+              : t('setup:deck_hint_guest', { defaultValue: "L'hôte compose la partie" })}
+          </span>
+        </header>
+
+        <div className="draft-panel__body">
+          {FACTIONS.map((faction) => {
+            const roles = grouped[faction];
+            if (!roles.length) return null;
+            const total = factionTotal(faction);
+            return (
+              <div key={faction} className={`deck-faction deck-faction--${faction}`}>
+                <div className="deck-faction__head">
+                  <span className="deck-faction__name">{t(`game:teams.${faction}.short`)}</span>
+                  <span className={`deck-faction__count ${total > 0 ? 'is-active' : ''}`}>{total}</span>
+                </div>
+                <div className="deck-faction__grid">
+                  {roles.map((role) => {
+                    const count = countOf(role.key);
+                    const atUniqueCap = role.unique && count >= 1;
+                    const canAdd = host && slotsLeft > 0 && !atUniqueCap;
+                    return (
+                      <RoleCard
+                        key={role.key}
+                        role={role}
+                        size="sm"
+                        count={count}
+                        faded={count === 0}
+                        selected={count > 0}
+                        className={host ? 'role-card--clickable' : ''}
+                        onClick={canAdd ? () => addRole(role) : undefined}
+                        onContextMenu={host ? (e) => onCardContext(e, role) : undefined}
+                        title={
+                          atUniqueCap
+                            ? t('setup:role_unique', { defaultValue: 'Un seul par partie' })
+                            : role.description || role.label
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Right: the bag ─────────────────────────────────────── */}
+      <aside className="draft-bag" aria-label={t('setup:bag_title', { defaultValue: 'Dans la partie' })}>
+        <header className="draft-panel__head">
+          <span className="draft-panel__title">{t('setup:bag_title', { defaultValue: 'Dans la partie' })}</span>
+          <span className={`draft-bag__tally ${slotsLeft === 0 ? 'is-complete' : ''}`}>
+            {rolesSelected.length}<span className="draft-bag__sep">/</span>{nbPlayers}
+          </span>
+        </header>
+
+        <div className="draft-panel__body">
+          {bagStacks.length === 0 ? (
+            <p className="draft-bag__empty">
+              {t('setup:bag_empty', { defaultValue: 'Choisis des cartes à gauche pour composer la partie.' })}
+            </p>
+          ) : (
+            <div className="draft-bag__grid">
+              {bagStacks.map(({ role, count }) => (
+                <RoleCard
+                  key={role.key}
+                  role={role}
+                  size="sm"
+                  count={count > 1 ? count : null}
+                  selected
+                  className={host ? 'role-card--clickable' : ''}
+                  onClick={host ? () => removeRole(role.key) : undefined}
+                  title={t('setup:role_remove_one', { name: role.label, defaultValue: `Retirer un ${role.label}` })}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <footer className="draft-bag__foot">
           {slotsLeft > 0
             ? t('setup:roles_remaining', { count: slotsLeft, defaultValue: `${slotsLeft} rôle(s) à placer` })
             : t('setup:roles_complete', { defaultValue: 'Tous les rôles sont placés' })}
-        </span>
-      </div>
-
-      {FACTIONS.map((faction) => {
-        const roles = grouped[faction];
-        if (!roles.length) return null;
-        const total = factionTotal(faction);
-        return (
-          <section key={faction} className={`role-group role-group--${faction}`}>
-            <header className="role-group__head">
-              <span className="role-group__name">{t(`game:teams.${faction}.short`)}</span>
-              <span className={`role-group__count ${total > 0 ? 'is-active' : ''}`}>{total}</span>
-            </header>
-
-            <ul className="role-group__list">
-              {roles.map((role) => {
-                const count = countOf(role.key);
-                const atUniqueCap = role.unique && count >= 1;
-                const canAdd = host && slotsLeft > 0 && !atUniqueCap;
-                const canRemove = host && count > 0;
-                return (
-                  <li
-                    key={role.key}
-                    className={`role-row ${count > 0 ? 'is-picked' : ''}`}
-                    title={role.description || role.label}
-                  >
-                    <span className="role-row__icon" style={{ color: role.couleur }} aria-hidden="true">
-                      <i className={`fas ${role.icon}`} />
-                    </span>
-                    <span className="role-row__name">{role.label}</span>
-                    {role.unique && (
-                      <span className="role-row__unique" title={t('setup:role_unique', { defaultValue: 'Un seul par partie' })}>
-                        {t('setup:role_unique_short', { defaultValue: 'unique' })}
-                      </span>
-                    )}
-
-                    <span className="role-row__stepper">
-                      <button
-                        type="button"
-                        className="role-step role-step--minus"
-                        onClick={() => removeRole(role.key)}
-                        disabled={!canRemove}
-                        aria-label={t('setup:role_remove_one', { name: role.label, defaultValue: `Retirer un ${role.label}` })}
-                      >
-                        <i className="fas fa-minus" aria-hidden="true" />
-                      </button>
-                      <span className="role-row__count" aria-live="polite">{count}</span>
-                      <button
-                        type="button"
-                        className="role-step role-step--plus"
-                        onClick={() => addRole(role)}
-                        disabled={!canAdd}
-                        aria-label={t('setup:role_add_one', { name: role.label, defaultValue: `Ajouter un ${role.label}` })}
-                      >
-                        <i className="fas fa-plus" aria-hidden="true" />
-                      </button>
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
+        </footer>
+      </aside>
     </div>
   );
 };

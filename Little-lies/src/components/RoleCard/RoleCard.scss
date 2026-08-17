@@ -1,0 +1,170 @@
+@import '../../styles/variables';
+
+// ─────────────────────────────────────────────────────────────────────
+// RoleCard — physical playing-card look. One component, three sizes,
+// driven by a single --card-w so a card in a 90px grid cell and a card
+// on a full-screen reveal share every proportion.
+// ─────────────────────────────────────────────────────────────────────
+
+.role-card {
+  --card-w: 8rem;
+  --card-accent: #{$al-gold};
+
+  position: relative;
+  width: var(--card-w);
+  // Playing-card proportions (roughly 2:3, as on the physical deck).
+  aspect-ratio: 2 / 3;
+  flex: 0 0 auto;
+  user-select: none;
+
+  &--sm { --card-w: 5.4rem; }
+  &--md { --card-w: 8rem; }
+  &--lg { --card-w: 17rem; }
+}
+
+.role-card__frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: calc(var(--card-w) * 0.07);
+  // Double edge: a dark outer rim then the faction colour inside, the
+  // way a printed card has a border inside its cut edge.
+  border: 2px solid var(--card-accent);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.55),
+    0 4px 14px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(180deg, #221b33 0%, #14101f 100%);
+  transition: box-shadow $al-trans, transform $al-trans-fast;
+}
+
+// ── Name banner ──
+.role-card__banner {
+  flex: 0 0 auto;
+  padding: calc(var(--card-w) * 0.045) calc(var(--card-w) * 0.05);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--card-accent) 78%, #000) 0%,
+    color-mix(in srgb, var(--card-accent) 52%, #000) 100%
+  );
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.role-card__name {
+  display: block;
+  font-family: $al-font-header;
+  // Scales with the card so a small card doesn't get a huge title.
+  font-size: calc(var(--card-w) * 0.115);
+  font-weight: $al-fw-bold;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+  // Long names (Maître-chanteur, Garde du corps) shrink rather than
+  // overflow the banner.
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+// ── Illustration ──
+.role-card__art {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+
+  .role-art {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+// The FontAwesome glyph the role already owns, tucked in the corner as
+// a maker's mark. It ties the card back to the icon used in the HUD,
+// so a player who learned "fa-star = Sheriff" still recognises it.
+.role-card__glyph {
+  position: absolute;
+  right: calc(var(--card-w) * 0.055);
+  bottom: calc(var(--card-w) * 0.05);
+  font-size: calc(var(--card-w) * 0.1);
+  color: var(--card-accent);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.role-card__team {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: calc(var(--card-w) * 0.03) 0;
+  background: rgba(0, 0, 0, 0.62);
+  font-size: calc(var(--card-w) * 0.078);
+  font-weight: $al-fw-bold;
+  letter-spacing: $al-track-label;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--card-accent);
+}
+
+// ── Count badge ──
+// Big number over the art: "how many of this role are in the bag".
+.role-card__count {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $al-font-header;
+  font-size: calc(var(--card-w) * 0.42);
+  font-weight: $al-fw-bold;
+  line-height: 1;
+  color: #fff;
+  text-shadow:
+    0 0 calc(var(--card-w) * 0.08) rgba(0, 0, 0, 0.9),
+    0 2px 4px rgba(0, 0, 0, 0.9);
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--card-accent) 45%, transparent) 0%,
+    rgba(0, 0, 0, 0.55) 70%
+  );
+  border-radius: calc(var(--card-w) * 0.07);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+// ── States ──
+.role-card.is-faded .role-card__frame {
+  filter: saturate(0.35) brightness(0.62);
+  border-color: $al-border-dark-soft;
+}
+
+.role-card.is-selected .role-card__frame {
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.55),
+    0 0 0 2px var(--card-accent),
+    0 6px 20px color-mix(in srgb, var(--card-accent) 35%, transparent);
+}
+
+// Interactive cards (setup picker) get a lift on hover.
+.role-card--clickable {
+  cursor: pointer;
+
+  .role-card__frame { transition: transform 0.12s $al-ease-pop, box-shadow $al-trans; }
+
+  &:hover .role-card__frame { transform: translateY(-3px); }
+  &:active .role-card__frame { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-card__frame { transition: none; }
+  .role-card--clickable:hover .role-card__frame { transform: none; }
+}

@@ -16,16 +16,16 @@
 .setup-screen {
   position: relative;
   z-index: 10;
-  // Fixed to the viewport rather than min-height: this element carries
-  // `overflow-y: auto`, and an ancestor with overflow that never
-  // actually scrolls silently kills `position: sticky` on everything
-  // inside it — the tally and the footer both sit still while the
-  // document scrolls underneath. Bounding it makes it the real scroll
-  // container, so the two sticky bars work and the page itself no
-  // longer scrolls behind the fixed TopBar.
+  // Exactly the viewport, never taller. The screen itself does not
+  // scroll — the deck and bag panels inside do. That's what keeps the
+  // start button and the balance verdict permanently visible instead
+  // of floating over the role list when it gets long.
   height: 100vh;
-  padding: 1.4rem 1rem 5rem;
-  overflow-y: auto;
+  // Room for the fixed TopBar above and the lobby chat docked below.
+  padding: 3.2rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: radial-gradient(
     ellipse 100% 55% at 50% 110%,
     rgba(169, 104, 48, 0.22) 0%,
@@ -38,15 +38,26 @@
 // to give the 2-column role list room to breathe. Paddings dialled
 // down so the whole page fits in a typical viewport without scroll
 // on a 4-faction roster.
+// Bounded to the screen, not grown by its content. The header, the
+// draft table and the footer are three flex rows; only the table
+// scrolls. Nothing is sticky, so nothing can draw on top of anything.
 .setup-stage {
   @include al-card;
-  max-width: 62rem;
+  width: 100%;
+  max-width: 74rem;
+  // flex, not height:100% — in a column flex container `align-items:
+  // stretch` sizes the cross axis (width), so the stage needs to be
+  // told to grow along the main axis or it collapses to its content
+  // and leaves the bottom of the screen empty.
+  flex: 1 1 auto;
   margin: 0 auto;
-  padding: 1.05rem 1.25rem 1.15rem;
+  padding: 0.9rem 1.05rem 0.95rem;
   border-radius: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.55rem;
+  min-height: 0;
+  overflow: hidden;
 }
 
 // ── Header ────────────────────────────────────────────────────────
@@ -215,87 +226,90 @@
   }
 }
 
-// ── Role picker — one list, one stepper per row ───────────────────
-// Replaces the two-zone catalogue + numbered roster. The count on each
-// row IS the roster, so there is nothing to hold in your head and no
-// second column to reconcile.
+// ── Draft table — deck (left) + bag (right) ───────────────────────
+// Both panels scroll INSIDE themselves. This is what fixes the bug
+// where the balance verdict and the start button drew on top of the
+// role list: the footer used to be sticky over a page that grew past
+// the viewport, so it overlapped whatever was underneath. Now the
+// stage is bounded to the screen, the two panels take the leftover
+// height and scroll their own content, and the footer is an ordinary
+// flex item that nothing can ever cover.
 
-.role-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.draft {
+  flex: 1 1 auto;
   min-height: 0;
-}
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(11rem, 17rem);
+  gap: 0.6rem;
 
-// Running total. Sticky so the "can I start yet?" number stays put
-// while a long faction list scrolls under it.
-.role-picker__tally {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
-  padding: 0.5rem 0.7rem;
-  border: 1px solid $al-border-dark-soft;
-  border-radius: $al-radius-sm;
-  background: $al-hud-bg-lifted;
-  backdrop-filter: blur($al-blur);
-
-  &__tally-count { font-variant-numeric: tabular-nums; }
-
-  &.is-complete {
-    border-color: $al-success;
-    background: rgba(92, 178, 85, 0.14);
+  @media (max-width: 52rem) {
+    grid-template-columns: 1fr;
+    // On one column the bag goes first: on a phone, what you've picked
+    // matters more than the shelf you picked it from.
+    .draft-bag { order: -1; max-height: 12rem; }
   }
 }
 
-.role-picker__tally-count {
+// Shared panel chrome. The deck and the bag deliberately do NOT share a
+// background — see .draft-deck / .draft-bag below.
+.draft-panel__head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid $al-border-dark-subtle;
+}
+
+.draft-panel__title {
   font-family: $al-font-header;
-  font-size: $al-fs-lead;
+  font-size: $al-fs-label;
   font-weight: $al-fw-bold;
+  letter-spacing: $al-track-label;
+  text-transform: uppercase;
   color: $al-gold;
-  font-variant-numeric: tabular-nums;
-
-  .is-complete & { color: $al-success; }
 }
 
-.role-picker__tally-sep {
-  margin: 0 0.1rem;
+.draft-panel__hint {
+  font-size: $al-fs-label;
   color: $al-text-on-dark-dim;
-  font-weight: $al-fw-normal;
 }
 
-.role-picker__tally-label {
-  font-size: $al-fs-small;
-  color: $al-text-on-dark-mute;
-
-  .is-complete & { color: $al-success; }
+.draft-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.5rem 0.6rem 0.6rem;
 }
 
-// ── Faction group ──
-.role-group {
+// ── Left: the deck ──
+// Recessed, like cards laid out on the table.
+.draft-deck {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border: 1px solid $al-border-dark-subtle;
   border-radius: $al-radius-sm;
-  overflow: hidden;
+  background: $al-scrim;
+}
 
-  // The left edge carries the faction colour — the only place colour is
-  // load-bearing here, so it reads without a legend.
-  border-left: 3px solid $al-border-dark-soft;
-
-  &--town    { border-left-color: $al-faction-town; }
-  &--mafia   { border-left-color: $al-faction-mafia; }
-  &--neutral { border-left-color: $al-faction-neutral; }
-  &--cult    { border-left-color: $al-faction-cult; }
+.deck-faction {
+  & + & { margin-top: 0.7rem; }
 
   &__head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    padding: 0.35rem 0.7rem;
-    background: $al-fill-subtle;
+    gap: 0.45rem;
+    margin-bottom: 0.35rem;
+    padding-left: 0.35rem;
+    border-left: 3px solid $al-border-dark-soft;
   }
+
+  &--town    .deck-faction__head { border-left-color: $al-faction-town; }
+  &--mafia   .deck-faction__head { border-left-color: $al-faction-mafia; }
+  &--neutral .deck-faction__head { border-left-color: $al-faction-neutral; }
+  &--cult    .deck-faction__head { border-left-color: $al-faction-cult; }
 
   &__name {
     font-size: $al-fs-label;
@@ -305,12 +319,9 @@
     color: $al-text-on-dark-mute;
   }
 
-  // Per-faction count — this is the balance, read straight off the
-  // headers. No separate balance widget needed to answer "how many
-  // wolves have I got?".
   &__count {
-    min-width: 1.4rem;
-    padding: 0.05rem 0.4rem;
+    min-width: 1.3rem;
+    padding: 0 0.35rem;
     border-radius: $al-radius-pill;
     background: $al-fill;
     font-size: $al-fs-label;
@@ -319,127 +330,96 @@
     color: $al-text-on-dark-dim;
     font-variant-numeric: tabular-nums;
 
-    &.is-active {
-      background: $al-fill-strong;
-      color: $al-text-on-dark;
-    }
+    &.is-active { background: $al-fill-strong; color: $al-text-on-dark; }
   }
 
-  &__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.4rem, 1fr));
+    gap: 0.45rem;
+    justify-items: center;
   }
 }
 
-// ── Role row ──
-.role-row {
+// ── Right: the bag ──
+// Raised and gold-edged — the opposite treatment to the recessed deck,
+// so a glance tells you which side is "chosen" and which is "available".
+.draft-bag {
   display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.28rem 0.7rem;
-  transition: background $al-trans-fast;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid $al-gold-border;
+  border-radius: $al-radius-sm;
+  background: $al-hud-bg-lifted;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-  & + & { border-top: 1px solid $al-border-dark-subtle; }
-
-  &:hover { background: $al-fill-subtle; }
-
-  // A picked role is stated by weight and a gold count, not by a
-  // background wash — the list has to stay scannable at 20 rows.
-  &.is-picked .role-row__name { color: $al-text-on-dark; font-weight: $al-fw-bold; }
-  &.is-picked .role-row__count { color: $al-gold; }
-
-  &__icon {
-    flex: 0 0 1.1rem;
-    text-align: center;
-    font-size: $al-fs-small;
-  }
-
-  &__name {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-size: $al-fs-small;
-    color: $al-text-on-dark-mute;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__unique {
-    flex: 0 0 auto;
-    padding: 0 0.35rem;
-    border: 1px solid $al-border-dark-subtle;
-    border-radius: $al-radius-pill;
-    font-size: $al-fs-label;
-    color: $al-text-on-dark-dim;
-    text-transform: uppercase;
-    letter-spacing: $al-track-label;
-  }
-
-  &__stepper {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  &__count {
-    min-width: 1.1rem;
-    text-align: center;
-    font-size: $al-fs-small;
+  &__tally {
+    font-family: $al-font-header;
+    font-size: $al-fs-body;
     font-weight: $al-fw-bold;
-    color: $al-text-on-dark-dim;
+    color: $al-gold;
     font-variant-numeric: tabular-nums;
+
+    &.is-complete { color: $al-success; }
+  }
+
+  &__sep {
+    margin: 0 0.1rem;
+    color: $al-text-on-dark-dim;
+    font-weight: $al-fw-normal;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.4rem, 1fr));
+    gap: 0.45rem;
+    justify-items: center;
+  }
+
+  &__empty {
+    margin: 0;
+    padding: 1.2rem 0.4rem;
+    font-size: $al-fs-small;
+    font-style: italic;
+    text-align: center;
+    color: $al-text-on-dark-dim;
+  }
+
+  &__foot {
+    flex: 0 0 auto;
+    padding: 0.4rem 0.6rem;
+    border-top: 1px solid $al-border-dark-subtle;
+    font-size: $al-fs-label;
+    text-align: center;
+    color: $al-text-on-dark-mute;
   }
 }
-
-.role-step {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin: 0;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: $al-radius-xs;
-  border: 1px solid $al-border-dark-soft;
-  background: $al-fill;
-  color: $al-text-on-dark-mute;
-  font-size: $al-fs-label;
-  box-shadow: none;
-  cursor: pointer;
-  transition: background $al-trans-fast, border-color $al-trans-fast, color $al-trans-fast;
-
-  &:hover:not(:disabled) {
-    background: $al-fill-strong;
-    border-color: $al-gold;
-    color: $al-gold-hot;
-  }
-
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-}
-
 // ── Footer (balance · CTA) ────────────────────────────────────────
 // Sticky at the bottom: twenty role rows push the start button well
 // below the fold, and the host shouldn't have to scroll past the whole
 // catalogue to launch. Pairs with the sticky tally at the top — the
 // two questions that matter ("how far along am I?" and "can I go?")
 // stay on screen while the list scrolls between them.
+// An ordinary flex row at the bottom of a bounded stage — NOT sticky.
+// Sticky was the bug: over a page taller than the viewport it drew on
+// top of the role list. Now the draft table above scrolls inside its
+// own panels, and this row simply sits under it, always visible and
+// never overlapping.
 .setup-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
+  flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.6rem;
-  margin-top: 0.2rem;
-  padding: 0.6rem 0 0.2rem;
+  padding-top: 0.55rem;
   border-top: 1px solid $al-border-dark-soft;
-  background: $al-hud-bg-lifted;
-  backdrop-filter: blur($al-blur);
+
+  .balance-summary { flex: 1 1 auto; min-width: 0; }
+  .seal-btn { flex: 0 0 auto; }
+
+  @media (max-width: 40rem) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 // Balance summary — compact row showing T/M/N/C counts + a status
@@ -615,11 +595,23 @@
 }
 
 // ── Advanced config (collapsible) ─────────────────────────────────
+// Takes only the height it needs; when open its body scrolls rather
+// than pushing the footer off the bounded stage.
 .setup-advanced {
-  margin-top: 0.3rem;
+  flex: 0 0 auto;
+  max-height: 45%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border: 1px solid $al-border-dark-soft;
   border-radius: $al-radius-sm;
-  background: rgba(43, 31, 18, 0.04);
+  background: $al-fill-subtle;
+
+  &[open] > .setup-advanced__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
 
   > summary {
     cursor: pointer;
@@ -658,16 +650,23 @@
 // viewports. Shrink the chat while we're in setup mode so the stage
 // stays unobstructed; the chat is still accessible, just compact.
 .setup-screen .lobby-chat {
-  width: clamp(14rem, 22vw, 22rem);
-  max-width: 22rem;
-  height: 13rem;
-  max-height: 13rem;
-  font-size: $al-fs-small;
+  width: clamp(13rem, 20vw, 19rem);
+  max-width: 19rem;
+  height: 8.5rem;
+  max-height: 8.5rem;
+  // Flush to the corner in setup mode. The lobby floats it 4rem up,
+  // which pushed its top edge into the stage's footer row — the chat
+  // then sat on top of the balance verdict, the exact overlap this
+  // screen was reported for.
+  bottom: 0.75rem;
+  left: 0.75rem;
+  font-size: $al-fs-label;
 }
 
-// Bottom padding so the very last footer rows of the stage clear the
-// shrunken chat sitting at bottom-left.
-.setup-screen { padding-bottom: 15rem; }
+// Vertical clearance for that chat: its height plus its offset plus a
+// gap. It used to reserve 15rem — 210px, 29% of a 720px screen — which
+// is what squeezed the deck down to two rows of cards.
+.setup-screen { padding-bottom: 10.5rem; }
 
 // ── Mobile / narrow viewports ─────────────────────────────────────
 @media (max-width: 36rem) {

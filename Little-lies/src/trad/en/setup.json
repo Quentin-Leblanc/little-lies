@@ -122,5 +122,10 @@
   "role_unique": "Only one per game",
   "role_unique_short": "unique",
   "role_add_one": "Add one {{name}}",
-  "role_remove_one": "Remove one {{name}}"
+  "role_remove_one": "Remove one {{name}}",
+  "deck_title": "The deck",
+  "deck_hint": "Click to add · right-click to remove",
+  "deck_hint_guest": "The host is building the game",
+  "bag_title": "In this game",
+  "bag_empty": "Pick cards on the left to build the game."
 }

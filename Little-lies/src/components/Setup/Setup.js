@@ -148,12 +148,33 @@ const Setup = () => {
           </div>
         )}
 
-        {/* ── Catalogue + Roster (two distinct zones) ────────────── */}
+        {/* ── The draft table: deck left, bag right ──────────────── */}
         <Roles />
 
-        {/* ── Footer: balance verdict + CTA (rules + advanced config
-                are tucked into the `<details>` below so the main
-                screen reads cleanly). ─────────────────────────────── */}
+        {/* Rules + advanced config. Sits between the table and the
+            footer rather than after it: the stage is bounded to the
+            viewport and the table is the flexible row, so opening this
+            takes height from the table (whose panels scroll) instead of
+            pushing the start button off screen. */}
+        {host && (
+          <details className="setup-advanced">
+            <summary>
+              <i className="fas fa-sliders" aria-hidden="true"></i> {t('setup:advanced_config', { defaultValue: 'Configuration & règles' })}
+            </summary>
+            <div className="setup-advanced__body">
+              <HouseRules
+                rules={game.config?.rules}
+                onChange={(rules) => handleConfigChange({ ...game.config, rules })}
+                disabled={!host}
+              />
+              <GameConfig config={game.config} onConfigChange={handleConfigChange} />
+            </div>
+          </details>
+        )}
+
+        {/* ── Footer: balance verdict + CTA. Ordinary flex row at the
+                bottom of the bounded stage — always visible, never
+                overlapping the deck. ──────────────────────────────── */}
         <footer className="setup-footer">
           <Balance
             town={townCount}
@@ -179,26 +200,6 @@ const Setup = () => {
             </div>
           )}
         </footer>
-
-        {/* Rules + advanced game config moved behind a single
-            collapsible panel so the main flow stays focused on
-            "pick roles → launch". The host can still tweak everything,
-            but it doesn't dominate the screen anymore. */}
-        {host && (
-          <details className="setup-advanced">
-            <summary>
-              <i className="fas fa-sliders" aria-hidden="true"></i> {t('setup:advanced_config', { defaultValue: 'Configuration & règles' })}
-            </summary>
-            <div className="setup-advanced__body">
-              <HouseRules
-                rules={game.config?.rules}
-                onChange={(rules) => handleConfigChange({ ...game.config, rules })}
-                disabled={!host}
-              />
-              <GameConfig config={game.config} onConfigChange={handleConfigChange} />
-            </div>
-          </details>
-        )}
       </div>
 
       {/* Persistent chat — same multiplayer state as the lobby */}
