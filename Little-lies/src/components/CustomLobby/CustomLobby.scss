@@ -64,7 +64,7 @@
   border-radius: 50%;
   background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #bbb;
+  color: $al-text-on-dark-mute;
   cursor: pointer;
   font-size: $al-fs-body;
   display: flex;
@@ -108,7 +108,7 @@
   background: none !important;
   border: none !important;
   box-shadow: none !important;
-  color: #bbb;
+  color: $al-text-on-dark-mute;
   cursor: pointer;
   font-size: $al-fs-small;
   padding: 0.1rem 0.3rem;
@@ -176,7 +176,7 @@
 }
 
 .lobby-volume-value {
-  color: #888;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-label;
   font-variant-numeric: tabular-nums;
   min-width: 1.5rem;
@@ -651,7 +651,7 @@
 /* ── Instructions ── */
 .lobby-instructions {
   font-size: $al-fs-label;
-  color: #666;
+  color: $al-text-on-dark-dim;
   text-align: center;
   padding: 0.471rem;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
@@ -1000,7 +1000,7 @@
 
   span {
     font-size: $al-fs-label;
-    color: #666;
+    color: $al-text-on-dark-dim;
     text-transform: uppercase;
     letter-spacing: 0.059rem;
   }
@@ -1009,7 +1009,7 @@
 .lobby-chat-info-btn {
   background: none !important;
   border: none;
-  color: #555;
+  color: $al-text-on-dark-dim;
   cursor: pointer;
   font-size: $al-fs-small;
   padding: 2px 0.353rem;
@@ -1017,7 +1017,7 @@
   box-shadow: none;
   transition: color 0.2s;
 
-  &:hover { color: #aaa; background: none !important; }
+  &:hover { color: $al-text-on-dark-mute; background: none !important; }
 }
 
 .lobby-chat-messages {
@@ -1047,7 +1047,7 @@
     padding: 0.118rem 0;
     min-height: 1.176rem;
     .lobby-chat-msg {
-      color: #888;
+      color: $al-text-on-dark-dim;
       font-style: italic;
       font-size: $al-fs-small;
     }
@@ -1137,7 +1137,7 @@
     border-radius: 0.176rem;
     padding: 0.059rem 0.294rem;
     font-size: $al-fs-label;
-    color: #888;
+    color: $al-text-on-dark-dim;
     margin-right: 0.235rem;
   }
 }
@@ -1148,7 +1148,7 @@
   background: rgba(47, 130, 255, 0.06);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   font-size: $al-fs-label;
-  color: #aaa;
+  color: $al-text-on-dark-mute;
 
   div {
     padding: 2px 0;
@@ -1164,7 +1164,7 @@
 }
 
 .lobby-chat-info-hint {
-  color: #666;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-label;
   font-style: italic;
 }

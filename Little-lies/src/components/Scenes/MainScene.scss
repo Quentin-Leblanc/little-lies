@@ -145,7 +145,7 @@
 
   &:hover {
     background: #444;
-    border-color: #aaa;
+    border-color: $al-text-on-dark-mute;
     transform: scale(1.05);
   }
 
@@ -412,7 +412,7 @@
 .lynch-reveal-role-label {
   font-family: $al-font-header;
   font-size: $al-fs-body;
-  color: #aaa;
+  color: $al-text-on-dark-mute;
   letter-spacing: 0.22rem;
   text-transform: uppercase;
   margin-top: 0.2rem;

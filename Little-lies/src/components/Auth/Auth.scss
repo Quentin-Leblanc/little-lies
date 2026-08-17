@@ -98,7 +98,7 @@
 
   span {
     padding: 0 0.706rem;
-    color: #555;
+    color: $al-text-on-dark-dim;
     font-size: $al-fs-small;
   }
 }
@@ -122,7 +122,7 @@
     font-family: inherit;
     box-sizing: border-box;
 
-    &::placeholder { color: #555; }
+    &::placeholder { color: $al-text-on-dark-dim; }
     &:focus { outline: none; border-color: rgba(47, 130, 255, 0.4); }
   }
 }
@@ -166,7 +166,7 @@
 .auth-toggle {
   text-align: center;
   font-size: $al-fs-small;
-  color: #666;
+  color: $al-text-on-dark-dim;
   margin: 0.706rem 0 0.471rem;
 
   button {
@@ -189,7 +189,7 @@
   background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.471rem;
-  color: #777;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-small;
   cursor: pointer;
   transition: all 0.2s;
@@ -199,7 +199,7 @@
 
   &:hover {
     background: $al-fill;
-    color: #aaa;
+    color: $al-text-on-dark-mute;
   }
 }
 
@@ -221,7 +221,7 @@
   z-index: 2;
   background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ccc;
+  color: $al-text-on-dark-mute;
   width: 1.8rem;
   height: 1.8rem;
   border-radius: 50%;
@@ -365,7 +365,7 @@
 .profile-name-edit-btn {
   background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #888;
+  color: $al-text-on-dark-dim;
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 0.3rem;
@@ -373,7 +373,7 @@
   padding: 0;
   font-size: $al-fs-label;
 
-  &:hover { color: #ccc; background: $al-fill; }
+  &:hover { color: $al-text-on-dark-mute; background: $al-fill; }
 }
 
 .profile-name-edit {
@@ -451,7 +451,7 @@
 .profile-tier-progress-label {
   display: flex;
   justify-content: space-between;
-  color: #999;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-label;
   text-transform: uppercase;
   letter-spacing: 0.04rem;
@@ -481,13 +481,13 @@
   display: flex;
   justify-content: space-between;
   font-size: $al-fs-small;
-  color: #ccc;
+  color: $al-text-on-dark-mute;
   margin-bottom: 0.353rem;
 
   i { color: #ffd54f; margin-right: 0.235rem; }
 }
 
-.profile-xp-next { color: #666; font-size: $al-fs-label; }
+.profile-xp-next { color: $al-text-on-dark-dim; font-size: $al-fs-label; }
 
 .profile-xp-bar {
   height: 8px;
@@ -524,9 +524,9 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 0.471rem;
 
-  i { color: #888; font-size: $al-fs-body; }
+  i { color: $al-text-on-dark-dim; font-size: $al-fs-body; }
   strong { color: #eee; font-size: $al-fs-lead; font-weight: 700; }
-  span { color: #777; font-size: $al-fs-label; text-transform: uppercase; letter-spacing: 0.04rem; text-align: center; }
+  span { color: $al-text-on-dark-dim; font-size: $al-fs-label; text-transform: uppercase; letter-spacing: 0.04rem; text-align: center; }
 }
 
 // Sections (rewards, skins, teaser)
@@ -552,7 +552,7 @@
   font-family: inherit;
   font-size: $al-fs-label;
   text-transform: uppercase;
-  color: #555;
+  color: $al-text-on-dark-dim;
   font-weight: 400;
   letter-spacing: 0.05rem;
 }
@@ -580,7 +580,7 @@
 
     .profile-tier-icon {
       background: $al-fill !important;
-      color: #555 !important;
+      color: $al-text-on-dark-dim !important;
     }
   }
 
@@ -605,14 +605,14 @@
 }
 
 .profile-tier-name {
-  color: #ccc;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-small;
   font-weight: 600;
   text-align: center;
 }
 
 .profile-tier-req {
-  color: #666;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-label;
   margin-top: 0.118rem;
 }
@@ -648,13 +648,13 @@
 }
 
 .profile-skin-name {
-  color: #ccc;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-label;
   font-weight: 600;
 }
 
 .profile-skin-req {
-  color: #666;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-label;
   text-transform: uppercase;
   letter-spacing: 0.03rem;
@@ -686,9 +686,9 @@
   border-radius: 0.471rem;
   opacity: 0.7;
 
-  i { color: #666; font-size: $al-fs-lead; }
-  span { color: #aaa; font-size: $al-fs-label; text-align: center; font-weight: 600; }
-  em { color: #555; font-size: $al-fs-label; font-style: normal; text-transform: uppercase; letter-spacing: 0.05rem; }
+  i { color: $al-text-on-dark-dim; font-size: $al-fs-lead; }
+  span { color: $al-text-on-dark-mute; font-size: $al-fs-label; text-align: center; font-weight: 600; }
+  em { color: $al-text-on-dark-dim; font-size: $al-fs-label; font-style: normal; text-transform: uppercase; letter-spacing: 0.05rem; }
 }
 
 // Footer actions

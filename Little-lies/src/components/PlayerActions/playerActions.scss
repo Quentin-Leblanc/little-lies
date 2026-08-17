@@ -442,7 +442,7 @@
 
 // AFK badge
 .afk-badge {
-  color: #999;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-label;
   margin-left: 0.25rem;
   padding: 0.05rem 0.3rem;
@@ -472,7 +472,12 @@
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
   background: var(--action-bg, rgba(100,100,100,0.7)) !important;
-  color: #fff !important;
+  // ACTION_COLORS pairs each action background with a readable text
+  // colour — the investigative actions (Sheriff, Consigliere, Lookout,
+  // Spy) are yellow and ask for black text. That colour was computed
+  // and then never passed to the button, so white was forced here and
+  // those four roles read their own action at 2.1:1.
+  color: var(--action-fg, #fff) !important;
   border: 1px solid transparent;
   font-weight: bold;
 
@@ -629,7 +634,7 @@
 // Disabled action hint (e.g. Vigilante night 1)
 .action-hint-disabled {
   font-size: $al-fs-small;
-  color: #666;
+  color: $al-text-on-dark-dim;
   padding: 0.235rem 0.588rem;
   border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 0.235rem;
@@ -639,7 +644,7 @@
 }
 
 .dead-label {
-  color: #555;
+  color: $al-text-on-dark-dim;
   font-style: italic;
   font-size: $al-fs-label;
 }

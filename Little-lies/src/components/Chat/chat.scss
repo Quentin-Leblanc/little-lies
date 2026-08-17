@@ -143,7 +143,7 @@
 
 .dead-chat-banner {
   text-align: center;
-  color: #888;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-small;
   padding: 0.235rem;
   border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -208,7 +208,7 @@
 
   &.msg-whisper-notice {
     .chat-message {
-      color: #888;
+      color: $al-text-on-dark-dim;
       font-size: $al-fs-small;
       font-style: italic;
     }
@@ -267,7 +267,7 @@
   // Messages from previous days/nights — grayed out
   &.msg-past {
     opacity: 1;
-    .chat-message { color: #555 !important; }
+    .chat-message { color: $al-text-on-dark-dim !important; }
     .chat-day-separator { color: #444 !important; font-weight: 400; }
   }
 }
@@ -311,7 +311,7 @@
 }
 
 .dead-prefix {
-  color: #666;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-small;
   margin-right: 0.235rem;
 }
@@ -331,7 +331,7 @@
 }
 
 .whisper-notice-text {
-  color: #888;
+  color: $al-text-on-dark-dim;
   font-style: italic;
 }
 
@@ -390,7 +390,7 @@
     border-radius: 0.176rem;
     padding: 0.059rem 0.294rem;
     font-size: $al-fs-small;
-    color: #888;
+    color: $al-text-on-dark-dim;
   }
 }
 
@@ -406,12 +406,12 @@
   background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.471rem;
-  color: #aaa;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-small;
   font-style: italic;
   letter-spacing: 0.02rem;
   user-select: none;
-  i { color: #888; font-size: $al-fs-small; }
+  i { color: $al-text-on-dark-dim; font-size: $al-fs-small; }
 }
 
 .chat-input {
@@ -432,7 +432,7 @@
 
   &:disabled {
     background: rgba(15, 15, 25, 0.5);
-    color: #555;
+    color: $al-text-on-dark-dim;
   }
 
   &.chat-blackmailed {

@@ -36,7 +36,7 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: $al-scrim;
-  color: #aaa;
+  color: $al-text-on-dark-mute;
   cursor: pointer;
   font-size: $al-fs-small;
   padding: 0;
@@ -58,7 +58,7 @@
 .survey-modal-subtitle {
   margin: 0.3rem 0 1.1rem;
   font-size: $al-fs-small;
-  color: #888;
+  color: $al-text-on-dark-dim;
   text-align: center;
 }
 
@@ -68,7 +68,7 @@
 
 .survey-modal-label {
   font-size: $al-fs-small;
-  color: #bbb;
+  color: $al-text-on-dark-mute;
   margin-bottom: 0.45rem;
   font-weight: 600;
 }
@@ -85,7 +85,7 @@
   border-radius: 0.588rem;
   background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #888;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-lead;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -122,7 +122,7 @@
   padding: 0.5rem 0.6rem;
   background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #aaa;
+  color: $al-text-on-dark-mute;
   border-radius: 0.4rem;
   font-size: $al-fs-small;
   cursor: pointer;
@@ -149,7 +149,7 @@
   resize: vertical;
   box-sizing: border-box;
 
-  &::placeholder { color: #555; }
+  &::placeholder { color: $al-text-on-dark-dim; }
   &:focus { outline: none; border-color: rgba(47, 130, 255, 0.4); }
 }
 
@@ -171,12 +171,12 @@
 .survey-skip {
   background: none;
   border: none;
-  color: #888;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-small;
   cursor: pointer;
   padding: 0.4rem 0.8rem;
 
-  &:hover { color: #ccc; }
+  &:hover { color: $al-text-on-dark-mute; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
@@ -245,7 +245,7 @@
 
 .survey-thanks-sub {
   font-size: $al-fs-body;
-  color: #bbb;
+  color: $al-text-on-dark-mute;
   margin: 0 0 1.5rem;
   max-width: 26rem;
   line-height: 1.4;
@@ -301,7 +301,7 @@
 
 .survey-thanks-btn-secondary {
   background: $al-fill-subtle;
-  color: #ccc;
+  color: $al-text-on-dark-mute;
   border: 1px solid rgba(255, 255, 255, 0.14);
 
   &:hover {

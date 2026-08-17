@@ -463,7 +463,7 @@ const PlayerActions = memo(function () {
                         return (
                           <button
                             className={`action-btn ${isSelected ? 'action-btn-active' : ''}`}
-                            style={{ '--action-bg': style.bg, '--action-hover': style.hover }}
+                            style={{ '--action-bg': style.bg, '--action-hover': style.hover, '--action-fg': style.color }}
                             onClick={() => handleDayAction(action, player)}
                             key={action.type}
                             title={getActionTooltip(action.type) || action.description || ''}
@@ -530,7 +530,7 @@ const PlayerActions = memo(function () {
                         return (
                           <button
                             className={`action-btn ${isSelected ? 'action-btn-active' : ''} ${isLocked ? 'action-btn-locked' : ''}`}
-                            style={{ '--action-bg': style.bg, '--action-hover': style.hover }}
+                            style={{ '--action-bg': style.bg, '--action-hover': style.hover, '--action-fg': style.color }}
                             onClick={() => handleNightAction(action, player)}
                             disabled={isLocked || disabledByFirstNight}
                             key={action.type}

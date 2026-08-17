@@ -160,7 +160,7 @@
 
 .role-stats-empty {
   text-align: center;
-  color: #999;
+  color: $al-text-on-dark-mute;
   font-style: italic;
   padding: 2rem 1rem;
   margin: 0;
@@ -193,7 +193,7 @@
   margin: 0;
   margin-left: auto;
   font-size: $al-fs-label;
-  color: #888;
+  color: $al-text-on-dark-dim;
   font-style: italic;
   max-width: 18rem;
   text-align: right;

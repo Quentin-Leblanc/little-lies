@@ -16,9 +16,14 @@ const Player = () => {
 
     const [lastWill, setLastWill] = useState(me?.lastWill || '');
     const [showLwDialog, setShowLwDialog] = useState(false);
-    // Details-tooltip toggle: hover on desktop opens it, click works too so
-    // it's usable on touch devices. Outside-click closes — handled via the
-    // wrapper's onMouseLeave plus an Escape key effect below.
+    // One fold for everything you read once and then stop reading:
+    // description, abilities, and the mechanical fine print. They used to
+    // be three permanently-open cells plus a separate hover tooltip —
+    // half the panel height, every phase of every game, for text the
+    // player already met on the role reveal card.
+    //
+    // What stays out of the fold is what you actually check each turn:
+    // who you are, which side you're on, and what you need to win.
     const [detailsOpen, setDetailsOpen] = useState(false);
     useEffect(() => {
         if (!detailsOpen) return;
@@ -135,56 +140,36 @@ const Player = () => {
                             <span className="role-kicker">{t('game:role_sections.your_role_is', { defaultValue: 'Your role is' })}</span>
                             {me.character.icon && <i className={`fas ${me.character.icon}`}></i>}
                             <h2>{roleLabel}</h2>
-                            {/* Details tooltip trigger — info icon at the top-right
-                                of the role block. Opens a 2-column tooltip with
-                                the role's mechanical nuances (framing duration,
-                                sheriff binary result, vigilante suicide…). Kept
-                                out of the main grid so the base block stays
-                                compact; anchored top-right so the tooltip opens
-                                down-left and doesn't clip offscreen. */}
-                            {Array.isArray(me.character.details) && me.character.details.length > 0 && (
-                                <div
-                                    className={`role-details-toggle ${detailsOpen ? 'open' : ''}`}
-                                    onMouseEnter={() => setDetailsOpen(true)}
-                                    onMouseLeave={() => setDetailsOpen(false)}
-                                >
-                                    <button
-                                        type="button"
-                                        className="role-details-btn"
-                                        aria-label={t('game:role_sections.details_aria', { defaultValue: 'Détails du rôle' })}
-                                        aria-expanded={detailsOpen}
-                                        onClick={toggleDetails}
-                                    >
-                                        <i className="fas fa-info"></i>
-                                    </button>
-                                    {detailsOpen && (
-                                        <div className="role-details-tooltip" role="tooltip">
-                                            <div className="role-details-tooltip-title">
-                                                <i className="fas fa-scroll" aria-hidden="true"></i>
-                                                <span>{t('game:role_sections.details', { defaultValue: 'Détails du rôle' })}</span>
-                                            </div>
-                                            <ul className="role-details-list role-details-list-grid">
-                                                {me.character.details.map((line, i) => (
-                                                    <li
-                                                        key={i}
-                                                        dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
-                                                    />
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
                         </div>
 
-                        {/* Role info split into a 2-column grid so the block
-                            halves its vertical footprint: left column = what
-                            you do (description + abilities), right column =
-                            what it means (objective + mechanics detail).
-                            Grid collapses to one column on narrow viewports. */}
-                        <div className="role-info-grid">
-                            <section className="role-info-cell">
-                                <h4 className="role-section-title"><i className="fas fa-info-circle" aria-hidden="true"></i> {t('game:role_sections.description')}</h4>
+                        {/* Objective stays out of the fold: it's the one line
+                            a player re-reads every single turn — "what do I
+                            need for this to end well for me?". */}
+                        <div className="role-objective">
+                            <i className="fas fa-crosshairs" aria-hidden="true"></i>
+                            <span>{t(`roles:${me.character.key}.objectif`, { defaultValue: me.character.objectif })}</span>
+                        </div>
+                        {execTarget && (
+                            <div className="exec-target">
+                                <i className="fas fa-bullseye" aria-hidden="true"></i> {t('game:role_sections.target')} : <strong>{execTarget.profile.name}</strong>
+                            </div>
+                        )}
+
+                        {/* Everything you read once — description, abilities,
+                            fine print — behind one control. Replaces three
+                            permanently-open cells plus a hover tooltip. */}
+                        <button
+                            type="button"
+                            className={`role-details-toggle ${detailsOpen ? 'is-open' : ''}`}
+                            onClick={toggleDetails}
+                            aria-expanded={detailsOpen}
+                        >
+                            <i className={`fas fa-chevron-${detailsOpen ? 'up' : 'down'}`} aria-hidden="true"></i>
+                            <span>{t('game:role_sections.details', { defaultValue: 'Détails du rôle' })}</span>
+                        </button>
+
+                        {detailsOpen && (
+                            <div className="role-details-panel">
                                 <p className="role-description">
                                     {descriptionParts.map((part, i) =>
                                         part.toLowerCase() === roleLabel.toLowerCase()
@@ -192,38 +177,32 @@ const Player = () => {
                                             : <React.Fragment key={i}>{part}</React.Fragment>
                                     )}
                                 </p>
-                            </section>
 
-                            <section className="role-info-cell">
-                                <h4 className="role-section-title"><i className="fas fa-crosshairs"></i> {t('game:role_sections.objective', { defaultValue: 'Objectif' })}</h4>
-                                <div className="role-objective">
-                                    <span>{t(`roles:${me.character.key}.objectif`, { defaultValue: me.character.objectif })}</span>
-                                    {execTarget && (
-                                        <div className="exec-target">
-                                            <i className="fas fa-bullseye" aria-hidden="true"></i> {t('game:role_sections.target')} : <strong>{execTarget.profile.name}</strong>
-                                        </div>
-                                    )}
-                                </div>
-                            </section>
+                                <h4 className="role-section-title"><i className="fas fa-bolt" aria-hidden="true"></i> {t('game:role_sections.abilities')}</h4>
+                                {me.character.actions?.length > 0 ? (
+                                    <ul className="role-actions">
+                                        {me.character.actions.map((action, index) => (
+                                            <li key={index}>
+                                                <strong>{t(`roles:${me.character.key}.actions.${action.type}.label`, { defaultValue: action.label })}</strong> — {t(`roles:${me.character.key}.actions.${action.type}.description`, { defaultValue: action.description })}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="no-ability">{t('game:no_ability')}</p>
+                                )}
 
-                            <section className="role-info-cell">
-                                <h4 className="role-section-title role-section-title-abilities"><i className="fas fa-bolt" aria-hidden="true"></i> {t('game:role_sections.abilities')}</h4>
-                                <div className="role-actions role-actions-highlight">
-                                    {me.character.actions?.length > 0 ? (
-                                        <ul>
-                                            {me.character.actions.map((action, index) => (
-                                                <li key={index}>
-                                                    <strong>{t(`roles:${me.character.key}.actions.${action.type}.label`, { defaultValue: action.label })}:</strong> {t(`roles:${me.character.key}.actions.${action.type}.description`, { defaultValue: action.description })}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p className="no-ability">{t('game:no_ability')}</p>
-                                    )}
-                                </div>
-                            </section>
-
-                        </div>
+                                {Array.isArray(me.character.details) && me.character.details.length > 0 && (
+                                    <ul className="role-details-list">
+                                        {me.character.details.map((line, i) => (
+                                            <li
+                                                key={i}
+                                                dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+                                            />
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        )}
                     </>
                     );
                 })()}

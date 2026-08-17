@@ -51,7 +51,7 @@
   font-size: $al-fs-small;
   letter-spacing: 0.3rem;
   text-transform: uppercase;
-  color: #888;
+  color: $al-text-on-dark-dim;
   text-align: center;
 }
 
@@ -140,7 +140,7 @@
   border-radius: 50%;
   background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #bbb;
+  color: $al-text-on-dark-mute;
   cursor: pointer;
   font-size: $al-fs-body;
   display: flex;
@@ -183,7 +183,7 @@
 .go-volume-mute {
   background: none;
   border: none;
-  color: #bbb;
+  color: $al-text-on-dark-mute;
   cursor: pointer;
   font-size: $al-fs-small;
   padding: 0.1rem 0.3rem;
@@ -244,7 +244,7 @@
 }
 
 .go-volume-value {
-  color: #888;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-label;
   font-variant-numeric: tabular-nums;
   min-width: 1.5rem;
@@ -334,7 +334,7 @@
 }
 
 .go-subtitle {
-  color: #888;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-body;
   margin: 0.235rem 0 0;
   animation: go-fade-up 0.6s ease-out 0.6s both;
@@ -395,7 +395,7 @@
 
 .go-stat-label {
   font-size: $al-fs-small;
-  color: #666;
+  color: $al-text-on-dark-dim;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -474,14 +474,14 @@
 
 .go-xp-hint {
   font-size: $al-fs-label;
-  color: #666;
+  color: $al-text-on-dark-dim;
   margin: 0.353rem 0 0;
   i { margin-right: 0.235rem; }
 }
 
 .go-recap-title {
   font-family: $al-font-header;
-  color: #777;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-small;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -544,7 +544,7 @@
 .go-me-badge {
   font-size: $al-fs-label;
   background: $al-fill;
-  color: #aaa;
+  color: $al-text-on-dark-mute;
   padding: 1px 0.353rem;
   border-radius: 0.588rem;
   font-weight: 400;
@@ -574,7 +574,7 @@
   }
 
   &.dead {
-    color: #666;
+    color: $al-text-on-dark-dim;
     i { font-size: $al-fs-label; }
   }
 }
@@ -635,7 +635,7 @@
 .go-btn-feedback {
   background: $al-fill-subtle;
   border: 1px dashed rgba(255, 255, 255, 0.18);
-  color: #bbb;
+  color: $al-text-on-dark-mute;
   padding: 0.5rem 1.1rem;
   font-size: $al-fs-small;
   border-radius: 0.5rem;
