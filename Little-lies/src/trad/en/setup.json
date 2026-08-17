@@ -48,13 +48,34 @@
   "host_configuring": "{{host}} is configuring the game...",
   "presets": "Presets",
   "presets_list": {
-    "beginner_4": { "label": "Beginner 4", "desc": "Perfect to discover the game — simple roles" },
-    "beginner_5": { "label": "Beginner 5", "desc": "Introduction with a doctor" },
-    "classic_6": { "label": "Classic 6", "desc": "Town + Mafia balanced" },
-    "classic_8": { "label": "Classic 8", "desc": "Added investigation roles" },
-    "ranked_10": { "label": "Ranked 10", "desc": "Competitive mode with neutrals" },
-    "chaos_12": { "label": "Chaos 12", "desc": "All roles, total chaos" },
-    "full_15": { "label": "Full 15", "desc": "Complete game with all roles" }
+    "beginner_4": {
+      "label": "Beginner 4",
+      "desc": "Perfect to discover the game — simple roles"
+    },
+    "beginner_5": {
+      "label": "Beginner 5",
+      "desc": "Introduction with a doctor"
+    },
+    "classic_6": {
+      "label": "Classic 6",
+      "desc": "Town + Mafia balanced"
+    },
+    "classic_8": {
+      "label": "Classic 8",
+      "desc": "Added investigation roles"
+    },
+    "ranked_10": {
+      "label": "Ranked 10",
+      "desc": "Competitive mode with neutrals"
+    },
+    "chaos_12": {
+      "label": "Chaos 12",
+      "desc": "All roles, total chaos"
+    },
+    "full_15": {
+      "label": "Full 15",
+      "desc": "Complete game with all roles"
+    }
   },
   "team_counter": {
     "village": "Town: {{count}}",
@@ -93,5 +114,13 @@
     "Ringing the church bells...",
     "The villagers are gathering...",
     "The village is ready."
-  ]
+  ],
+  "roles_remaining_one": "{{count}} role left to place",
+  "roles_remaining_other": "{{count}} roles left to place",
+  "roles_remaining": "{{count}} roles left to place",
+  "roles_complete": "Every role is placed",
+  "role_unique": "Only one per game",
+  "role_unique_short": "unique",
+  "role_add_one": "Add one {{name}}",
+  "role_remove_one": "Remove one {{name}}"
 }

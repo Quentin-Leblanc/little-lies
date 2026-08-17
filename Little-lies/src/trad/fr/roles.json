@@ -22,7 +22,10 @@
       "**Une** interrogation par nuit, choix verrouillé dès le premier clic. Rapport au matin."
     ],
     "actions": {
-      "INVESTIGATE": { "label": "Interroger", "description": "Investigue un joueur pour découvrir s'il est suspect" }
+      "INVESTIGATE": {
+        "label": "Interroger",
+        "description": "Investigue un joueur pour découvrir s'il est suspect"
+      }
     }
   },
   "docteur": {
@@ -37,11 +40,14 @@
       "Soigner le Maire révélé n'a aucun effet : une fois révélé, il n'est plus soignable."
     ],
     "actions": {
-      "PROTECT": { "label": "Soigner", "description": "Protège un joueur d'une attaque cette nuit" }
+      "PROTECT": {
+        "label": "Soigner",
+        "description": "Protège un joueur d'une attaque cette nuit"
+      }
     }
   },
   "lookout": {
-    "label": "Lookout",
+    "label": "Guetteur",
     "description": "Tu es le Guetteur. Chaque nuit, tu surveilles un joueur pour voir qui lui rend visite.",
     "objectif": "Ton objectif : identifier les visiteurs nocturnes pour aider le village.",
     "details": [
@@ -51,7 +57,10 @@
       "Utile pour repérer le tueur de la mafia ou identifier qui a été visité par qui."
     ],
     "actions": {
-      "LOOKOUT": { "label": "Surveiller", "description": "Observe un joueur pour voir qui le visite cette nuit" }
+      "LOOKOUT": {
+        "label": "Surveiller",
+        "description": "Observe un joueur pour voir qui le visite cette nuit"
+      }
     }
   },
   "vigilante": {
@@ -66,7 +75,10 @@
       "Tuer un neutre (Jester, Survivor, Executioner) ne déclenche **pas** la culpabilité."
     ],
     "actions": {
-      "VIGILANTE_KILL": { "label": "Tirer", "description": "Tire sur un joueur cette nuit (attention aux innocents !)" }
+      "VIGILANTE_KILL": {
+        "label": "Tirer",
+        "description": "Tire sur un joueur cette nuit (attention aux innocents !)"
+      }
     }
   },
   "maire": {
@@ -80,7 +92,10 @@
       "Choix stratégique : te révéler tard c'est moins utile, te révéler tôt c'est risqué."
     ],
     "actions": {
-      "REVEAL": { "label": "Se révéler", "description": "Révèle votre rôle de Maire (3 votes, mais plus de soins possibles)" }
+      "REVEAL": {
+        "label": "Se révéler",
+        "description": "Révèle votre rôle de Maire (3 votes, mais plus de soins possibles)"
+      }
     }
   },
   "escort": {
@@ -95,11 +110,14 @@
       "**Attention** : bloquer un Serial Killer le retourne contre toi (il t'attaque en représailles selon les parties)."
     ],
     "actions": {
-      "ROLEBLOCK": { "label": "Bloquer", "description": "Empêche un joueur d'agir cette nuit" }
+      "ROLEBLOCK": {
+        "label": "Bloquer",
+        "description": "Empêche un joueur d'agir cette nuit"
+      }
     }
   },
   "bodyguard": {
-    "label": "Bodyguard",
+    "label": "Garde du corps",
     "description": "Tu es le Garde du corps. Tu protèges un joueur la nuit. Si ta cible est attaquée, tu tues l'attaquant mais tu meurs aussi.",
     "objectif": "Ton objectif : protéger le village au prix de ta vie.",
     "details": [
@@ -110,11 +128,14 @@
       "Un seul sacrifice : si plusieurs attaquants frappent la même cible, tu n'en prends qu'un."
     ],
     "actions": {
-      "BODYGUARD": { "label": "Protéger", "description": "Se sacrifie pour protéger un joueur et tuer son attaquant" }
+      "BODYGUARD": {
+        "label": "Protéger",
+        "description": "Se sacrifie pour protéger un joueur et tuer son attaquant"
+      }
     }
   },
   "spy": {
-    "label": "Spy",
+    "label": "Espion",
     "description": "Tu es l'Espion. Chaque nuit, tu apprends qui la mafia a visité.",
     "objectif": "Ton objectif : infiltrer la mafia pour obtenir des informations cruciales.",
     "details": [
@@ -124,11 +145,14 @@
       "Si la mafia ne tue personne (roleblock, prison…), tu reçois une notification « aucune visite »."
     ],
     "actions": {
-      "SPY": { "label": "Espionner", "description": "Apprends qui la mafia a visité cette nuit" }
+      "SPY": {
+        "label": "Espionner",
+        "description": "Apprends qui la mafia a visité cette nuit"
+      }
     }
   },
   "jailor": {
-    "label": "Jailor",
+    "label": "Geôlier",
     "description": "Tu es le Geôlier. Tu choisis un joueur pendant le jour pour l'emprisonner la nuit. Tu peux l'exécuter (3 utilisations).",
     "objectif": "Ton objectif : interroger et éliminer les suspects de manière contrôlée.",
     "details": [
@@ -139,12 +163,18 @@
       "Le prisonnier n'est pas visible au Spy comme cible mafia, puisqu'il ne sort pas."
     ],
     "actions": {
-      "JAIL": { "label": "Emprisonner", "description": "Emprisonne un joueur cette nuit (choisi pendant le jour)" },
-      "JAILOR_EXECUTE": { "label": "Exécuter", "description": "Exécute le prisonnier cette nuit (3 utilisations max)" }
+      "JAIL": {
+        "label": "Emprisonner",
+        "description": "Emprisonne un joueur cette nuit (choisi pendant le jour)"
+      },
+      "JAILOR_EXECUTE": {
+        "label": "Exécuter",
+        "description": "Exécute le prisonnier cette nuit (3 utilisations max)"
+      }
     }
   },
   "godfather": {
-    "label": "Godfather",
+    "label": "Parrain",
     "description": "Tu es le Parrain. Tu diriges la mafia et apparais non-suspect au Sheriff.",
     "objectif": "Ton objectif : éliminer tous ceux qui s'opposent à la mafia.",
     "details": [
@@ -155,7 +185,10 @@
       "Tu peux être **roleblocké** par l'Escort et **emprisonné** par le Geôlier."
     ],
     "actions": {
-      "KILL": { "label": "Tuer", "description": "Ordonne l'élimination d'un joueur cette nuit" }
+      "KILL": {
+        "label": "Tuer",
+        "description": "Ordonne l'élimination d'un joueur cette nuit"
+      }
     }
   },
   "mafioso": {
@@ -169,11 +202,14 @@
       "Pas d'immunité nocturne : tu meurs d'une attaque basique."
     ],
     "actions": {
-      "KILL": { "label": "Tuer", "description": "Tue un joueur cette nuit sur ordre de la mafia" }
+      "KILL": {
+        "label": "Tuer",
+        "description": "Tue un joueur cette nuit sur ordre de la mafia"
+      }
     }
   },
   "framer": {
-    "label": "Framer",
+    "label": "Piégeur",
     "description": "Tu es le Piégeur. Tu peux faire apparaître un joueur comme suspect au Sheriff.",
     "objectif": "Ton objectif : semer la confusion pour protéger la mafia.",
     "details": [
@@ -184,11 +220,14 @@
       "Apparais **suspect** toi-même au Sheriff."
     ],
     "actions": {
-      "FRAME": { "label": "Piéger", "description": "Fait apparaître un joueur comme suspect au Sheriff (1 nuit)" }
+      "FRAME": {
+        "label": "Piéger",
+        "description": "Fait apparaître un joueur comme suspect au Sheriff (1 nuit)"
+      }
     }
   },
   "blackmailer": {
-    "label": "Blackmailer",
+    "label": "Maître-chanteur",
     "description": "Tu es le Maître-chanteur. Tu peux empêcher un joueur de parler le jour suivant.",
     "objectif": "Ton objectif : réduire au silence les menaces pour la mafia.",
     "details": [
@@ -198,7 +237,10 @@
       "Excellente pour faire taire un Sheriff qui allait révéler ses infos."
     ],
     "actions": {
-      "BLACKMAIL": { "label": "Bâillonner", "description": "Empêche un joueur de parler pendant le jour suivant" }
+      "BLACKMAIL": {
+        "label": "Bâillonner",
+        "description": "Empêche un joueur de parler pendant le jour suivant"
+      }
     }
   },
   "consigliere": {
@@ -213,7 +255,10 @@
       "Apparais **suspect** au Sheriff."
     ],
     "actions": {
-      "INVESTIGATE_ROLE": { "label": "Enquêter", "description": "Découvre le rôle exact d'un joueur" }
+      "INVESTIGATE_ROLE": {
+        "label": "Enquêter",
+        "description": "Découvre le rôle exact d'un joueur"
+      }
     }
   },
   "serial_killer": {
@@ -228,11 +273,14 @@
       "Tu gagnes si tu es le dernier en vie ou si seuls d'autres neutres cohabitent avec toi."
     ],
     "actions": {
-      "KILL": { "label": "Poignarder", "description": "Tue un joueur cette nuit" }
+      "KILL": {
+        "label": "Poignarder",
+        "description": "Tue un joueur cette nuit"
+      }
     }
   },
   "jester": {
-    "label": "Jester",
+    "label": "Bouffon",
     "description": "Tu es le Bouffon. Tu veux te faire lyncher par le village. Tu n'as aucun pouvoir.",
     "objectif": "Ton objectif : te faire lyncher par le village.",
     "details": [
@@ -244,7 +292,7 @@
     "actions": {}
   },
   "survivor": {
-    "label": "Survivor",
+    "label": "Survivant",
     "description": "Tu es le Survivant. Tu veux juste rester en vie. Tu possèdes un gilet pare-balles limité.",
     "objectif": "Ton objectif : survivre jusqu'à la fin de la partie.",
     "details": [
@@ -255,11 +303,14 @@
       "Aucune action offensive : tu ne peux que te protéger."
     ],
     "actions": {
-      "VEST": { "label": "Gilet", "description": "Enfile un gilet pare-balles pour cette nuit (3 utilisations max)" }
+      "VEST": {
+        "label": "Gilet",
+        "description": "Enfile un gilet pare-balles pour cette nuit (3 utilisations max)"
+      }
     }
   },
   "executioner": {
-    "label": "Executioner",
+    "label": "Exécuteur",
     "description": "Tu es l'Exécuteur. Tu as une cible secrète du village que tu dois faire lyncher.",
     "objectif": "Ton objectif : faire lyncher ta cible par le village.",
     "details": [
@@ -284,7 +335,10 @@
       "Le Culte gagne quand il égale ou dépasse le reste des vivants."
     ],
     "actions": {
-      "CULT_VOTE": { "label": "Convertir", "description": "Vote pour convertir cette cible cette nuit. La conversion n'a lieu que si tous les cultistes votent la même cible." }
+      "CULT_VOTE": {
+        "label": "Convertir",
+        "description": "Vote pour convertir cette cible cette nuit. La conversion n'a lieu que si tous les cultistes votent la même cible."
+      }
     }
   }
 }

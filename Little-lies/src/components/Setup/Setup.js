@@ -85,7 +85,6 @@ const Setup = () => {
   const townCount = teamCounts.town || 0;
   const mafiaCount = teamCounts.mafia || 0;
   const cultCount = teamCounts.cult || 0;
-  const neutralCount = teamCounts.neutral || 0;
   const isUnbalanced = rolesSelected.length > 0 && (mafiaCount + cultCount) >= townCount;
 
   const hasThreatFaction = rolesSelected.some((r) => (
@@ -159,7 +158,6 @@ const Setup = () => {
           <Balance
             town={townCount}
             mafia={mafiaCount}
-            neutral={neutralCount}
             cult={cultCount}
             total={rolesSelected.length}
             isUnbalanced={isUnbalanced}

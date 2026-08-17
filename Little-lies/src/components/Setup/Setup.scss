@@ -16,7 +16,14 @@
 .setup-screen {
   position: relative;
   z-index: 10;
-  min-height: 100vh;
+  // Fixed to the viewport rather than min-height: this element carries
+  // `overflow-y: auto`, and an ancestor with overflow that never
+  // actually scrolls silently kills `position: sticky` on everything
+  // inside it — the tally and the footer both sit still while the
+  // document scrolls underneath. Bounding it makes it the real scroll
+  // container, so the two sticky bars work and the page itself no
+  // longer scrolls behind the fixed TopBar.
+  height: 100vh;
   padding: 1.4rem 1rem 5rem;
   overflow-y: auto;
   background: radial-gradient(
@@ -208,299 +215,231 @@
   }
 }
 
-// ── Draft picker — two distinct zones side by side ────────────────
-// Left:  catalogue of available roles (single-column vertical list,
-//        grouped by faction)
-// Right: roster of selected roles (numbered slots, one after the other)
-// No +/− steppers — click a catalogue line to add, click a roster
-// slot to remove.
-.role-draft {
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(13rem, 1fr);
-  gap: 0.7rem;
-  align-items: start;
+// ── Role picker — one list, one stepper per row ───────────────────
+// Replaces the two-zone catalogue + numbered roster. The count on each
+// row IS the roster, so there is nothing to hold in your head and no
+// second column to reconcile.
 
-  @media (max-width: 44rem) {
-    grid-template-columns: 1fr;
+.role-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+}
+
+// Running total. Sticky so the "can I start yet?" number stays put
+// while a long faction list scrolls under it.
+.role-picker__tally {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid $al-border-dark-soft;
+  border-radius: $al-radius-sm;
+  background: $al-hud-bg-lifted;
+  backdrop-filter: blur($al-blur);
+
+  &__tally-count { font-variant-numeric: tabular-nums; }
+
+  &.is-complete {
+    border-color: $al-success;
+    background: rgba(92, 178, 85, 0.14);
   }
 }
 
-// Shared header for both zones — keeps catalogue/roster headers
-// visually consistent.
-.role-zone {
+.role-picker__tally-count {
+  font-family: $al-font-header;
+  font-size: $al-fs-lead;
+  font-weight: $al-fw-bold;
+  color: $al-gold;
+  font-variant-numeric: tabular-nums;
+
+  .is-complete & { color: $al-success; }
+}
+
+.role-picker__tally-sep {
+  margin: 0 0.1rem;
+  color: $al-text-on-dark-dim;
+  font-weight: $al-fw-normal;
+}
+
+.role-picker__tally-label {
+  font-size: $al-fs-small;
+  color: $al-text-on-dark-mute;
+
+  .is-complete & { color: $al-success; }
+}
+
+// ── Faction group ──
+.role-group {
+  border: 1px solid $al-border-dark-subtle;
+  border-radius: $al-radius-sm;
+  overflow: hidden;
+
+  // The left edge carries the faction colour — the only place colour is
+  // load-bearing here, so it reads without a legend.
+  border-left: 3px solid $al-border-dark-soft;
+
+  &--town    { border-left-color: $al-faction-town; }
+  &--mafia   { border-left-color: $al-faction-mafia; }
+  &--neutral { border-left-color: $al-faction-neutral; }
+  &--cult    { border-left-color: $al-faction-cult; }
+
   &__head {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    padding: 0 0.2rem 0.35rem;
-    margin-bottom: 0.35rem;
-    border-bottom: 1px solid $al-border-dark-soft;
-  }
-
-  &__title {
-    font-family: $al-font-header;
-    font-size: $al-fs-small;
-    font-weight: 700;
-    letter-spacing: $al-track-label;
-    text-transform: uppercase;
-    color: $al-gold;
-  }
-
-  &__count {
-    font-family: $al-font-header;
-    font-size: $al-fs-small;
-    font-weight: 800;
-    color: $al-gold;
-  }
-
-  &__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    max-height: 26rem;
-    overflow-y: auto;
-    padding-right: 0.2rem;
-  }
-}
-
-// ── Catalogue (left — available roles) ────────────────────────────
-.role-catalogue {
-  display: flex;
-  flex-direction: column;
-  padding: 0.6rem 0.65rem;
-  background: rgba(255, 250, 235, 0.5);
-  border: 1px solid $al-border-dark-soft;
-  border-radius: $al-radius-md;
-}
-
-.role-catalogue__section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-
-  &--town    { --team: var(--al-town); }
-  &--mafia   { --team: var(--al-mafia); }
-  &--neutral { --team: var(--al-neutral); }
-  &--cult    { --team: var(--al-cult); }
-}
-
-.role-catalogue__faction {
-  font-family: $al-font-header;
-  font-size: $al-fs-label;
-  font-weight: 800;
-  letter-spacing: $al-track-label;
-  text-transform: uppercase;
-  color: var(--team);
-  padding: 0.2rem 0.25rem 0.1rem;
-  border-bottom: 1px dashed color-mix(in srgb, var(--team) 45%, transparent);
-  margin-bottom: 0.15rem;
-}
-
-.role-catalogue__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-
-  // The <li> wrappers are layout-invisible — the .role-line button
-  // becomes the direct flex child, otherwise each li stays block and
-  // chips end up stacked vertically again.
-  > li { display: contents; }
-}
-
-// A single catalogue chip — inline pill-shaped button with icon + label
-// and an optional ×N count when already in the roster. Chips wrap
-// horizontally within their faction section so 10+ roles per team fit
-// in a few rows instead of stacking 10 lines tall.
-.role-line {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.25rem 0.6rem;
-  margin: 0;
-  border-radius: $al-radius-pill;
-  border: 1.5px solid color-mix(in srgb, var(--team) 55%, transparent);
-  background: color-mix(in srgb, var(--team) 12%, rgba(255, 255, 255, 0.05));
-  color: $al-text-on-dark;
-  font-family: $al-font-body;
-  font-size: $al-fs-small;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: left;
-  box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
-  min-height: 1.6rem;
-  white-space: nowrap;
-
-  &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--team) 25%, rgba(255, 255, 255, 0.05));
-    border-color: var(--team);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(1px);
-    box-shadow: none;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.4;
-  }
-
-  &.is-locked {
-    opacity: 0.4;
-    text-decoration: line-through;
-    text-decoration-color: rgba(43, 31, 18, 0.4);
-  }
-
-  &__icon {
-    font-size: $al-fs-small;
-    text-align: center;
-    flex-shrink: 0;
+    gap: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    background: $al-fill-subtle;
   }
 
   &__name {
-    white-space: nowrap;
-  }
-
-  &__count {
-    font-family: $al-font-header;
     font-size: $al-fs-label;
-    font-weight: 800;
-    color: var(--team);
-    flex-shrink: 0;
-    margin-left: 0.1rem;
+    font-weight: $al-fw-bold;
+    letter-spacing: $al-track-label;
+    text-transform: uppercase;
+    color: $al-text-on-dark-mute;
   }
-}
 
-// ── Roster (right — selected roles, in order) ─────────────────────
-.role-roster {
-  display: flex;
-  flex-direction: column;
-  padding: 0.6rem 0.65rem;
-  background: rgba(43, 31, 18, 0.06);
-  border: 1px solid $al-border-dark-soft;
-  border-radius: $al-radius-md;
+  // Per-faction count — this is the balance, read straight off the
+  // headers. No separate balance widget needed to answer "how many
+  // wolves have I got?".
+  &__count {
+    min-width: 1.4rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: $al-radius-pill;
+    background: $al-fill;
+    font-size: $al-fs-label;
+    font-weight: $al-fw-bold;
+    text-align: center;
+    color: $al-text-on-dark-dim;
+    font-variant-numeric: tabular-nums;
+
+    &.is-active {
+      background: $al-fill-strong;
+      color: $al-text-on-dark;
+    }
+  }
 
   &__list {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
   }
 }
 
-.role-slot {
-  display: block;
+// ── Role row ──
+.role-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.28rem 0.7rem;
+  transition: background $al-trans-fast;
 
-  &--town    { --team: var(--al-town); }
-  &--mafia   { --team: var(--al-mafia); }
-  &--neutral { --team: var(--al-neutral); }
-  &--cult    { --team: var(--al-cult); }
+  & + & { border-top: 1px solid $al-border-dark-subtle; }
 
-  &__num {
-    font-family: $al-font-header;
-    font-size: $al-fs-label;
-    font-weight: 800;
-    color: $al-text-on-dark-mute;
-    width: 1.2rem;
-    text-align: right;
-    flex-shrink: 0;
-  }
+  &:hover { background: $al-fill-subtle; }
 
-  &--empty {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.3rem 0.55rem;
-    border-radius: $al-radius-sm;
-    border: 1px dashed $al-border-dark-soft;
-    color: $al-text-on-dark-dim;
-    font-size: $al-fs-small;
-    font-style: italic;
-    min-height: 1.7rem;
-  }
-
-  &__placeholder { opacity: 0.7; }
-
-  &__btn {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    width: 100%;
-    padding: 0.3rem 0.55rem;
-    margin: 0;
-    border-radius: $al-radius-sm;
-    border: 1.5px solid var(--team);
-    background: color-mix(in srgb, var(--team) 15%, rgba(255, 255, 255, 0.05));
-    color: $al-text-on-dark;
-    font-family: $al-font-body;
-    cursor: pointer;
-    box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
-    text-align: left;
-    min-height: 1.7rem;
-
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--team) 25%, rgba(255, 255, 255, 0.05));
-
-      .role-slot__remove {
-        opacity: 1;
-        color: $al-blood;
-      }
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(1px);
-      box-shadow: none;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
+  // A picked role is stated by weight and a gold count, not by a
+  // background wash — the list has to stay scannable at 20 rows.
+  &.is-picked .role-row__name { color: $al-text-on-dark; font-weight: $al-fw-bold; }
+  &.is-picked .role-row__count { color: $al-gold; }
 
   &__icon {
-    font-size: $al-fs-body;
-    width: 1rem;
+    flex: 0 0 1.1rem;
     text-align: center;
-    flex-shrink: 0;
+    font-size: $al-fs-small;
   }
 
   &__name {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: $al-fs-small;
-    font-weight: 700;
+    color: $al-text-on-dark-mute;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  &__remove {
-    font-size: $al-fs-small;
+  &__unique {
+    flex: 0 0 auto;
+    padding: 0 0.35rem;
+    border: 1px solid $al-border-dark-subtle;
+    border-radius: $al-radius-pill;
+    font-size: $al-fs-label;
     color: $al-text-on-dark-dim;
-    opacity: 0.6;
-    transition: opacity 0.15s ease, color 0.15s ease;
-    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: $al-track-label;
+  }
+
+  &__stepper {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  &__count {
+    min-width: 1.1rem;
+    text-align: center;
+    font-size: $al-fs-small;
+    font-weight: $al-fw-bold;
+    color: $al-text-on-dark-dim;
+    font-variant-numeric: tabular-nums;
   }
 }
 
-// (Old catalogue grid/tile styles removed — replaced by the
-// .role-line list above. Roster slot styles continue below.)
+.role-step {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $al-radius-xs;
+  border: 1px solid $al-border-dark-soft;
+  background: $al-fill;
+  color: $al-text-on-dark-mute;
+  font-size: $al-fs-label;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background $al-trans-fast, border-color $al-trans-fast, color $al-trans-fast;
 
-// ── Footer (balance · rules · CTA) ────────────────────────────────
+  &:hover:not(:disabled) {
+    background: $al-fill-strong;
+    border-color: $al-gold;
+    color: $al-gold-hot;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+// ── Footer (balance · CTA) ────────────────────────────────────────
+// Sticky at the bottom: twenty role rows push the start button well
+// below the fold, and the host shouldn't have to scroll past the whole
+// catalogue to launch. Pairs with the sticky tally at the top — the
+// two questions that matter ("how far along am I?" and "can I go?")
+// stay on screen while the list scrolls between them.
 .setup-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+  padding: 0.6rem 0 0.2rem;
   border-top: 1px solid $al-border-dark-soft;
+  background: $al-hud-bg-lifted;
+  backdrop-filter: blur($al-blur);
 }
 
 // Balance summary — compact row showing T/M/N/C counts + a status
@@ -746,17 +685,22 @@
     gap: 0.4rem;
   }
 
-  .role-draft {
-    grid-template-columns: 1fr;
-    gap: 0.55rem;
+  // Touch targets: the steppers get bigger, not smaller, on phones —
+  // they're the only controls on this screen, and 27px under a thumb
+  // is a mis-tap waiting to happen.
+  .role-step {
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: $al-fs-small;
   }
 
-  .role-roster__list {
-    max-height: 12rem;
+  .role-row {
+    padding: 0.35rem 0.6rem;
+    gap: 0.45rem;
   }
 
-  .role-tile {
-    padding: 0.25rem 0.4rem;
-    font-size: $al-fs-label;
+  .role-row__count {
+    min-width: 1.5rem;
+    font-size: $al-fs-body;
   }
 }

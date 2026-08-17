@@ -8,21 +8,26 @@ const FACTIONS = ['town', 'mafia', 'neutral', 'cult'];
 const bucketFor = (team) => (FACTIONS.includes(team) ? team : 'neutral');
 
 // ─────────────────────────────────────────────────────────────────────
-// Roles — two distinct zones, side by side:
+// Roles — one list, one stepper per row.
 //
-//   ┌────────────────────────────┬──────────────────────────┐
-//   │ DISPONIBLES (gauche)       │ SÉLECTIONNÉS (droite)    │
-//   │   ▸ Town                   │   1. 🛡 Villageois       │
-//   │     🛡 Villageois  (2)     │   2. 🛡 Villageois       │
-//   │     🔍 Sheriff    (1)      │   3. 🔍 Sheriff          │
-//   │   ▸ Mafia                  │   — slot 4               │
-//   │     🩸 Parrain             │   — slot 5               │
-//   │   ...                      │   ...                    │
-//   └────────────────────────────┴──────────────────────────┘
+//   VILLAGE                                    3
+//     🛡  Villageois          −   2   +
+//     ⭐  Sheriff             −   1   +
+//     💉  Docteur             −   0   +
+//   MAFIA                                      1
+//     🔫  Mafioso             −   1   +
 //
-// Click any row in the catalogue → adds to the roster.
-// Click a filled roster slot → removes that instance.
-// Both zones are simple vertical lists (no grids, no tiles).
+// What this replaces: two side-by-side zones — a catalogue you clicked
+// to add from, and a numbered roster you clicked to remove from. Three
+// problems with that. It asked the player to hold two lists and their
+// relationship in their head. It repeated duplicates as separate rows
+// ("1. Villageois", "2. Villageois") instead of counting them. And it
+// numbered the roster slots, which encoded nothing at all — roles are
+// shuffled and dealt at random, so slot 3 means exactly as much as
+// slot 7.
+//
+// Setting up a werewolf game is one question: how many of each role?
+// So there is one list, and each row answers it.
 // ─────────────────────────────────────────────────────────────────────
 const Roles = () => {
   const { t } = useTranslation(['setup', 'game', 'roles']);
@@ -31,21 +36,25 @@ const Roles = () => {
   const host = isHost();
 
   const countOf = (key) => rolesSelected.filter((r) => r.key === key).length;
+  const slotsLeft = nbPlayers - rolesSelected.length;
 
   const addRole = (role) => {
-    if (!host || rolesSelected.length >= nbPlayers) return;
-    if (role.unique && rolesSelected.some((r) => r.key === role.key)) return;
+    if (!host || slotsLeft <= 0) return;
+    if (role.unique && countOf(role.key) >= 1) return;
     setRolesSelected([...rolesSelected, role]);
   };
 
-  const removeAt = (index) => {
+  // Removes the last instance of that role — with a count-based list
+  // there's no meaningful "which one", they're identical.
+  const removeRole = (key) => {
     if (!host) return;
-    setRolesSelected(rolesSelected.filter((_, i) => i !== index));
+    const last = rolesSelected.map((r) => r.key).lastIndexOf(key);
+    if (last === -1) return;
+    setRolesSelected(rolesSelected.filter((_, i) => i !== last));
   };
 
-  const slotsLeft = nbPlayers - rolesSelected.length;
-
-  // Group catalogue roles by faction; villageois anchors first in town.
+  // Group by faction; villageois anchors first in town since it's the
+  // filler role people reach for.
   const grouped = FACTIONS.reduce((acc, f) => ({ ...acc, [f]: [] }), {});
   rolesAvailable.forEach((role) => {
     grouped[bucketFor(role.team)].push(role);
@@ -58,131 +67,86 @@ const Roles = () => {
     });
   });
 
-  const rosterSlots = [
-    ...rolesSelected.map((role, i) => ({ kind: 'filled', role, index: i })),
-    ...Array.from({ length: Math.max(0, slotsLeft) }, (_, i) => ({
-      kind: 'empty',
-      slotNumber: rolesSelected.length + i + 1,
-    })),
-  ];
+  const factionTotal = (faction) =>
+    rolesSelected.filter((r) => bucketFor(r.team) === faction).length;
 
   return (
-    <div className="role-draft">
-      {/* ── Catalogue (left — available roles) ────────────────── */}
-      <section
-        className="role-catalogue"
-        aria-label={t('setup:catalogue_title', { defaultValue: 'Rôles disponibles' })}
-      >
-        <header className="role-zone__head">
-          <span className="role-zone__title">
-            {t('setup:catalogue_title', { defaultValue: 'Rôles disponibles' })}
-          </span>
-        </header>
-        <div className="role-zone__body">
-          {FACTIONS.map((faction) => {
-            const roles = grouped[faction];
-            if (!roles.length) return null;
-            return (
-              <div
-                key={faction}
-                className={`role-catalogue__section role-catalogue__section--${faction}`}
-              >
-                <div className="role-catalogue__faction">
-                  {t(`game:teams.${faction}.short`)}
-                </div>
-                <ul className="role-catalogue__list">
-                  {roles.map((role) => {
-                    const count = countOf(role.key);
-                    const isUniqueTaken = role.unique && count >= 1;
-                    const canAdd = host && slotsLeft > 0 && !isUniqueTaken;
-                    return (
-                      <li key={role.key}>
-                        <button
-                          type="button"
-                          className={`role-line role-line--${faction} ${isUniqueTaken ? 'is-locked' : ''}`}
-                          onClick={() => addRole(role)}
-                          disabled={!canAdd}
-                          title={role.description || role.label}
-                        >
-                          <span
-                            className="role-line__icon"
-                            style={{ color: role.couleur }}
-                            aria-hidden="true"
-                          >
-                            <i className={`fas ${role.icon}`} />
-                          </span>
-                          <span className="role-line__name">{role.label}</span>
-                          {count > 0 && (
-                            <span className="role-line__count" aria-label={`${count} sélectionné(s)`}>
-                              ×{count}
-                            </span>
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+    <div className="role-picker">
+      {/* Running total — the one number that decides whether the game
+          can start. Sticky so it stays readable while scrolling a long
+          faction list. */}
+      <div className={`role-picker__tally ${slotsLeft === 0 ? 'is-complete' : ''}`}>
+        <span className="role-picker__tally-count">
+          {rolesSelected.length}<span className="role-picker__tally-sep">/</span>{nbPlayers}
+        </span>
+        <span className="role-picker__tally-label">
+          {slotsLeft > 0
+            ? t('setup:roles_remaining', { count: slotsLeft, defaultValue: `${slotsLeft} rôle(s) à placer` })
+            : t('setup:roles_complete', { defaultValue: 'Tous les rôles sont placés' })}
+        </span>
+      </div>
 
-      {/* ── Roster (right — selected roles, in order) ─────────── */}
-      <aside
-        className="role-roster"
-        aria-label={t('setup:roster_title', { defaultValue: 'Sélectionnés' })}
-      >
-        <header className="role-zone__head">
-          <span className="role-zone__title">
-            {t('setup:roster_title', { defaultValue: 'Sélectionnés' })}
-          </span>
-          <span className="role-zone__count">
-            {rolesSelected.length}/{nbPlayers}
-          </span>
-        </header>
-        <ul className="role-zone__body role-roster__list">
-          {rosterSlots.map((slot, i) => {
-            if (slot.kind === 'empty') {
-              return (
-                <li key={`empty-${i}`} className="role-slot role-slot--empty">
-                  <span className="role-slot__num">{slot.slotNumber}</span>
-                  <span className="role-slot__placeholder">
-                    {t('setup:roster_empty_slot', { defaultValue: 'libre' })}
-                  </span>
-                </li>
-              );
-            }
-            const { role, index } = slot;
-            const faction = bucketFor(role.team);
-            return (
-              <li
-                key={`filled-${index}`}
-                className={`role-slot role-slot--filled role-slot--${faction}`}
-              >
-                <button
-                  type="button"
-                  className="role-slot__btn"
-                  onClick={() => removeAt(index)}
-                  disabled={!host}
-                  title={t('setup:roster_remove', { name: role.label, defaultValue: `Retirer ${role.label}` })}
-                >
-                  <span className="role-slot__num">{index + 1}</span>
-                  <span
-                    className="role-slot__icon"
-                    style={{ color: role.couleur }}
-                    aria-hidden="true"
+      {FACTIONS.map((faction) => {
+        const roles = grouped[faction];
+        if (!roles.length) return null;
+        const total = factionTotal(faction);
+        return (
+          <section key={faction} className={`role-group role-group--${faction}`}>
+            <header className="role-group__head">
+              <span className="role-group__name">{t(`game:teams.${faction}.short`)}</span>
+              <span className={`role-group__count ${total > 0 ? 'is-active' : ''}`}>{total}</span>
+            </header>
+
+            <ul className="role-group__list">
+              {roles.map((role) => {
+                const count = countOf(role.key);
+                const atUniqueCap = role.unique && count >= 1;
+                const canAdd = host && slotsLeft > 0 && !atUniqueCap;
+                const canRemove = host && count > 0;
+                return (
+                  <li
+                    key={role.key}
+                    className={`role-row ${count > 0 ? 'is-picked' : ''}`}
+                    title={role.description || role.label}
                   >
-                    <i className={`fas ${role.icon}`} />
-                  </span>
-                  <span className="role-slot__name">{role.label}</span>
-                  <i className="fas fa-xmark role-slot__remove" aria-hidden="true" />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </aside>
+                    <span className="role-row__icon" style={{ color: role.couleur }} aria-hidden="true">
+                      <i className={`fas ${role.icon}`} />
+                    </span>
+                    <span className="role-row__name">{role.label}</span>
+                    {role.unique && (
+                      <span className="role-row__unique" title={t('setup:role_unique', { defaultValue: 'Un seul par partie' })}>
+                        {t('setup:role_unique_short', { defaultValue: 'unique' })}
+                      </span>
+                    )}
+
+                    <span className="role-row__stepper">
+                      <button
+                        type="button"
+                        className="role-step role-step--minus"
+                        onClick={() => removeRole(role.key)}
+                        disabled={!canRemove}
+                        aria-label={t('setup:role_remove_one', { name: role.label, defaultValue: `Retirer un ${role.label}` })}
+                      >
+                        <i className="fas fa-minus" aria-hidden="true" />
+                      </button>
+                      <span className="role-row__count" aria-live="polite">{count}</span>
+                      <button
+                        type="button"
+                        className="role-step role-step--plus"
+                        onClick={() => addRole(role)}
+                        disabled={!canAdd}
+                        aria-label={t('setup:role_add_one', { name: role.label, defaultValue: `Ajouter un ${role.label}` })}
+                      >
+                        <i className="fas fa-plus" aria-hidden="true" />
+                      </button>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 };

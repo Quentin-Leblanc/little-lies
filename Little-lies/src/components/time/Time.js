@@ -94,8 +94,12 @@ const Time = () => {
   // Opening cinematic: no UI.
   if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) return null;
 
-  const isFirstDayDiscussion = dayCount === 1 && phase === 'DISCUSSION';
-  const showCountdown = !isInfoPhase && !isFirstDayDiscussion;
+  // Day 1 used to hide its countdown. The clock ran anyway — the host
+  // tick decrements it and flips to VOTING at zero — so the first
+  // discussion simply ended without warning. A running clock you can't
+  // see is worse than no clock: the only phases without a countdown are
+  // the ones that genuinely have no deadline (info beats).
+  const showCountdown = !isInfoPhase;
 
   // Middle pill label — "DAY 2 · 0:42" or "NIGHT 02 · 0:42" with a
   // zero-padded night count to mirror the mockup's typography. Paused
