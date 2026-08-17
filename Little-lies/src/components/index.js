@@ -1,6 +1,5 @@
 import Chat from './Chat';
 import Graveyard from './Graveyard';
-import Menu from './Menu';
 import Player from './Player';
 import PlayerActions from './PlayerActions';
 import Roles from './Roles';
@@ -12,7 +11,6 @@ export {
   Chat,
   Graveyard,
   MainScene,
-  Menu,
   Player,
   PlayerActions,
   Roles,

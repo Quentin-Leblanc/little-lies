@@ -8,7 +8,7 @@ import './Tutorial.scss';
 // to be discoverable from the lobby so people who just landed in a room
 // can get the gist in under a minute — the full role-by-role guide stays
 // accessible via the in-game menu (which the last slide links out to).
-const Tutorial = ({ onClose }) => {
+const Tutorial = ({ onClose, onOpenGuide }) => {
   const { t } = useTranslation(['menu', 'common']);
   const [step, setStep] = useState(0);
 
@@ -88,7 +88,14 @@ const Tutorial = ({ onClose }) => {
           )}
         </div>
 
-        <p className="tutorial-hint">{t('menu:tutorial.guide_hint')}</p>
+        {/* One door for help: the basics here, the full role list one
+            click further. Replaces the old hint that told the player to
+            go hunt for another button in another menu. */}
+        {onOpenGuide && (
+          <button className="tutorial-guide-link" onClick={onOpenGuide}>
+            <i className="fas fa-book" aria-hidden="true"></i> {t('menu:tutorial.open_guide', { defaultValue: 'Voir tous les rôles' })}
+          </button>
+        )}
       </div>
     </div>,
     document.body,

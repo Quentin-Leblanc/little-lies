@@ -1,117 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { useMultiplayerState, getRoomCode } from 'playroomkit';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import { getRoles } from '../../data/roles.js';
 import Audio from '../../utils/AudioManager';
 import useEscapeKey from '../../hooks/useEscapeKey';
-import Legal from '../Legal/Legal';
-import { useAuth } from '../Auth/Auth';
-import { isAdminEmail } from '../../utils/supabase';
 
 import './Menu.scss';
 
-const Menu = () => {
-  const { t } = useTranslation(['menu', 'common']);
-  const { user } = useAuth();
-  const [showLogs, setShowLogs] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [showLegal, setShowLegal] = useState(false);
-  const [roomCode, setRoomCode] = useState('');
-  const [muted, setMuted] = useState(Audio.isMuted());
-  const [barCopied, setBarCopied] = useState(false);
-  const isAdmin = isAdminEmail(user);
+// ─────────────────────────────────────────────────────────────────────
+// The in-game menu bar that used to sit in the top-left corner is gone.
+// It duplicated the game title, the help button and the sound toggle the
+// persistent TopBar already carried, plus a room code the Setup screen
+// also showed — seven controls where the player needed one.
+//
+// What survives are the three dialogs, now opened from the TopBar:
+//   - MenuDialog : room code, volume, language, legal, quit
+//   - LogDialog  : the public chat history
+//   - HelpDialog : the full role guide
+// ─────────────────────────────────────────────────────────────────────
 
-  const [messages = []] = useMultiplayerState('chatMessages', []);
-
-  useEffect(() => {
-    try {
-      const code = getRoomCode();
-      setRoomCode(code || '');
-    } catch (e) {
-      console.warn('Could not get room code:', e);
-    }
-  }, []);
-
-  const handleQuitGame = () => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete('r');
-    window.location.href = url.toString();
-  };
-
-  const filteredLogs = messages?.filter((message) => message.chat !== 'mafia' && message.chat !== 'whisper' && message.chat !== 'dead') || [];
-
-  const copyCode = () => {
-    if (!roomCode) return;
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(roomCode).catch(() => {
-        try {
-          const ta = document.createElement('textarea');
-          ta.value = roomCode;
-          ta.style.position = 'fixed';
-          ta.style.opacity = '0';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-        } catch (_) {}
-      });
-    }
-    setBarCopied(true);
-    setTimeout(() => setBarCopied(false), 1600);
-  };
-
-  return (
-    <div className="menu-wrapper">
-      <div className="menu-bar">
-        <h1 className="menu-game-title" data-text="AMONG LIARS">AMONG LIARS</h1>
-        <div
-          className={`menu-lobby-code ${barCopied ? 'is-copied' : ''}`}
-          onClick={copyCode}
-          title={t('menu:copy_tooltip')}
-        >
-          <span className="menu-code-value">{roomCode || '...'}</span>
-          <i className={`fas ${barCopied ? 'fa-check' : 'fa-copy'} menu-code-copy`}></i>
-          {barCopied && <span className="menu-code-tooltip">{t('common:copied')}</span>}
-        </div>
-        <button className="menu-btn-icon" onClick={() => setShowMenu(true)} title={t('menu:menu')} aria-label={t('menu:menu')} aria-expanded={showMenu}>
-          <i className="fas fa-bars" aria-hidden="true"></i>
-        </button>
-        <button className="menu-btn-icon" onClick={() => setShowHelp(true)} title={t('menu:help')} aria-label={t('menu:help')} aria-expanded={showHelp}>
-          <i className="fas fa-book" aria-hidden="true"></i>
-        </button>
-        <button className="menu-btn-icon" onClick={() => setShowLogs(true)} title={t('menu:logs')} aria-label={t('menu:logs')} aria-expanded={showLogs}>
-          <i className="fas fa-scroll" aria-hidden="true"></i>
-        </button>
-        <button className="menu-btn-icon" onClick={() => { const m = Audio.toggleMute(); setMuted(m); }} title={muted ? t('menu:unmute') : t('menu:mute')} aria-label={muted ? t('menu:unmute') : t('menu:mute')} aria-pressed={muted}>
-          <i className={`fas ${muted ? 'fa-volume-mute' : 'fa-volume-up'}`} aria-hidden="true"></i>
-        </button>
-        {isAdmin && (
-          <button className="menu-btn-icon menu-btn-admin" onClick={() => window.dispatchEvent(new Event('admin-panel-open'))} title="Admin" aria-label="Admin">
-            <i className="fas fa-shield-alt" aria-hidden="true"></i>
-          </button>
-        )}
-      </div>
-      {showMenu && createPortal(
-        <MenuDialog
-          roomCode={roomCode}
-          onClose={() => setShowMenu(false)}
-          onQuit={handleQuitGame}
-          onShowLegal={() => { setShowMenu(false); setShowLegal(true); }}
-        />,
-        document.body
-      )}
-      {showLogs && createPortal(<LogDialog messages={filteredLogs} onClose={() => setShowLogs(false)} />, document.body)}
-      {showHelp && createPortal(<HelpDialog onClose={() => setShowHelp(false)} />, document.body)}
-      {showLegal && createPortal(<Legal onClose={() => setShowLegal(false)} />, document.body)}
-    </div>
-  );
-};
-
-const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
+export const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal, onShowLogs, isAdmin }) => {
   const { t } = useTranslation(['menu', 'common']);
   const [copied, setCopied] = useState(false);
   const [volume, setVolume] = useState(Audio.getVolume());
@@ -202,6 +111,17 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
               ))}
             </div>
           </div>
+          <button onClick={onShowLogs} className="legal-btn">
+            <i className="fas fa-scroll"></i> {t('menu:logs')}
+          </button>
+          {isAdmin && (
+            <button
+              onClick={() => { onClose(); window.dispatchEvent(new Event('admin-panel-open')); }}
+              className="legal-btn"
+            >
+              <i className="fas fa-shield-alt"></i> Admin
+            </button>
+          )}
           <button onClick={onShowLegal} className="legal-btn">
             <i className="fas fa-scale-balanced"></i> {t('menu:legal')}
           </button>
@@ -214,7 +134,7 @@ const MenuDialog = ({ roomCode, onClose, onQuit, onShowLegal }) => {
   );
 };
 
-const LogDialog = ({ messages, onClose }) => {
+export const LogDialog = ({ messages, onClose }) => {
   const { t } = useTranslation(['menu', 'common']);
   useEscapeKey(onClose);
 
@@ -241,7 +161,44 @@ const LogDialog = ({ messages, onClose }) => {
   );
 };
 
-const HelpDialog = ({ onClose }) => {
+// Faction sections of the role guide, in reading order. Colours match
+// the faction colours used on the role cards themselves.
+const ROLE_SECTIONS = [
+  { team: 'town',    titleKey: 'roles_town',    color: '#78ff78' },
+  { team: 'mafia',   titleKey: 'roles_mafia',   color: '#ff4444' },
+  { team: 'cult',    titleKey: 'roles_cult',    color: '#a96edd' },
+  { team: 'neutral', titleKey: 'roles_neutral', color: '#9370db' },
+];
+
+const RoleSection = ({ title, color, roles }) => {
+  if (!roles || roles.length === 0) return null;
+  return (
+    <>
+      <h3 style={{ color }}>{title}</h3>
+      <div className="help-role-grid">
+        {roles.map((role) => (
+          <div key={role.key} className="help-role">
+            <div className="help-role-header">
+              <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
+              <strong style={{ color: role.couleur }}>{role.label}</strong>
+            </div>
+            <p>{role.description}</p>
+            {Array.isArray(role.details) && role.details.length > 0 && (
+              <ul className="help-role-details">
+                {role.details.map((line, i) => (
+                  <li key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
+                ))}
+              </ul>
+            )}
+            <span className="help-objective">{role.objectif}</span>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+};
+
+export const HelpDialog = ({ onClose }) => {
   const { t } = useTranslation(['menu', 'game', 'common']);
   useEscapeKey(onClose);
   const allRoles = getRoles();
@@ -303,72 +260,20 @@ const HelpDialog = ({ onClose }) => {
             <li>{t('menu:help_dialog.key_escape')}</li>
           </ul>
 
-          <h3 style={{ color: '#78ff78' }}>{t('menu:help_dialog.roles_town')}</h3>
-          <div className="help-role-grid">
-            {rolesByTeam.town.map((role) => (
-              <div key={role.key} className="help-role">
-                <div className="help-role-header">
-                  <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
-                  <strong style={{ color: role.couleur }}>{role.label}</strong>
-                </div>
-                <p>{role.description}</p>
-                {Array.isArray(role.details) && role.details.length > 0 && (
-                  <ul className="help-role-details">
-                    {role.details.map((line, i) => (
-                      <li key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
-                    ))}
-                  </ul>
-                )}
-                <span className="help-objective">{role.objectif}</span>
-              </div>
-            ))}
-          </div>
-
-          <h3 style={{ color: '#ff4444' }}>{t('menu:help_dialog.roles_mafia')}</h3>
-          <div className="help-role-grid">
-            {rolesByTeam.mafia.map((role) => (
-              <div key={role.key} className="help-role">
-                <div className="help-role-header">
-                  <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
-                  <strong style={{ color: role.couleur }}>{role.label}</strong>
-                </div>
-                <p>{role.description}</p>
-                {Array.isArray(role.details) && role.details.length > 0 && (
-                  <ul className="help-role-details">
-                    {role.details.map((line, i) => (
-                      <li key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
-                    ))}
-                  </ul>
-                )}
-                <span className="help-objective">{role.objectif}</span>
-              </div>
-            ))}
-          </div>
-
-          <h3 style={{ color: '#9370db' }}>{t('menu:help_dialog.roles_neutral')}</h3>
-          <div className="help-role-grid">
-            {rolesByTeam.neutral.map((role) => (
-              <div key={role.key} className="help-role">
-                <div className="help-role-header">
-                  <i className={`fas ${role.icon}`} style={{ color: role.couleur }}></i>
-                  <strong style={{ color: role.couleur }}>{role.label}</strong>
-                </div>
-                <p>{role.description}</p>
-                {Array.isArray(role.details) && role.details.length > 0 && (
-                  <ul className="help-role-details">
-                    {role.details.map((line, i) => (
-                      <li key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
-                    ))}
-                  </ul>
-                )}
-                <span className="help-objective">{role.objectif}</span>
-              </div>
-            ))}
-          </div>
+          {/* One section per faction, driven by a list — the Cult used to
+              be silently missing because the three sections were pasted
+              copies and nobody added a fourth. A converted player could
+              not look up their own role. */}
+          {ROLE_SECTIONS.map(({ team, titleKey, color }) => (
+            <RoleSection
+              key={team}
+              title={t(`menu:help_dialog.${titleKey}`)}
+              color={color}
+              roles={rolesByTeam[team]}
+            />
+          ))}
         </div>
       </div>
     </div>
   );
 };
-
-export default Menu;

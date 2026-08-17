@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePlayersList, getRoomCode } from 'playroomkit';
 import {
     Graveyard,
-    Menu,
     MainScene,
     Setup,
     Chat,
@@ -15,7 +14,6 @@ import GameComponent from './components/GameComponent/GameComponent';
 import GameOver from './components/GameOver/GameOver';
 import AdminPanel from './components/AdminPanel/AdminPanel';
 import RoleReveal from './components/RoleReveal/RoleReveal';
-import GameTutorial from './components/Tutorial/GameTutorial';
 import CustomLobby from './components/CustomLobby/CustomLobby';
 import UnifiedScene from './components/Scenes/UnifiedScene';
 import TopBar from './components/TopBar';
@@ -41,21 +39,6 @@ const writeRoleRevealSeen = (seen) => {
         if (seen) sessionStorage.setItem(ROLE_REVEAL_SEEN_KEY, 'true');
         else sessionStorage.removeItem(ROLE_REVEAL_SEEN_KEY);
     } catch { /* storage blocked — accept degraded behavior */ }
-};
-
-// First-match onboarding — shown once per browser, not per session.
-// Stored in localStorage so even closing the tab doesn't re-trigger it
-// next time the player comes back. The RoleReveal SEEN key above is
-// per-session (F5 during a match shouldn't replay the card), but the
-// tutorial should only appear for genuinely new players.
-const GAME_TUTORIAL_SEEN_KEY = 'amongliars_game_tutorial_seen';
-const readGameTutorialSeen = () => {
-    try { return localStorage.getItem(GAME_TUTORIAL_SEEN_KEY) === 'true'; }
-    catch { return false; }
-};
-const writeGameTutorialSeen = () => {
-    try { localStorage.setItem(GAME_TUTORIAL_SEEN_KEY, 'true'); }
-    catch { /* storage blocked — accept degraded behavior */ }
 };
 
 function App() {
@@ -88,16 +71,6 @@ function App() {
     // F5 during a game drops the player straight into the match instead
     // of replaying the card + "la nuit tombe" intro.
     const [showRoleReveal, setShowRoleReveal] = useState(() => !readRoleRevealSeen());
-    // Game tutorial visibility — stays false until the role reveal ends
-    // AND the setup cinematic has finished (phase left INTRO_CINEMATIC).
-    // Previously we spawned the tutorial ~1.2s after the curtain opened,
-    // which fell inside the 6s setup shots where the HUD is hidden
-    // (.intro-cinematic-hide) — the spotlight would highlight invisible
-    // blocks and the tutorial silently did nothing. Now we arm it on
-    // role-reveal close and actually show it once phase flips to
-    // DISCUSSION (Day 1 UI fully visible).
-    const [showGameTutorial, setShowGameTutorial] = useState(false);
-    const [gameTutorialArmed, setGameTutorialArmed] = useState(false);
 
     const isGameOver = status === CONSTANTS.GAME_ENDED;
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -158,31 +131,7 @@ function App() {
         setTimeout(() => {
             setCurtainVisible(false);
             setCurtainReady(false);
-            // Arm the first-match walkthrough — the effect below waits for
-            // the intro cinematic to finish before actually spawning it,
-            // so the spotlight lands on a visible HUD instead of the
-            // hidden-during-setup blocks.
-            if (!readGameTutorialSeen()) {
-                setGameTutorialArmed(true);
-            }
         }, 4300);
-    };
-
-    // Spawn the tutorial once the setup cinematic ends (UI now visible).
-    useEffect(() => {
-        if (!gameTutorialArmed || showGameTutorial) return;
-        if (phase === CONSTANTS.PHASE.INTRO_CINEMATIC) return;
-        // Tiny delay so the HUD's fade-in finishes before the spotlight
-        // reads getBoundingClientRect — without it the first measure can
-        // land while opacity is still mid-interpolation.
-        const t = setTimeout(() => setShowGameTutorial(true), 700);
-        return () => clearTimeout(t);
-    }, [gameTutorialArmed, phase, showGameTutorial, CONSTANTS.PHASE.INTRO_CINEMATIC]);
-
-    const handleGameTutorialClose = () => {
-        setShowGameTutorial(false);
-        setGameTutorialArmed(false);
-        writeGameTutorialSeen();
     };
 
     // Pre-game: Lobby ↔ Setup with fade transition.
@@ -297,14 +246,6 @@ function App() {
                 <RoleReveal onComplete={handleRoleRevealComplete} />
             )}
 
-            {/* First-match UI walkthrough — appears once per browser after
-                the curtain opens and the role reveal finishes. Hidden if
-                the game ended during the reveal (short round) since the
-                GameOver screen takes over. */}
-            {showGameTutorial && !isGameOver && (
-                <GameTutorial onClose={handleGameTutorialClose} />
-            )}
-
             {/* Spectator banner */}
             {isSpectator && (
                 <div className="spectator-banner">
@@ -338,9 +279,12 @@ function App() {
                     return (
                         <>
                             <div className={`game-layout ${uiClass}`}>
-                                {/* Top-left — Menu + (Graveyard | Roles) */}
+                                {/* Top-left — who's still in the village.
+                                    The old Menu bar that sat above this
+                                    block moved into the TopBar: it
+                                    duplicated the title, help and sound
+                                    the TopBar already carried. */}
                                 <div className="layout-players">
-                                    <Menu />
                                     <div className="players-row">
                                         <Graveyard />
                                         <Roles />

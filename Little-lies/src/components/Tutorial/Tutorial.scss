@@ -147,15 +147,30 @@
   i { margin: 0 0.25rem; }
 }
 
-.tutorial-hint {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: $al-text-on-light-mute;
-  text-align: center;
-  font-style: italic;
+// Secondary door to the full role guide. Reads as a link, not a CTA —
+// the primary action of the dialog stays "C'est parti !".
+.tutorial-guide-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
   margin: 0;
-  padding-top: 0.4rem;
-  border-top: 1px dashed $al-border-soft;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-top: 1px solid $al-border-soft;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $al-text-on-light-mute;
+  cursor: pointer;
+
+  &:hover {
+    background: $al-bg-subtle;
+    color: $al-text-on-light;
+  }
 }
 
 @keyframes tutorial-fade-in {

@@ -418,10 +418,8 @@ $topbar-h-compact: 2.5rem;
   height: calc(100% - #{$topbar-h});
 }
 
-// In-game volume / config / menu floaters that used to live at the top
-// of the screen need to clear the bar too. The .menu-bar in the game
-// HUD anchors top-left and would otherwise jam under the logo.
-.has-topbar .menu-container,
+// The top-left village roster anchors under the bar so it doesn't jam
+// against the logo.
 .has-topbar .layout-players {
   margin-top: $topbar-h-compact;
 }

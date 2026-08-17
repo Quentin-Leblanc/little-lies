@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useMultiplayerState } from 'playroomkit';
 import AuthModal, { useAuth } from '../Auth/Auth';
 import Tutorial from '../Tutorial/Tutorial';
+import Legal from '../Legal/Legal';
+import { MenuDialog, LogDialog, HelpDialog } from '../Menu/Menu';
+import { isAdminEmail } from '../../utils/supabase';
 import Time from '../time/Time';
 import Audio from '../../utils/AudioManager';
 import { getLevel, getXPProgress } from '../../utils/xpSystem';
@@ -263,10 +267,36 @@ const GameOverCentre = () => {
 
 // ── TopBar ────────────────────────────────────────────────────────
 const TopBar = ({ mode = 'lobby', roomCode = '', playersCount = 0 }) => {
+  const { t } = useTranslation(['menu', 'common']);
+  const { user } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  // In-game menu — replaces the old top-left Menu bar. One button, one
+  // panel; the room code, chat history, language, legal and quit all
+  // live inside it instead of being seven separate icons on the board.
+  const [showMenu, setShowMenu] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
+  // Role guide — reached from the tutorial's last slide, so "Aide" is a
+  // single door: the basics first, the full role list behind it.
+  const [showGuide, setShowGuide] = useState(false);
+  const [messages = []] = useMultiplayerState('chatMessages', []);
+  const isAdmin = isAdminEmail(user);
 
   const compact = mode === 'game';
+  const inGame = mode === 'game' || mode === 'gameover';
+
+  const handleQuit = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('r');
+    window.location.href = url.toString();
+  };
+
+  // Private channels stay out of the public log — reading the mafia's
+  // night chat from the history panel would hand the game away.
+  const publicLog = (messages || []).filter(
+    (m) => m.chat !== 'mafia' && m.chat !== 'cult' && m.chat !== 'whisper' && m.chat !== 'dead',
+  );
 
   return (
     <>
@@ -291,12 +321,24 @@ const TopBar = ({ mode = 'lobby', roomCode = '', playersCount = 0 }) => {
             type="button"
             className="topbar-icon-btn topbar-icon-btn--help"
             onClick={() => setShowTutorial(true)}
-            title="Comment jouer ?"
-            aria-label="Comment jouer ?"
+            title={t('menu:tutorial.open_button', { defaultValue: 'Comment jouer ?' })}
+            aria-label={t('menu:tutorial.open_button', { defaultValue: 'Comment jouer ?' })}
           >
             <i className="fas fa-question" aria-hidden="true"></i>
           </button>
           <VolumeControl />
+          {inGame && (
+            <button
+              type="button"
+              className="topbar-icon-btn topbar-icon-btn--menu"
+              onClick={() => setShowMenu(true)}
+              title={t('menu:menu', { defaultValue: 'Menu' })}
+              aria-label={t('menu:menu', { defaultValue: 'Menu' })}
+              aria-expanded={showMenu}
+            >
+              <i className="fas fa-bars" aria-hidden="true"></i>
+            </button>
+          )}
         </div>
       </header>
 
@@ -307,7 +349,33 @@ const TopBar = ({ mode = 'lobby', roomCode = '', playersCount = 0 }) => {
         document.body,
       )}
       {showTutorial && createPortal(
-        <Tutorial onClose={() => setShowTutorial(false)} />,
+        <Tutorial
+          onClose={() => setShowTutorial(false)}
+          onOpenGuide={() => { setShowTutorial(false); setShowGuide(true); }}
+        />,
+        document.body,
+      )}
+      {showGuide && createPortal(
+        <HelpDialog onClose={() => setShowGuide(false)} />,
+        document.body,
+      )}
+      {showMenu && createPortal(
+        <MenuDialog
+          roomCode={roomCode}
+          isAdmin={isAdmin}
+          onClose={() => setShowMenu(false)}
+          onQuit={handleQuit}
+          onShowLogs={() => { setShowMenu(false); setShowLogs(true); }}
+          onShowLegal={() => { setShowMenu(false); setShowLegal(true); }}
+        />,
+        document.body,
+      )}
+      {showLogs && createPortal(
+        <LogDialog messages={publicLog} onClose={() => setShowLogs(false)} />,
+        document.body,
+      )}
+      {showLegal && createPortal(
+        <Legal onClose={() => setShowLegal(false)} />,
         document.body,
       )}
     </>
