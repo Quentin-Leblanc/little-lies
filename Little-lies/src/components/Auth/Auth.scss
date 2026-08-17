@@ -93,7 +93,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: rgba(255, 255, 255, 0.08);
+    background: $al-fill;
   }
 
   span {
@@ -114,7 +114,7 @@
   input {
     width: 100%;
     padding: 0.588rem 0.824rem;
-    background: rgba(0, 0, 0, 0.4);
+    background: $al-scrim;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 0.471rem;
     color: #ddd;
@@ -186,7 +186,7 @@
 .auth-btn-guest {
   width: 100%;
   padding: 0.588rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.471rem;
   color: #777;
@@ -198,7 +198,7 @@
   i { margin-right: 0.353rem; }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: $al-fill;
     color: #aaa;
   }
 }
@@ -219,7 +219,7 @@
   top: 0.706rem;
   right: 0.706rem;
   z-index: 2;
-  background: rgba(0, 0, 0, 0.4);
+  background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #ccc;
   width: 1.8rem;
@@ -228,7 +228,7 @@
   cursor: pointer;
   font-size: $al-fs-small;
 
-  &:hover { background: rgba(0, 0, 0, 0.6); color: #fff; }
+  &:hover { background: $al-scrim; color: #fff; }
 }
 
 .profile-hero {
@@ -282,7 +282,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
+  background: $al-scrim;
   color: #fff;
   font-size: $al-fs-lead;
   opacity: 0;
@@ -294,7 +294,7 @@
   position: absolute;
   top: 1.2rem;
   left: 5rem;
-  background: rgba(0, 0, 0, 0.55);
+  background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #ff8a8a;
   width: 1.6rem;
@@ -363,7 +363,7 @@
 }
 
 .profile-name-edit-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #888;
   width: 1.6rem;
@@ -373,7 +373,7 @@
   padding: 0;
   font-size: $al-fs-label;
 
-  &:hover { color: #ccc; background: rgba(255, 255, 255, 0.1); }
+  &:hover { color: #ccc; background: $al-fill; }
 }
 
 .profile-name-edit {
@@ -385,7 +385,7 @@
 .profile-name-input {
   flex: 1;
   padding: 0.353rem 0.588rem;
-  background: rgba(0, 0, 0, 0.4);
+  background: $al-scrim;
   border: 1px solid rgba(47, 130, 255, 0.4);
   border-radius: 0.3rem;
   color: #eee;
@@ -398,7 +398,7 @@
 
 .profile-name-save,
 .profile-name-cancel {
-  background: rgba(255, 255, 255, 0.05);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
   width: 1.8rem;
   height: 1.8rem;
@@ -460,7 +460,7 @@
 
 .profile-tier-progress-bar {
   height: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: $al-fill;
   border-radius: 2px;
   overflow: hidden;
 }
@@ -491,7 +491,7 @@
 
 .profile-xp-bar {
   height: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: $al-fill;
   border-radius: 4px;
   overflow: hidden;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -520,7 +520,7 @@
   align-items: center;
   gap: 0.235rem;
   padding: 0.706rem 0.353rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 0.471rem;
 
@@ -569,7 +569,7 @@
   flex-direction: column;
   align-items: center;
   padding: 0.588rem 0.235rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 0.471rem;
   transition: all 0.2s;
@@ -579,7 +579,7 @@
     filter: grayscale(80%);
 
     .profile-tier-icon {
-      background: rgba(255, 255, 255, 0.08) !important;
+      background: $al-fill !important;
       color: #555 !important;
     }
   }
@@ -666,7 +666,7 @@
 
 // Teaser (coming soon features)
 .profile-section-teaser {
-  background: rgba(255, 255, 255, 0.01);
+  background: $al-fill-subtle;
 }
 
 .profile-teaser-grid {
@@ -681,7 +681,7 @@
   align-items: center;
   gap: 0.235rem;
   padding: 0.588rem 0.235rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: $al-fill-subtle;
   border: 1px dashed rgba(255, 255, 255, 0.08);
   border-radius: 0.471rem;
   opacity: 0.7;
@@ -855,7 +855,7 @@
 .profile-badge-xp-bar {
   width: 100%;
   height: 3px;
-  background: rgba(255, 255, 255, 0.1);
+  background: $al-fill;
   border-radius: 2px;
   margin-top: 0.118rem;
   overflow: hidden;

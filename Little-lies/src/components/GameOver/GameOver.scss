@@ -82,7 +82,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.45rem 0.8rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 0.4rem;
   font-size: $al-fs-body;
@@ -138,7 +138,7 @@
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
+  background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #bbb;
   cursor: pointer;
@@ -216,7 +216,7 @@
 
   &::-webkit-slider-runnable-track {
     height: 0.28rem;
-    background: rgba(255, 255, 255, 0.15);
+    background: $al-fill-strong;
     border-radius: 0.14rem;
   }
   &::-webkit-slider-thumb {
@@ -230,7 +230,7 @@
   }
   &::-moz-range-track {
     height: 0.28rem;
-    background: rgba(255, 255, 255, 0.15);
+    background: $al-fill-strong;
     border-radius: 0.14rem;
   }
   &::-moz-range-thumb {
@@ -403,7 +403,7 @@
 .go-stat-divider {
   width: 1px;
   height: 1.765rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: $al-fill;
 }
 
 // Gagnants neutres
@@ -493,7 +493,7 @@
 
   &.go-team-winner {
     .go-team-header {
-      background: rgba(255, 255, 255, 0.03);
+      background: $al-fill-subtle;
     }
   }
 }
@@ -543,7 +543,7 @@
 
 .go-me-badge {
   font-size: $al-fs-label;
-  background: rgba(255, 255, 255, 0.1);
+  background: $al-fill;
   color: #aaa;
   padding: 1px 0.353rem;
   border-radius: 0.588rem;
@@ -633,7 +633,7 @@
 }
 
 .go-btn-feedback {
-  background: rgba(255, 255, 255, 0.04);
+  background: $al-fill-subtle;
   border: 1px dashed rgba(255, 255, 255, 0.18);
   color: #bbb;
   padding: 0.5rem 1.1rem;
@@ -863,14 +863,14 @@
   padding: 0.65rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0.4rem;
-  background: rgba(255, 255, 255, 0.06);
+  background: $al-fill-subtle;
   color: #fff;
   font-size: $al-fs-body;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 
-  &:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.35); }
+  &:hover { background: $al-fill; border-color: rgba(255, 255, 255, 0.35); }
   i { font-size: $al-fs-lead; }
   &.google i { color: #fff; }
 }
@@ -888,7 +888,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: rgba(255, 255, 255, 0.12);
+    background: $al-fill;
   }
 }
 
@@ -899,7 +899,7 @@
 
   input {
     padding: 0.6rem 0.85rem;
-    background: rgba(0, 0, 0, 0.4);
+    background: $al-scrim;
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 0.35rem;
     color: #fff;
@@ -909,7 +909,7 @@
     &:focus {
       outline: none;
       border-color: rgba(217, 184, 112, 0.55);
-      background: rgba(0, 0, 0, 0.55);
+      background: $al-scrim;
     }
     &::placeholder { color: rgba(255, 255, 255, 0.4); }
   }

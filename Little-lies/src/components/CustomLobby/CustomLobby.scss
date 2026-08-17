@@ -62,7 +62,7 @@
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
+  background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #bbb;
   cursor: pointer;
@@ -91,7 +91,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 0.5rem 0.55rem;
-  background: $al-grad-panel;
+  background: $al-grad-hud-panel;
   border: 1px solid $al-gold-border;
   border-radius: $al-radius-md;
   backdrop-filter: blur($al-blur);
@@ -147,7 +147,7 @@
 
   &::-webkit-slider-runnable-track {
     height: 0.28rem;
-    background: rgba(255, 255, 255, 0.15);
+    background: $al-fill-strong;
     border-radius: 0.14rem;
   }
   &::-webkit-slider-thumb {
@@ -162,7 +162,7 @@
   }
   &::-moz-range-track {
     height: 0.28rem;
-    background: rgba(255, 255, 255, 0.15);
+    background: $al-fill-strong;
     border-radius: 0.14rem;
   }
   &::-moz-range-thumb {
@@ -192,7 +192,7 @@
   padding: 0.5rem 0 0;
   background: none !important;
   border: none;
-  color: $al-text-on-light-dim;
+  color: $al-text-on-dark-dim;
   font-size: $al-fs-label;
   font-family: inherit;
   cursor: pointer;
@@ -202,7 +202,7 @@
   transition: color 0.25s;
 
   &:hover {
-    color: $al-text-on-light;
+    color: $al-text-on-dark;
     background: none !important;
     text-decoration: underline;
   }
@@ -225,10 +225,10 @@
   pointer-events: auto;
   width: 100%;
   padding: 1.4rem 1.25rem 1.25rem;
-  background: $al-grad-panel;
-  border-left: 2px solid $al-border-strong;
+  background: $al-grad-hud-panel;
+  border-left: 2px solid $al-border-dark-strong;
   box-shadow: -8px 0 24px rgba(20, 16, 40, 0.35);
-  color: $al-text-on-light;
+  color: $al-text-on-dark;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -249,7 +249,7 @@
   font-size: $al-fs-title;
   font-weight: 800;
   letter-spacing: 0.18rem;
-  color: $al-gold-dim;
+  color: $al-gold;
   text-align: center;
   white-space: nowrap;
   position: relative;
@@ -298,7 +298,7 @@
 .lobby-subtitle {
   margin: 0;
   font-size: $al-fs-label;
-  color: $al-text-on-light-mute;
+  color: $al-text-on-dark-mute;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -338,16 +338,16 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: $al-track-label;
-  color: $al-gold-rich;
+  color: $al-gold;
 }
 
 /* ── Inputs ── */
 .lobby-input {
   padding: 0.6rem 0.75rem;
   border-radius: $al-radius-sm;
-  border: 1px solid $al-border-strong;
-  background: #fffaef;
-  color: $al-text-on-light;
+  border: 1px solid $al-border-dark-strong;
+  background: $al-fill-subtle;
+  color: $al-text-on-dark;
   font-family: $al-font-body;
   font-size: $al-fs-body;
   font-weight: 600;
@@ -355,13 +355,13 @@
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 
   &:focus {
-    border-color: $al-gold-rich;
+    border-color: $al-gold;
     background: #fff;
     box-shadow: 0 0 0 2px $al-gold-glow-strong;
   }
 
   &::placeholder {
-    color: $al-text-on-light-dim;
+    color: $al-text-on-dark-dim;
     font-weight: 400;
   }
 }
@@ -372,14 +372,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #fffaef;
-  border: 1px solid $al-border-strong;
+  background: $al-fill-subtle;
+  border: 1px solid $al-border-dark-strong;
   border-radius: $al-radius-sm;
   padding: 0.5rem 0.75rem;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 
-  &:hover { background: #f5e7c0; border-color: $al-gold-rich; }
+  &:hover { background: $al-fill; border-color: $al-gold; }
 
   &.is-copied {
     border-color: $al-success;
@@ -426,7 +426,7 @@
   font-size: $al-fs-lead;
   font-weight: 800;
   letter-spacing: 0.18rem;
-  color: $al-text-on-light;
+  color: $al-text-on-dark;
   flex: 1;
   user-select: all;
 }
@@ -434,7 +434,7 @@
 .lobby-btn-icon {
   background: none !important;
   border: none;
-  color: $al-text-on-light-mute;
+  color: $al-text-on-dark-mute;
   cursor: pointer;
   font-size: $al-fs-small;
   padding: 0.25rem 0.4rem;
@@ -444,7 +444,7 @@
   transition: color 0.2s, background 0.2s;
 
   &:hover {
-    color: $al-text-on-light;
+    color: $al-text-on-dark;
     background: rgba(43, 31, 18, 0.08) !important;
   }
 }
@@ -504,8 +504,8 @@
   }
 
   &:disabled {
-    background: #c4b89e;
-    color: #8a7860;
+    background: $al-fill-subtle;
+    color: $al-text-on-dark-dim;
     cursor: not-allowed;
     box-shadow: 0 2px 0 rgba(43, 31, 18, 0.18);
     text-shadow: none;
@@ -513,14 +513,14 @@
 }
 
 .lobby-btn-secondary {
-  background: #ede0bf;
-  color: $al-text-on-light;
-  border: 1px solid $al-border-strong;
+  background: $al-fill;
+  color: $al-text-on-dark;
+  border: 1px solid $al-border-dark-strong;
   box-shadow: 0 2px 0 rgba(43, 31, 18, 0.18);
 
   &:hover {
-    background: #f5e9c8;
-    border-color: $al-gold-rich;
+    background: $al-fill-strong;
+    border-color: $al-gold;
   }
 }
 
@@ -543,13 +543,13 @@
 
 .lobby-btn-ghost {
   background: none;
-  color: $al-text-on-light-mute;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-small;
   padding: 0.5rem;
   box-shadow: none;
 
   &:hover {
-    color: $al-gold-rich;
+    color: $al-gold;
     background: rgba(43, 31, 18, 0.05);
   }
 }
@@ -585,8 +585,8 @@
   gap: 0.5rem;
   padding: 0.4rem 0.6rem;
   border-radius: $al-radius-sm;
-  background: #fffaef;
-  border: 1px solid $al-border-soft;
+  background: $al-fill-subtle;
+  border: 1px solid $al-border-dark-soft;
   transition: background 0.15s, border-color 0.15s;
 
   &.is-me {
@@ -604,7 +604,7 @@
 
 .player-number {
   font-size: $al-fs-label;
-  color: $al-text-on-light-dim;
+  color: $al-text-on-dark-dim;
   font-weight: 700;
   min-width: 1.1rem;
 }
@@ -612,7 +612,7 @@
 .player-list-name {
   font-size: $al-fs-body;
   font-weight: 800;
-  color: $al-text-on-light;
+  color: $al-text-on-dark;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -623,7 +623,7 @@
 // the old HOST/TOI badge stack (obvious by context: host is #1, me is
 // the row with the colored frame).
 .player-host-icon {
-  color: $al-gold-rich;
+  color: $al-gold;
   font-size: $al-fs-small;
   flex-shrink: 0;
 }
@@ -632,7 +632,7 @@
   margin-left: auto;
   background: none !important;
   border: none;
-  color: $al-text-on-light-dim;
+  color: $al-text-on-dark-dim;
   cursor: pointer;
   padding: 2px 0.4rem;
   border-radius: $al-radius-xs;
@@ -671,14 +671,14 @@
 
 .lobby-waiting {
   text-align: center;
-  color: $al-text-on-light-mute;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-small;
   font-style: italic;
   margin: 0;
 
   i {
     margin-right: 0.4rem;
-    color: $al-gold-rich;
+    color: $al-gold;
   }
 }
 
@@ -694,7 +694,7 @@
   width: 2.118rem;
   height: 2.118rem;
   border-radius: 0.471rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: $al-fs-lead;
   cursor: pointer;
@@ -706,7 +706,7 @@
   justify-content: center;
   box-shadow: none;
 
-  &:hover { background: rgba(255, 255, 255, 0.1); }
+  &:hover { background: $al-fill; }
 
   &.active {
     background: rgba(47, 130, 255, 0.15);
@@ -723,8 +723,8 @@
   gap: 0.5rem;
   margin-top: 0.25rem;
   padding: 0.35rem 0.5rem;
-  background: #fffaef;
-  border: 1px solid $al-border-strong;
+  background: $al-fill-subtle;
+  border: 1px solid $al-border-dark-strong;
   border-radius: $al-radius-sm;
 }
 
@@ -738,16 +738,16 @@
   padding: 0;
   margin: 0;
   border-radius: $al-radius-xs;
-  background: #ede0bf;
-  border: 1px solid $al-border-strong;
-  color: $al-gold-dim;
+  background: $al-fill;
+  border: 1px solid $al-border-dark-strong;
+  color: $al-gold;
   cursor: pointer;
   box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 
   &:hover {
     background: $al-gold-soft;
-    border-color: $al-gold-rich;
+    border-color: $al-gold;
   }
 
   i { font-size: $al-fs-small; }
@@ -760,7 +760,7 @@
   font-size: $al-fs-body;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: $al-text-on-light;
+  color: $al-text-on-dark;
 }
 
 // Color picker
@@ -785,7 +785,7 @@
 
   &:hover:not(:disabled) {
     transform: scale(1.18);
-    border-color: $al-text-on-light;
+    border-color: $al-text-on-dark;
     background: var(--dot-color) !important;
   }
 
@@ -794,7 +794,7 @@
   }
 
   &.selected {
-    border-color: $al-text-on-light;
+    border-color: $al-text-on-dark;
     box-shadow: 0 0 0 2px $al-gold, 0 0 10px var(--dot-color);
     transform: scale(1.15);
   }
@@ -812,7 +812,7 @@
       left: 15%;
       width: 70%;
       height: 2px;
-      background: $al-text-on-light;
+      background: $al-text-on-dark;
       transform: rotate(-45deg);
       pointer-events: none;
     }
@@ -825,7 +825,7 @@
 .lobby-palettes-section {
   margin-top: 0.7rem;
   padding-top: 0.7rem;
-  border-top: 1px dashed $al-border-soft;
+  border-top: 1px dashed $al-border-dark-soft;
 }
 
 .lobby-palettes-label {
@@ -833,10 +833,10 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: $al-text-on-light-mute;
+  color: $al-text-on-dark-mute;
   margin-bottom: 0.3rem;
 
-  i { margin-right: 0.3rem; font-size: $al-fs-label; color: $al-gold-rich; }
+  i { margin-right: 0.3rem; font-size: $al-fs-label; color: $al-gold; }
 }
 
 .lobby-palettes-grid {
@@ -865,11 +865,11 @@
 
   &:hover:not(:disabled) {
     transform: scale(1.18);
-    border-color: $al-text-on-light;
+    border-color: $al-text-on-dark;
   }
 
   &.selected {
-    border-color: $al-text-on-light;
+    border-color: $al-text-on-dark;
     box-shadow: 0 0 0 2px $al-gold, 0 0 8px rgba(43, 31, 18, 0.3);
     transform: scale(1.15);
   }
@@ -907,9 +907,9 @@
   font-size: $al-fs-label;
   font-weight: 700;
   border-radius: $al-radius-pill;
-  border: 1px solid $al-border-strong;
-  background: #ede0bf !important;
-  color: $al-text-on-light;
+  border: 1px solid $al-border-dark-strong;
+  background: $al-fill !important;
+  color: $al-text-on-dark;
   cursor: pointer;
   transition: all 0.2s;
   margin: 0;
@@ -919,7 +919,7 @@
 
   &:hover:not(:disabled) {
     background: $al-gold-soft !important;
-    border-color: $al-gold-rich;
+    border-color: $al-gold;
   }
 
   &.active {
@@ -931,7 +931,7 @@
   &.locked {
     opacity: 0.45;
     cursor: default;
-    &:hover { background: #ede0bf !important; transform: none; }
+    &:hover { background: $al-fill !important; transform: none; }
   }
 }
 
@@ -1103,7 +1103,7 @@
 
 .lobby-chat-input {
   flex-grow: 1;
-  background: rgba(0, 0, 0, 0.45);
+  background: $al-scrim;
   color: $al-text-on-dark;
   border: 1px solid $al-hud-border;
   border-radius: $al-radius-xs;
@@ -1132,7 +1132,7 @@
   box-sizing: border-box;
 
   kbd {
-    background: rgba(255, 255, 255, 0.08);
+    background: $al-fill;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 0.176rem;
     padding: 0.059rem 0.294rem;
@@ -1155,7 +1155,7 @@
   }
 
   code {
-    background: rgba(255, 255, 255, 0.08);
+    background: $al-fill;
     padding: 1px 0.353rem;
     border-radius: 0.176rem;
     color: #ddd;
@@ -1196,7 +1196,7 @@
 
   .lobby-panel-inner {
     border-left: none;
-    border-top: 2px solid $al-border-strong;
+    border-top: 2px solid $al-border-dark-strong;
     border-radius: $al-radius-lg $al-radius-lg 0 0;
   }
 }

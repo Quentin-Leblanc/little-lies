@@ -82,34 +82,38 @@ html, body, #root {
     height: 100%;
 }
 // Native button default — fallback for utility buttons that don't go
-// through al-btn-* mixins. Light cream tile with thick dark border.
+// through the al-btn-* mixins. Matches the single dark surface: no
+// cream tile, because a cream tile on dark glass is the exact clash
+// this chantier exists to remove.
 button {
-    background: #ede0bf;
-    color: $al-text-on-light;
-    border: 1px solid $al-border-strong;
+    background: $al-fill;
+    color: $al-text-on-dark;
+    border: 1px solid $al-border-dark-strong;
     padding: 0.5rem 1rem;
     font-size: $al-fs-body;
     font-family: $al-font-body;
-    font-weight: 700;
+    font-weight: $al-fw-bold;
     text-transform: none;
     border-radius: $al-radius-sm;
     cursor: pointer;
-    transition: background $al-trans, box-shadow $al-trans-fast, transform 0.08s ease;
-    box-shadow: 0 2px 0 rgba(43, 31, 18, 0.18);
+    transition: background $al-trans, border-color $al-trans-fast, color $al-trans-fast, transform 0.08s ease;
+    box-shadow: none;
     margin: 0.25rem;
 
     &:hover {
-        background: #f5e9c8;
+        background: $al-fill-strong;
+        border-color: $al-gold;
+        color: $al-gold-hot;
     }
 
     &:active {
         transform: translateY(1px);
-        box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
     }
 
     &:disabled {
-        background: #c4b89e;
-        color: #8a7860;
+        background: $al-fill-subtle;
+        color: $al-text-on-dark-dim;
+        border-color: $al-border-dark-subtle;
         cursor: not-allowed;
     }
 }
@@ -134,7 +138,7 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: $al-fill-strong;
     border-radius: 2px;
 }
 

@@ -385,7 +385,7 @@
   margin-top: 0.235rem;
   background: transparent;
   kbd {
-    background: rgba(255,255,255,0.08);
+    background: $al-fill;
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 0.176rem;
     padding: 0.059rem 0.294rem;
@@ -403,7 +403,7 @@
   gap: 0.5rem;
   padding: 0.5rem 0.7rem;
   margin-top: 0.235rem;
-  background: rgba(0, 0, 0, 0.55);
+  background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.471rem;
   color: #aaa;
@@ -455,11 +455,11 @@
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: $al-fill;
   border-radius: 0.118rem;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: $al-fill-strong;
   }
 }
 

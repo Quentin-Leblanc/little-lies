@@ -102,7 +102,7 @@
   padding: 0.471rem 0.706rem;
   margin-bottom: 0.294rem;
   font-size: $al-fs-small;
-  background: rgba(255, 255, 255, 0.06);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.235rem;
   color: #ccc;
@@ -113,7 +113,7 @@
   i { margin-right: 0.353rem; width: 0.824rem; text-align: center; }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: $al-fill;
     color: #fff;
   }
 
@@ -155,7 +155,7 @@
   flex: 1;
   padding: 0.353rem 0.588rem;
   font-size: $al-fs-small;
-  background: rgba(0, 0, 0, 0.5);
+  background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.235rem;
   color: #ddd;
@@ -252,14 +252,14 @@
 .admin-weather-btn {
   padding: 0.353rem 0.588rem;
   font-size: $al-fs-small;
-  background: rgba(255, 255, 255, 0.06);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 0.235rem;
   color: #aaa;
   cursor: pointer;
   transition: all 0.15s;
 
-  &:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  &:hover { background: $al-fill; color: #fff; }
 
   &.admin-active {
     background: rgba(80, 180, 255, 0.2);

@@ -38,10 +38,10 @@
 
   &:disabled,
   &[aria-disabled='true'] {
-    background: #c4b89e !important;
-    color: #8a7860 !important;
+    background: $al-fill-subtle !important;
+    color: $al-text-on-dark-dim !important;
     cursor: not-allowed;
-    box-shadow: 0 2px 0 rgba(43, 31, 18, 0.18) !important;
+    box-shadow: none !important;
     text-shadow: none;
   }
 }
@@ -97,20 +97,22 @@
   }
 }
 
-// Secondary — neutral cream surface with definite border. Reads on
-// both cream cards (darker) and dark scene (lighter via the border).
+// Secondary — sits on the dark surface: light text, visible border,
+// no fill. The old cream tile was designed for parchment panels and
+// glared against dark glass.
 @mixin al-btn-secondary {
   @include al-btn-base;
   & {
-    background: #ede0bf;
-    color: $al-text-on-light;
-    border: 1px solid $al-border-strong;
+    background: $al-fill;
+    color: $al-text-on-dark;
+    border: 1px solid $al-border-dark-strong;
     text-shadow: none;
-    box-shadow: 0 2px 0 rgba(43, 31, 18, 0.18);
+    box-shadow: none;
   }
   &:hover:not(:disabled) {
-    background: #f5e9c8;
-    border-color: $al-gold-rich;
+    background: $al-fill-strong;
+    border-color: $al-gold;
+    color: $al-gold-hot;
   }
 }
 
@@ -119,7 +121,7 @@
   @include al-btn-base;
   & {
     background: none;
-    color: $al-text-on-light-mute;
+    color: $al-text-on-dark-mute;
     font-size: $al-fs-body;
     padding: 0.5rem 0.8rem;
     text-shadow: none;
@@ -130,8 +132,8 @@
     box-shadow: none !important;
   }
   &:hover:not(:disabled) {
-    color: $al-gold-rich;
-    background: $al-bg-subtle;
+    color: $al-gold-hot;
+    background: $al-fill-subtle;
   }
 }
 
@@ -154,41 +156,64 @@
 }
 
 // ─────────────────────────────────────────────
-// CARDS / PANELS / DIALOGS — "cream parchment tiles"
+// SURFACES — ONE style, two depths, one pill
 // ─────────────────────────────────────────────
-// Cards are now cream parchment with thick dark border + chunky drop
-// shadow. Sit clearly above the dusk page background.
+// There used to be six surface mixins (al-card, al-card-lite,
+// al-card-accent, al-dialog, al-hud-pill, al-hud-panel) for two actual
+// call sites — four were dead. Worse, they described two opposite
+// worlds: cream parchment with dark text for the pre-game screens, dark
+// glass with light text in-game. The player crossed that border every
+// single match.
+//
+// The village 3D scene is the permanent backdrop of every screen since
+// the UnifiedScene merge, so the app commits to the surface that works
+// over it: dark glass, light text. A cream panel fights the scene in
+// the lobby exactly as much as it would at night.
+//
+// `al-surface` is the block. `al-surface-nested` is the only allowed
+// second level — if something needs a third, the block holds too much.
 
-@mixin al-card {
-  background: $al-grad-panel;
-  border: 2px solid $al-border-strong;
-  border-radius: $al-radius-lg;
-  box-shadow: $al-shadow-panel;
-  color: $al-text-on-light;
-}
-
-// Lifted card — slightly tinted for nested panels
-@mixin al-card-lite {
-  background: $al-grad-panel-lite;
-  border: 1px solid $al-border-soft;
+@mixin al-surface {
+  background: $al-grad-hud-panel;
+  border: 1px solid $al-hud-border;
   border-radius: $al-radius-md;
   box-shadow: $al-shadow-card;
-  color: $al-text-on-light;
+  color: $al-text-on-dark;
+  backdrop-filter: blur($al-blur);
+  -webkit-backdrop-filter: blur($al-blur);
 }
 
-// Accent card — gold-bordered for ceremonial content (role reveal,
-// last will dialog, ceremonial moments)
-@mixin al-card-accent {
-  @include al-card;
+// Nested block inside a surface — reads as "one level in", nothing more.
+@mixin al-surface-nested {
+  background: $al-fill-subtle;
+  border: 1px solid $al-border-dark-subtle;
+  border-radius: $al-radius-sm;
+  color: $al-text-on-dark;
+}
+
+// Same surface, pill-shaped. For counters, chips, HUD pills.
+@mixin al-pill {
+  background: $al-hud-bg;
+  border: 1px solid $al-hud-border;
+  border-radius: $al-radius-pill;
+  color: $al-text-on-dark;
+  backdrop-filter: blur($al-blur);
+  -webkit-backdrop-filter: blur($al-blur);
+}
+
+// Ceremonial variant — gold border. Role reveal, verdict, the moments
+// the game wants the player to stop and look at. Not for panels.
+@mixin al-surface-accent {
+  @include al-surface;
   & {
     border-color: $al-gold-rich;
-    box-shadow: $al-shadow-panel, 0 0 28px $al-gold-glow-strong;
+    box-shadow: $al-shadow-card, 0 0 28px $al-gold-glow-strong;
   }
 }
 
-// Dialog — centered overlay card
+// Centred dialog built on the same surface.
 @mixin al-dialog {
-  @include al-card;
+  @include al-surface;
   & {
     padding: 1.4rem 1.6rem;
     max-width: 32rem;
@@ -196,30 +221,15 @@
   }
 }
 
-// HUD pill — for in-game floating UI (Time, day counter, sidebar
-// headers). Stays dark because pills sit over varying 3D scene
-// backgrounds.
-@mixin al-hud-pill {
-  background: $al-hud-bg;
-  border: 1px solid $al-hud-border;
-  border-radius: $al-radius-pill;
-  color: $al-text-on-dark;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur($al-blur);
-  -webkit-backdrop-filter: blur($al-blur);
-}
-
-// HUD panel — larger dark surface (sidebar, chat). Same dark base
-// as pills but rectangular with corner radius.
-@mixin al-hud-panel {
-  background: $al-hud-bg-lifted;
-  border: 1px solid $al-hud-border;
-  border-radius: $al-radius-md;
-  color: $al-text-on-dark;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur($al-blur);
-  -webkit-backdrop-filter: blur($al-blur);
-}
+// ── Back-compat aliases ──
+// Old names kept so existing call sites migrate by definition rather
+// than by edit. Prefer al-surface in new code; these will be retired
+// once no call site names them.
+@mixin al-card { @include al-surface; }
+@mixin al-card-lite { @include al-surface-nested; }
+@mixin al-card-accent { @include al-surface-accent; }
+@mixin al-hud-pill { @include al-pill; }
+@mixin al-hud-panel { @include al-surface; }
 
 // ─────────────────────────────────────────────
 // OVERLAYS — full-screen backdrops
@@ -247,32 +257,31 @@
 // TYPOGRAPHY HELPERS
 // ─────────────────────────────────────────────
 
-// Ceremonial title — Cinzel, deep gold-brown on cream cards. Reads
-// at a glance instead of being a glow-tinted whisper. No text-shadow
-// on cream surfaces — produced a soft halo that read as blur, not
-// emboss.
-@mixin al-title($size: 1.4rem) {
+// Ceremonial title — Cinzel, bright gold. Tuned for the dark surface:
+// the previous deep gold-brown ($al-gold-dim) was picked for cream
+// panels and reads as mud on dark glass.
+@mixin al-title($size: $al-fs-lead) {
   font-family: $al-font-header;
   font-size: $size;
-  font-weight: 700;
+  font-weight: $al-fw-bold;
   letter-spacing: $al-track-title;
-  color: $al-gold-dim;
+  color: $al-gold;
 }
 
 // Section label — small caps. Dimmer than title but still readable.
 @mixin al-label {
   font-family: $al-font-body;
-  font-size: $al-fs-small;
-  font-weight: 800;
+  font-size: $al-fs-label;
+  font-weight: $al-fw-bold;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
-  color: $al-text-on-light-mute;
+  color: $al-text-on-dark-mute;
 }
 
 // Gold label variant
 @mixin al-label-gold {
   @include al-label;
-  color: $al-gold-rich;
+  color: $al-gold;
   text-shadow: none;
 }
 

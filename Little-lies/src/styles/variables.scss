@@ -108,6 +108,25 @@ $al-hud-bg:         rgba(30, 24, 50, 0.82);
 $al-hud-bg-lifted:  rgba(40, 32, 60, 0.88);
 $al-hud-border:     rgba(245, 236, 214, 0.22);
 
+// ── Fills — CLOSED SET ───────────────────────────────────────────
+// Translucent white lifts used inside a surface. Components had
+// invented nine different values for the same job (0.02 / 0.03 / 0.04
+// / 0.05 / 0.06 / 0.08 / 0.1 / 0.12 / 0.15) — visually indistinguishable
+// from each other, but enough to make every panel subtly disagree with
+// its neighbour.
+//
+// Three levels, and they mean something:
+//   subtle → a block sitting inside another block
+//   base   → something you can interact with
+//   strong → that thing, active or hovered
+$al-fill-subtle: rgba(255, 255, 255, 0.05);
+$al-fill:        rgba(255, 255, 255, 0.09);
+$al-fill-strong: rgba(255, 255, 255, 0.14);
+
+// Inset well — darker than the surface, for sunken areas (chat log,
+// code display, scroll regions).
+$al-scrim:       rgba(0, 0, 0, 0.4);
+
 // ─────────────────────────────────────────────
 // TYPOGRAPHY
 // ─────────────────────────────────────────────

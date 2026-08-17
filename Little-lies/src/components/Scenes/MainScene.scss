@@ -122,7 +122,7 @@
 .scene-alive-count {
   font-size: $al-fs-small;
   color: rgba(255, 255, 255, 0.5);
-  background: rgba(0, 0, 0, 0.3);
+  background: $al-scrim;
   padding: 0.176rem 0.706rem;
   border-radius: 0.588rem;
 }

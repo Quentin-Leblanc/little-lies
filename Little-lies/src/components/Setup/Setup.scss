@@ -49,7 +49,7 @@
   justify-content: space-between;
   gap: 0.8rem;
   padding-bottom: 0.55rem;
-  border-bottom: 1px solid $al-border-soft;
+  border-bottom: 1px solid $al-border-dark-soft;
 }
 
 .setup-title {
@@ -57,7 +57,7 @@
   font-size: $al-fs-lead;
   font-weight: 700;
   letter-spacing: $al-track-title;
-  color: $al-gold-dim;
+  color: $al-gold;
   margin: 0;
   padding: 0;
   text-align: left;
@@ -136,15 +136,15 @@
 
 .setup-host-notice {
   font-size: $al-fs-small;
-  color: $al-gold-dim;
+  color: $al-gold;
   background: rgba(240, 184, 64, 0.15);
-  border: 1px solid $al-gold-rich;
+  border: 1px solid $al-gold;
   padding: 0.4rem 0.75rem;
   border-radius: $al-radius-sm;
   font-style: italic;
   font-weight: 600;
 
-  i { color: $al-gold-rich; margin-right: 0.35rem; }
+  i { color: $al-gold; margin-right: 0.35rem; }
 }
 
 // ── Presets ───────────────────────────────────────────────────────
@@ -155,7 +155,7 @@
   flex-wrap: wrap;
   padding: 0.55rem 0.7rem;
   background: rgba(255, 250, 235, 0.55);
-  border: 1px solid $al-border-soft;
+  border: 1px solid $al-border-dark-soft;
   border-radius: $al-radius-sm;
 }
 
@@ -164,7 +164,7 @@
   font-weight: 800;
   letter-spacing: $al-track-label;
   text-transform: uppercase;
-  color: $al-text-on-light-mute;
+  color: $al-text-on-dark-mute;
   font-family: $al-font-body;
 }
 
@@ -184,20 +184,20 @@
   letter-spacing: 0.03em;
   text-transform: uppercase;
   border-radius: $al-radius-pill;
-  border: 1px solid $al-border-strong;
-  background: #fffaef;
-  color: $al-text-on-light;
+  border: 1px solid $al-border-dark-strong;
+  background: $al-fill-subtle;
+  color: $al-text-on-dark;
   cursor: pointer;
   box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
   transition: background 0.15s, border-color 0.15s;
 
   &:hover:not(:disabled) {
     background: $al-gold-soft;
-    border-color: $al-gold-rich;
+    border-color: $al-gold;
   }
 
   &.preset-beginner i {
-    color: $al-gold-rich;
+    color: $al-gold;
     margin-right: 0.3rem;
     font-size: $al-fs-label;
   }
@@ -234,7 +234,7 @@
     justify-content: space-between;
     padding: 0 0.2rem 0.35rem;
     margin-bottom: 0.35rem;
-    border-bottom: 1px solid $al-border-soft;
+    border-bottom: 1px solid $al-border-dark-soft;
   }
 
   &__title {
@@ -243,14 +243,14 @@
     font-weight: 700;
     letter-spacing: $al-track-label;
     text-transform: uppercase;
-    color: $al-gold-dim;
+    color: $al-gold;
   }
 
   &__count {
     font-family: $al-font-header;
     font-size: $al-fs-small;
     font-weight: 800;
-    color: $al-gold-rich;
+    color: $al-gold;
   }
 
   &__body {
@@ -269,7 +269,7 @@
   flex-direction: column;
   padding: 0.6rem 0.65rem;
   background: rgba(255, 250, 235, 0.5);
-  border: 1px solid $al-border-soft;
+  border: 1px solid $al-border-dark-soft;
   border-radius: $al-radius-md;
 }
 
@@ -323,8 +323,8 @@
   margin: 0;
   border-radius: $al-radius-pill;
   border: 1.5px solid color-mix(in srgb, var(--team) 55%, transparent);
-  background: color-mix(in srgb, var(--team) 12%, #fffaef);
-  color: $al-text-on-light;
+  background: color-mix(in srgb, var(--team) 12%, rgba(255, 255, 255, 0.05));
+  color: $al-text-on-dark;
   font-family: $al-font-body;
   font-size: $al-fs-small;
   font-weight: 700;
@@ -336,7 +336,7 @@
   white-space: nowrap;
 
   &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--team) 25%, #fffaef);
+    background: color-mix(in srgb, var(--team) 25%, rgba(255, 255, 255, 0.05));
     border-color: var(--team);
   }
 
@@ -382,7 +382,7 @@
   flex-direction: column;
   padding: 0.6rem 0.65rem;
   background: rgba(43, 31, 18, 0.06);
-  border: 1px solid $al-border-soft;
+  border: 1px solid $al-border-dark-soft;
   border-radius: $al-radius-md;
 
   &__list {
@@ -407,7 +407,7 @@
     font-family: $al-font-header;
     font-size: $al-fs-label;
     font-weight: 800;
-    color: $al-text-on-light-mute;
+    color: $al-text-on-dark-mute;
     width: 1.2rem;
     text-align: right;
     flex-shrink: 0;
@@ -419,8 +419,8 @@
     gap: 0.45rem;
     padding: 0.3rem 0.55rem;
     border-radius: $al-radius-sm;
-    border: 1px dashed $al-border-soft;
-    color: $al-text-on-light-dim;
+    border: 1px dashed $al-border-dark-soft;
+    color: $al-text-on-dark-dim;
     font-size: $al-fs-small;
     font-style: italic;
     min-height: 1.7rem;
@@ -437,8 +437,8 @@
     margin: 0;
     border-radius: $al-radius-sm;
     border: 1.5px solid var(--team);
-    background: color-mix(in srgb, var(--team) 15%, #fffaef);
-    color: $al-text-on-light;
+    background: color-mix(in srgb, var(--team) 15%, rgba(255, 255, 255, 0.05));
+    color: $al-text-on-dark;
     font-family: $al-font-body;
     cursor: pointer;
     box-shadow: 0 1px 0 rgba(43, 31, 18, 0.18);
@@ -447,7 +447,7 @@
     min-height: 1.7rem;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--team) 25%, #fffaef);
+      background: color-mix(in srgb, var(--team) 25%, rgba(255, 255, 255, 0.05));
 
       .role-slot__remove {
         opacity: 1;
@@ -484,7 +484,7 @@
 
   &__remove {
     font-size: $al-fs-small;
-    color: $al-text-on-light-dim;
+    color: $al-text-on-dark-dim;
     opacity: 0.6;
     transition: opacity 0.15s ease, color 0.15s ease;
     flex-shrink: 0;
@@ -500,7 +500,7 @@
   flex-direction: column;
   gap: 0.6rem;
   padding-top: 0.6rem;
-  border-top: 1px solid $al-border-soft;
+  border-top: 1px solid $al-border-dark-soft;
 }
 
 // Balance summary — compact row showing T/M/N/C counts + a status
@@ -513,15 +513,15 @@
   gap: 0.45rem;
   font-size: $al-fs-small;
   font-weight: 700;
-  color: $al-text-on-light;
+  color: $al-text-on-dark;
   font-family: $al-font-body;
   padding: 0.5rem 0.7rem;
   background: rgba(255, 250, 235, 0.55);
-  border: 1px solid $al-border-soft;
+  border: 1px solid $al-border-dark-soft;
   border-radius: $al-radius-sm;
 
   > i {
-    color: $al-gold-rich;
+    color: $al-gold;
     font-size: $al-fs-body;
   }
 
@@ -539,7 +539,7 @@
     border-radius: $al-radius-pill;
     font-weight: 800;
     font-family: $al-font-header;
-    background: #fffaef;
+    background: $al-fill-subtle;
     border: 1px solid currentColor;
 
     &--town    { color: $al-faction-town; }
@@ -561,7 +561,7 @@
 
   &__verdict {
     font-style: italic;
-    color: $al-text-on-light-mute;
+    color: $al-text-on-dark-mute;
     font-size: $al-fs-small;
     font-weight: 700;
     margin-left: auto;
@@ -585,9 +585,9 @@
   padding: 0.25rem 0.7rem 0.25rem 0.45rem;
   margin: 0;
   border-radius: $al-radius-pill;
-  border: 1px solid $al-border-strong;
-  background: #fffaef;
-  color: $al-text-on-light-mute;
+  border: 1px solid $al-border-dark-strong;
+  background: $al-fill-subtle;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-label;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -600,25 +600,25 @@
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background: $al-text-on-light-dim;
+    background: $al-text-on-dark-dim;
     box-shadow: inset 0 0 0 1px rgba(43, 31, 18, 0.25);
     transition: background 0.15s ease, box-shadow 0.15s ease;
 
     &.is-on {
       background: $al-gold;
-      box-shadow: 0 0 0 1px $al-gold-rich, 0 0 6px $al-gold-glow-strong;
+      box-shadow: 0 0 0 1px $al-gold, 0 0 6px $al-gold-glow-strong;
     }
   }
 
   &.is-on {
-    color: $al-gold-dim;
-    border-color: $al-gold-rich;
+    color: $al-gold;
+    border-color: $al-gold;
     background: rgba(240, 184, 64, 0.18);
   }
 
   &:hover:not(:disabled) {
-    color: $al-text-on-light;
-    border-color: $al-gold-rich;
+    color: $al-text-on-dark;
+    border-color: $al-gold;
   }
 
   &:disabled {
@@ -665,20 +665,20 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.7rem 1rem;
-  border: 1px dashed $al-border-strong;
+  border: 1px dashed $al-border-dark-strong;
   border-radius: $al-radius-md;
-  color: $al-text-on-light-mute;
+  color: $al-text-on-dark-mute;
   font-size: $al-fs-small;
   font-style: italic;
   font-weight: 600;
 
-  i { color: $al-gold-rich; }
+  i { color: $al-gold; }
 }
 
 // ── Advanced config (collapsible) ─────────────────────────────────
 .setup-advanced {
   margin-top: 0.3rem;
-  border: 1px solid $al-border-soft;
+  border: 1px solid $al-border-dark-soft;
   border-radius: $al-radius-sm;
   background: rgba(43, 31, 18, 0.04);
 
@@ -690,19 +690,19 @@
     font-family: $al-font-body;
     letter-spacing: $al-track-label;
     text-transform: uppercase;
-    color: $al-text-on-light;
+    color: $al-text-on-dark;
     list-style: none;
 
     &::-webkit-details-marker { display: none; }
 
-    i { color: $al-gold-rich; margin-right: 0.5rem; }
+    i { color: $al-gold; margin-right: 0.5rem; }
 
-    &:hover { color: $al-gold-dim; }
+    &:hover { color: $al-gold; }
   }
 
   &[open] > summary {
-    color: $al-gold-dim;
-    border-bottom: 1px solid $al-border-soft;
+    color: $al-gold;
+    border-bottom: 1px solid $al-border-dark-soft;
   }
 
   &__body {

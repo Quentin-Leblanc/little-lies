@@ -50,7 +50,7 @@
     margin-left: auto;
     padding: 0.05rem 0.4rem;
     border-radius: $al-radius-pill;
-    background: rgba(255, 255, 255, 0.07);
+    background: $al-fill;
     border: 1px solid $al-border-dark-subtle;
     font-size: $al-fs-label;
     font-weight: 700;
@@ -79,7 +79,7 @@
   gap: 0.25rem;
   margin: 0;
   padding: 0.18rem 0.5rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: $al-fill-subtle;
   border: 1px solid;
   border-radius: $al-radius-pill;
   box-shadow: none;
@@ -93,14 +93,14 @@
   i { font-size: 0.8em; }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.11);
+    background: $al-fill;
     transform: translateY(-1px);
   }
 
   &__count {
     padding: 0 0.25rem;
     border-radius: $al-radius-pill;
-    background: rgba(255, 255, 255, 0.1);
+    background: $al-fill;
     font-size: 0.85em;
     color: $al-text-on-dark-mute;
   }
@@ -114,7 +114,7 @@
   gap: 0.35rem;
   margin: 0;
   padding: 0.22rem 0.55rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: $al-scrim;
   border: 1px solid color-mix(in srgb, var(--dot) 30%, $al-border-dark-subtle);
   border-radius: $al-radius-pill;
   box-shadow: none;
@@ -129,7 +129,7 @@
 
     &:hover {
       border-color: color-mix(in srgb, var(--dot) 55%, $al-border-dark-subtle);
-      background: rgba(0, 0, 0, 0.42);
+      background: $al-scrim;
     }
   }
 

@@ -35,7 +35,7 @@
   height: 1.9rem;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.4);
+  background: $al-scrim;
   color: #aaa;
   cursor: pointer;
   font-size: $al-fs-small;
@@ -44,7 +44,7 @@
   align-items: center;
   justify-content: center;
 
-  &:hover { color: #fff; background: rgba(0, 0, 0, 0.6); }
+  &:hover { color: #fff; background: $al-scrim; }
 }
 
 .survey-modal-title {
@@ -83,7 +83,7 @@
   width: 2.588rem;
   height: 2.588rem;
   border-radius: 0.588rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #888;
   font-size: $al-fs-lead;
@@ -97,14 +97,14 @@
   box-shadow: none;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: $al-fill;
     color: var(--rating-color, #fff);
     border-color: var(--rating-color, #fff);
     transform: scale(1.1);
   }
 
   &.selected {
-    background: rgba(255, 255, 255, 0.08);
+    background: $al-fill;
     color: var(--rating-color, #fff);
     border-color: var(--rating-color, #fff);
     box-shadow: 0 0 10px color-mix(in srgb, var(--rating-color, #fff) 30%, transparent);
@@ -120,7 +120,7 @@
 .survey-yn-btn {
   flex: 1;
   padding: 0.5rem 0.6rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: $al-fill-subtle;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #aaa;
   border-radius: 0.4rem;
@@ -128,7 +128,7 @@
   cursor: pointer;
   transition: all 0.15s;
 
-  &:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+  &:hover { background: $al-fill; color: #fff; }
 
   &.selected {
     background: rgba(47, 130, 255, 0.2);
@@ -140,7 +140,7 @@
 .survey-comment-area {
   width: 100%;
   padding: 0.6rem 0.7rem;
-  background: rgba(0, 0, 0, 0.4);
+  background: $al-scrim;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.4rem;
   color: #ddd;
@@ -300,12 +300,12 @@
 }
 
 .survey-thanks-btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
+  background: $al-fill-subtle;
   color: #ccc;
   border: 1px solid rgba(255, 255, 255, 0.14);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: $al-fill;
     color: #fff;
   }
 }
