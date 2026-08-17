@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { isHost } from 'playroomkit';
 import { useGameEngine } from '../../hooks/useGameEngine';
+import RoleCard from '../RoleCard/RoleCard';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import './RoleReveal.scss';
 
@@ -412,24 +413,19 @@ const RoleReveal = ({ onComplete }) => {
             >
               {teamLabel}
             </motion.div>
+
+            {/* The actual playing card, dealt face-down and turned over.
+                Replaces the giant floating FontAwesome glyph: the player
+                now meets the same object they'll see in the deck, in the
+                graveyard and on every death reveal, so one image carries
+                the role across the whole game. */}
             <motion.div
-              className="card-icon"
-              style={{ color: role.couleur }}
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.25, duration: 0.7, ease: 'easeOut' }}
+              className="card-deal"
+              initial={{ opacity: 0, rotateY: 180, scale: 0.82 }}
+              animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.85, ease: [0.2, 0.8, 0.25, 1] }}
             >
-              <i className={`fas ${role.icon}`}></i>
-            </motion.div>
-            <motion.div
-              className="card-name-wrapper"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55 }}
-            >
-              <div className="card-name" style={{ color: role.couleur }}>
-                {t(`roles:${role.key}.label`, { defaultValue: role.label })}
-              </div>
+              <RoleCard role={role} size="lg" />
             </motion.div>
 
             <motion.div

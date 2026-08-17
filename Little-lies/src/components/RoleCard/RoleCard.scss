@@ -17,7 +17,7 @@
   flex: 0 0 auto;
   user-select: none;
 
-  &--sm { --card-w: 5.4rem; }
+  &--sm { --card-w: 6.2rem; }
   &--md { --card-w: 8rem; }
   &--lg { --card-w: 17rem; }
 }
@@ -56,8 +56,12 @@
 .role-card__name {
   display: block;
   font-family: $al-font-header;
-  // Scales with the card so a small card doesn't get a huge title.
-  font-size: calc(var(--card-w) * 0.115);
+  // Scales with the card, but never below the readability floor: a
+  // card 76px wide would otherwise print its name at 7px. Long names
+  // (Maître-chanteur, Garde du corps) wrap to two lines on the small
+  // cards and the banner grows to fit — which is what a printed card
+  // does too.
+  font-size: max(0.72rem, calc(var(--card-w) * 0.098));
   font-weight: $al-fw-bold;
   line-height: 1.1;
   letter-spacing: 0.04em;

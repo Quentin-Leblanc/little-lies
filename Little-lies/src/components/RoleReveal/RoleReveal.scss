@@ -362,27 +362,24 @@
 // Oversized role icon — now the centerpiece of the reveal. Big glow
 // drops the need for a card frame to anchor the eye. Size trimmed from
 // 6.5rem to 4.5rem so the icon doesn't dwarf the role name next to it.
-.card-icon {
-  font-size: $al-fs-display-lg;
-  line-height: 1;
-  filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor);
-  margin: 0.235rem 0;
+
+
+// The dealt playing card. Replaces the old giant glyph + wordmark: the
+// card carries its own title banner, so a separate .card-name would say
+// the role twice. 3D-flip needs perspective on the wrapper, and
+// backface-visibility so the reverse never flashes mid-turn.
+.card-deal {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  margin: 0.3rem 0 0.1rem;
+  filter: drop-shadow(0 12px 34px rgba(0, 0, 0, 0.6));
 }
 
-.card-name-wrapper {
-  text-align: center;
+@media (prefers-reduced-motion: reduce) {
+  .card-deal { perspective: none; }
 }
 
-.card-name {
-  font-family: $al-font-header;
-  font-size: $al-fs-display-lg;
-  font-weight: 800;
-  letter-spacing: 0.12rem;
-  text-shadow:
-    0 0 18px currentColor,
-    0 0 42px currentColor,
-    0 0 2px rgba(0, 0, 0, 0.9);
-}
 
 .card-details {
   width: 100%;

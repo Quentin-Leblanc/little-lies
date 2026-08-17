@@ -10,6 +10,7 @@ import i18n from '../../trad/i18n';
 import './preloads';
 import { getNightAmbiance } from './utils';
 import PhaseTransitionFX from '../Effects/PhaseTransitionFX';
+import RoleCard from '../RoleCard/RoleCard';
 
 import './MainScene.scss';
 
@@ -259,8 +260,8 @@ const MainScene = () => {
           const executed = players.find((p) => p.id === game.accusedId);
           if (!executed?.character) return null;
           const role = executed.character;
-          const teamLabel = i18n.t(`game:teams.${role.team}.short`, { defaultValue: role.team });
-          const roleLabel = i18n.t(`roles:${role.key}.label`, { defaultValue: role.label });
+          // The card prints the role name and the faction itself, so
+          // neither is looked up here any more.
           return (
             <div className="lynch-reveal-overlay">
               <div
@@ -282,11 +283,13 @@ const MainScene = () => {
                 <div className="lynch-reveal-role-label">
                   {i18n.t('game:lynch_reveal.role_was', { defaultValue: 'Their role was:' })}
                 </div>
-                <div className="lynch-reveal-icon" style={{ color: role.couleur }}>
-                  <i className={`fas ${role.icon}`}></i>
+                {/* The dead player's card, turned face-up. Same object
+                    the player met on their own reveal and sees in the
+                    deck — the table learns "that was a Piégeur" from an
+                    image, not a line of text. */}
+                <div className="lynch-reveal-cardslot">
+                  <RoleCard role={role} size="lg" showTeam />
                 </div>
-                <div className="lynch-reveal-role" style={{ color: role.couleur }}>{roleLabel}</div>
-                <div className="lynch-reveal-team" style={{ color: role.couleur }}>{teamLabel}</div>
               </div>
             </div>
           );

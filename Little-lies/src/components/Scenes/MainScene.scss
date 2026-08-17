@@ -398,6 +398,32 @@
   animation: lynch-reveal-card-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 }
 
+// The card slot on the death reveal. The card turns face-up as it
+// rises: the table reads the role from the same image the dead player
+// saw at their own reveal, instead of from a line of text.
+.lynch-reveal-cardslot {
+  margin-top: 0.4rem;
+  perspective: 1400px;
+
+  .role-card {
+    animation: lynch-card-flip 0.85s cubic-bezier(0.2, 0.8, 0.25, 1) both;
+    animation-delay: 0.25s;
+    backface-visibility: hidden;
+  }
+}
+
+@keyframes lynch-card-flip {
+  from { opacity: 0; transform: rotateY(180deg) translateY(26px) scale(0.86); }
+  to   { opacity: 1; transform: rotateY(0deg) translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lynch-reveal-cardslot {
+    perspective: none;
+    .role-card { animation: none; }
+  }
+}
+
 .lynch-reveal-verdict {
   font-family: $al-font-header;
   font-size: $al-fs-display;
@@ -418,46 +444,14 @@
   margin-top: 0.2rem;
 }
 
-.lynch-reveal-team {
-  font-size: $al-fs-small;
-  letter-spacing: 0.25rem;
-  text-transform: uppercase;
-  font-weight: 700;
-  opacity: 0.9;
-}
 
-.lynch-reveal-icon {
-  font-size: $al-fs-display-lg;
-  margin: 0.1rem 0;
-  filter: drop-shadow(0 0 12px currentColor);
-  animation: lynch-reveal-icon-in 0.6s ease-out 0.4s both;
-}
 
-.lynch-reveal-role {
-  font-family: $al-font-header;
-  font-size: $al-fs-display;
-  font-weight: 800;
-  letter-spacing: 0.18rem;
-  text-transform: uppercase;
-  text-shadow: 0 0 20px currentColor, 0 2px 10px rgba(0, 0, 0, 0.8);
-  animation: lynch-reveal-role-in 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.8s both;
-}
-
-@keyframes lynch-reveal-icon-in {
-  0% { opacity: 0; transform: scale(0.6); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes lynch-reveal-role-in {
-  0% { opacity: 0; transform: scale(0.75) translateY(6px); filter: blur(6px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-}
 
 @media (max-width: 768px) {
   .lynch-reveal-card { min-width: 85vw; padding: 1.4rem 1rem; }
   .lynch-reveal-verdict { font-size: $al-fs-lead; }
-  .lynch-reveal-role { font-size: $al-fs-title; }
-  .lynch-reveal-icon { font-size: $al-fs-display; }
+  // The card shrinks with the screen but keeps its proportions.
+  .lynch-reveal-cardslot .role-card { --card-w: 11rem; }
 }
 
 @keyframes lynch-reveal-fade {
