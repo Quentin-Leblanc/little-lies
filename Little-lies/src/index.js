@@ -65,7 +65,7 @@ const Main = () => {
 
   // Rendre l'application uniquement lorsque Playroom est prêt
   if (!isPlayroomReady) {
-    return <div style={{color:'#666',display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Inter,sans-serif'}}>Loading...</div>;
+    return <div style={{color:'#666',display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Nunito, "Segoe UI", sans-serif'}}>Loading...</div>;
   }
 
   return (

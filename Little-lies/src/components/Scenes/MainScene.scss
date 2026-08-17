@@ -22,7 +22,7 @@
   box-shadow:
     0 4px 10px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.35) inset;
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-weight: 600;
   font-size: 0.62rem;
   color: #2a1a05;
@@ -135,7 +135,7 @@
   border-radius: 0.353rem;
   padding: 0.294rem 0.941rem;
   font-size: 0.765rem;
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-weight: bold;
   cursor: pointer;
   white-space: nowrap;
@@ -184,7 +184,7 @@
   border-radius: 0.353rem;
   padding: 0.235rem 0.706rem;
   font-size: 0.706rem;
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s, border-color 0.2s, color 0.2s;
@@ -399,7 +399,7 @@
 }
 
 .lynch-reveal-verdict {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 2rem;
   font-weight: 800;
   color: #c23a3a;
@@ -410,7 +410,7 @@
 }
 
 .lynch-reveal-role-label {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 0.95rem;
   color: #aaa;
   letter-spacing: 0.22rem;
@@ -434,7 +434,7 @@
 }
 
 .lynch-reveal-role {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 2.3rem;
   font-weight: 800;
   letter-spacing: 0.18rem;
@@ -526,7 +526,7 @@
 
 .death-name {
   display: block;
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 2.4rem;
   font-weight: 700;
   color: #ff3333;
@@ -667,7 +667,7 @@
    as the guide's description, kept short so it reads at a glance during
    the 3-4s morning overlay. */
 .death-role-desc {
-  font-family: 'Inter', 'Chakra Petch', sans-serif;
+  font-family: $al-font-body;
   font-size: 0.86rem;
   color: rgba(230, 225, 215, 0.8);
   font-style: italic;
@@ -678,7 +678,7 @@
 }
 
 .death-role-label {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 0.85rem;
   letter-spacing: 0.16rem;
   text-transform: uppercase;
@@ -689,7 +689,7 @@
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 1.55rem;
   font-weight: 800;
   letter-spacing: 0.08rem;
@@ -720,7 +720,7 @@
 }
 
 .death-will-label {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-weight: 700;
   letter-spacing: 0.08rem;
   text-transform: uppercase;
@@ -741,7 +741,7 @@
 }
 
 .death-report-safe {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 2.2rem;
   font-weight: 800;
   color: #f0f0f0;
@@ -795,7 +795,7 @@
 }
 
 .night-ambiance-text {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 1.294rem;
   font-style: italic;
   color: rgba(232, 212, 154, 0.85);
@@ -878,7 +878,7 @@
 }
 
 .night-text-content {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 2.118rem;
   letter-spacing: 0.235rem;
   padding: 0.824rem 2.118rem;
@@ -902,7 +902,9 @@
 // render as the mixed-case sentences they are in the JSON source, but
 // the bigger phase-transition texts still use Cinzel for impact.
 .night-text-ambiance {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  // Body font rather than a third family: Nunito is already loaded and
+  // renders mixed case, which is the whole point here.
+  font-family: $al-font-body;
   font-size: 0.95rem;
   font-style: italic;
   letter-spacing: 0.04rem;

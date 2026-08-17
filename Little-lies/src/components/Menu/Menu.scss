@@ -112,7 +112,7 @@
   background: rgba(255, 68, 68, 0.12);
   border: 1px solid rgba(255, 68, 68, 0.35);
   color: #ff8080;
-  font-family: 'Inter', sans-serif;
+  font-family: $al-font-body;
   font-size: 0.824rem;
   font-weight: 600;
   padding: 0.235rem 0.647rem;
@@ -361,7 +361,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #999;
-  font-family: 'Inter', sans-serif;
+  font-family: $al-font-body;
   font-size: 0.824rem;
   padding: 0.588rem;
   border-radius: 0.471rem;
@@ -382,7 +382,7 @@
   background: rgba(255, 68, 68, 0.15);
   border: 1px solid rgba(255, 68, 68, 0.4);
   color: #ff4444;
-  font-family: 'Inter', sans-serif;
+  font-family: $al-font-body;
   font-size: 0.882rem;
   padding: 0.706rem;
   border-radius: 0.471rem;

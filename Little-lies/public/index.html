@@ -34,10 +34,13 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
+  <!-- Two families, no more. Cinzel for screen titles, Nunito for
+       everything else. Marcellus and Space Grotesk were downloaded and
+       never used; Chakra Petch survived in two rules; 'Inter' was named
+       in six places but never loaded at all, so those spots silently
+       rendered a fallback face. All of it now goes through the
+       $al-font-header / $al-font-body tokens. -->
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <!-- FontAwesome: bundled via npm (@fortawesome/fontawesome-free), imported from src/index.scss -->
 </head>

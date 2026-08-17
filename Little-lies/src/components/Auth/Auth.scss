@@ -1,3 +1,4 @@
+@import '../../styles/variables';
 // ============================================================
 // Auth overlay + dialog (shared by login form and profile panel)
 // ============================================================
@@ -39,7 +40,7 @@
 
   h2 {
     margin: 0;
-    font-family: 'Cinzel', serif;
+    font-family: $al-font-header;
     font-size: 1.2rem;
     color: #ddd;
   }
@@ -317,7 +318,7 @@
 }
 
 .profile-avatar-initial {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 2rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.95);
@@ -353,7 +354,7 @@
 
 .profile-name {
   margin: 0;
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 1.4rem;
   color: #eee;
   overflow: hidden;
@@ -536,7 +537,7 @@
 
 .profile-section-title {
   margin: 0 0 0.706rem;
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: 0.95rem;
   color: #ddd;
   display: flex;
@@ -777,7 +778,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.15);
 
   span {
-    font-family: 'Cinzel', serif;
+    font-family: $al-font-header;
     font-size: 1.05rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.95);

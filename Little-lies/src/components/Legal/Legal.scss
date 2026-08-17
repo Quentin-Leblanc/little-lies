@@ -1,3 +1,4 @@
+@import '../../styles/variables';
 .legal-overlay {
   position: fixed;
   inset: 0;
@@ -37,7 +38,7 @@
 
   h2 {
     margin: 0;
-    font-family: 'Cinzel', serif;
+    font-family: $al-font-header;
     font-size: 1.1rem;
     color: #ddd;
   }
@@ -55,7 +56,7 @@
   }
 
   h3 {
-    font-family: 'Cinzel', serif;
+    font-family: $al-font-header;
     font-size: 0.9rem;
     color: #ddd;
     margin: 0 0 0.471rem;

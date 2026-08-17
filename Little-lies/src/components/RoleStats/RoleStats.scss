@@ -1,3 +1,4 @@
+@import '../../styles/variables';
 .role-stats-overlay {
   position: fixed;
   inset: 0;
@@ -19,7 +20,7 @@
   max-height: 82vh;
   padding: 1.412rem 1.647rem;
   color: #e0e0e0;
-  font-family: 'Inter', 'Chakra Petch', sans-serif;
+  font-family: $al-font-body;
   display: flex;
   flex-direction: column;
   gap: 0.941rem;
@@ -32,7 +33,7 @@
   align-items: center;
 
   h2 {
-    font-family: 'Cinzel', serif;
+    font-family: $al-font-header;
     font-size: 1.176rem;
     margin: 0;
     color: #9dc8ff;
@@ -70,7 +71,7 @@
   border-radius: 0.353rem;
 
   .role-stats-num {
-    font-family: 'Cinzel', serif;
+    font-family: $al-font-header;
     font-size: 1.588rem;
     font-weight: 800;
     color: #9dc8ff;
@@ -126,7 +127,7 @@
   display: flex;
   align-items: baseline;
   gap: 0.706rem;
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
 }
 
 .role-stats-count {

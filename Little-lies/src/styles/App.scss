@@ -291,7 +291,7 @@
 }
 
 .nightfall-text {
-  font-family: 'Cinzel', serif;
+  font-family: $al-font-header;
   font-size: clamp(1.2rem, 3.2vw, 2rem);
   font-weight: 600;
   color: #d9cfbf;
