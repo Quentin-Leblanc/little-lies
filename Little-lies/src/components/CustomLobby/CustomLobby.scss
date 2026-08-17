@@ -524,6 +524,23 @@
   }
 }
 
+// Discord CTA — brand blurple rather than the village palette. The
+// colour break is deliberate: it signals "this opens another app", so
+// nobody clicks it expecting an in-game panel.
+.lobby-btn-discord {
+  background: #5865f2;
+  color: #fff;
+  border: 1px solid #4752c4;
+  box-shadow: 0 2px 0 rgba(28, 32, 84, 0.35);
+  text-decoration: none;
+
+  &:hover {
+    background: #6b76f5;
+    border-color: #7a84ff;
+    color: #fff;
+  }
+}
+
 .lobby-btn-ghost {
   background: none;
   color: $al-text-on-light-mute;

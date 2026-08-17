@@ -181,6 +181,22 @@ $topbar-h-compact: 2.5rem;
   }
 
   &--help i { font-size: 0.78rem; }
+
+  // Discord keeps its own brand colour on hover instead of the gold
+  // used by the game's own affordances — it reads as "this leaves the
+  // app" without needing an external-link glyph.
+  &--discord {
+    text-decoration: none;
+    color: $al-text-on-dark-mute;
+
+    i { font-size: 0.92rem; }
+
+    &:hover {
+      background: rgba(88, 101, 242, 0.25);
+      border-color: #5865f2;
+      color: #a8b1ff;
+    }
+  }
 }
 
 // ── Profile chip ──────────────────────────────────────────────────

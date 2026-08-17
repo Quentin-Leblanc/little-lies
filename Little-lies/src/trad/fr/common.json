@@ -35,6 +35,8 @@
   "loading": "Chargement...",
   "waiting": "En attente...",
   "copied": "Copié !",
+  "discord_voice": "Vocal Discord",
+  "discord_join_voice": "Rejoindre le vocal Discord",
   "error": "Erreur",
   "success": "Succès",
   "yes": "Oui",

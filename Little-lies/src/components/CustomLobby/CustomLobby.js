@@ -12,6 +12,7 @@ import i18n from '../../trad/i18n';
 import { AVAILABLE_LANGUAGES } from '../../trad/i18n';
 import { getLevel } from '../../utils/xpSystem';
 import { COLOR_REWARDS } from '../../data/progression';
+import { DISCORD_INVITE_URL, hasDiscord } from '../../data/links';
 import { motion, AnimatePresence } from 'framer-motion';
 import './CustomLobby.scss';
 
@@ -726,6 +727,21 @@ const CustomLobby = () => {
             <i className="fas fa-link"></i>
             {copied ? t('common:copied') : t('setup:copy_link')}
           </button>
+
+          {/* Voice happens on Discord, not in the game. Placed right under
+              the invite link because the two go together: you send the
+              room link AND the vocal link, or half the table plays mute. */}
+          {hasDiscord() && (
+            <a
+              className="lobby-btn lobby-btn-discord"
+              href={DISCORD_INVITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i className="fa-brands fa-discord"></i>
+              {t('common:discord_join_voice', { defaultValue: 'Rejoindre le vocal Discord' })}
+            </a>
+          )}
 
           <div className="lobby-section">
             <label className="lobby-label">{t('setup:players_count', { count: playroom_players.length })}</label>

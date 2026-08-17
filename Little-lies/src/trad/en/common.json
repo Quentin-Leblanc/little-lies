@@ -35,6 +35,8 @@
   "loading": "Loading...",
   "waiting": "Waiting...",
   "copied": "Copied!",
+  "discord_voice": "Discord voice",
+  "discord_join_voice": "Join the Discord voice chat",
   "error": "Error",
   "success": "Success",
   "yes": "Yes",

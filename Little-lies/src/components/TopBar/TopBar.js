@@ -6,6 +6,7 @@ import Tutorial from '../Tutorial/Tutorial';
 import Time from '../time/Time';
 import Audio from '../../utils/AudioManager';
 import { getLevel, getXPProgress } from '../../utils/xpSystem';
+import { DISCORD_INVITE_URL, hasDiscord } from '../../data/links';
 import './TopBar.scss';
 
 // ─────────────────────────────────────────────────────────────────────
@@ -185,6 +186,30 @@ const VolumeControl = () => {
   );
 };
 
+// ── Discord voice link ───────────────────────────────────────────
+// Among Liars has no in-game voice: the discussion happens on the
+// community Discord. This button is the bridge, and it sits in the
+// persistent TopBar precisely because a player who joins mid-lobby or
+// realises nobody can hear them at Day 2 needs it reachable *without*
+// leaving the match. Opens in a new tab so the room isn't lost.
+const DiscordLink = () => {
+  const { t } = useTranslation('common');
+  if (!hasDiscord()) return null;
+  const label = t('discord_voice', { defaultValue: 'Vocal Discord' });
+  return (
+    <a
+      className="topbar-icon-btn topbar-icon-btn--discord"
+      href={DISCORD_INVITE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={label}
+      aria-label={label}
+    >
+      <i className="fa-brands fa-discord" aria-hidden="true"></i>
+    </a>
+  );
+};
+
 // ── Centre slot ──────────────────────────────────────────────────
 // Lobby centre — just the player count pill. Room code was redundant
 // (the lobby panel already shows it with a copy button, so duplicating
@@ -261,6 +286,7 @@ const TopBar = ({ mode = 'lobby', roomCode = '', playersCount = 0 }) => {
 
         <div className="topbar-right">
           <ProfileChip onClick={() => setShowAuth(true)} />
+          <DiscordLink />
           <button
             type="button"
             className="topbar-icon-btn topbar-icon-btn--help"
