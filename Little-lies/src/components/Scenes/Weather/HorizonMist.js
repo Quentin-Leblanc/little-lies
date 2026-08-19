@@ -13,7 +13,7 @@ import * as THREE from 'three';
 // looking like a wall.
 const HorizonMist = React.memo(function HorizonMist({ isDay = true }) {
   const color = isDay ? '#c4ccd8' : '#1a1e2c';
-  const opacity = isDay ? 0.72 : 0.85;
+  const opacity = isDay ? 0.55 : 0.65;
 
   const clouds = useMemo(() => {
     const arr = [];
@@ -25,8 +25,8 @@ const HorizonMist = React.memo(function HorizonMist({ isDay = true }) {
     // bounds up to 28 and fade 80 → the nearest puff edge could creep to
     // ~19m, which landed as visible fog over the plaza from high orbit
     // cameras. Bumped out and shrunk.
-    for (let i = 0; i < 22; i++) {
-      const angle = (i / 22) * Math.PI * 2 + rand() * 0.12;
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2 + rand() * 0.12;
       const radius = 68 + rand() * 6;
       arr.push({
         position: [Math.cos(angle) * radius, 7 + rand() * 3, Math.sin(angle) * radius],
@@ -38,8 +38,8 @@ const HorizonMist = React.memo(function HorizonMist({ isDay = true }) {
     }
     // Outer mist layer — radius ~100, taller puffs, swallows most of
     // MOUNTAINS_FAR so the horizon looks like it recedes into haze.
-    for (let i = 0; i < 18; i++) {
-      const angle = (i / 18) * Math.PI * 2 + rand() * 0.18;
+    for (let i = 0; i < 10; i++) {
+      const angle = (i / 10) * Math.PI * 2 + rand() * 0.18;
       const radius = 100 + rand() * 8;
       arr.push({
         position: [Math.cos(angle) * radius, 11 + rand() * 5, Math.sin(angle) * radius],

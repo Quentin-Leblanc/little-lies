@@ -12,9 +12,9 @@ const VillageFogWall = React.memo(function VillageFogWall({ isDay = true }) {
     const arr = [];
     let s = 7777;
     const rand = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
-    // Dense inner ring (radius ~18-22) — main wall
-    for (let i = 0; i < 20; i++) {
-      const angle = (i / 20) * Math.PI * 2 + rand() * 0.15;
+    // Inner ring (radius ~18-22) — main wall
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2 + rand() * 0.15;
       const radius = 18 + rand() * 4;
       arr.push({
         position: [Math.cos(angle) * radius, 1.5 + rand() * 3, Math.sin(angle) * radius],
@@ -25,8 +25,8 @@ const VillageFogWall = React.memo(function VillageFogWall({ isDay = true }) {
       });
     }
     // Outer ring (radius ~24-30) — depth
-    for (let i = 0; i < 14; i++) {
-      const angle = (i / 14) * Math.PI * 2 + rand() * 0.2;
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2 + rand() * 0.2;
       const radius = 24 + rand() * 6;
       arr.push({
         position: [Math.cos(angle) * radius, 2 + rand() * 4, Math.sin(angle) * radius],
@@ -54,7 +54,7 @@ const VillageFogWall = React.memo(function VillageFogWall({ isDay = true }) {
           concentrate="inside"
           growth={6}
           color={color}
-          opacity={isDay ? 0.85 : 0.92}
+          opacity={isDay ? 0.55 : 0.62}
           speed={0.02}
           fade={50}
         />

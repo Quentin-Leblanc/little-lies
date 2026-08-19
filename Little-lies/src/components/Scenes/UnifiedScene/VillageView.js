@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef, Suspense } from 'react';
 import { Sky, Stars } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette, HueSaturation } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMultiplayerState, getRoomCode } from 'playroomkit';
 import { useGameEngine } from '../../../hooks/useGameEngine';
 import { PLAYER_Y, PODIUM_POSITION } from '../constants';
@@ -8,6 +8,7 @@ import { getGameSeed, LOBBY_MOODS, MOOD_DAY_ROLLS, MOOD_NIGHT_ROLLS } from '../u
 import CameraController from '../Camera/CameraController';
 import SceneLighting from '../Lighting/SceneLighting';
 import GroundPlane from '../Environment/GroundPlane';
+import PlazaFloor from '../Environment/PlazaFloor';
 import Village from '../Buildings/Village';
 import PlayerFigure from '../Players/PlayerFigure';
 import DeadPlayerFigure from '../Players/DeadPlayerFigure';
@@ -23,7 +24,6 @@ import HorizonMist from '../Weather/HorizonMist';
 import NightRain from '../Weather/NightRain';
 import NightLightning from '../Weather/NightLightning';
 import TrialStormLighting from '../Weather/TrialStormLighting';
-import NightDarkFog from '../Weather/NightDarkFog';
 import NightCrows from '../Wildlife/NightCrows';
 import DayRabbits from '../Wildlife/DayRabbits';
 import ExecutionCrows from '../Wildlife/ExecutionCrows';
@@ -307,9 +307,17 @@ const VillageView = () => {
           let baseSky = isSunny ? '#8fcff0' : isRainyDay ? '#5a6878' : '#909aa8';
           if (isDusk) baseSky = lerpHex(baseSky, '#e59c5f', 0.55);
           const skyColor = lerpHex(baseSky, '#4a1e1e', deathsRatio);
-          const fogShrink = 1 - deathsRatio * 0.35;
-          const fogNear = (isSunny ? 50 : isRainyDay ? 8 : 12) * fogShrink;
-          const fogFar = (isSunny ? 120 : isRainyDay ? 26 : 32) * fogShrink;
+          // Fog is a HORIZON tool, not a village tool. The old tuning
+          // (near 12 / far 32 on a misty day) put the cottage ring — which
+          // sits at radius 10..17 — inside the fog gradient, so the village
+          // itself was 30..50% washed out before anything else was drawn.
+          // `far` now sits well past the outer props so the playable area
+          // renders at full contrast and only the mountain backdrop fades.
+          // `fogShrink` (the "deaths tighten the world" cue) is kept but
+          // halved — at 0.35 it clawed back everything this pass gains.
+          const fogShrink = 1 - deathsRatio * 0.15;
+          const fogNear = (isSunny ? 60 : isRainyDay ? 22 : 25) * fogShrink;
+          const fogFar = (isSunny ? 140 : isRainyDay ? 60 : 70) * fogShrink;
           return (
             <>
               <color attach="background" args={[skyColor]} />
@@ -320,11 +328,23 @@ const VillageView = () => {
                 rayleigh={isRainyDay ? 6 : isSunny ? 1.2 : 3}
               />
               <DayFireflies count={isRainyDay ? 8 : isSunny ? 70 : 40} />
-              <FloatingDust count={isMisty ? 140 : isSunny ? 40 : 90} isDay />
-              <WindLeaves count={isRainyDay ? 140 : isSunny ? 70 : 95} />
+              {/* Dust is the least legible of the particle layers — it
+                  veils uniformly instead of reading as motion. Halved. */}
+              <FloatingDust count={isMisty ? 60 : isSunny ? 30 : 45} isDay />
+              <WindLeaves count={isRainyDay ? 100 : isSunny ? 70 : 80} />
               {(isMisty || isRainyDay) && <GroundFog isDay />}
-              {(isMisty || isRainyDay) && <VillageFogWall isDay />}
-              <HorizonMist isDay />
+              {/* VillageFogWall dropped in daylight. Its job was to hide
+                  empty sky at grazing camera angles — but every entry in
+                  DAY_ORBIT_CAMERAS now frames downward at 45..70°, so
+                  there is no empty sky left to hide. What it actually did
+                  was park 34 opacity-0.85 cloud puffs at radius 18..30,
+                  i.e. directly on top of the cottage ring.
+
+                  HorizonMist is now gated on sunny days: with fog far at
+                  70 the mountain rings it exists to wash out are already
+                  fully fogged on misty/rainy days, so its 40 puffs were
+                  rendering for zero visible pixels. */}
+              {isSunny && <HorizonMist isDay />}
               {isSunny && <DayRabbits count={8} />}
               {isRainyDay && <NightRain count={220} />}
               {isRainyDay && <NightLightning />}
@@ -335,7 +355,7 @@ const VillageView = () => {
           const isRainy = nightWeather === 1;
           const isFoggy = nightWeather === 2;
           const nightSky = lerpHex('#060818', '#140408', deathsRatio);
-          const nightFogShrink = 1 - deathsRatio * 0.25;
+          const nightFogShrink = 1 - deathsRatio * 0.12;
           return (
             <>
               <color attach="background" args={[nightSky]} />
@@ -343,19 +363,26 @@ const VillageView = () => {
                 attach="fog"
                 args={[
                   nightSky,
-                  (isRainy ? 14 : isFoggy ? 12 : 22) * nightFogShrink,
-                  (isRainy ? 36 : isFoggy ? 38 : 60) * nightFogShrink,
+                  (isRainy ? 22 : isFoggy ? 20 : 30) * nightFogShrink,
+                  (isRainy ? 65 : isFoggy ? 60 : 90) * nightFogShrink,
                 ]}
               />
               <Stars radius={80} depth={50} count={isRainy ? 500 : 3000} factor={4} saturation={0} fade speed={1} />
               <Moon phase={moonPhase} />
-              <FloatingDust count={60} isDay={false} />
+              <FloatingDust count={30} isDay={false} />
               <NightEmbers count={isRainy ? 30 : isFoggy ? 50 : 70} />
               {(isFoggy || isRainy) && <GroundFog isDay={false} />}
-              <VillageFogWall isDay={false} />
-              <HorizonMist isDay={false} />
+              {/* Both walls of mist are now weather-gated instead of
+                  unconditional. On a clear night the stars, moon and fog
+                  gradient already close the horizon; stacking 74 cloud
+                  puffs on top only cost contrast.
+
+                  NightDarkFog is gone entirely: it parked 8..24 pure
+                  black spheres at opacity 0.4 between y=0.3 and y=1.5 —
+                  exactly at character height, exactly over the plaza. */}
+              {isFoggy && <VillageFogWall isDay={false} />}
+              {!isFoggy && !isRainy && <HorizonMist isDay={false} />}
               <NightCrows count={Math.min(4 + deathsCount, 10)} />
-              <NightDarkFog count={isFoggy ? 24 : isRainy ? 14 : 8} />
               {isRainy && <NightRain count={300} />}
               {isRainy && <NightLightning />}
             </>
@@ -364,6 +391,7 @@ const VillageView = () => {
       })()}
 
       <GroundPlane isDay={game.isDay} />
+      <PlazaFloor isDay={game.isDay} />
       <Village isDay={game.isDay} isTrialPhase={isTrialPhase} gameSeed={gameSeed} />
 
       <DistantWindmill position={[-28, 0, -26]} scale={1.8} />
@@ -416,6 +444,7 @@ const VillageView = () => {
             dayCount={game.dayCount}
             isGameOver={isGameOver}
             isWinningTeam={isGameOver && (player.character?.team === game.winner)}
+            isMe={isMe}
           />
         );
       })}
@@ -436,6 +465,17 @@ const VillageView = () => {
         <ExecutionCrows origin={[PODIUM_POSITION[0], 3.5, PODIUM_POSITION[2]]} />
       )}
 
+      {/* Post FX, deliberately minimal.
+          - HueSaturation(+0.18) is gone. A global saturation lift can't
+            tell a character apart from the fog it's standing in, so it
+            pushed both equally and the frame ended up more colourful
+            AND less legible. Saturation now comes from the material
+            choices (faction colours, the ritual altar) — the things
+            that are actually supposed to carry colour.
+          - Vignette dialled well back, night especially (0.85 → 0.42).
+            At 0.85 the trial phases — the moment the table most needs
+            to read faces at the podium — were the darkest frames in
+            the game. */}
       <EffectComposer>
         <Bloom
           intensity={game.isDay ? 0.08 : 0.1}
@@ -443,10 +483,9 @@ const VillageView = () => {
           luminanceSmoothing={0.2}
           mipmapBlur
         />
-        <HueSaturation saturation={0.18} />
         <Vignette
-          offset={game.isDay ? 0.3 : 0.1}
-          darkness={game.isDay ? 0.35 : 0.85}
+          offset={game.isDay ? 0.35 : 0.2}
+          darkness={game.isDay ? 0.22 : 0.42}
         />
       </EffectComposer>
     </Suspense>

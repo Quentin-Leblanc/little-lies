@@ -4,20 +4,28 @@ import { TextureLoader } from 'three';
 import * as THREE from 'three';
 import { GROUND_TEX_PATHS } from '../constants';
 
-// Main terrain — Poly Haven albedo only, fully matte. Normal & roughness
-// maps were dropped because they produced specular aliasing ("sparkle
-// pixels") at grazing angles under the directional light, clashing with
-// the stylised look.
+// Main terrain — a flat tone first, a texture second.
+//
+// The albedo used to run at repeat(4,4) across a 70-unit circle, which
+// put high-frequency photo detail under every camera angle. On a
+// stylised scene that detail doesn't add richness, it adds noise: the
+// ground competed for attention with the props and the characters
+// standing on it, and nothing in frame held a clean silhouette.
+//
+// Now the texture is a MOTTLE, not a surface: stretched wide (repeat 1.5)
+// and dropped to ~20% so it only breaks up the flat colour at large
+// scale. The base tone below carries the actual look. Normal & roughness
+// maps stay dropped — they produced specular aliasing at grazing angles.
 const GroundPlane = React.memo(function GroundPlane({ isDay }) {
   const albedo = useLoader(TextureLoader, GROUND_TEX_PATHS[0]);
 
   useMemo(() => {
     if (!albedo) return;
     albedo.wrapS = albedo.wrapT = THREE.RepeatWrapping;
-    // 4 full repeats across the 70-unit ground circle → each tile covers
-    // ~17 units, texture features stay readable from camera height without
-    // looking busy.
-    albedo.repeat.set(4, 4);
+    // 1.5 repeats across the 70-unit circle → each tile spans ~47 units.
+    // Features are far too large to read as texture; they read as terrain
+    // variation, which is the whole point.
+    albedo.repeat.set(1.5, 1.5);
     albedo.anisotropy = 16;
     albedo.colorSpace = THREE.SRGBColorSpace;
     albedo.minFilter = THREE.LinearMipmapLinearFilter;
@@ -25,42 +33,31 @@ const GroundPlane = React.memo(function GroundPlane({ isDay }) {
     albedo.generateMipmaps = true;
   }, [albedo]);
 
-  // Day tint desaturated from #c8c0a8 → #b9b5ad so the ground reads as
-  // a cool neutral instead of a warm tan — this lets the newly contrast-
-  // punched cottages and the blood altar carry the colour in frame.
-  // Night tint unchanged (already near-neutral).
-  const groundTint = isDay ? '#b9b5ad' : '#30302a';
-  // Earth base that sits a hair below the textured plane — at night it
-  // stays dark (barely visible), during the day it's a warm dirt brown
-  // that bleeds through the semi-transparent albedo to break up the
-  // texture repeat and give the plaza a trodden-earth feel.
-  const earthColor = isDay ? '#6a4e2e' : '#2a231b';
-  // Daytime: drop the textured plane's opacity so the brown earth
-  // underneath shows through at ~35%. Night keeps the texture opaque
-  // since the dark tint already buries the repeat pattern.
-  const dayTextureOpacity = isDay ? 0.65 : 1;
+  // The base tone is now the ground. Day sits a clear step BELOW the
+  // plaza floor (#c9c3b0) so the play area reads as lifted out of the
+  // surrounding terrain; night sits a step below its plaza counterpart
+  // for the same reason. Both are desaturated on purpose — the colour
+  // in frame belongs to the characters and the ritual altar.
+  const baseColor = isDay ? '#a8a698' : '#23242c';
+  const textureOpacity = isDay ? 0.22 : 0.16;
 
   return (
     <group>
-      {/* Earth base — no texture, solid color. Slightly lower Y so the
-          textured plane above masks most of it but it bleeds through
-          the alpha gaps / low-opacity portions during the day. */}
+      {/* Flat base — this is what the player actually sees. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
         <circleGeometry args={[35, 64]} />
-        <meshStandardMaterial color={earthColor} roughness={1} metalness={0} />
+        <meshStandardMaterial color={baseColor} roughness={1} metalness={0} />
       </mesh>
-      {/* Textured albedo plane — full opacity at night (grid reads as
-          stone/snow-ish), semi-transparent during the day so the brown
-          earth below reads as "trodden dirt under scattered grass". */}
+      {/* Large-scale mottling on top, barely there. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
         <circleGeometry args={[35, 64]} />
         <meshStandardMaterial
           map={albedo}
-          color={groundTint}
+          color={isDay ? '#b9b5ad' : '#30302a'}
           roughness={1}
           metalness={0}
-          transparent={isDay}
-          opacity={dayTextureOpacity}
+          transparent
+          opacity={textureOpacity}
         />
       </mesh>
     </group>

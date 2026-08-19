@@ -1,9 +1,16 @@
 import React, { useMemo } from 'react';
 
-// Distant horizon mountain — richer silhouette than the old single-cone:
-// a main peak + 2 side shoulders + a faint forested fringe at the base
-// and an occasional snow cap on the highest peaks. Still dark + flat-shaded
-// so it reads as a horizon layer, not a detailed prop.
+// Distant horizon mountain — a main peak + 2 side shoulders, flat-shaded.
+//
+// The backdrop's job is to be a SHAPE, not a place. An earlier pass gave
+// each cluster a 6-cone forest fringe and a snow cap; across the three
+// rings that came to ~500 meshes of detail sitting 48 to 118 units out,
+// where it resolves to a few pixels and only muddies the ridgeline. The
+// fringe is gone and snow is near-ring only.
+//
+// Shadows are off on all of them: the sun's shadow camera spans ±25
+// units, so every mountain here was outside it — the castShadow flags
+// cost draw setup and produced nothing.
 //
 // Props:
 //   position — world origin of the mountain cluster
@@ -19,7 +26,6 @@ const TONE_PALETTE = {
   far:  ['#3a3846', '#322f3e'],
 };
 const SNOW_COLOR = '#e8ecf2';
-const FRINGE_COLOR = '#1b2a1e'; // dark forest green
 
 const DarkMountain = React.memo(({ position, scale = 1, variant = 0, tone = 'near' }) => {
   // Cheap deterministic jitter off the variant integer
@@ -39,55 +45,31 @@ const DarkMountain = React.memo(({ position, scale = 1, variant = 0, tone = 'nea
   const rightShoulderX =  1.6 + j.r3 * 0.6;
   const sideScale = 0.55 + j.r4 * 0.2;
 
-  // Forest fringe at the base — 6 tiny dark-green cones arranged across
-  // the front so the mountain reads as "sits behind a forest" instead of
-  // rising out of bare ground.
-  const fringe = useMemo(() => {
-    const arr = [];
-    const count = 6;
-    for (let i = 0; i < count; i++) {
-      const t = (i / (count - 1)) - 0.5; // -0.5 .. 0.5
-      arr.push({
-        x: t * 5.2,
-        z: 1.6 + (i % 2) * 0.4 - j.r1 * 0.3,
-        h: 0.9 + ((i * 13) % 5) / 10, // 0.9 .. 1.4
-        r: 0.35 + ((i * 7) % 3) / 10, // 0.35 .. 0.55
-      });
-    }
-    return arr;
-  }, [j.r1]);
-
   return (
     <group position={position} rotation={[0, rotY, 0]} scale={scale}>
       {/* Main peak */}
-      <mesh castShadow receiveShadow>
+      <mesh>
         <coneGeometry args={[3.2, 6.2, 7]} />
         <meshStandardMaterial color={baseColor} flatShading roughness={1} />
       </mesh>
-      {/* Snow cap on the main peak — only on some mountains */}
-      {hasSnow && (
+      {/* Snow cap — near ring only. On the mid/far rings it was a bright
+          speck at the edge of vision that pulled the eye off the plaza. */}
+      {hasSnow && tone === 'near' && (
         <mesh position={[0, 2.2, 0]}>
           <coneGeometry args={[1.1, 1.4, 7]} />
           <meshStandardMaterial color={SNOW_COLOR} flatShading roughness={1} />
         </mesh>
       )}
       {/* Right shoulder */}
-      <mesh position={[rightShoulderX, -0.9, 0.6]} castShadow>
+      <mesh position={[rightShoulderX, -0.9, 0.6]}>
         <coneGeometry args={[2.0 * sideScale, 4.2, 7]} />
         <meshStandardMaterial color={shoulderColor} flatShading roughness={1} />
       </mesh>
       {/* Left shoulder — lower & slightly darker so the ridgeline isn't symmetric */}
-      <mesh position={[leftShoulderX, -1.4, 0.3]} castShadow>
+      <mesh position={[leftShoulderX, -1.4, 0.3]}>
         <coneGeometry args={[1.7 * sideScale, 3.4, 6]} />
         <meshStandardMaterial color={baseColor} flatShading roughness={1} />
       </mesh>
-      {/* Forest fringe — tiny dark-green cones at the base */}
-      {fringe.map((f, i) => (
-        <mesh key={`fringe-${i}`} position={[f.x, -2.6, f.z]}>
-          <coneGeometry args={[f.r, f.h, 5]} />
-          <meshStandardMaterial color={FRINGE_COLOR} flatShading roughness={1} />
-        </mesh>
-      ))}
     </group>
   );
 });

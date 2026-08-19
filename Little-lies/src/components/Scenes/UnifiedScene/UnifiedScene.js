@@ -32,6 +32,25 @@ import './UnifiedScene.scss';
 // the village. lobby/setup render the campfire scene.
 const isGameView = (view) => typeof view === 'string' && view.startsWith('game');
 
+// ── Tone mapping ─────────────────────────────────────────────────────
+// ACESFilmic is a PHOTOGRAPHIC curve: it desaturates highlights and
+// rolls shadows off softly, which is the opposite of what a flat,
+// graphic art direction wants. Swapping it for THREE.LinearToneMapping
+// (or NoToneMapping) gives cleaner, more saturated colour blocks and
+// harder value separation — the look this scene is heading toward.
+//
+// It is NOT flipped here because it can't be flipped alone. Every light
+// intensity in SceneLighting is tuned against this curve: day scene
+// radiance peaks near 4.8, which ACES compresses to ~0.93 but Linear
+// would clip to solid white unless the exposure drops to ~0.2 — and at
+// that exposure shadowed faces fall from ~0.72 to ~0.26, i.e. the whole
+// scene goes dark and contrasty in one step. Doing that properly means
+// retuning the lighting alongside it and LOOKING at the result.
+//
+// Left as a one-line A/B so that retune can start from a single edit.
+const TONE_MAPPING = THREE.ACESFilmicToneMapping;
+const TONE_MAPPING_EXPOSURE = 0.92;
+
 const UnifiedScene = ({ view = 'lobby' }) => {
   const inGame = isGameView(view);
   return (
@@ -41,8 +60,8 @@ const UnifiedScene = ({ view = 'lobby' }) => {
         camera={{ position: [6, 3.5, 0], fov: 50 }}
         dpr={[1, 1.5]}
         gl={{
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 0.92,
+          toneMapping: TONE_MAPPING,
+          toneMappingExposure: TONE_MAPPING_EXPOSURE,
         }}
       >
         {/* CameraRig only drives the lobby/setup orbit. VillageView

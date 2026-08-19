@@ -6,6 +6,13 @@ import * as THREE from 'three';
 // and a dedicated sunset animation — sun drops to horizon, color shifts
 // warm → orange → red, fill tinted, ambient dimmed. All interp happens
 // on refs so React never re-renders during the cinematic.
+//
+// Night levels were raised across the board (ambient 0.12 → 0.22, moon
+// 0.2 → 0.34, hemisphere 0.07 → 0.13). The old floor put total night
+// irradiance around 0.25 before tone mapping, so the village during the
+// night cinematics resolved to a near-black frame with a moon in it —
+// the player couldn't tell one shot from the next. Still unmistakably
+// night, but the silhouettes now exist.
 const SceneLighting = ({ isDay, isSunset = false }) => {
   const sunRef = useRef();
   const sunGlowRef = useRef();
@@ -57,29 +64,29 @@ const SceneLighting = ({ isDay, isSunset = false }) => {
 
     if (!isSunset) {
       if (sunRef.current) {
-        const target = isDay ? 3.0 : 0.2;
+        const target = isDay ? 3.0 : 0.34;
         sunRef.current.intensity += (target - sunRef.current.intensity) * 0.03;
       }
     }
     if (fillRef.current) {
-      const target = isDay ? (1.0 - sunsetEased * 0.6) : 0.05;
+      const target = isDay ? (1.0 - sunsetEased * 0.6) : 0.09;
       fillRef.current.intensity += (target - fillRef.current.intensity) * 0.05;
       if (isSunset) fillRef.current.color.set(sunsetEased > 0.3 ? '#ff8855' : '#ffd4a0');
     }
     if (ambientRef.current) {
-      const target = isDay ? (0.85 - sunsetEased * 0.35) : 0.12;
+      const target = isDay ? (0.85 - sunsetEased * 0.3) : 0.22;
       ambientRef.current.intensity += (target - ambientRef.current.intensity) * 0.05;
     }
   });
 
   return (
     <>
-      <ambientLight ref={ambientRef} intensity={isDay ? 0.7 : 0.12} />
+      <ambientLight ref={ambientRef} intensity={isDay ? 0.7 : 0.22} />
 
       <directionalLight
         ref={sunRef}
         position={isDay ? [15, 20, 10] : [-5, 12, 8]}
-        intensity={isDay ? 1.55 : 0.18}
+        intensity={isDay ? 1.55 : 0.32}
         color={isDay ? '#ffe8c8' : '#6677aa'}
         castShadow
         shadow-mapSize-width={2048}
@@ -97,14 +104,14 @@ const SceneLighting = ({ isDay, isSunset = false }) => {
       <directionalLight
         ref={fillRef}
         position={isDay ? [-10, 8, -5] : [5, 6, -8]}
-        intensity={isDay ? 0.8 : 0.07}
+        intensity={isDay ? 0.8 : 0.11}
         color={isDay ? '#ddc8a0' : '#334466'}
       />
 
       <hemisphereLight
         color={isDay ? '#8ab4cc' : '#1a1a3a'}
         groundColor={isDay ? '#8B7355' : '#0a0a15'}
-        intensity={isDay ? 0.45 : 0.07}
+        intensity={isDay ? 0.45 : 0.13}
       />
 
       {isDay && (
