@@ -8,6 +8,7 @@ import PhaseEmote from './PhaseEmote';
 import { IDLE_VARIANTS, DANCE_VARIANTS, WALK_OBSTACLES } from '../constants';
 import { pickForPlayer } from '../utils';
 import { toTextCss, buildPlayerNamePillStyle } from '../../../utils/playerColor';
+import { setOutlineOpacity } from '../../Character/CharacterOutline';
 
 // Apply radial "push" away from each obstacle so the walker curves around
 // plaza props (bulletin board, podium, gallows…) instead of clipping
@@ -36,7 +37,7 @@ const PlayerFigure = ({
   characterScale = 1.0, pauseAnim = null,
   phase = null, CONSTANTS = null, fadeOnTransition = true,
   chatMessages = null, dayCount = 0,
-  isGameOver = false, isWinningTeam = false,
+  isGameOver = false, isWinningTeam = false, isMe = false,
 }) => {
   const groupRef = useRef();
   const transitionStartTime = useRef(null);
@@ -136,19 +137,24 @@ const PlayerFigure = ({
       const fadeEnd = Math.max(transitionDuration - 2, 0.5);
       const opacity = Math.max(1 - elapsed / fadeEnd, 0);
       charGroupRef.current.traverse((child) => {
-        if (child.isMesh && child.material) {
+        if (child.isMesh && child.material && !child.material.uniforms) {
           child.material.transparent = true;
           child.material.opacity = opacity;
           child.castShadow = opacity > 0.1;
         }
       });
+      // The outline is a ShaderMaterial, so it doesn't respond to the
+      // material.opacity sweep above — without this the body dissolves
+      // and leaves a dark hollow shell walking home.
+      setOutlineOpacity(charGroupRef.current, opacity);
     } else if (charGroupRef.current) {
       charGroupRef.current.traverse((child) => {
-        if (child.isMesh && child.material && child.material.opacity < 1) {
+        if (child.isMesh && child.material && !child.material.uniforms && child.material.opacity < 1) {
           child.material.opacity = 1;
           child.castShadow = true;
         }
       });
+      setOutlineOpacity(charGroupRef.current, 1);
     }
   });
 
@@ -175,7 +181,7 @@ const PlayerFigure = ({
     return new THREE.MeshBasicMaterial({
       color: solid,
       transparent: true,
-      opacity: 0.4,
+      opacity: 0.55,
       depthWrite: false,
     });
   }, [rawColor, characterColor]);
@@ -196,18 +202,43 @@ const PlayerFigure = ({
           animOffset={player.id ? (player.id.charCodeAt(0) % 20) * 0.15 : 0}
         />
       </group>
-      {/* Colored halo disk under the feet — visible whether the player
-          is alive on their seat or the dead body on the central pile. */}
+      {/* Ground token under the feet. Three concentric parts, and each
+          one answers a different question the player asks every round:
+
+            fill  — who is this?      (their colour)
+            rim   — where do they end? (a dark edge, so the fill reads as
+                    a SHAPE on any ground value instead of a light patch)
+            gold  — which one am I?   (local player only)
+
+          The dark rim is the part that makes this work. A translucent
+          coloured disc alone disappears the moment the ground behind it
+          shares its value — which, on a plaza floor tuned for contrast,
+          happens constantly. */}
       {!isTransitioning && (
-        <mesh position={[0, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1}>
-          <circleGeometry args={[0.65, 32]} />
-          <primitive object={haloMaterial} attach="material" />
-        </mesh>
+        <group renderOrder={-1}>
+          <mesh position={[0, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.65, 32]} />
+            <primitive object={haloMaterial} attach="material" />
+          </mesh>
+          <mesh position={[0, 0.045, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.65, 0.76, 40]} />
+            <meshBasicMaterial color="#14121c" transparent opacity={0.8} depthWrite={false} />
+          </mesh>
+          {isMe && (
+            <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.8, 0.94, 40]} />
+              <meshBasicMaterial color="#f0b840" transparent opacity={0.85} depthWrite={false} />
+            </mesh>
+          )}
+        </group>
       )}
       {isAccused && (
         <mesh position={[0, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.7, 0.9, 16]} />
-          <meshBasicMaterial color="#ff0000" transparent opacity={0.7} />
+          {/* 16 segments read as a visible polygon at trial camera
+              distance — the ring the whole table is looking at should
+              not be the one thing in frame with flat sides. */}
+          <ringGeometry args={[0.7, 0.9, 48]} />
+          <meshBasicMaterial color="#ff0000" transparent opacity={0.7} depthWrite={false} />
         </mesh>
       )}
       {!isTransitioning && (

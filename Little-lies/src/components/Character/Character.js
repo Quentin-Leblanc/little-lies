@@ -1,7 +1,9 @@
 import { useAnimations, useGLTF } from '@react-three/drei';
+import { useThree } from '@react-three/fiber';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Color, LoopOnce } from 'three';
+import { Color, LoopOnce, Vector2 } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
+import { attachOutlines } from './CharacterOutline';
 
 // ============================================================
 // Skin keys
@@ -159,6 +161,7 @@ function WandererCharacter({ color, animation, animOffset, ...props }) {
 // ============================================================
 function CharacterRenderer({ group, clone, allAnimations, origMaterials, color, animation = 'Idle', animOffset = 0, ...props }) {
   const { actions } = useAnimations(allAnimations, group);
+  const gl = useThree((s) => s.gl);
 
   // Death plays once and holds
   if (actions['Death']) {
@@ -247,6 +250,14 @@ function CharacterRenderer({ group, clone, allAnimations, origMaterials, color, 
       }
     });
   }, [clone, color]);
+
+  // Dark silhouette outline. This is what lets a figure hold its shape
+  // against the ground, the fog and the night sky alike — the rim
+  // fresnel above only brightens the edge, which loses against any
+  // background lighter than the character.
+  useEffect(() => {
+    attachOutlines(clone, gl.getDrawingBufferSize(new Vector2()));
+  }, [clone, gl]);
 
   return (
     <group {...props} dispose={null} ref={group}>
