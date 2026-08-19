@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { isHost } from 'playroomkit';
 import { useTranslation } from 'react-i18next';
 import './GameConfig.scss';
@@ -16,9 +16,16 @@ const DEFAULT_DURATIONS = {
 
 const CONFIGURABLE_PHASES = ['NIGHT', 'DISCUSSION', 'VOTING', 'DEFENSE', 'JUDGMENT'];
 
+// Phase durations. Rendered flat — no toggle of its own.
+//
+// This used to hide behind a "config-toggle" button, which put it two
+// collapses deep: the host opened "Configuration & règles", found a
+// single button, clicked it, and only then saw the settings. Two clicks
+// to reach four number fields, and the second click made the panel jump
+// in height with nothing on screen explaining why. The parent <details>
+// is the only disclosure this content needs.
 const GameConfig = ({ config, onConfigChange }) => {
   const { t } = useTranslation(['setup', 'game']);
-  const [isOpen, setIsOpen] = useState(false);
   const host = isHost();
 
   const durations = config?.durations || DEFAULT_DURATIONS;
@@ -36,43 +43,37 @@ const GameConfig = ({ config, onConfigChange }) => {
 
   return (
     <div className="game-config">
-      <button className="config-toggle" onClick={() => setIsOpen(!isOpen)}>
-        <i className="fas fa-cog"></i> {isOpen ? t('setup:config.toggle_close') : t('setup:config.toggle_open')}
-      </button>
+      {!host && <p className="config-readonly-hint">{t('setup:config.host_only')}</p>}
 
-      {isOpen && (
-        <div className="config-panel">
-          <h3>{t('setup:config.title')}</h3>
-          {!host && <p className="config-readonly-hint">{t('setup:config.host_only')}</p>}
-          <div className="config-durations">
-            {CONFIGURABLE_PHASES.map((key) => (
-              <div key={key} className="config-row">
-                <label>{t(`game:phases.${key}`)}</label>
-                <div className="config-input-group">
-                  <input
-                    type="number"
-                    min={5}
-                    max={120}
-                    value={durations[key]}
-                    onChange={(e) => handleDurationChange(key, e.target.value)}
-                    disabled={!host}
-                  />
-                  <span>s</span>
-                </div>
-              </div>
-            ))}
+      <div className="config-durations">
+        {CONFIGURABLE_PHASES.map((key) => (
+          <div key={key} className="config-row">
+            <label htmlFor={`duration-${key}`}>{t(`game:phases.${key}`)}</label>
+            <div className="config-input-group">
+              <input
+                id={`duration-${key}`}
+                type="number"
+                min={5}
+                max={120}
+                value={durations[key]}
+                onChange={(e) => handleDurationChange(key, e.target.value)}
+                disabled={!host}
+              />
+              <span>s</span>
+            </div>
           </div>
-          {host && (
-            <button
-              type="button"
-              className="config-reset"
-              onClick={handleReset}
-              title={t('setup:config.reset')}
-            >
-              <i className="fas fa-rotate-left"></i> {t('setup:config.reset')}
-            </button>
-          )}
-        </div>
+        ))}
+      </div>
+
+      {host && (
+        <button
+          type="button"
+          className="config-reset"
+          onClick={handleReset}
+          title={t('setup:config.reset')}
+        >
+          <i className="fas fa-rotate-left"></i> {t('setup:config.reset')}
+        </button>
       )}
     </div>
   );

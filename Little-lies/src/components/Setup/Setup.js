@@ -159,15 +159,33 @@ const Setup = () => {
         {host && (
           <details className="setup-advanced">
             <summary>
-              <i className="fas fa-sliders" aria-hidden="true"></i> {t('setup:advanced_config', { defaultValue: 'Configuration & règles' })}
+              <i className="fas fa-sliders" aria-hidden="true"></i>
+              <span>{t('setup:advanced_config', { defaultValue: 'Configuration & règles' })}</span>
+              <i className="fas fa-chevron-down setup-advanced__chevron" aria-hidden="true"></i>
             </summary>
+            {/* Two named sections, read top to bottom: what the game
+                allows, then how long each phase lasts. Before this both
+                landed in the same undifferentiated stack — the rules
+                chips and the duration fields looked like one list of
+                controls with no explanation of what separated them. */}
             <div className="setup-advanced__body">
-              <HouseRules
-                rules={game.config?.rules}
-                onChange={(rules) => handleConfigChange({ ...game.config, rules })}
-                disabled={!host}
-              />
-              <GameConfig config={game.config} onConfigChange={handleConfigChange} />
+              <section className="setup-advanced__section">
+                <h3 className="setup-advanced__section-title">
+                  {t('setup:rules.title', { defaultValue: 'Règles de la partie' })}
+                </h3>
+                <HouseRules
+                  rules={game.config?.rules}
+                  onChange={(rules) => handleConfigChange({ ...game.config, rules })}
+                  disabled={!host}
+                />
+              </section>
+
+              <section className="setup-advanced__section">
+                <h3 className="setup-advanced__section-title">
+                  {t('setup:config.title', { defaultValue: 'Durée des phases' })}
+                </h3>
+                <GameConfig config={game.config} onConfigChange={handleConfigChange} />
+              </section>
             </div>
           </details>
         )}

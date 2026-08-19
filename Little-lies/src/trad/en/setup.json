@@ -90,9 +90,7 @@
   "roles_available": "Available roles",
   "roles_selected": "Selected ({{current}}/{{total}})",
   "config": {
-    "title": "Game configuration",
-    "toggle_open": "Config",
-    "toggle_close": "Close",
+    "title": "Phase durations",
     "host_only": "Only the host can modify",
     "reset": "Reset"
   },
