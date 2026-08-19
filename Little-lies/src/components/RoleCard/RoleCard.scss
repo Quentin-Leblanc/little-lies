@@ -17,7 +17,11 @@
   flex: 0 0 auto;
   user-select: none;
 
-  &--sm { --card-w: 6.2rem; }
+  // 'sm' is the setup picker size. Bumped 6.2 → 7.6rem: at 6.2 the
+  // card printed its name at the 0.72rem readability floor and the
+  // illustration — the thing that actually teaches a new host what a
+  // role is — was under 60px tall.
+  &--sm { --card-w: 7.6rem; }
   &--md { --card-w: 8rem; }
   &--lg { --card-w: 17rem; }
 }
@@ -146,8 +150,13 @@
 }
 
 // ── States ──
+// "Not picked yet" — not "disabled". At saturate(0.35)/brightness(0.62)
+// the deck read as greyed-out and the illustrations were unreadable,
+// which is the opposite of what the deck is for: it's the catalogue a
+// host browses to decide. Dimmed just enough that a picked card still
+// jumps out next to it.
 .role-card.is-faded .role-card__frame {
-  filter: saturate(0.35) brightness(0.62);
+  filter: saturate(0.7) brightness(0.85);
   border-color: $al-border-dark-soft;
 }
 
